@@ -4,15 +4,44 @@ Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7), autotools-dev
 Standards-Version: 3.7.3
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://www.aps.anl.gov/epics/
 
-Package: epics-base
+Package: epics-libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: EPICS libraries for clients and servers
+ EPICS shared libraries.
 
-Package: epics-base-doc
+Package: epics-dev
+Architecture: any
+Depends: epics-libs, epics-perl, ${shlibs:Depends}, ${misc:Depends}
+Suggests: epics-doc
+Description: Files needed to develop new EPICS applications
+ Libraries, headers, and utilities needed to develop applications
+ targeted to the host system.
+
+Package: epics-compat-dev
+Architecture: any
+Depends: epics-dev, epics-libs, epics-perl, ${shlibs:Depends}, ${misc:Depends}
+Suggests: epics-doc
+Description: Files needed to develop new EPICS applications
+ Libraries, headers, and utilities needed to develop applications
+ targeted to the host system.
+ This package contains additional files needed for compatibility with EPICS 3.13.x
+
+Package: epics-catools
+Architecture: any
+Depends: epics-libs, ${shlibs:Depends}, ${misc:Depends}
+Description: Command line utilities for EPICS
+ EPICS utilities such as caget and caput.
+
+Package: epics-perl
+Architecture: any
+Depends: epics-libs, ${shlibs:Depends}, ${misc:Depends}
+Description: Perl bindings for for EPICS
+ Perl bindings for for EPICS
+
+Package: epics-doc
 Architecture: all
-Description: Documentation for epics-base
- <insert long description, indented with spaces>
+Description: EPICS documentation
+ Documentation for EPICS Base

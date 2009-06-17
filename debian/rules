@@ -16,44 +16,20 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
-# These are used for cross-compiling and for saving the configure script
-# from having to guess our platform (since we know it already)
-DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
-CROSS= --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
-else
-CROSS= --build $(DEB_BUILD_GNU_TYPE)
-endif
-
-
-
-
-
-config.status: configure
-	dh_testdir
-	# Add here commands to configure the package.
-ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-	cp -f /usr/share/misc/config.sub config.sub
-endif
-ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-	cp -f /usr/share/misc/config.guess config.guess
-endif
-	./configure $(CROSS) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
-
+EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
 #Architecture
 build: build-arch build-indep
 
 build-arch: build-arch-stamp
-build-arch-stamp:  config.status 
+build-arch-stamp: 
 
 	# Add here commands to compile the arch part of the package.
-	#$(MAKE)
+	EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE)
 	touch $@
 
 build-indep: build-indep-stamp
-build-indep-stamp:  config.status 
+build-indep-stamp: 
 
 	# Add here commands to compile the indep part of the package.
 	#$(MAKE) doc
@@ -65,10 +41,29 @@ clean:
 	rm -f build-arch-stamp build-indep-stamp 
 
 	# Add here commands to clean up after the build process.
-	[ ! -f Makefile ] || $(MAKE) distclean
-	rm -f config.sub config.guess
+	[ ! -f Makefile ] || EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE) realclean
+	rm -rf bin db dbd html include lib templates
 
 	dh_clean 
+
+doc_prefix=debian/epics-doc/usr/share/doc/epics-3.14.10
+lib_prefix=debian/epics-libs/usr/lib
+cat_prefix=debian/epics-catools/usr/bin
+prl_prefix=debian/epics-perl/usr/lib/perl5
+dev_prefix=debian/epics-dev/usr/epics/base
+com_prefix=debian/epics-compat-dev/usr/epics/base
+
+devbin=debian/epics-dev/usr/epics/base/bin/$(EPICS_HOST_ARCH)
+devlib=debian/epics-dev/usr/epics/base/lib/$(EPICS_HOST_ARCH)
+
+binprogs=caConnTest caDirServ caEventRate caget cainfo camonitor caput caRepeater casw softIoc iocLogServer
+libs+= asHost asIoc ca cas Com
+libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
+libs+= gdd miscIoc recIoc registryIoc
+libs+= rsrvIoc softDevIoc testDevIoc
+
+doln=rm $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);\
+ ln -s ../../../../$(1)/$(2) $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);
 
 install: install-indep install-arch
 install-indep:
@@ -77,9 +72,11 @@ install-indep:
 	dh_clean -k -i 
 	dh_installdirs -i
 
-	# Add here commands to install the indep part of the package into
-	# debian/<package>-doc.
-	#INSTALLDOC#
+	# epics-doc
+	install -d $(doc_prefix)
+	install README LICENSE $(doc_prefix)/
+	install documentation/* $(doc_prefix)/
+	cp -r html $(doc_prefix)/
 
 	dh_install -i
 
@@ -89,9 +86,40 @@ install-arch:
 	dh_clean -k -s 
 	dh_installdirs -s
 
-	# Add here commands to install the arch part of the package into
-	# debian/tmp.
-	$(MAKE) prefix=$(CURDIR)/debian/epics-base/usr install
+	# epics-libs
+	install -d $(lib_prefix)
+	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so,$(libs)) $(lib_prefix)/
+	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so.3.14,$(libs)) $(lib_prefix)/
+
+	# epics-catools
+	install -d $(cat_prefix)
+	install $(patsubst %,bin/$(EPICS_HOST_ARCH)/%,$(binprogs)) $(cat_prefix)/
+
+	# epics-perl
+	install -d $(prl_prefix)
+	install -d $(prl_prefix)/EPICS
+	install lib/perl/*.pm $(prl_prefix)/
+	install lib/perl/EPICS/* $(prl_prefix)/EPICS/
+
+	# epics-compat-dev
+	install -d $(com_prefix)
+	cp -r config $(com_prefix)/
+
+	# epics-dev
+	install -d $(dev_prefix)/bin
+	install -d $(dev_prefix)/lib
+	cp -r bin/$(EPICS_HOST_ARCH) $(dev_prefix)/bin/
+	cp -r lib/$(EPICS_HOST_ARCH) $(dev_prefix)/lib/
+	cp -r configure $(dev_prefix)/
+	cp -r db $(dev_prefix)/
+	cp -r dbd $(dev_prefix)/
+	cp -r include $(dev_prefix)/
+	cp -r startup $(dev_prefix)/
+	cp -r templates $(dev_prefix)/
+
+	$(foreach prog,$(binprogs),$(call doln,bin,$(prog)))
+	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so)))
+	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so.3.14)))
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
