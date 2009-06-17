@@ -1,0 +1,13 @@
+# CONFIG.linux-x86.Common
+#
+# CONFIG.linux-x86.Common,v 1.3.2.1 2003/09/04 19:57:34 anj Exp
+# This file is maintained by the build community.
+#
+# Definitions for linux-x86 host builds
+# Sites may override these definitions in CONFIG_SITE.linux-x86.Common
+#-------------------------------------------------------
+
+#Include definitions common to unix hosts
+include $(CONFIG)/os/CONFIG.UnixCommon.Common
+
+WIND_HOST_TYPE = x86-linux

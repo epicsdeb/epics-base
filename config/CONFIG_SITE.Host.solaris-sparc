@@ -1,0 +1,4 @@
+# CONFIG_SITE.Host.solaris-sparc,v 1.1 2000/03/28 21:53:47 jba Exp
+
+# solaris-sparc is the new name for solaris
+-include $(EPICS_BASE)/config/CONFIG_SITE.Host.solaris

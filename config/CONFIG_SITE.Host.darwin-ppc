@@ -1,0 +1,5 @@
+# CONFIG_SITE.Host.darwin-ppc,v 1.3 2002/03/27 16:42:35 norume Exp
+
+-include $(EPICS_BASE)/config/CONFIG_SITE.Host.Darwin
+
+SHARED_LIBRARIES=NO

@@ -1,0 +1,11 @@
+# CONFIG_SITE.Common.solaris-sparc64-gnu
+#
+# CONFIG_SITE.Common.solaris-sparc64-gnu,v 1.1.2.1 2005/11/03 20:53:04 jba Exp
+#
+# Site Specific definitions for solaris-sparc64-gnu target
+# Only the local epics system manager should modify this file
+
+# Include definitions common to all solaris-sparc-gnu target archs
+include $(CONFIG)/os/CONFIG_SITE.Common.solaris-sparc-gnu
+
+COMMANDLINE_LIBRARY = EPICS

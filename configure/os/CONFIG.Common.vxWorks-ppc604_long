@@ -1,0 +1,13 @@
+# CONFIG.Common.vxWorks-ppc604_long,v 1.1.2.3 2007/04/16 19:45:35 anj Exp
+#
+# Definitions for vxWorks-ppc604 targets with >32MB of RAM
+# Site-specific overrides go in CONFIG_SITE.Common.vxWorks-ppc604_long
+#
+# This file is maintained by the EPICS build community.
+#-------------------------------------------------------
+
+# Inherit the settings from vxWorks-ppc604
+include $(CONFIG)/os/CONFIG.Common.vxWorks-ppc604
+
+# Tell compiler to generate long branches
+ARCH_DEP_CFLAGS += -mlongcall

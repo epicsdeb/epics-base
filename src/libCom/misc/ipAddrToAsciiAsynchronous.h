@@ -1,0 +1,59 @@
+/*************************************************************************\
+* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+*     National Laboratory.
+* Copyright (c) 2002 The Regents of the University of California, as
+*     Operator of Los Alamos National Laboratory.
+* EPICS BASE Versions 3.13.7
+* and higher are distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution. 
+\*************************************************************************/
+
+/*  
+ *  ipAddrToAsciiAsynchronous.h,v 1.12.2.2 2003/09/01 20:05:12 lange Exp
+ *
+ *                              
+ *                    L O S  A L A M O S
+ *              Los Alamos National Laboratory
+ *               Los Alamos, New Mexico 87545
+ *                                  
+ *  Copyright, 1986, The Regents of the University of California.
+ *                                  
+ *           
+ *	Author Jeffrey O. Hill
+ *	johill@lanl.gov
+ */
+
+#ifndef ipAddrToAsciiAsynchronous_h
+#define ipAddrToAsciiAsynchronous_h
+
+#include "osiSock.h"
+#include "shareLib.h"
+
+class epicsShareClass ipAddrToAsciiCallBack {
+public:
+    virtual void transactionComplete ( const char * pHostName ) = 0;
+    virtual void show ( unsigned level ) const; 
+    virtual ~ipAddrToAsciiCallBack () = 0;
+};
+
+class epicsShareClass ipAddrToAsciiTransaction { // X aCC 655
+public:
+    virtual void release () = 0; 
+    virtual void ipAddrToAscii ( const osiSockAddr &, ipAddrToAsciiCallBack & ) = 0;
+    virtual osiSockAddr address () const  = 0;
+    virtual void show ( unsigned level ) const = 0; 
+protected:
+    virtual ~ipAddrToAsciiTransaction () = 0;
+};
+
+class epicsShareClass ipAddrToAsciiEngine { // X aCC 655
+public:
+    virtual void release () = 0; 
+    virtual ipAddrToAsciiTransaction & createTransaction () = 0;
+    virtual void show ( unsigned level ) const = 0; 
+    static ipAddrToAsciiEngine & allocate ();
+protected:
+    virtual ~ipAddrToAsciiEngine () = 0;
+};
+
+#endif // ifdef ipAddrToAsciiAsynchronous_h

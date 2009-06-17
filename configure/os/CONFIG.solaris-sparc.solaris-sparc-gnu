@@ -1,0 +1,13 @@
+# CONFIG.solaris-sparc.solaris-sparc-gnu
+#
+# CONFIG.solaris-sparc.solaris-sparc-gnu,v 1.1.2.3 2004/01/16 17:36:25 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for solaris-sparc host - solaris-sparc-gnu target build with gnu compiler
+# Sites may override these definitions in CONFIG_SITE.solaris-sparc.solaris-sparc-gnu
+#-------------------------------------------------------
+
+include $(CONFIG)/os/CONFIG.solaris-sparc-gnu.solaris-sparc-gnu
+
+BUILD_CLASS = HOST
+

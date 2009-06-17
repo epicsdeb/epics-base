@@ -1,0 +1,307 @@
+# CONFIG.win32-x86.win32-x86
+#
+# CONFIG.win32-x86.win32-x86,v 1.32.2.15 2008/07/03 15:16:04 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for win32-x86 target archs when host arch is win32-x86
+# Sites may override these definitions in CONFIG_SITE.win32-x86.win32-x86
+#-------------------------------------------------------
+
+# Win32 valid build types and include directory suffixes
+
+VALID_BUILDS = Host Ioc
+
+# convert UNIX path to native path
+PATH_FILTER = $(subst /,\\,$(1))
+
+#-------------------------------------------------------
+
+#
+# "\ " forces gnu make to keep this as one token
+#
+WINLINK = link
+
+RCCMD = rc -l 0x409 $(INCLUDES) -fo $@ $<
+
+ARCMD = lib /nologo /verbose /out:$@ $(LIBRARY_LD_OBJS)
+
+BAFCMD = bscmake /nologo /o $@
+
+#
+# Configure OS vendor C compiler
+CC = cl
+
+#
+# __STDC__=0 is a real great idea of Jeff that gives us both:
+# 1) define STDC for build code (pretend ANSI conformance)
+# 2) set it to 0 to use MS C "extensions" (open for _open etc.)
+# because MS uses:   if __STDC__ ... disable many nice things
+#
+# Use of /Za would dissable DLL import/export keywords which
+# include/excludes using architecture neutral macros
+CONFORM_CFLAGS_ANSI = /nologo /D__STDC__=0
+CONFORM_CFLAGS_STRICT = /nologo /D__STDC__=0
+CONFORM_CFLAGS_TRAD = /nologo
+
+#
+# /W<N> use warning level N
+# (maximum (lint type) warnings at level 4)
+# /w44355 set "'this' used in the base initializer list" to be level 4
+WARN_CFLAGS_YES = /W3 /w44355
+WARN_CFLAGS_NO =  /W1
+
+#
+# /Ox maximum optimizations
+# /MD use MSVCRT (run-time as DLL, multi-thread support)
+# /GL whole program optimization
+# /Zi generate program database for debugging information
+OPT_CFLAGS_YES = /Ox /GL
+
+#
+# /Zi generate program database for debugging information
+# /Z7 include debugging info in object files
+# /Fr create source browser file
+# /GZ catch bugs occurring only in optimized code
+# /D_CRTDBG_MAP_ALLOC
+# /RTCsu catch bugs occuring only inoptimized code
+# /DEPICS_FREELIST_DEBUG good for detecting mem mrg bugs
+OPT_CFLAGS_NO = /Zi /RTCsu
+
+# specify object file name and location
+OBJ_CFLAG = /Fo
+
+#
+# the following options are required when
+# vis c++ compiles the code (and includes
+# the header files)
+#
+# /MT static multithreaded C RTL
+# /MTd static multithreaded C RTL (debug version)
+# /MD multithreaded C RTL in DLL
+# /MDd multithreaded C RTL in DLL (debug version)
+VISC_DLL_NO = -DEPICS_DLL_NO
+VISC_DLL_YES =
+VISC_DLL = $(VISC_DLL_$(SHARED_LIBRARIES))
+VISC_STATIC_CFLAGS_DEBUG_NO = d
+VISC_STATIC_CFLAGS_DEBUG_YES =
+VISC_STATIC_CFLAGS_DEBUG = $(VISC_STATIC_CFLAGS_DEBUG_$(HOST_OPT))
+STATIC_CFLAGS_YES= /MT$(VISC_STATIC_CFLAGS_DEBUG) $(VISC_DLL)
+STATIC_CFLAGS_NO= /MD$(VISC_STATIC_CFLAGS_DEBUG) $(VISC_DLL)
+
+# OS vendor c preprocessor
+CPP = cl /C /E
+#GNU c preprocessor
+#CPP = gcc -x c -E
+
+# Configure OS vendor C++ compiler
+#
+# __STDC__=0 is a real great idea of Jeff that gives us both:
+# 1) define STDC for code (pretend ANSI conformance)
+# 2) set it to 0 to use MS C "extensions" (open for _open etc.)
+# because MS uses:   if __STDC__ ... disable many nice things
+#
+# Use of /Za would dissable DLL import/export keywords which
+# include/excludes using architecture neutral macros
+# 
+# /EHsc - generate code for exceptions
+# /GR - generate code for run time type identification
+#
+CCC = cl /nologo /EHsc /GR
+CONFORM_CXXFLAGS_NORMAL =
+CONFORM_CXXFLAGS_STRICT = /D__STDC__=0
+CODE_CPPFLAGS += /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE
+
+#
+# /W<N> use warning level N
+# (maximum lint level warnings at level 4)
+# /w44355 set "'this' used in the base initializer list" to be level 4
+WARN_CXXFLAGS_YES = /W3 /w44355
+WARN_CXXFLAGS_NO =  /W1
+
+#
+# /Ox maximum optimizations
+# /GL whole program optimization
+# /Zi generate program database for debugging information
+OPT_CXXFLAGS_YES = /Ox /GL
+
+#
+# /Zi generate program database for debugging information
+# /Z7 include debugging info in object files
+# /Fr create source browser file
+# /D_CRTDBG_MAP_ALLOC
+# /RTCsu catch bugs occurring only in optimized code
+# /DEPICS_FREELIST_DEBUG good for detecting mem mrg bugs
+OPT_CXXFLAGS_NO = /RTCsu /Zi 
+
+# specify object file name and location
+OBJ_CXXFLAG = /Fo
+
+#
+# the following options are required when
+# vis c++ compiles the code (and includes
+# the header files)
+#
+# /MT static multithreaded C RTL
+# /MTd static multithreaded C RTL (debug version)
+# /MD multithreaded C RTL in DLL
+# /MDd multithreaded C RTL in DLL (debug version)
+STATIC_CXXFLAGS_YES= /MT$(VISC_STATIC_CFLAGS_DEBUG) $(VISC_DLL)
+STATIC_CXXFLAGS_NO= /MD$(VISC_STATIC_CFLAGS_DEBUG) $(VISC_DLL)
+
+STATIC_LDLIBS_YES=ws2_32.lib advapi32.lib user32.lib kernel32.lib winmm.lib
+STATIC_LDLIBS_NO=
+STATIC_LDFLAGS=
+RANLIB=
+
+# add /profile here to run the ms profiler
+# /LTCG - whole program optimization
+# /fixed:no good for programs such as purify and quantify
+# /debug good for programs such as purify and quantify
+LINK_OPT_FLAGS_YES = /LTCG /incremental:no /opt:ref /release $(PROD_VERSION:%=/version:%) 
+LINK_OPT_FLAGS_NO = /debug /incremental:no /fixed:no
+OPT_LDFLAGS = $(LINK_OPT_FLAGS_$(HOST_OPT))
+
+ARCH_DEP_CFLAGS=
+SHRLIB_CFLAGS=
+
+#	to identify the general architecture class:
+#	should be BSD, SYSV, WIN32, ...
+#	is: WIN32, sun4, hpux, linux, ...
+#
+OS_CLASS=WIN32
+POSIX=NO
+
+#	ifdef WIN32   looks better that  ifeq ($(OS_CLASS),WIN32)  ??
+WIN32=1
+
+EXE=.exe
+OBJ=.obj
+RES=.res
+BAF=.bsc
+BOF=.sbr
+
+#       Problem: MS Visual C++ does not recognize  *.cc as C++ source,
+#       we have to compile xx.cc  using the flag -Tp xx.cc,
+#       i.e.  -Tp  has to be immediately before the source file name
+SOURCE_CXXFLAG = /Tp
+
+#	Operating system flags 
+OP_SYS_CFLAGS =
+
+#
+# WIN32 specific include files
+#
+#OP_SYS_INCLUDES = -I$(INSTALL_INCLUDE)\\os\\WIN32
+
+#	Files and flags needed to link DLLs (used in RULES_BUILD)
+#
+#	Strange but seems to work without: WIN32_DLLFLAGS should contain
+#	an entry point:
+#		'-entry:_DllMainCRTStartup$(DLLENTRY)'
+DLLENTRY = @12
+
+WIN32_DLLFLAGS = /subsystem:windows /dll $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(LIB_LDFLAGS)
+
+#
+# specify dll .def file only if it exists
+#
+DLL_DEF_FLAG = $(addprefix /def:,$(wildcard ../$(addsuffix .def,$*)))
+
+#
+#	A WIN32 dll has three parts:
+#	x.dll: the real dll (SHRLIBNAME)
+#	x.lib: what you link to progs that use the dll (DLL_LINK_LIBNAME)
+#	x.exp: what you need to build the dll (in no variable)
+#
+LINK.shrlib = $(WINLINK) /nologo $(WIN32_DLLFLAGS) /implib:$*.lib /out:$*.dll $(DLL_DEF_FLAG)
+LINK.shrlib += $(LIBRARY_LD_OBJS) $(LIBRARY_LD_RESS) $(SHRLIB_LDLIBS)
+MUNCH_CMD =  $(CCC) /Fo $@ $^
+
+
+#	adjust names of libraries to build
+#
+#	But: if there are no objects LIBRARY_LD_OBJS to include
+#	in this library (may be for e.g. base/src/libCompat
+#	on some archs), don't define (and build) any library!
+SHRLIB_SUFFIX=.dll
+SHRLIBNAME_YES = $(BUILD_LIBRARY:%=%$(SHRLIB_SUFFIX))
+LOADABLE_SHRLIBNAME = $(LOADABLE_BUILD_LIBRARY:%=%$(SHRLIB_SUFFIX))
+
+#
+# When SHARED_LIBRARIES is YES we are building a DLL link library 
+# and when SHARED_LIBRARIES is NO we are building an object library
+#
+DLL_LINK_LIBNAME_YES = $(BUILD_LIBRARY:%=%.lib)
+DLL_LINK_LIBNAME = $(DLL_LINK_LIBNAME_$(SHARED_LIBRARIES))
+LIB_PREFIX=
+LIB_SUFFIX=.lib
+LIBNAME_NO = $(BUILD_LIBRARY:%=%.lib)
+LIBNAME = $(LIBNAME_$(SHARED_LIBRARIES))
+
+#	dll install location
+INSTALL_SHRLIB = $(INSTALL_BIN)
+
+
+#--------------------------------------------------
+# Products dependancy definitions
+
+# SYS_PROD_LIBS deprecated
+# Use PROD_SYS_LIBS
+
+PROD_DEPLIBS=$(foreach lib, $(PROD_LIBS) $(USR_LIBS), \
+    $(firstword $(wildcard $(addsuffix /$(LIB_PREFIX)$(lib)$(LIB_SUFFIX), \
+    $($(lib)_DIR) $(SHRLIB_SEARCH_DIRS))) \
+    $(addsuffix /$(LIB_PREFIX)$(lib)$(LIB_SUFFIX), \
+    $(firstword $($(lib)_DIR) $(INSTALL_LIB)))))
+
+PROD_LDLIBS += $($*_DEPLIBS) $(PROD_DEPLIBS)
+PROD_LDLIBS += $(addsuffix .lib, \
+         $($*_SYS_LIBS) $(PROD_SYS_LIBS) $(USR_SYS_LIBS) )
+
+LDLIBS_STATIC_YES = LDLIBS
+LDLIBS_SHARED_NO = LDLIBS
+PROD_LDLIBS += $($(firstword $(LDLIBS_STATIC_$(STATIC_BUILD)) \
+               $(LDLIBS_SHARED_$(SHARED_LIBRARIES))))
+
+#--------------------------------------------------
+#Libraries dependancy definitions
+
+# <name>_DLL_LIBS <name>_SYS_DLL_LIBS deprecated.
+# Use <name>_LIBS and <name>_SYS_LIBS.
+# DLL_LIBS, and SYS_DLL_LIBS deprecated
+# Use LIB_LIBS and LIB_SYS_LIBS
+LIB_LIBS += $(DLL_LIBS)
+LIB_SYS_LIBS += $(SYS_DLL_LIBS)
+
+#   libs that we need to link the DLL with
+#   (it isnt necessary to rebuild the dll if these change)
+
+SHRLIB_DEPLIBS += $(foreach lib, $(LIB_LIBS) $(USR_LIBS), \
+    $(firstword $(wildcard $(addsuffix /$(LIB_PREFIX)$(lib)$(LIB_SUFFIX), \
+    $($(lib)_DIR) $(SHRLIB_SEARCH_DIRS))) \
+    $(addsuffix /$(LIB_PREFIX)$(lib)$(LIB_SUFFIX), \
+    $(firstword $($(lib)_DIR) $(INSTALL_LIB)))))
+
+SHRLIB_LDLIBS += $($*_DLL_DEPLIBS) $($*_DEPLIBS) $(SHRLIB_DEPLIBS)
+SHRLIB_LDLIBS += $(addsuffix .lib, \
+         $($*_SYS_DLL_LIBS) \
+         $($*_SYS_LIBS) $(LIB_SYS_LIBS) $(USR_SYS_LIBS) )
+
+#--------------------------------------------------
+# Linker definition
+LINK.cpp = $(WINLINK) -nologo $(STATIC_LDFLAGS) $(LDFLAGS) $(PROD_LDFLAGS) -out:$@ \
+	$(PROD_LD_OBJS) $(PROD_LD_RESS) $(PROD_LDLIBS)
+
+#--------------------------------------------------
+# UseManifestTool.pl checks MS Visual c++ compiler version number to
+# decide whether or not to use the Manifest Tool command to embed the
+# linker created .manifest file into a library or product target. 
+# useManifestTool.pl returns 0(don't use) or 1(use).
+#
+MT_DLL_COMMAND1 = mt.exe /manifest $@.manifest "/outputresource:$@;\#2"
+MT_EXE_COMMAND_YES =
+MT_EXE_COMMAND_NO = mt.exe /manifest $@.manifest "/outputresource:$@;\#1"
+MT_EXE_COMMAND1 = $(MT_EXE_COMMAND_$(STATIC_BUILD))
+MT_DLL_COMMAND = $(MT_DLL_COMMAND$(shell $(PERL) $(TOOLS)/useManifestTool.pl))
+MT_EXE_COMMAND = $(MT_EXE_COMMAND$(shell $(PERL) $(TOOLS)/useManifestTool.pl))
+

@@ -1,0 +1,10 @@
+# CONFIG_SITE.Common.cygwin-x86
+#
+# CONFIG_SITE.Common.cygwin-x86,v 1.1.2.2 2008/07/31 21:58:37 jba Exp
+#
+# Site Specific definitions for cygwin-x86 target
+# Only the local epics system manager should modify this file
+
+# If readline is installed uncomment the following line
+# to add command-line editing and history support
+COMMANDLINE_LIBRARY = READLINE

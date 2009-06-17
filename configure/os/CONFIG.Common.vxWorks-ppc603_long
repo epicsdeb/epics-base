@@ -1,0 +1,13 @@
+# CONFIG.Common.vxWorks-ppc603_long,v 1.1.2.2 2006/12/09 00:01:50 anj Exp
+#
+# Definitions for vxWorks-ppc603 targets with >32MB of RAM
+# Site-specific overrides go in CONFIG_SITE.Common.vxWorks-ppc603_long
+#
+# This file is maintained by the EPICS build community.
+#-------------------------------------------------------
+
+# Inherit the settings from vxWorks-ppc603
+include $(CONFIG)/os/CONFIG.Common.vxWorks-ppc603
+
+# Tell compiler to generate long branches
+ARCH_DEP_CFLAGS += -mlongcall

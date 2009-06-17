@@ -1,0 +1,38 @@
+#  CONFIG.cygwin-x86.cygwin-x86
+#
+# CONFIG.cygwin-x86.cygwin-x86,v 1.1.2.4 2008/07/31 21:58:37 jba Exp
+#
+# Definitions for cygwin-x86 host - cygwin-x86 target builds
+# Sites may override these definitions in CONFIG_SITE.cygwin-x86.cygwin-x86
+#-------------------------------------------------------
+
+# Include common gnu compiler definitions
+include $(CONFIG)/CONFIG.gnuCommon
+
+# cygwin's gcc, g++, ar, ld, and ranlib must be in user's path
+CC = gcc
+CCC = g++
+AR = ar -rc
+LD = ld -r
+RANLIB = ranlib
+RES=.coff
+RCCMD = windres $(INCLUDES) $< $@
+
+# No -fPIC avoids "-fPIC ignored for target (all code is position independent)"
+SHRLIB_CFLAGS =
+SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
+LOADABLE_SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
+
+CONFORM_CFLAGS_ANSI =
+CONFORM_CFLAGS_STRICT = -ansi
+CONFORM_CXXFLAGS_NORMAL =
+CONFORM_CXXFLAGS_STRICT = -ansi
+
+# -ansi build errors need fixing: u_long  undeclared, fd_set with no type
+CONFORM_CFLAGS_STRICT = 
+CONFORM_CXXFLAGS_STRICT = 
+
+# Override linking with gcc library from CONFIG.gnuCommon
+GNU_LDLIBS_YES =
+
+

@@ -1,0 +1,14 @@
+# CONFIG.Common.solaris-sparc64
+#
+# CONFIG.Common.solaris-sparc64,v 1.1.2.3 2007/12/11 20:50:21 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for solaris-sparc64 compiler target archs
+# Sites may override these definitions in CONFIG_SITE.Common.solaris-sparc64
+#-------------------------------------------------------
+
+# Include definitions common to all solaris-sparc target archs
+include $(CONFIG)/os/CONFIG.Common.solaris-sparc
+
+ARCH_DEP_CFLAGS +=   -m64
+ARCH_DEP_LDFLAGS +=  -m64

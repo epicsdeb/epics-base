@@ -1,0 +1,188 @@
+#*************************************************************************
+# Copyright (c) 2006 UChicago Argonne LLC, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE is distributed subject to a Software License Agreement found
+# in the file LICENSE that is included with this distribution.
+#*************************************************************************
+#
+#  CONFIG_SITE,v 1.42.2.18 2008/10/02 21:33:23 anj Exp
+#
+#  CONFIG_SITE  - Global site configuration file
+#
+
+#  The host architecture performing the build, in the form
+#       <operating system>-<architecture>[-<toolset>]
+#
+#  Currently Supporting:
+#	aix-ppc                (IBM compiler used for host builds)
+#	aix-ppc-gnu            (GNU compiler used for host builds)
+#	cygwin-x86             (cygwin compiler used for host builds)
+#	darwin-ppc             (PowerPC based Apple running OSX)
+#	darwin-x86             (Intel based Apple running OSX)
+#	darwin-ppcx86          (Universal binaries for both CPUs)
+#	freebsd-x86            (GNU compiler used for host builds)
+#	freebsd-x86_64         (GNU compiler used for host builds)
+#	hpux-parisc            (HP compiler used for host builds)
+#	hpux-parisc-gnu        (GNU compiler used for host builds)
+#	linux-ppc              (GNU compiler used for host builds)
+#	linux-x86              (GNU compiler used for host builds)
+#	linux-x86_64           (GNU compiler used for host builds)
+#	linux-x86-borland      (Borland C++ compiler used for host builds)
+#	solaris-sparc          (Sun compiler used for host builds)
+#	solaris-sparc-gnu      (GNU compiler used for host builds)
+#	solaris-sparc64        (Sun compiler used for host builds)
+#	solaris-sparc64-gnu    (GNU compiler used for host builds)
+#	solaris-x86            (Sun compiler used for host builds)
+#	solaris-x86-gnu        (GNU compiler used for host builds)
+#	win32-x86              (MS Visual C++ compiler used for host builds)
+#	win32-x86-mingw        (MinGW compiler used for host builds)
+#	win32-x86-cygwin       (WIN32 API with cygwin GNU compiler used for host builds)
+
+#  Debugging builds 
+#	linux-x86-debug        (GNU compiler with -g option for host builds)
+#	linux-x86_64-debug     (GNU compiler with -g option for host builds)
+#	solaris-sparc-debug    (sun compiler no optimization,-g for debugging info)
+#	win32-x86-debug        (MS Visual C++ compiler with debug option for host builds)
+
+
+#  EPICS_HOST_ARCH is a required environment variable
+#  Do not set EPICS_HOST_ARCH in this file. 
+#  Use base/startup files to set EPICS_HOST_ARCH or 
+#  provide EPICS_HOST_ARCH on the GNU make command line.
+
+#  The cross-compiler architectures to build EPICS for
+#
+#  Currently Supporting:
+#       linux-386               (linux-x86 host)
+#       linux-486               (linux-x86 host)
+#       linux-586               (linux-x86 host)
+#       linux-686               (linux-x86 host)
+#       linux-arm
+#       linux-arm_eb
+#       linux-arm_el
+#       linux-athlon            (linux-x86 host)
+#       linux-cris              (Axis GNU crosscompiler on linux-x86 host)
+#       linux-cris_v10          (Axis GNU crosscompiler on linux-x86 host)
+#       linux-cris_v32          (Axis GNU crosscompiler on linux-x86 host)
+#       linux-xscale_be
+#       vxWorks-486
+#       vxWorks-68040
+#       vxWorks-68040lc
+#       vxWorks-68060
+#       vxWorks-pentium
+#       vxWorks-ppc603
+#       vxWorks-ppc603_long
+#       vxWorks-ppc604
+#       vxWorks-ppc604_long
+#       vxWorks-ppc604_altivec
+#       vxWorks-mpc8540
+#       RTEMS-at91rm9200ek
+#       RTEMS-beatnik
+#       RTEMS-gen68360
+#       RTEMS-mcp750
+#       RTEMS-mvme167
+#       RTEMS-mvme2100
+#       RTEMS-mvme3100
+#       RTEMS-mvme5500
+#       RTEMS-pc386
+#       RTEMS-psim
+#       RTEMS-uC5282
+#
+
+# Definitions of CROSS_COMPILER_TARGET_ARCHS in
+# configure/os/CONFIG_SITE.<host>.Common files will
+# override 
+#
+CROSS_COMPILER_TARGET_ARCHS=
+#CROSS_COMPILER_TARGET_ARCHS=vxWorks-68040
+
+#  If only a subset of the host architectures perform
+#  the build for the CROSS_COMPILER_TARGET_ARCHS
+#  uncomment the following line and specify them.
+#
+CROSS_COMPILER_HOST_ARCHS=
+
+# Default ANSI level, individual Makefiles will override
+#  if they cannot support ANSI compilation.
+#   STRICT -  ANSI C - force warning flags
+#   ANSI   -  ANSI C
+#   TRAD   -  Standard C - Not appropriate here.
+CMPLR=STRICT
+
+# Default C++ compiler ANSI level
+#   STRICT -  ANSI C++ force strict warning flags
+#   NORMAL -  ANSI C++ optional warning flags
+#   Individual Makefiles may override
+CXXCMPLR=STRICT
+
+#  Build shared libraries?
+#        must be either YES or NO
+#     NOTE: os/CONFIG.$(EPICS_HOST_ARCH).$(EPICS_HOST_ARCH) files and
+#     os/CONFIG_SITE.$(EPICS_HOST_ARCH).$(EPICS_HOST_ARCH) files may override
+#
+#     NOTE WIN32: YES results in a DLL.  Valid settings are
+#                   SHARED_LIBRARIES=YES and STATIC_BUILD=NO
+#                   SHARED_LIBRARIES=NO  and STATIC_BUILD=YES
+#
+SHARED_LIBRARIES=YES
+
+#  Build client objects statically ?
+#        must be either YES or NO
+#
+STATIC_BUILD=NO
+
+#  Should header dependancy files be automatically generated
+#  for each C/C++ created object file?
+#        must be either YES or NO
+HDEPENDS=YES
+
+#  Host build optimization
+#	must be either YES or NO
+HOST_OPT=YES
+
+#  Cross build optimization
+#	must be either YES or NO
+CROSS_OPT=YES
+
+#  Generate Verbose Compiler Warnings for Host builds
+#	must be either YES or NO
+HOST_WARN=YES
+
+#  Generate Verbose Compiler Warnings for cross compile builds
+#	must be either YES or NO
+CROSS_WARN=YES
+
+#  Create and/or install perl build tools for R3.13 extension builds?
+#  must be either YES or NO
+#
+#  NOTE: Set to YES only if you have existing R3.13 extensions to be
+#  built with this base
+#
+#COMPAT_TOOLS_313=YES
+
+#  Create and/or install files for R3.13 ioc application and extension builds?
+#  must be either YES or NO
+#
+#  NOTE: Set to YES only if you have existing R3.13 ioc applications
+#  and extensions to be built with this base
+#
+COMPAT_313=NO
+
+#  Installation directory
+# If you don't want to install into $(TOP) dir then
+# define INSTALL_LOCATION here
+#INSTALL_LOCATION=<fullpathname>
+
+# Use POSIX thread priority scheduling (YES or NO)
+USE_POSIX_THREAD_PRIORITY_SCHEDULING = NO
+
+#  Site version number, if set will append '-' and this string to the
+#  EPICS version number string that is reported by many tools
+EPICS_SITE_VERSION =
+
+# For GNU compiler, use pipes rather than temporary files for communication 
+# between the various stages of compilation.
+GCC_PIPE = NO
+

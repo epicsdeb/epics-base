@@ -1,0 +1,11 @@
+# CONFIG_SITE.cygwin-x86.cygwin-x86
+#
+# CONFIG_SITE.cygwin-x86.cygwin-x86,v 1.1.2.3 2008/07/31 21:58:37 jba Exp
+# This file is maintained by the build community.
+#
+# Site override definitions for cygwin-x86 host - cygwin-x86 target builds
+#-------------------------------------------------------
+ 
+#  GNU_DIR used when COMMANDLINE_LIBRARY is READLINE
+#GNU_DIR=C:/cygwin
+

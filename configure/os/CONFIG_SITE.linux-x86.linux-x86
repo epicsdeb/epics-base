@@ -1,0 +1,7 @@
+#  CONFIG_SITE.linux-x86.linux-x86
+#
+# CONFIG_SITE.linux-x86.linux-x86,v 1.2 2002/11/15 22:32:21 jba Exp
+#
+# Site specific definitions for linux-x86 host - linux-x86 target builds
+#-------------------------------------------------------
+

@@ -1,0 +1,13 @@
+# CONFIG.hpux-parisc.Common
+#
+# CONFIG.hpux-parisc.Common,v 1.3 2003/04/04 12:50:28 lange Exp
+# This file is maintained by the build community.
+#
+# Definitions for hpux-parisc host archs
+# Sites may override these definitions in CONFIG_SITE.hpux-parisc.Common
+#-------------------------------------------------------
+
+#Include definitions common to unix hosts
+include $(CONFIG)/os/CONFIG.UnixCommon.Common
+
+WIND_HOST_TYPE = parisc-hpux10

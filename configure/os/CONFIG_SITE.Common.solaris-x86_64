@@ -1,0 +1,11 @@
+# CONFIG_SITE.Common.solaris-x86_64
+#
+# CONFIG_SITE.Common.solaris-x86_64,v 1.1.2.2 2007/12/12 20:04:54 jba Exp
+#
+# Site Specific definitions for solaris-x86_64 target
+# Only the local epics system manager should modify this file
+
+# Include definitions common to all solaris-x86_64 target archs
+-include $(CONFIG)/os/CONFIG_SITE.Common.solaris-x86
+
+COMMANDLINE_LIBRARY = EPICS

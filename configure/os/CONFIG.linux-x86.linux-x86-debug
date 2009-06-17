@@ -1,0 +1,17 @@
+# CONFIG.linux-x86.linux-x86-debug
+#
+# CONFIG.linux-x86.linux-x86-debug,v 1.1.2.5 2008/09/22 15:12:57 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for linux-x86 host - linux-x86-debug target build with debug compiler flags
+# Sites may override these definitions in CONFIG_SITE.linux-x86.linux-x86-debug
+#-------------------------------------------------------
+
+include $(CONFIG)/os/CONFIG.linux-x86.linux-x86
+
+# This will cause build failure when used with make -j option
+# See base/src/bpt MAKEBPT
+#BUILD_CLASS = HOST
+#HOST_OPT = NO
+
+CROSS_OPT=NO

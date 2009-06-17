@@ -1,0 +1,12 @@
+# CONFIG.linux-x86.linux-arm
+#
+# Definitions for linux-x86 host - linux-arm target builds
+# Sites may override these definitions in CONFIG_SITE.linux-x86.linux-arm
+#-------------------------------------------------------
+
+# Copied from x86.x86
+STATIC_LDFLAGS_YES= -Wl,-Bstatic
+STATIC_LDFLAGS_NO= 
+STATIC_LDLIBS_YES= -Wl,-Bdynamic
+STATIC_LDLIBS_NO= 
+

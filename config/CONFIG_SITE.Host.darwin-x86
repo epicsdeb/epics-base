@@ -1,0 +1,5 @@
+# CONFIG_SITE.Host.darwin-x86,v 1.1.2.1 2006/04/08 16:36:43 norume Exp
+
+-include $(EPICS_BASE)/config/CONFIG_SITE.Host.Darwin
+
+SHARED_LIBRARIES=NO

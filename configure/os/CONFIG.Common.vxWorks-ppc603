@@ -1,0 +1,21 @@
+# CONFIG.Common.vxWorks-ppc603,v 1.4.2.2 2006/12/09 00:01:50 anj Exp
+#
+# Definitions for vxWorks-ppc603 targets: PPC603 and PMC8240 CPUs
+# Site-specific overrides go in CONFIG_SITE.Common.vxWorks-ppc603
+#
+# This file is maintained by the EPICS build community.
+#-------------------------------------------------------
+
+# Include definitions common to all vxWorks target archs
+include $(CONFIG)/os/CONFIG.Common.vxWorksCommon
+
+# Vx GNU cross compiler suffix
+CMPLR_SUFFIX = ppc
+ 
+ARCH_CLASS = ppc
+
+# Architecture specific build flags
+ARCH_DEP_CPPFLAGS = -DCPU=PPC603  
+ARCH_DEP_CFLAGS = -mcpu=603 -mstrict-align
+
+GNU_TARGET = powerpc-wrs-vxworks

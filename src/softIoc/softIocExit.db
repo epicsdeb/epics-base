@@ -1,0 +1,7 @@
+# softIocExit.db,v 1.1.2.1 2006/11/13 21:45:38 anj Exp
+#
+record(sub,"$(IOC):exit") {
+	field(DESC,"Exit subroutine")
+	field(SCAN,"Passive")
+	field(SNAM,"exit")
+}

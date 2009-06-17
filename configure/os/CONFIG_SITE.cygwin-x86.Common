@@ -1,0 +1,10 @@
+# CONFIG_SITE.cygwin-x86.Common
+#
+# CONFIG_SITE.cygwin-x86.Common,v 1.1.2.1 2004/05/13 22:33:57 jhill Exp
+# This file is maintained by the build community.
+#
+# Site override definitions for cygwin-x86 host builds
+#-------------------------------------------------------
+ 
+CROSS_COMPILER_TARGET_ARCHS =
+

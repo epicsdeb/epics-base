@@ -1,0 +1,44 @@
+# CONFIG,v 1.1.2.4 2006/03/30 17:25:13 jba Exp
+
+INSTALL_IDLFILE = $(INSTALL)
+
+include $(TOP)/configure/RELEASE
+-include $(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH)
+-include $(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH).Common
+ifdef T_A
+-include $(TOP)/configure/RELEASE.Common.$(T_A)
+-include $(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH).$(T_A)
+endif
+
+CONFIG=$(EPICS_BASE)/configure
+include $(CONFIG)/CONFIG
+
+# Override for definition in base
+INSTALL_LOCATION = $(TOP)
+include $(TOP)/configure/CONFIG_SITE
+
+ifdef INSTALL_LOCATION_EXTENSIONS
+INSTALL_LOCATION = $(INSTALL_LOCATION_EXTENSIONS)
+endif
+
+#  Site specific host architecture definitions
+-include $(TOP)/configure/os/CONFIG_SITE.$(EPICS_HOST_ARCH).Common
+
+ifdef T_A
+
+#  Site specific target architecture definitions
+-include $(TOP)/configure/os/CONFIG_SITE.Common.$(T_A)
+
+#  Cross compile specific definitions
+ifneq ($(EPICS_HOST_ARCH),$(T_A))
+-include $(TOP)/configure/CONFIG.CrossCommon
+endif
+
+#  Site specific host-target combination definitions
+-include $(TOP)/configure/os/CONFIG.$(EPICS_HOST_ARCH).$(T_A)
+-include $(TOP)/configure/os/CONFIG_SITE.$(EPICS_HOST_ARCH).$(T_A)
+
+-include $(TOP)/configure/O.$(T_A)/CONFIG_APP_INCLUDE
+
+endif
+

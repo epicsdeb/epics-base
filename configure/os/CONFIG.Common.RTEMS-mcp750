@@ -1,0 +1,10 @@
+#
+# CONFIG.Common.RTEMS-mcp750,v 1.1 2002/10/31 22:04:59 norume Exp
+# Author: W. Eric Norum
+#         Canadian Light Source
+#         eric@cls.usask.ca
+#
+# All RTEMS targets use the same Makefile fragment
+#
+RTEMS_TARGET_CPU=ppc
+include $(CONFIG)/os/CONFIG.Common.RTEMS

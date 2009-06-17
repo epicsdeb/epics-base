@@ -1,0 +1,134 @@
+/*************************************************************************\
+* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+*     National Laboratory.
+* Copyright (c) 2002 The Regents of the University of California, as
+*     Operator of Los Alamos National Laboratory.
+* EPICS BASE Versions 3.13.7
+* and higher are distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution. 
+\*************************************************************************/
+
+/*
+ *  dbChannelIO.h,v 1.5.2.8 2007/01/11 22:07:47 jhill Exp
+ *
+ *
+ *                    L O S  A L A M O S
+ *              Los Alamos National Laboratory
+ *               Los Alamos, New Mexico 87545
+ *
+ *  Copyright, 1986, The Regents of the University of California.
+ *
+ *
+ *	Author Jeffrey O. Hill
+ *	johill@lanl.gov
+ *	505 665 1831
+ *
+ * NOTES:
+ * 1) This interface is preliminary and will change in the future
+ */
+
+#ifndef dbChannelIOh
+#define dbChannelIOh
+
+#ifdef epicsExportSharedSymbols
+#   define dbChannelIOh_restore_epicsExportSharedSymbols
+#   undef epicsExportSharedSymbols
+#endif
+
+#include "compilerDependencies.h"
+#include "epicsMemory.h"
+
+#ifdef dbChannelIOh_restore_epicsExportSharedSymbols
+#   define epicsExportSharedSymbols
+#endif
+
+class dbChannelIO : public cacChannel, public dbContextPrivateListOfIO {
+public:
+    dbChannelIO ( 
+        epicsMutex &, cacChannelNotify &, 
+        const dbAddr &, dbContext & );
+    void destructor ( 
+        epicsGuard < epicsMutex > & );
+    void destroy (
+        epicsGuard < epicsMutex > & mutualExclusionGuard );
+    void callReadNotify ( 
+        epicsGuard < epicsMutex > &, 
+        unsigned type, unsigned long count, 
+        cacReadNotify & notify );
+    void callStateNotify ( 
+        unsigned type, unsigned long count, 
+        const struct db_field_log * pfl, cacStateNotify & notify );
+    void show ( 
+        epicsGuard < epicsMutex > &, unsigned level ) const;
+    unsigned getName (
+        epicsGuard < epicsMutex > &,
+        char * pBuf, unsigned bufLen ) const throw ();
+    const char * pName (
+        epicsGuard < epicsMutex > & ) const throw ();
+    void * operator new ( size_t size, 
+        tsFreeList < dbChannelIO, 256, epicsMutexNOOP > & );
+    epicsPlacementDeleteOperator (( void *, 
+        tsFreeList < dbChannelIO, 256, epicsMutexNOOP > & ))
+protected:
+    ~dbChannelIO ();
+private:
+    epicsMutex & mutex;
+    dbContext & serviceIO;
+    dbAddr addr;
+    epics_auto_ptr < char, eapt_array > pNameStr;
+
+    void initiateConnect (
+        epicsGuard < epicsMutex > & );
+    unsigned requestMessageBytesPending ( 
+        epicsGuard < epicsMutex > & );
+    void flush ( 
+        epicsGuard < epicsMutex > & );
+    ioStatus read ( 
+        epicsGuard < epicsMutex > &,
+        unsigned type, unsigned long count, 
+        cacReadNotify &, ioid * );
+    void write ( 
+        epicsGuard < epicsMutex > &,
+        unsigned type, unsigned long count, 
+        const void * pvalue );
+    ioStatus write ( 
+        epicsGuard < epicsMutex > &,
+        unsigned type, unsigned long count, 
+        const void * pvalue, cacWriteNotify &, ioid * );
+    void subscribe ( 
+        epicsGuard < epicsMutex > &,
+        unsigned type, unsigned long count, 
+        unsigned mask, cacStateNotify &notify, ioid * );
+    void ioCancel ( 
+        epicsGuard < epicsMutex > & mutualExclusionGuard,
+        const ioid & );
+    void ioShow ( 
+        epicsGuard < epicsMutex > &,
+        const ioid &, unsigned level ) const;
+    short nativeType (
+        epicsGuard < epicsMutex > & ) const;
+    unsigned long nativeElementCount (
+        epicsGuard < epicsMutex > & ) const;
+	dbChannelIO ( const dbChannelIO & );
+	dbChannelIO & operator = ( const dbChannelIO & );
+    void * operator new ( size_t size );
+    void operator delete ( void * );
+};
+
+inline void dbChannelIO::callReadNotify ( 
+    epicsGuard < epicsMutex > & guard, unsigned type, unsigned long count, 
+    cacReadNotify & notify )
+{
+    guard.assertIdenticalMutex ( this->mutex );
+    this->serviceIO.callReadNotify ( guard, this->addr, type, count, notify );
+}
+
+inline void dbChannelIO::callStateNotify ( unsigned type, unsigned long count, 
+        const struct db_field_log *pfl, cacStateNotify &notify )
+{
+    this->serviceIO.callStateNotify ( this->addr, type, count, pfl, notify );
+}
+
+
+#endif // dbChannelIOh
+

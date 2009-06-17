@@ -1,0 +1,10 @@
+#
+# CONFIG.Common.RTEMS-mvme167,v 1.2 2000/12/18 16:05:25 norume Exp
+# Author: W. Eric Norum
+#         Canadian Light Source
+#         eric@cls.usask.ca
+#
+# All RTEMS targets use the same Makefile fragment
+#
+RTEMS_TARGET_CPU=m68k
+include $(CONFIG)/os/CONFIG.Common.RTEMS

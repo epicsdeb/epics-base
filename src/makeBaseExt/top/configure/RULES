@@ -1,0 +1,5 @@
+# RULES,v 1.2.2.1 2004/02/26 22:01:57 jba Exp
+
+include $(EPICS_BASE)/configure/RULES
+include $(TOP)/configure/RULES_PYTHON
+include $(TOP)/configure/RULES_IDL

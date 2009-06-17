@@ -1,0 +1,21 @@
+# CONFIG.Common.solaris-sparc-gnu
+#
+# CONFIG.Common.solaris-sparc-gnu,v 1.3.2.7 2008/07/10 19:45:01 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for solaris-sparc gnu compiler target archs
+# Sites may override these definitions in CONFIG_SITE.Common.solaris-sparc-gnu
+#-------------------------------------------------------
+
+# Include definitions common to all solaris-sparc  target archs
+include $(CONFIG)/os/CONFIG.Common.solaris-sparc
+# CONFIG.Common.solaris-sparc
+
+COMPILER_CPPFLAGS =  -D_REENTRANT
+
+STLPORT_LDLIBS_NO =
+
+OP_SYS_LDLIBS_8 =
+OP_SYS_LDLIBS_9 =
+OP_SYS_LDLIBS_10 =
+

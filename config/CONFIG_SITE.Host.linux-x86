@@ -1,0 +1,7 @@
+# CONFIG_SITE.Host.linux-x86,v 1.4 2002/07/17 19:59:44 jba Exp
+
+# linux-x86 is the new name for linux
+-include $(EPICS_BASE)/config/CONFIG_SITE.Host.Linux
+
+#SHARED_LIBRARIES=YES
+

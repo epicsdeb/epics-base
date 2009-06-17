@@ -1,0 +1,12 @@
+# CONFIG.aix-ppc-gnu.Common
+#
+# CONFIG.aix-ppc-gnu.Common,v 1.1.2.1 2004/04/05 15:01:23 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for aix-ppc gnu compiler host builds
+# Sites may override these definitions in CONFIG_SITE.aix-ppc-gnu.Common
+#-------------------------------------------------------
+
+#Include definitions common to aix-ppc hosts
+include $(CONFIG)/os/CONFIG.aix-ppc.Common
+

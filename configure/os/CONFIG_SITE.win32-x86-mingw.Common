@@ -1,0 +1,16 @@
+# CONFIG_SITE.win32-x86-mingw.Common
+#
+# CONFIG_SITE.win32-x86-mingw.Common,v 1.1.2.3 2007/03/09 23:21:23 jba Exp
+#
+# Site Specific definitions for cygwin-x86 target
+# Only the local epics system manager should modify this file
+
+# If readline is not installed comment the following line
+# to omit command-line editing and history support
+#COMMANDLINE_LIBRARY = READLINE
+
+# Needed to find dlls for gcc, g++, as, cpp, ...
+# if MINGW_BIN not in user's path
+MINGW_BIN=C:/MinGW/bin
+export PATH := $(MINGW_BIN):$(PATH)
+

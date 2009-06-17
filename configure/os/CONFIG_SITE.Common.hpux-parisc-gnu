@@ -1,0 +1,13 @@
+# CONFIG_SITE.Common.hpux-parisc-gnu
+#
+# CONFIG_SITE.Common.hpux-parisc-gnu,v 1.1 2003/04/04 12:50:28 lange Exp
+#
+# Site Specific definitions for hpux-parisc-gnu target
+# Only the local epics system manager should modify this file
+
+# Include definitions for hpux-parisc, as gnu builds will use the HP linker
+include $(CONFIG)/os/CONFIG_SITE.Common.hpux-parisc
+
+# If you have built the GNU suite yourself, set the install location here,
+# else the default (/usr/local) will be used
+#GNU_DIR = /opt/gcc

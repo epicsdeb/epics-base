@@ -1,0 +1,12 @@
+# CONFIG.solaris-sparc64-gnu.Common
+#
+# CONFIG.solaris-sparc64-gnu.Common,v 1.1.2.1 2005/11/03 20:53:03 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for solaris-sparc64 gnu compiler host builds
+# Sites may override these definitions in CONFIG_SITE.solaris-sparc64-gnu.Common
+#-------------------------------------------------------
+
+#Include definitions common to solaris-sparc-gnu hosts
+include $(CONFIG)/os/CONFIG.solaris-sparc-gnu.Common
+

@@ -1,0 +1,10 @@
+# CONFIG_SITE.Vx.Linux.ppc603,v 1.3 2002/12/05 20:39:04 jba Exp
+#
+# This file contains overrides for Vx builds
+
+# ORNL SNS overrides for cross compilers
+#VX_DIR_YES = /opt/tornado20/
+#VX_INCLUDE_YES = /usr/local/crossgcc/ppc/powerpc-wrs-vxworks/sys-include
+#VX_GNU_YES = /usr/local/crossgcc/ppc/
+#VX_GNU_BIN_YES = $(VX_GNU)/bin
+#VX_GNU_LIB_YES = /usr/local/crossgcc/ppc/lib/gcc-lib/powerpc-wrs-vxworks/2.95.2

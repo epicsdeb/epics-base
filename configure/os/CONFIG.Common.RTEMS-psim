@@ -1,0 +1,10 @@
+#
+# CONFIG.Common.RTEMS-psim,v 1.1 2002/10/31 22:05:00 norume Exp
+# Author: W. Eric Norum
+#         University of Saskatchewan
+#         eric.norum@usask.ca
+#
+# All RTEMS targets use the same Makefile fragment
+#
+RTEMS_TARGET_CPU=ppc
+include $(CONFIG)/os/CONFIG.Common.RTEMS

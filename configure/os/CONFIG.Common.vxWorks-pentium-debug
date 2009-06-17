@@ -1,0 +1,14 @@
+# CONFIG.Common.vxWorks-pentium-debug
+#
+# CONFIG.Common.vxWorks-pentium-debug,v 1.1.2.1 2008/09/22 15:12:55 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for vxWorks-pentium-debug target archs
+# Sites may override these definitions in CONFIG_SITE.Common.vxWorks-pentium-debug
+#-------------------------------------------------------
+
+# Include definitions common to all vxWorks archs
+include $(CONFIG)/os/CONFIG.Common.vxWorks-pentium
+
+CROSS_OPT = NO
+

@@ -1,0 +1,14 @@
+# CONFIG.linux-x86-debug.linux-x86-debug
+#
+# CONFIG.linux-x86-debug.linux-x86-debug,v 1.1.2.1 2003/12/18 15:14:38 jba Exp
+# This file is maintained by the build community.
+#
+# Definitions for linux-x86 host - linux-x86 target build with debug compiler flags
+# Sites may override these definitions in CONFIG_SITE.linux-x86-debug.linux-x86-debug
+#-------------------------------------------------------
+
+include $(CONFIG)/os/CONFIG.linux-x86.linux-x86
+
+# Removes -O optimization and adds -g compile option
+HOST_OPT=NO
+

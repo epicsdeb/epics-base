@@ -1,0 +1,8 @@
+# CONFIG_SITE.linux-x86_64.linux-x86_64
+#
+# CONFIG_SITE.linux-x86_64.linux-x86_64,v 1.1.2.2 2007/12/11 20:22:06 jba Exp
+#
+# Site specific definitions for linux-x86_64 host - linux-x86_64 target builds
+#-------------------------------------------------------
+
+

@@ -1,0 +1,8 @@
+#  CONFIG_HOST_ARCH.solarisGnu
+#
+
+# Include definitions common to all Unix archs
+include $(EPICS_BASE)/config/CONFIG_HOST_ARCH.UnixCommon
+
+WIND_HOST_TYPE = sun4-solaris2
+

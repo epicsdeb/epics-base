@@ -1,0 +1,4 @@
+#  CONFIG_HOST_ARCH.solaris-x86-gnu,v 1.1.2.1 2003/06/19 17:29:16 jba Exp
+
+-include $(EPICS_BASE)/config/CONFIG_HOST_ARCH.solarisGnu
+

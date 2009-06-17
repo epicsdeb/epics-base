@@ -1,0 +1,4 @@
+# CONFIG_SITE.Host.win32-x86-borland,v 1.1 2002/01/07 20:46:53 jba Exp
+
+# win32-x86-borland is the new name for Borland
+-include $(EPICS_BASE)/config/CONFIG_SITE.Host.Borland

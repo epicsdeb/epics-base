@@ -1,0 +1,118 @@
+#
+# This file contains definitions for RTEMS builds
+#
+# CONFIG.Common.RTEMS,v 1.44.2.20 2008/09/29 15:52:05 anj Exp
+# Author: W. Eric Norum
+#         University of Saskatchewan
+#         eric.norum@usask.ca
+#
+#  Contains definitions common to all RTEMS targets
+#
+#  This file is maintained by the build community.
+#  Sites may override definitions in os/CONFIG_SITE.Common.RTEMS
+#-------------------------------------------------------
+#
+
+#-------------------------------------------------------
+# RTEMS tools are similar to UNIX tools
+-include $(CONFIG)/os/CONFIG.Common.UnixCommon
+
+GNU_TARGET_INCLUDE_DIR =
+unexport GCC_EXEC_PREFIX
+
+#--------------------------------------------------
+# Get RTEMS_BASE definition
+-include $(CONFIG)/os/CONFIG_SITE.Common.RTEMS
+
+#-------------------------------------------------------
+# Pick up the RTEMS tool/path definitions from the RTEMS BSP directory.
+include $(RTEMS_BASE)/$(RTEMS_TARGET_CPU)-rtems$(RTEMS_VERSION)/$(subst RTEMS-,,$(T_A))/Makefile.inc
+include $(RTEMS_CUSTOM)
+include $(CONFIG.CC)
+
+#-------------------------------------------------------
+# RTEMS cross-development tools
+CC = $(RTEMS_BASE)/bin/$(CC_FOR_TARGET) $(GCCSPECS) -fasm
+CCC = $(RTEMS_BASE)/bin/$(CXX)
+CPP = $(RTEMS_BASE)/bin/$(CC_FOR_TARGET) -x c -E
+AR = $(RTEMS_BASE)/bin/$(AR_FOR_TARGET)
+LD = $(RTEMS_BASE)/bin/$(LD_FOR_TARGET) -r
+
+RANLIB := $(RTEMS_BASE)/bin/$(RANLIB)
+
+#-------------------------------------------------------
+# Build types
+VALID_BUILDS = Ioc
+
+#--------------------------------------------------
+# The RTEMS Makefiles redefine several macros, so we have to go
+# through the following contortions to get the EPICS flags back.
+CFLAGS = $(CONFORM_CFLAGS) $(CROSS_CFLAGS) $(OPT_CFLAGS) $(DEBUG_CFLAGS)\
+ $(WARN_CFLAGS) $(TARGET_CFLAGS) $(USR_CFLAGS) $(ARCH_DEP_CFLAGS)\
+ $(CODE_CFLAGS) $(STATIC_CFLAGS)  $(OP_SYS_CFLAGS) $(LIBRARY_SRC_CFLAGS)
+
+CXXFLAGS = $(CONFORM_CXXFLAGS) $(CROSS_CXXFLAGS) $(OPT_CXXFLAGS)\
+ $(DEBUG_CXXFLAGS) $(WARN_CXXFLAGS) $(TARGET_CXXFLAGS) $(USR_CXXFLAGS)\
+ $(ARCH_DEP_CXXFLAGS) $(CODE_CXXFLAGS) $(STATIC_CXXCFLAGS) $(OP_SYS_CXXFLAGS)\
+ $(LIBRARY_SRC_CFLAGS)
+
+LDFLAGS = $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(USR_LDFLAGS) \
+ $(ARCH_DEP_LDFLAGS) $(DEBUG_LDFLAGS) $(OP_SYS_LDFLAGS) $(CROSS_LDFLAGS)\
+ $(RUNTIME_LDFLAGS) $(CODE_LDFLAGS)
+
+LDLIBS = $(STATIC_LDLIBS)\
+ $(POSIX_LDLIBS) $(ARCH_DEP_LDLIBS) $(DEBUG_LDLIBS) $(OP_SYS_LDLIBS)
+
+CPPFLAGS += $(CONFORM_CPPFLAGS) $(CROSS_CPPFLAGS) $(POSIX_CPPFLAGS)\
+$(BASE_CPPFLAGS) $(TARGET_CPPFLAGS) $(USR_CPPFLAGS) $(ARCH_DEP_CPPFLAGS)\
+ $(OP_SYS_CPPFLAGS) $(OP_SYS_INCLUDE_CPPFLAGS) $(CODE_CPPFLAGS)
+
+#--------------------------------------------------
+# Although RTEMS uses gcc, it wants to use gcc its own way
+CROSS_CPPFLAGS =
+CROSS_LDFLAGS =
+SHRLIB_CFLAGS =
+OPT_CFLAGS_YES   = $(CFLAGS_OPTIMIZE_V)
+OPT_CXXFLAGS_YES = $(CFLAGS_OPTIMIZE_V)
+OPT_CFLAGS_NO    = $(CFLAGS_DEBUG_V)
+OPT_CXXFLAGS_NO  = $(CFLAGS_DEBUG_V)
+
+#--------------------------------------------------
+# operating system class (include/os/<os_class>)
+OS_CLASS = RTEMS
+
+#--------------------------------------------------
+# Operating system flags
+OP_SYS_LDLIBS += -lrtemsCom -lc -lrtemscpu -lCom -lnfs -lm
+OP_SYS_LDFLAGS += $(CPU_CFLAGS) -u Init \
+                 $(PROJECT_RELEASE)/lib/no-dpmem.rel \
+                 $(PROJECT_RELEASE)/lib/no-mp.rel \
+                 $(PROJECT_RELEASE)/lib/no-part.rel \
+                 $(PROJECT_RELEASE)/lib/no-signal.rel \
+                 $(PROJECT_RELEASE)/lib/no-rtmon.rel
+
+#--------------------------------------------------
+# RTEMS has neither shared libraries nor dynamic loading
+STATIC_BUILD=YES
+SHARED_LIBRARIES=NO
+CODE_CFLAGS =
+CODE_CXXFLAGS =
+
+#--------------------------------------------------
+# RTEMS uses the inline keyword so -pedantic causes too many problems.
+# Using -ansi turns off lots of useful prototypes (e.g. strtok_r).
+CONFORM_CFLAGS_STRICT =
+CONFORM_CXXFLAGS_STRICT =
+
+#--------------------------------------------------
+# Override the usual RTEMS verbosity from ar
+ARFLAGS = rc
+
+#--------------------------------------------------
+# Command-line input support
+LDLIBS_LIBTECLA = -ltecla_r -lncurses
+LDLIBS_READLINE = -lreadline -lncurses
+
+#--------------------------------------------------
+# Allow site overrides
+-include $(CONFIG)/os/CONFIG_SITE.$(EPICS_HOST_ARCH).RTEMS

@@ -1,0 +1,71 @@
+#*************************************************************************
+# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE Versions 3.13.7
+# and higher are distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution. 
+#*************************************************************************
+#	CONFIG_SITE_ENV,v 1.9.2.5 2008/10/09 10:11:15 lange Exp
+#	Author:	Andrew Johnson
+#	Date:	1 May 1995
+#
+#	Experimental Physics and Industrial Control System (EPICS)
+#
+#	CONFIG_SITE_ENV - EPICS Environment Parameter Site configuration file
+#
+# This file is read by the script base/src/libCom/env/bldEnvdata.pl
+# Variable definitions must take the form
+#	VAR = VALUE
+# or
+#	VAR = "Value containing spaces"
+# with each one on its own line.
+# Enclosing spaces and "" will be trimmed.
+#
+
+#  Site-specific environment settings
+
+# Time service:
+# EPICS_TIMEZONE
+#	local timezone info for vxWorks IOCs.  The format required is
+#	<name>::<minutesWest>:<start daylight>:<end daylight>
+#	where the start and end are mmddhh - that is month,day,hour
+#	eg EPICS_TIMEZONE=CUS::360:033102:102802
+#
+#	DST for 2008  US: Mar 09 - Nov 02
+#	              EU: Mar 30 - Oct 26
+#	(see: http://www.worldtimezone.org/daylight.html)
+#
+# EPICS_TS_NTP_INET
+#	NTP or Unix time server ip address.  Uses boot host if not set.
+
+EPICS_TIMEZONE=CUS::360:030902:110202
+#EPICS_TIMEZONE=MET::-60:033002:102602
+EPICS_TS_NTP_INET=
+
+# IOC Shell:
+# IOCSH_PS1
+#	Prompt string
+# IOCSH_HISTSIZE
+#	Number of lines of command history to keep.
+IOCSH_PS1="epics> "
+IOCSH_HISTSIZE=50
+
+# Log Server:
+# EPICS_IOC_LOG_INET 
+#	Log server ip addr.
+# EPICS_IOC_LOG_FILE_NAME 
+#	pathname to the log file.
+# EPICS_IOC_LOG_FILE_LIMIT 
+#	maximum log file size.
+# EPICS_IOC_LOG_FILE_COMMAND 
+#	A shell command string used to obtain a new 
+#       path name in response to SIGHUP - the new path name will
+#       replace any path name supplied in EPICS_IOC_LOG_FILE_NAME
+
+EPICS_IOC_LOG_INET=
+EPICS_IOC_LOG_FILE_NAME=
+EPICS_IOC_LOG_FILE_COMMAND=
+EPICS_IOC_LOG_FILE_LIMIT=1000000
+

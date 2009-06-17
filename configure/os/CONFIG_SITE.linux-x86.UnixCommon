@@ -1,0 +1,6 @@
+#
+# CONFIG_SITE.linux-x86.UnixCommon,v 1.1.2.1 2005/02/25 16:00:40 jba Exp
+#
+# Site Specific Configuration Information
+# Only the local epics system manager should modify this file
+ 

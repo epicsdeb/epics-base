@@ -1,0 +1,12 @@
+# CONFIG.hpux-parisc-gnu.Common
+#
+# CONFIG.hpux-parisc-gnu.Common,v 1.1 2002/11/04 12:50:00 lange Exp
+# This file is maintained by the build community.
+#
+# Definitions for hpux-parisc gnu compiler host builds
+# Sites may override these definitions in CONFIG_SITE.hpux-parisc-gnu.Common
+#-------------------------------------------------------
+
+#Include definitions common to hpux-parisc hosts
+include $(CONFIG)/os/CONFIG.hpux-parisc.Common
+

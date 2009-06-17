@@ -1,0 +1,116 @@
+#*************************************************************************
+# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE Versions 3.13.7
+# and higher are distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution. 
+#*************************************************************************
+
+#---------------------------------------------------------------
+# Epics base directories
+
+EPICS_BASE_HOST_BIN = $(EPICS_BASE)/bin/$(EPICS_HOST_ARCH)
+EPICS_BASE_HOST_LIB = $(EPICS_BASE)/lib/$(EPICS_HOST_ARCH)
+ifdef T_A
+EPICS_BASE_LIB      = $(EPICS_BASE)/lib/$(T_A)
+EPICS_BASE_BIN      = $(EPICS_BASE)/bin/$(T_A)
+endif
+
+#---------------------------------------------------------------
+# Epics base Ioc libraries 
+
+EPICS_BASE_IOC_LIBS += recIoc softDevIoc
+EPICS_BASE_IOC_LIBS += miscIoc rsrvIoc dbtoolsIoc asIoc
+EPICS_BASE_IOC_LIBS += dbIoc registryIoc dbStaticIoc ca Com 
+
+#---------------------------------------------------------------
+# Epics base Host libraries 
+
+EPICS_BASE_HOST_LIBS += cas gdd asHost dbStaticHost registryIoc
+EPICS_BASE_HOST_LIBS += ca Com
+
+#---------------------------------------------------------------
+# Version number for base shared libraries (and win32 products)
+
+ifdef BASE_TOP
+SHRLIB_VERSION = $(EPICS_VERSION).$(EPICS_REVISION)
+PROD_VERSION = $(EPICS_VERSION).$(EPICS_REVISION)
+endif # BASE_TOP
+
+#---------------------------------------------------------------
+# Base c preprocessor flags
+
+BASE_CPPFLAGS = 
+
+# osithread default stack
+OSITHREAD_USE_DEFAULT_STACK = NO
+OSITHREAD_DEFAULT_STACK_FLAGS_YES = -DOSITHREAD_USE_DEFAULT_STACK
+OSITHREAD_DEFAULT_STACK_FLAGS_NO =
+BASE_CPPFLAGS += $(OSITHREAD_DEFAULT_STACK_FLAGS_$(OSITHREAD_USE_DEFAULT_STACK))
+
+#---------------------------------------------------------------
+# Where to find the installed build tools
+
+TOOLS = $(EPICS_BASE_HOST_BIN)
+
+#---------------------------------------------------------------
+# Epics base build tools and tool flags
+
+MAKEBPT                    = $(call PATH_FILTER, $(TOOLS)/makeBpt$(HOSTEXE))
+DBEXPAND                   = $(call PATH_FILTER, $(TOOLS)/dbExpand$(HOSTEXE))
+DBTORECORDTYPEH            = $(call PATH_FILTER, $(TOOLS)/dbToRecordtypeH$(HOSTEXE))
+DBTOMENUH                  = $(call PATH_FILTER, $(TOOLS)/dbToMenuH$(HOSTEXE))
+REGISTERRECORDDEVICEDRIVER = $(PERL) $(TOOLS)/registerRecordDeviceDriver.pl
+CONVERTRELEASE=$(PERL) $(TOOLS)/convertRelease.pl
+
+#-------------------------------------------------------
+# tools for installing libraries and products
+INSTALL = $(PERL) $(TOOLS)/installEpics.pl
+INSTALL_PRODUCT = $(INSTALL)
+INSTALL_LIBRARY = $(INSTALL)
+
+#---------------------------------------------------------------
+# tools for making header dependancies and variable replacement
+MKMF                       = $(PERL) $(TOOLS)/mkmf.pl
+REPLACEVAR                 = $(PERL) $(TOOLS)/replaceVAR.pl
+
+#---------------------------------------------------------------
+# private versions of lex/yacc from EPICS
+EYACC = $(call PATH_FILTER, $(TOOLS)/antelope$(HOSTEXE))
+ELEX = $(call PATH_FILTER, $(TOOLS)/e_flex$(HOSTEXE)) -S$(EPICS_BASE)/include/flex.skel.static
+
+YACC  = $(EYACC)
+LEX   = $(ELEX)
+
+#---------------------------------------------------------------
+# External tools and tool flags - must be in path or defined in application
+
+ifndef ADL2DL
+ADL2DL = adl2dl
+endif
+
+# sch2edif compiler and flags
+SCH2EDIF = sch2edif
+SCH2EDIF_PATH =
+SCH2EDIF_SYSFLAGS = -n -ap -p.+..+$(SCH2EDIF_PATH)+$(CAPFAST_TEMPLATES)/sym+
+SCH2EDIF_FLAGS =
+ 
+# e2db and flags
+#    - again there is an assumption where edb.def is installed.
+ifndef E2DB
+E2DB = e2db
+endif
+E2DB_SYSFLAGS = -ate -d $(CAPFAST_TEMPLATES)/edb.def
+E2DB_FLAGS =
+
+ifndef DBST
+DBST = dbst
+endif
+
+ifndef MSI
+MSI = msi
+endif
+
+

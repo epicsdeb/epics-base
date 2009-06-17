@@ -1,0 +1,18 @@
+# CONFIG_SITE.Common.solaris-sparc
+#
+# CONFIG_SITE.Common.solaris-sparc,v 1.3.2.6 2008/09/15 15:18:41 jba Exp
+#
+# Site Specific definitions for solaris-sparc target
+# Only the local epics system manager should modify this file
+
+# If readline is installed uncomment the following macro definition
+# to include command-line editing and history support
+#
+
+# Readline library provides command-line editing and history in IOC shell
+#COMMANDLINE_LIBRARY = READLINE
+
+# Use stLport library instead of default Cstd library
+# Must be either YES or NO
+#USE_STLPORT=YES
+
