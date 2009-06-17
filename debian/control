@@ -1,0 +1,18 @@
+Source: epics-base
+Section: unknown
+Priority: extra
+Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
+Build-Depends: debhelper (>= 7), autotools-dev
+Standards-Version: 3.7.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: epics-base
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: epics-base-doc
+Architecture: all
+Description: Documentation for epics-base
+ <insert long description, indented with spaces>
