@@ -128,6 +128,11 @@ CXXCMPLR=STRICT
 #
 SHARED_LIBRARIES=YES
 
+#  Include RPATH when linking executables and libraries.
+#        must be either YES or NO
+#     Warning: Leave this set to YES unless you know what you are doing.
+USE_RPATH=YES
+
 #  Build client objects statically ?
 #        must be either YES or NO
 #
