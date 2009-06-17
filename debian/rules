@@ -25,7 +25,7 @@ build-arch: build-arch-stamp
 build-arch-stamp: 
 
 	# Add here commands to compile the arch part of the package.
-	EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE)
+	EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE) USE_RPATH=NO
 	touch $@
 
 build-indep: build-indep-stamp
