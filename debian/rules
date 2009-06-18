@@ -18,6 +18,11 @@ export DH_OPTIONS
 
 EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
+RTEMS_TARGETS=RTEMS-mvme3100
+TARGETS+=$(RTEMS_TARGETS)
+
+CONFIG=USE_RPATH=NO "CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)"
+
 #Architecture
 build: build-arch build-indep
 
@@ -25,7 +30,11 @@ build-arch: build-arch-stamp
 build-arch-stamp: 
 
 	# Add here commands to compile the arch part of the package.
-	EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE) USE_RPATH=NO
+	env \
+EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) \
+"PATH=$$PWD/bin/$(EPICS_HOST_ARCH):$$PATH" \
+"LD_LIBRARY_PATH=$$PWD/lib/$(EPICS_HOST_ARCH):$$LD_LIBRARY_PATH" \
+$(MAKE) $(CONFIG)
 	touch $@
 
 build-indep: build-indep-stamp
@@ -41,7 +50,7 @@ clean:
 	rm -f build-arch-stamp build-indep-stamp 
 
 	# Add here commands to clean up after the build process.
-	[ ! -f Makefile ] || EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE) realclean
+	[ ! -f Makefile ] || EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE) realclean $(CONFIG)
 	rm -rf bin db dbd html include lib templates
 
 	dh_clean 
@@ -56,11 +65,15 @@ com_prefix=debian/epics-compat-dev/usr/epics/base
 devbin=debian/epics-dev/usr/epics/base/bin/$(EPICS_HOST_ARCH)
 devlib=debian/epics-dev/usr/epics/base/lib/$(EPICS_HOST_ARCH)
 
+# List all host user tools
 binprogs=caConnTest caDirServ caEventRate caget cainfo camonitor caput caRepeater casw softIoc iocLogServer
+
+# List all shared libraries
 libs+= asHost asIoc ca cas Com
 libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
 libs+= gdd miscIoc recIoc registryIoc
 libs+= rsrvIoc softDevIoc testDevIoc
+#libs+= Cap5 # libCap5.so.3.14 receives special treatment below
 
 doln=rm $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);\
  ln -s ../../../../$(1)/$(2) $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);
@@ -79,6 +92,15 @@ install-indep:
 	cp -r html $(doc_prefix)/
 
 	dh_install -i
+
+# $(1) is package name (ie epics-rtems-mvme3100)
+# $(2) is the EPICS target name (ie RTEMS-mvme3100)
+define instbsp
+install -d debian/$(1)/usr/epics/base/bin ;
+install -d debian/$(1)/usr/epics/base/lib ;
+cp -r bin/$(2) debian/$(1)/usr/epics/base/bin/ ;
+cp -r lib/$(2) debian/$(1)/usr/epics/base/lib/ ;
+endef
 
 install-arch:
 	dh_testdir
@@ -109,7 +131,9 @@ install-arch:
 	install -d $(dev_prefix)/bin
 	install -d $(dev_prefix)/lib
 	cp -r bin/$(EPICS_HOST_ARCH) $(dev_prefix)/bin/
+	chmod u+w $(dev_prefix)/bin/*
 	cp -r lib/$(EPICS_HOST_ARCH) $(dev_prefix)/lib/
+	chmod u+w $(dev_prefix)/lib/*
 	cp -r configure $(dev_prefix)/
 	cp -r db $(dev_prefix)/
 	cp -r dbd $(dev_prefix)/
@@ -120,6 +144,14 @@ install-arch:
 	$(foreach prog,$(binprogs),$(call doln,bin,$(prog)))
 	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so)))
 	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so.3.14)))
+	$(call doln,lib,libCap5.so)
+
+	# Target packages
+
+	# RTEMS packages
+	#   ie epics-rtems-mvme3100
+
+	$(foreach targ,$(RTEMS_TARGETS),$(call instbsp,$(targ:RTEMS-%=epics-rtems-%),$(targ)))
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
@@ -143,7 +175,7 @@ binary-common:
 #	dh_installinfo
 	dh_installman
 	dh_link
-	dh_strip
+	dh_strip -Xrtems
 	dh_compress
 	dh_fixperms
 #	dh_perl

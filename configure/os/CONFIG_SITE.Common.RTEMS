@@ -5,7 +5,7 @@
 
 # Where to find RTEMS
 #
-RTEMS_BASE=/usr/local/rtems/rtems-4.9
+RTEMS_BASE=/usr
 RTEMS_VERSION=4.9
 
 

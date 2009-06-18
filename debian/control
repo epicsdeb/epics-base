@@ -43,5 +43,12 @@ Description: Perl bindings for for EPICS
 
 Package: epics-doc
 Architecture: all
+Depends: epics-libs
 Description: EPICS documentation
  Documentation for EPICS Base
+
+Package: epics-rtems-mvme3100
+Architecture: any
+Depends: rtems-mvme3100, epics-libs, ${shlibs:Depends}, ${misc:Depends}
+Description: EPICS targeted to the MVME3100
+ EPICS for the MVME3100 powerpc based vme bus processor card
