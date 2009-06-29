@@ -2,7 +2,7 @@ Source: epics-base
 Section: unknown
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), autotools-dev, rtems-libbspext-mvme3100, rtems-pc386
+Build-Depends: debhelper (>= 7), libreadline5-dev, rtems-libbspext-mvme3100, rtems-pc386
 Standards-Version: 3.7.3
 Homepage: http://www.aps.anl.gov/epics/
 
