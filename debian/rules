@@ -111,6 +111,7 @@ install-arch:
 
 	# epics-libs
 	install -d $(lib_prefix)
+	install lib/$(EPICS_HOST_ARCH)/libCap5.so $(lib_prefix)/
 	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so,$(libs)) $(lib_prefix)/
 	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so.3.14,$(libs)) $(lib_prefix)/
 
