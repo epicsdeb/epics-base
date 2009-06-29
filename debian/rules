@@ -18,8 +18,9 @@ export DH_OPTIONS
 
 EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
-RTEMS_TARGETS=RTEMS-mvme3100
-TARGETS+=$(RTEMS_TARGETS)
+RTEMS_TARGETS=RTEMS-mvme3100 RTEMS-pc386
+DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
+TARGETS+=$(DEBUG_TAGETS) $(RTEMS_TARGETS)
 
 CONFIG=USE_RPATH=NO "CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)"
 
@@ -131,8 +132,10 @@ install-arch:
 	install -d $(dev_prefix)/bin
 	install -d $(dev_prefix)/lib
 	cp -r bin/$(EPICS_HOST_ARCH) $(dev_prefix)/bin/
+	cp -r bin/$(EPICS_HOST_ARCH)-debug $(dev_prefix)/bin/
 	chmod u+w $(dev_prefix)/bin/*
 	cp -r lib/$(EPICS_HOST_ARCH) $(dev_prefix)/lib/
+	cp -r lib/$(EPICS_HOST_ARCH)-debug $(dev_prefix)/lib/
 	chmod u+w $(dev_prefix)/lib/*
 	cp -r configure $(dev_prefix)/
 	cp -r db $(dev_prefix)/
@@ -175,7 +178,7 @@ binary-common:
 #	dh_installinfo
 	dh_installman
 	dh_link
-	dh_strip -Xrtems
+	dh_strip -Xrtems -Xdebug
 	dh_compress
 	dh_fixperms
 #	dh_perl

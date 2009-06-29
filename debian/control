@@ -2,7 +2,7 @@ Source: epics-base
 Section: unknown
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), autotools-dev
+Build-Depends: debhelper (>= 7), autotools-dev, rtems-libbspext-mvme3100, rtems-pc386
 Standards-Version: 3.7.3
 Homepage: http://www.aps.anl.gov/epics/
 
@@ -14,7 +14,7 @@ Description: EPICS libraries for clients and servers
 
 Package: epics-dev
 Architecture: any
-Depends: epics-libs, epics-perl, ${shlibs:Depends}, ${misc:Depends}
+Depends: epics-libs, epics-catools, epics-perl, ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
@@ -49,6 +49,12 @@ Description: EPICS documentation
 
 Package: epics-rtems-mvme3100
 Architecture: any
-Depends: rtems-mvme3100, epics-libs, ${shlibs:Depends}, ${misc:Depends}
+Depends: rtems-mvme3100, rtems-libbspext-mvme3100, epics-dev, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME3100
  EPICS for the MVME3100 powerpc based vme bus processor card
+
+Package: epics-rtems-pc386
+Architecture: any
+Depends: rtems-pc386, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Description: EPICS targeted to the PC system with >= 386 cpus
+ EPICS for the standard 386 compatible cpu and PC hardware.
