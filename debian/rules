@@ -74,10 +74,15 @@ libs+= asHost asIoc ca cas Com
 libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
 libs+= gdd miscIoc recIoc registryIoc
 libs+= rsrvIoc softDevIoc testDevIoc
-#libs+= Cap5 # libCap5.so.3.14 receives special treatment below
+#libs+= Cap5 # libCap5.so.3.14.10 receives special treatment below
 
+# link from /usr/epics/base/lib/.../$(2) to /usr/$(1)/$(2)
 doln=rm $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);\
  ln -s ../../../../$(1)/$(2) $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);
+
+# link from /usr/epics/base/lib/.../$(2).3.14.10 to $(2)
+doln2=rm $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);\
+ ln -s $(2).3.14.10 $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);
 
 install: install-indep install-arch
 install-indep:
@@ -112,8 +117,7 @@ install-arch:
 	# epics-libs
 	install -d $(lib_prefix)
 	install lib/$(EPICS_HOST_ARCH)/libCap5.so $(lib_prefix)/
-	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so,$(libs)) $(lib_prefix)/
-	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so.3.14,$(libs)) $(lib_prefix)/
+	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so.3.14.10,$(libs)) $(lib_prefix)/
 
 	# epics-catools
 	install -d $(cat_prefix)
@@ -146,8 +150,8 @@ install-arch:
 	cp -r templates $(dev_prefix)/
 
 	$(foreach prog,$(binprogs),$(call doln,bin,$(prog)))
-	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so)))
-	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so.3.14)))
+	$(foreach lib,$(libs),$(call doln2,lib,$(lib:%=lib%.so)))
+	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so.3.14.10)))
 	$(call doln,lib,libCap5.so)
 
 	# Target packages
