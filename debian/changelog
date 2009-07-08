@@ -1,6 +1,16 @@
+epics-base (3.14.10-2) unstable; urgency=low
+
+  * Add missing libCap5.so
+  * Plain lib*.so symlinks are now part of the epics-dev package
+  * Patches:
+  *  Build libraries with sonames (lib*.so.3.14.10)
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 8 Jul 2009 9:22:00 -0400
+
 epics-base (3.14.10-1) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial release
+  * EPICS 3.14.10
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 17 Jun 2009 14:13:02 -0400
 
