@@ -77,19 +77,39 @@ OPT_CXXFLAGS_YES = $(CFLAGS_OPTIMIZE_V)
 OPT_CFLAGS_NO    = $(CFLAGS_DEBUG_V)
 OPT_CXXFLAGS_NO  = $(CFLAGS_DEBUG_V)
 
+ifeq ($(USE_GESYS),YES)
+# Give loadable object a different extension
+override EXE=.obj
+STATIC_LDFLAGS_YES=
+
+# Don't product MUNCHed binary (ie myioc.boot)
+override MUNCHNAME=
+override MUNCH_CMD=
+endif
+
 #--------------------------------------------------
 # operating system class (include/os/<os_class>)
 OS_CLASS = RTEMS
 
 #--------------------------------------------------
 # Operating system flags
+OP_SYS_LDFLAGS += $(CPU_CFLAGS)
+ifeq ($(USE_GESYS),YES)
+# Assume all system libraries were linked with the generic image
+override OP_SYS_LDLIBS =
+# A Generic object is just a set of objects which have been
+# incrementally linked to create an object.
+# The result is almost the same as a shared library.
+OP_SYS_LDFLAGS += -Wl,-r -nostdlib
+else
 OP_SYS_LDLIBS += -lrtemsCom -lc -lrtemscpu -lCom -lnfs -lm
-OP_SYS_LDFLAGS += $(CPU_CFLAGS) -u Init \
+OP_SYS_LDFLAGS += -u Init \
                  $(PROJECT_RELEASE)/lib/no-dpmem.rel \
                  $(PROJECT_RELEASE)/lib/no-mp.rel \
                  $(PROJECT_RELEASE)/lib/no-part.rel \
                  $(PROJECT_RELEASE)/lib/no-signal.rel \
                  $(PROJECT_RELEASE)/lib/no-rtmon.rel
+endif
 
 #--------------------------------------------------
 # RTEMS has neither shared libraries nor dynamic loading
