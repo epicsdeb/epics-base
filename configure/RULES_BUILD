@@ -64,6 +64,11 @@ INSTALL_TEMPLATES_SUBDIR = $(INSTALL_TEMPLATES)
 endif
 
 #---------------------------------------------------------------
+# Allow installed 3rd party modules to add/modify make variables
+
+-include $(wildcard $(CONFIG)/conf.d/*.make)
+
+#---------------------------------------------------------------
 #	First target
 
 all:	install
@@ -444,6 +449,9 @@ endif
 endif
 
 -include $(CONFIG)/RULES_EXPAND
+
+# Allow 3rd party modules to inject additional rules
+-include $(wildcard $(CONFIG)/rules.d/*.make)
 
 .PRECIOUS: %.i %.o %.c %.nm %.cpp %.cc
 .PRECIOUS: $(COMMON_INC)
