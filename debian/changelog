@@ -1,3 +1,12 @@
+epics-base (3.14.10-3) unstable; urgency=low
+
+  * Patches:
+  *  Workaround for GeSys init bug (also in upstream)
+  *  Option to build with GeSys (default no) in configure/os/CONFIG_SITE.Common.RTEMS
+  *  Allow build system addons in configure/conf.d and rules.d
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 29 Jul 2009 10:02:00 -0400
+
 epics-base (3.14.10-2) unstable; urgency=low
 
   * Add missing libCap5.so
