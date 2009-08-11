@@ -2,7 +2,7 @@ Source: epics-base
 Section: unknown
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), libreadline5-dev, rtems-libbspext-mvme3100, rtems-pc386
+Build-Depends: debhelper (>= 7), libreadline5-dev, rtems-libbspext-mvme2100, rtems-libbspext-mvme3100, rtems-libbspext-mvme5500, rtems-pc386
 Standards-Version: 3.7.3
 Homepage: http://www.aps.anl.gov/epics/
 
@@ -11,6 +11,9 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS libraries for clients and servers
  EPICS shared libraries.
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-dev
 Architecture: any
@@ -19,6 +22,9 @@ Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
  targeted to the host system.
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-compat-dev
 Architecture: any
@@ -28,33 +34,69 @@ Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
  targeted to the host system.
  This package contains additional files needed for compatibility with EPICS 3.13.x
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-catools
 Architecture: any
 Depends: epics-libs, ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
  EPICS utilities such as caget and caput.
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-perl
 Architecture: any
 Depends: epics-libs, ${shlibs:Depends}, ${misc:Depends}
 Description: Perl bindings for for EPICS
  Perl bindings for for EPICS
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-doc
 Architecture: all
 Depends: epics-libs
 Description: EPICS documentation
  Documentation for EPICS Base
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
+
+Package: epics-rtems-mvme2100
+Architecture: any
+Depends: rtems-mvme2100, rtems-libbspext-mvme2100, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Description: EPICS targeted to the MVME2100
+ EPICS for the MVME2100 powerpc based vme bus processor card
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-rtems-mvme3100
 Architecture: any
 Depends: rtems-mvme3100, rtems-libbspext-mvme3100, epics-dev, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME3100
  EPICS for the MVME3100 powerpc based vme bus processor card
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
+
+Package: epics-rtems-mvme5500
+Architecture: any
+Depends: rtems-mvme5500, rtems-libbspext-mvme5500, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Description: EPICS targeted to the MVME5500
+ EPICS for the MVME5500 powerpc based vme bus processor card
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
 
 Package: epics-rtems-pc386
 Architecture: any
 Depends: rtems-pc386, epics-dev, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the PC system with >= 386 cpus
  EPICS for the standard 386 compatible cpu and PC hardware.
+ .
+ The Experimental Physics and Industrial Control System is a collection of tools, libraries and
+ applications for creating a distributed soft real-time control systems.
