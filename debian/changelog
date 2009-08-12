@@ -1,3 +1,12 @@
+epics-base (3.14.10-4) unstable; urgency=low
+
+  * Fix dbd hard-coded path in softIoc binary
+  * Build from mvme2100 and mvme5500
+  * Patches:
+  *  Missing RTEMS macro for 5500
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 12 Aug 2009 10:00:00 -0400
+
 epics-base (3.14.10-3) unstable; urgency=low
 
   * Patches:
