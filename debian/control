@@ -1,5 +1,5 @@
 Source: epics-base
-Section: unknown
+Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7), libreadline5-dev, rtems-libbspext-mvme2100, rtems-libbspext-mvme3100, rtems-libbspext-mvme5500, rtems-pc386
