@@ -1,3 +1,9 @@
+epics-base (3.14.10-5) unstable; urgency=low
+
+  * epics-dev missing dependency on libreadline5-dev
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 26 Aug 2009 13:35:00 -0400
+
 epics-base (3.14.10-4) unstable; urgency=low
 
   * Fix dbd hard-coded path in softIoc binary
