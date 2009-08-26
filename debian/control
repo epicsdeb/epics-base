@@ -17,7 +17,7 @@ Description: EPICS libraries for clients and servers
 
 Package: epics-dev
 Architecture: any
-Depends: epics-libs, epics-catools, epics-perl, ${shlibs:Depends}, ${misc:Depends}
+Depends: epics-libs, epics-catools, epics-perl, libreadline5-dev, ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
