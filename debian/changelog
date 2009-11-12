@@ -1,3 +1,14 @@
+epics-base (3.14.10-6) unstable; urgency=low
+
+  * Patches Updated
+  *  Options to build with GeSys
+  * Patches Added (from 3.14.10 Known Problems)
+  *  subRecord regression
+  *  libca endianness
+  *  NTP sync. on RTEMS
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 12 Nov 2009 11:57:05 -0500
+
 epics-base (3.14.10-5) unstable; urgency=low
 
   * epics-dev missing dependency on libreadline5-dev
