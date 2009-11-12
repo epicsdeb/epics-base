@@ -17,7 +17,9 @@ Description: EPICS libraries for clients and servers
 
 Package: epics-dev
 Architecture: any
-Depends: epics-libs, epics-catools, epics-perl, libreadline5-dev, ${shlibs:Depends}, ${misc:Depends}
+Depends: epics-libs (= ${binary:Version}), epics-catools (= ${binary:Version}), epics-perl (= ${binary:Version}),
+         libreadline5-dev,
+        ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
@@ -28,7 +30,8 @@ Description: Files needed to develop new EPICS applications
 
 Package: epics-compat-dev
 Architecture: any
-Depends: epics-dev, epics-libs, epics-perl, ${shlibs:Depends}, ${misc:Depends}
+Depends: epics-dev (= ${binary:Version}), epics-libs (= ${binary:Version}), epics-perl (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
@@ -40,7 +43,7 @@ Description: Files needed to develop new EPICS applications
 
 Package: epics-catools
 Architecture: any
-Depends: epics-libs, ${shlibs:Depends}, ${misc:Depends}
+Depends: epics-libs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
  EPICS utilities such as caget and caput.
  .
@@ -49,7 +52,7 @@ Description: Command line utilities for EPICS
 
 Package: epics-perl
 Architecture: any
-Depends: epics-libs, ${shlibs:Depends}, ${misc:Depends}
+Depends: epics-libs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Perl bindings for for EPICS
  Perl bindings for for EPICS
  .
@@ -58,7 +61,7 @@ Description: Perl bindings for for EPICS
 
 Package: epics-doc
 Architecture: all
-Depends: epics-libs
+Depends: epics-libs (= ${binary:Version})
 Description: EPICS documentation
  Documentation for EPICS Base
  .
@@ -67,7 +70,8 @@ Description: EPICS documentation
 
 Package: epics-rtems-mvme2100
 Architecture: any
-Depends: rtems-mvme2100, rtems-libbspext-mvme2100, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Depends: rtems-mvme2100, rtems-libbspext-mvme2100,
+         epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME2100
  EPICS for the MVME2100 powerpc based vme bus processor card
  .
@@ -76,7 +80,8 @@ Description: EPICS targeted to the MVME2100
 
 Package: epics-rtems-mvme3100
 Architecture: any
-Depends: rtems-mvme3100, rtems-libbspext-mvme3100, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Depends: rtems-mvme3100, rtems-libbspext-mvme3100,
+         epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME3100
  EPICS for the MVME3100 powerpc based vme bus processor card
  .
@@ -85,7 +90,8 @@ Description: EPICS targeted to the MVME3100
 
 Package: epics-rtems-mvme5500
 Architecture: any
-Depends: rtems-mvme5500, rtems-libbspext-mvme5500, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Depends: rtems-mvme5500, rtems-libbspext-mvme5500,
+         epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME5500
  EPICS for the MVME5500 powerpc based vme bus processor card
  .
@@ -94,7 +100,8 @@ Description: EPICS targeted to the MVME5500
 
 Package: epics-rtems-pc386
 Architecture: any
-Depends: rtems-pc386, epics-dev, ${shlibs:Depends}, ${misc:Depends}
+Depends: rtems-pc386,
+         epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the PC system with >= 386 cpus
  EPICS for the standard 386 compatible cpu and PC hardware.
  .
