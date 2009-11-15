@@ -2,8 +2,12 @@ Source: epics-base
 Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), libreadline5-dev, rtems-libbspext-mvme2100, rtems-libbspext-mvme3100, rtems-libbspext-mvme5500, rtems-pc386
-Standards-Version: 3.7.3
+Build-Depends: debhelper (>= 7), cdbs, libreadline5-dev,
+               rtems-libbspext-mvme2100,
+               rtems-libbspext-mvme3100,
+               rtems-libbspext-mvme5500,
+               rtems-pc386
+Standards-Version: 3.8.0
 Homepage: http://www.aps.anl.gov/epics/
 
 Package: epics-libs
@@ -61,6 +65,7 @@ Description: Perl bindings for for EPICS
 
 Package: epics-doc
 Architecture: all
+Section: doc
 Depends: epics-libs (= ${binary:Version})
 Description: EPICS documentation
  Documentation for EPICS Base

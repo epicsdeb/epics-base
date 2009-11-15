@@ -1,0 +1,7 @@
+usr/epics/base/bin/linux-*
+usr/epics/base/configure
+usr/epics/base/db
+usr/epics/base/dbd
+usr/epics/base/include
+usr/epics/base/lib/linux-*
+usr/epics/base/templates

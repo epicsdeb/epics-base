@@ -1,206 +1,79 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-#
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
-#
-# Modified to make a template file for a multi-binary package with separated
-# build-arch and build-indep targets  by Bill Allombert 2001
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-# This has to be exported to make some magic below work.
-export DH_OPTIONS
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/makefile.mk
+include /usr/share/cdbs/1/rules/utils.mk
 
 EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+
+# chop out the source version from Changelog (ie 3.14.10)
+SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
 
 RTEMS_TARGETS=RTEMS-mvme2100 RTEMS-mvme3100 RTEMS-mvme5500 RTEMS-pc386
 DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
 TARGETS+=$(DEBUG_TAGETS) $(RTEMS_TARGETS)
 
-CONFIG=USE_RPATH=NO "CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)" \
+DEB_MAKE_ENVVARS = PATH="$(CURDIR)/bin/$(EPICS_HOST_ARCH):$$PATH" \
+LD_LIBRARY_PATH="$(CURDIR)/lib/$(EPICS_HOST_ARCH):$$LD_LIBRARY_PATH"
+
+DEB_MAKE_MAKEVARS = EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) USE_RPATH=NO \
+CROSS_COMPILER_TARGET_ARCHS="$(TARGETS)" \
 ABS_INSTALL_DIR=/usr/epics/base
 
-#Architecture
-build: build-arch build-indep
+# Prevent CFLAGS and similar from being passed to EPICS since
+# this will break cross-builds of things.
+DEB_MAKE_INVOKE  = $(DEB_MAKE_ENVVARS) $(MAKE) -C $(DEB_BUILDDIR) $(DEB_MAKE_MAKEVARS)
 
-build-arch: build-arch-stamp
-build-arch-stamp: 
+DEB_MAKE_CLEAN_TARGET = distclean
+DEB_MAKE_BUILD_TARGET = all
+DEB_MAKE_INSTALL_TARGET = all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
+DEB_MAKE_CHECK_TARGET =
 
-	# Add here commands to compile the arch part of the package.
-	env \
-EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) \
-"PATH=$$PWD/bin/$(EPICS_HOST_ARCH):$$PATH" \
-"LD_LIBRARY_PATH=$$PWD/lib/$(EPICS_HOST_ARCH):$$LD_LIBRARY_PATH" \
-$(MAKE) $(CONFIG)
-	touch $@
+# prevent debug and cross targets from being stripped
+DEB_DH_STRIP_ARGS := -Xdebug -XRTEMS
 
-build-indep: build-indep-stamp
-build-indep-stamp: 
+epics_libs+= asHost asIoc ca cas Com
+epics_libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
+epics_libs+= gdd miscIoc recIoc registryIoc
+epics_libs+= rsrvIoc softDevIoc testDevIoc
 
-	# Add here commands to compile the indep part of the package.
-	#$(MAKE) doc
-	touch $@
+# lib*.so.3.14.10
+epics_libfiles = $(patsubst %,debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/lib%.so.$(SOV),$(epics_libs))
+# lib*.so
+epics_linklib  = $(patsubst %,debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/lib%.so,$(epics_libs))
 
-clean: 
-	dh_testdir
-	dh_testroot
-	rm -f build-arch-stamp build-indep-stamp 
+# Copy host sonamed libraries to /usr/lib
+# Leave a symlink in /usr/epics/base/lib/$EPICS_HOST_ARCH
+install/epics-libs::
+	install -d $(CURDIR)/debian/tmp/usr/lib
+	mv -t $(CURDIR)/debian/tmp/usr/lib $(epics_libfiles)
+	for ff in $(epics_linklib); do rm -f $$ff; ln -s ../../../../lib/`basename $$ff`.$(SOV) $$ff; done
 
-	# Add here commands to clean up after the build process.
-	[ ! -f Makefile ] || EPICS_HOST_ARCH=$(EPICS_HOST_ARCH) $(MAKE) realclean $(CONFIG)
-	rm -rf bin db dbd html include lib templates
+epics_perllib  = debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/libCap5.so
 
-	dh_clean 
+install/epics-perl::
+	install -d $(CURDIR)/debian/tmp/usr/lib
+	mv -t $(CURDIR)/debian/tmp/usr/lib $(epics_perllib)
+	mv $(CURDIR)/debian/tmp/usr/epics/base/lib/perl $(CURDIR)/debian/tmp/usr/lib/perl5
 
-doc_prefix=debian/epics-doc/usr/share/doc/epics-3.14.10
-lib_prefix=debian/epics-libs/usr/lib
-cat_prefix=debian/epics-catools/usr/bin
-prl_prefix=debian/epics-perl/usr/lib/perl5
-dev_prefix=debian/epics-dev/usr/epics/base
-com_prefix=debian/epics-compat-dev/usr/epics/base
+epics_utils+= caget cainfo camonitor caput casw caRepeater
+#epics_utils+= iocLogServer softIoc
 
-devbin=debian/epics-dev/usr/epics/base/bin/$(EPICS_HOST_ARCH)
-devlib=debian/epics-dev/usr/epics/base/lib/$(EPICS_HOST_ARCH)
+epics_bins = $(patsubst %,debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
 
-# List all host user tools
-binprogs=caConnTest caDirServ caEventRate caget cainfo camonitor caput caRepeater casw softIoc iocLogServer
+# Move some utilities to /usr/bin
+# Leave a symlink in /usr/epics/base/bin/$EPICS_HOST_ARCH
+install/epics-catools::
+	install -d $(CURDIR)/debian/tmp/usr/bin
+	mv -t $(CURDIR)/debian/tmp/usr/bin $(epics_bins)
+	for ff in $(epics_bins); do rm -f $$ff; ln -s ../../../../bin/`basename $$ff` $$ff; done
 
-# List all shared libraries
-libs+= asHost asIoc ca cas Com
-libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
-libs+= gdd miscIoc recIoc registryIoc
-libs+= rsrvIoc softDevIoc testDevIoc
-#libs+= Cap5 # libCap5.so.3.14.10 receives special treatment below
+install/epics-compat-dev::
+	install -d $(CURDIR)/debian/tmp/usr/epics/base
+	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/epics/base/
 
-# link from /usr/epics/base/lib/.../$(2) to /usr/$(1)/$(2)
-doln=rm $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);\
- ln -s ../../../../$(1)/$(2) $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);
-
-# link from /usr/epics/base/lib/.../$(2).3.14.10 to $(2)
-doln2=rm $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);\
- ln -s $(2).3.14.10 $(dev_prefix)/$(1)/$(EPICS_HOST_ARCH)/$(2);
-
-install: install-indep install-arch
-install-indep:
-	dh_testdir
-	dh_testroot
-	dh_clean -k -i 
-	dh_installdirs -i
-
-	# epics-doc
-	install -d $(doc_prefix)
-	install README LICENSE $(doc_prefix)/
-	install documentation/* $(doc_prefix)/
-	cp -r html $(doc_prefix)/
-
-	dh_install -i
-
-# $(1) is package name (ie epics-rtems-mvme3100)
-# $(2) is the EPICS target name (ie RTEMS-mvme3100)
-define instbsp
-install -d debian/$(1)/usr/epics/base/bin ;
-install -d debian/$(1)/usr/epics/base/lib ;
-cp -r bin/$(2) debian/$(1)/usr/epics/base/bin/ ;
-cp -r lib/$(2) debian/$(1)/usr/epics/base/lib/ ;
-endef
-
-install-arch:
-	dh_testdir
-	dh_testroot
-	dh_clean -k -s 
-	dh_installdirs -s
-
-	# epics-libs
-	install -d $(lib_prefix)
-	install lib/$(EPICS_HOST_ARCH)/libCap5.so $(lib_prefix)/
-	install $(patsubst %,lib/$(EPICS_HOST_ARCH)/lib%.so.3.14.10,$(libs)) $(lib_prefix)/
-
-	# epics-catools
-	install -d $(cat_prefix)
-	install $(patsubst %,bin/$(EPICS_HOST_ARCH)/%,$(binprogs)) $(cat_prefix)/
-
-	# epics-perl
-	install -d $(prl_prefix)
-	install -d $(prl_prefix)/EPICS
-	install lib/perl/*.pm $(prl_prefix)/
-	install lib/perl/EPICS/* $(prl_prefix)/EPICS/
-
-	# epics-compat-dev
-	install -d $(com_prefix)
-	cp -r config $(com_prefix)/
-
-	# epics-dev
-	install -d $(dev_prefix)/bin
-	install -d $(dev_prefix)/lib
-	cp -r bin/$(EPICS_HOST_ARCH) $(dev_prefix)/bin/
-	cp -r bin/$(EPICS_HOST_ARCH)-debug $(dev_prefix)/bin/
-	chmod u+w $(dev_prefix)/bin/*
-	cp -r lib/$(EPICS_HOST_ARCH) $(dev_prefix)/lib/
-	cp -r lib/$(EPICS_HOST_ARCH)-debug $(dev_prefix)/lib/
-	chmod u+w $(dev_prefix)/lib/*
-	cp -r configure $(dev_prefix)/
-	cp -r db $(dev_prefix)/
-	cp -r dbd $(dev_prefix)/
-	cp -r include $(dev_prefix)/
-	cp -r startup $(dev_prefix)/
-	cp -r templates $(dev_prefix)/
-
-	$(foreach prog,$(binprogs),$(call doln,bin,$(prog)))
-	$(foreach lib,$(libs),$(call doln2,lib,$(lib:%=lib%.so)))
-	$(foreach lib,$(libs),$(call doln,lib,$(lib:%=lib%.so.3.14.10)))
-	$(call doln,lib,libCap5.so)
-
-	# Target packages
-
-	# RTEMS packages
-	#   ie epics-rtems-mvme3100
-
-	$(foreach targ,$(RTEMS_TARGETS),$(call instbsp,$(targ:RTEMS-%=epics-rtems-%),$(targ)))
-
-	dh_install -s
-# Must not depend on anything. This is to be called by
-# binary-arch/binary-indep
-# in another 'make' thread.
-binary-common:
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
-#	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate	
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip -Xrtems -Xdebug
-	dh_compress
-	dh_fixperms
-#	dh_perl
-	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-# Build architecture independant packages using the common target.
-binary-indep: build-indep install-indep
-	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
-
-# Build architecture dependant packages using the common target.
-binary-arch: build-arch install-arch
-	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
-
-binary: binary-arch binary-indep
-.PHONY: build clean binary-indep binary-arch binary install install-indep install-arch 
+clean::
+	@echo "DEB_VERSION: $(DEB_VERSION)"
+	@echo "DEB_NOEPOCH_VERSION: $(DEB_NOEPOCH_VERSION)"
+	@echo "SOVERSON: $(SOV)"
