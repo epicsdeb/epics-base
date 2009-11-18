@@ -24,4 +24,4 @@ USE_GESYS=NO
 #
 # Specify your desired command-line-input library
 #
-COMMANDLINE_LIBRARY = EPICS
+COMMANDLINE_LIBRARY = LIBTECLA
