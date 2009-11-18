@@ -4,9 +4,13 @@ Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7), cdbs, libreadline5-dev,
                rtems-libbspext-mvme2100,
+               rtems-addons-mvme2100, rtems-cexp-mvme2100,
                rtems-libbspext-mvme3100,
+               rtems-addons-mvme3100, rtems-cexp-mvme3100,
                rtems-libbspext-mvme5500,
-               rtems-pc386
+               rtems-addons-mvme5500, rtems-cexp-mvme5500,
+               rtems-pc386,
+               rtems-addons-pc386, rtems-cexp-pc386,
 Standards-Version: 3.8.0
 Homepage: http://www.aps.anl.gov/epics/
 
@@ -21,7 +25,8 @@ Description: EPICS libraries for clients and servers
 
 Package: epics-dev
 Architecture: any
-Depends: epics-libs (= ${binary:Version}), epics-catools (= ${binary:Version}), epics-perl (= ${binary:Version}),
+Depends: epics-libs (= ${binary:Version}), epics-catools (= ${binary:Version}),
+         epics-perl (= ${binary:Version}),
          libreadline5-dev,
         ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
@@ -34,7 +39,8 @@ Description: Files needed to develop new EPICS applications
 
 Package: epics-compat-dev
 Architecture: any
-Depends: epics-dev (= ${binary:Version}), epics-libs (= ${binary:Version}), epics-perl (= ${binary:Version}),
+Depends: epics-dev (= ${binary:Version}), epics-libs (= ${binary:Version}),
+         epics-perl (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
@@ -75,7 +81,7 @@ Description: EPICS documentation
 
 Package: epics-rtems-mvme2100
 Architecture: any
-Depends: rtems-mvme2100, rtems-libbspext-mvme2100,
+Depends: rtems-mvme2100, rtems-libbspext-mvme2100, rtems-addons-mvme2100, rtems-cexp-mvme2100,
          epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME2100
  EPICS for the MVME2100 powerpc based vme bus processor card
@@ -85,7 +91,7 @@ Description: EPICS targeted to the MVME2100
 
 Package: epics-rtems-mvme3100
 Architecture: any
-Depends: rtems-mvme3100, rtems-libbspext-mvme3100,
+Depends: rtems-mvme3100, rtems-libbspext-mvme3100, rtems-addons-mvme3100, rtems-cexp-mvme3100,
          epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME3100
  EPICS for the MVME3100 powerpc based vme bus processor card
@@ -95,7 +101,7 @@ Description: EPICS targeted to the MVME3100
 
 Package: epics-rtems-mvme5500
 Architecture: any
-Depends: rtems-mvme5500, rtems-libbspext-mvme5500,
+Depends: rtems-mvme5500, rtems-libbspext-mvme5500, rtems-addons-mvme5500, rtems-cexp-mvme5500,
          epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the MVME5500
  EPICS for the MVME5500 powerpc based vme bus processor card
@@ -105,7 +111,7 @@ Description: EPICS targeted to the MVME5500
 
 Package: epics-rtems-pc386
 Architecture: any
-Depends: rtems-pc386,
+Depends: rtems-pc386, rtems-addons-pc386, rtems-cexp-pc386,
          epics-dev (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS targeted to the PC system with >= 386 cpus
  EPICS for the standard 386 compatible cpu and PC hardware.
