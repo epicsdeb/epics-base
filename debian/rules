@@ -50,6 +50,13 @@ install/epics-libs::
 	mv -t $(CURDIR)/debian/tmp/usr/lib $(epics_libfiles)
 	for ff in $(epics_linklib); do rm -f $$ff; ln -s ../../../../lib/`basename $$ff`.$(SOV) $$ff; done
 
+install/epics-dev::
+	install -d $(CURDIR)/debian/tmp/usr/epics/base/startup
+
+	install -m 755 -t $(CURDIR)/debian/tmp/usr/epics/base/startup \
+startup/EpicsHostArch startup/EpicsHostArch.pl \
+startup/Site.profile startup/Site.cshrc
+
 epics_perllib  = debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/libCap5.so
 
 install/epics-perl::

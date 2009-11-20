@@ -4,4 +4,5 @@ usr/epics/base/db
 usr/epics/base/dbd
 usr/epics/base/include
 usr/epics/base/lib/linux-*
+usr/epics/base/startup
 usr/epics/base/templates
