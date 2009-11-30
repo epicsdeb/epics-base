@@ -1,3 +1,10 @@
+epics-base (3.14.10-9) unstable; urgency=low
+
+  * 3.14.10-7 moved libCap5.so from -libs to -perl.
+  *   Add Conflicts: entries to prevent upgrade problems
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 30 Nov 2009 12:20:29 -0500
+
 epics-base (3.14.10-8) unstable; urgency=low
 
   * Accidental release of -7 before it was ready.
