@@ -17,6 +17,7 @@ Homepage: http://www.aps.anl.gov/epics/
 Package: epics-libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: epics-perl (<= 3.14.10-7)
 Description: EPICS libraries for clients and servers
  EPICS shared libraries.
  .
@@ -63,6 +64,7 @@ Description: Command line utilities for EPICS
 Package: epics-perl
 Architecture: any
 Depends: epics-libs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: epics-libs (<= 3.14.10-7)
 Description: Perl bindings for for EPICS
  Perl bindings for for EPICS
  .
