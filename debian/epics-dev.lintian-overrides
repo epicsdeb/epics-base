@@ -1,0 +1,3 @@
+epics-compat-dev binary: file-in-unusual-dir
+epics-compat-dev binary: non-standard-dir-in-usr
+# EPICS lives in usr/epics

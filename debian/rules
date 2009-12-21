@@ -80,6 +80,9 @@ install/epics-compat-dev::
 	install -d $(CURDIR)/debian/tmp/usr/epics/base
 	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/epics/base/
 
+common-binary-fixup-arch::
+	dh_rtems
+
 clean::
 	@echo "DEB_VERSION: $(DEB_VERSION)"
 	@echo "DEB_NOEPOCH_VERSION: $(DEB_NOEPOCH_VERSION)"
