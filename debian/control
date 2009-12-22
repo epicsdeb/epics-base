@@ -54,9 +54,8 @@ Description: Files needed to develop new EPICS applications
  tools, libraries and applications for creating a distributed soft real-time
  control systems.
  .
- Libraries, headers, and utilities needed to develop applications
- targeted to the host system.
- This package contains additional files needed for compatibility with EPICS 3.13.x
+ This package contains additional files needed for compatibility with
+ EPICS 3.13.x series.
 
 Package: epics-catools
 Architecture: any

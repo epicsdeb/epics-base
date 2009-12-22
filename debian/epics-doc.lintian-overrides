@@ -1,0 +1,3 @@
+epics-doc: non-standard-dir-in-usr
+epics-doc: file-in-unusual-dir
+# EPICS lives in usr/epics

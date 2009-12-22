@@ -1,3 +1,8 @@
-epics-compat-dev binary: file-in-unusual-dir
-epics-compat-dev binary: non-standard-dir-in-usr
+epics-dev: file-in-unusual-dir
+epics-dev: non-standard-dir-in-usr
 # EPICS lives in usr/epics
+epics-dev: unstripped-binary-or-object
+# The dev package also holds the debug build
+epics-dev: executable-not-elf-or-script
+# Crazy shell script invocation games
+#  Really need to track this back and see if it is really needed
