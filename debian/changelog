@@ -1,8 +1,10 @@
 epics-base (3.14.10-10) unstable; urgency=low
 
   * Update RTEMS dependencies (use rtems-debhelper)
+  * rename epics-libs to libepics3.14.10 to follow library
+    package naming convention.
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 21 Dec 2009 08:23:13 -0500
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 22 Dec 2009 15:13:41 -0500
 
 epics-base (3.14.10-9) unstable; urgency=low
 

@@ -33,6 +33,9 @@ DEB_MAKE_CHECK_TARGET =
 # prevent debug and cross targets from being stripped
 DEB_DH_STRIP_ARGS := -Xdebug -XRTEMS
 
+# prevent the .so symlinks in usr/epics/base/lib from being detected.
+DEB_DH_MAKESHLIBS_ARGS_epics-dev := -Xusr/epics/base
+
 epics_libs+= asHost asIoc ca cas Com
 epics_libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
 epics_libs+= gdd miscIoc recIoc registryIoc
@@ -45,7 +48,7 @@ epics_linklib  = $(patsubst %,debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/l
 
 # Copy host sonamed libraries to /usr/lib
 # Leave a symlink in /usr/epics/base/lib/$EPICS_HOST_ARCH
-install/epics-libs::
+install/libepics3.14.10::
 	install -d $(CURDIR)/debian/tmp/usr/lib
 	mv -t $(CURDIR)/debian/tmp/usr/lib $(epics_libfiles)
 	for ff in $(epics_linklib); do rm -f $$ff; ln -s ../../../../lib/`basename $$ff`.$(SOV) $$ff; done
