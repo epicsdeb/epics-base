@@ -64,8 +64,9 @@ epics_perllib  = debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/libCap5.so
 
 install/epics-perl::
 	install -d $(CURDIR)/debian/tmp/usr/lib
+	install -d $(CURDIR)/debian/tmp/usr/share
 	mv -t $(CURDIR)/debian/tmp/usr/lib $(epics_perllib)
-	mv $(CURDIR)/debian/tmp/usr/epics/base/lib/perl $(CURDIR)/debian/tmp/usr/lib/perl5
+	mv $(CURDIR)/debian/tmp/usr/epics/base/lib/perl $(CURDIR)/debian/tmp/usr/share/perl5
 
 epics_utils+= caget cainfo camonitor caput casw caRepeater
 #epics_utils+= iocLogServer softIoc
