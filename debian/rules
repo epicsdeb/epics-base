@@ -56,16 +56,15 @@ install/libepics3.14.10::
 install/epics-dev::
 	install -d $(CURDIR)/debian/tmp/usr/epics/base/startup
 
+	ln -s ${EPICS_HOST_ARCH} $(CURDIR)/debian/tmp/usr/epics/base/bin/host
+	ln -s ${EPICS_HOST_ARCH} $(CURDIR)/debian/tmp/usr/epics/base/lib/host
+
 	install -m 755 -t $(CURDIR)/debian/tmp/usr/epics/base/startup \
 startup/EpicsHostArch startup/EpicsHostArch.pl \
 startup/Site.profile startup/Site.cshrc
 
-epics_perllib  = debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)/libCap5.so
-
 install/epics-perl::
-	install -d $(CURDIR)/debian/tmp/usr/lib
 	install -d $(CURDIR)/debian/tmp/usr/share
-	mv -t $(CURDIR)/debian/tmp/usr/lib $(epics_perllib)
 	mv $(CURDIR)/debian/tmp/usr/epics/base/lib/perl $(CURDIR)/debian/tmp/usr/share/perl5
 
 epics_utils+= caget cainfo camonitor caput casw caRepeater

@@ -1,0 +1,3 @@
+epics-perl: non-standard-dir-in-usr
+epics-perl: file-in-unusual-dir
+# EPICS lives in usr/epics

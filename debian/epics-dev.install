@@ -1,8 +1,15 @@
 usr/epics/base/bin/linux-*
+usr/epics/base/bin/host
 usr/epics/base/configure
 usr/epics/base/db
 usr/epics/base/dbd
 usr/epics/base/include
-usr/epics/base/lib/linux-*
 usr/epics/base/startup
 usr/epics/base/templates
+usr/epics/base/lib/host
+usr/epics/base/lib/linux-*/lib*Ioc*
+usr/epics/base/lib/linux-*/lib*Host*
+usr/epics/base/lib/linux-*/libCom*
+usr/epics/base/lib/linux-*/libca*
+usr/epics/base/lib/linux-*/libgdd*
+usr/epics/base/lib/linux-*/libcas*

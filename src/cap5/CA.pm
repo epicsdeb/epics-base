@@ -29,9 +29,7 @@ our @ISA = qw(DynaLoader);
 require DynaLoader;
 
 # Add our lib/<arch> directory to the shared library search path
-use File::Basename;
-my $Lib = dirname(__FILE__);
-push @DynaLoader::dl_library_path, "$Lib/../$ENV{EPICS_HOST_ARCH}";
+push @DynaLoader::dl_library_path, "/usr/epics/base/lib/host";
 
 bootstrap Cap5 $VERSION;
 
