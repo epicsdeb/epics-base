@@ -59,7 +59,7 @@ Description: Files needed to develop new EPICS applications
 
 Package: epics-catools
 Architecture: any
-Depends: libepics3.14.10 (= ${binary:Version}), epics-perl (= ${binary:Version}),
+Depends: libepics3.14.10 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
  The Experimental Physics and Industrial Control System is a collection of

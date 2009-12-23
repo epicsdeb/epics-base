@@ -13,3 +13,6 @@ usr/epics/base/lib/linux-*/libCom*
 usr/epics/base/lib/linux-*/libca*
 usr/epics/base/lib/linux-*/libgdd*
 usr/epics/base/lib/linux-*/libcas*
+usr/bin/makeBaseApp
+usr/bin/makeBaseExt
+usr/bin/softIoc

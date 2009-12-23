@@ -54,6 +54,7 @@ install/libepics3.14.10::
 	for ff in $(epics_linklib); do rm -f $$ff; ln -s ../../../../lib/`basename $$ff`.$(SOV) $$ff; done
 
 install/epics-dev::
+	install -d $(CURDIR)/debian/tmp/usr/bin
 	install -d $(CURDIR)/debian/tmp/usr/epics/base/startup
 
 	ln -s ${EPICS_HOST_ARCH} $(CURDIR)/debian/tmp/usr/epics/base/bin/host
@@ -61,7 +62,11 @@ install/epics-dev::
 
 	install -m 755 -t $(CURDIR)/debian/tmp/usr/epics/base/startup \
 startup/EpicsHostArch startup/EpicsHostArch.pl \
-startup/Site.profile startup/Site.cshrc
+startup/Site.profile
+
+	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl debian/tmp/usr/bin/makeBaseApp
+	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl debian/tmp/usr/bin/makeBaseExt
+	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/softIoc debian/tmp/usr/bin/softIoc
 
 install/epics-perl::
 	install -d $(CURDIR)/debian/tmp/usr/share
