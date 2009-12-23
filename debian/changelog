@@ -1,10 +1,15 @@
 epics-base (3.14.10-10) unstable; urgency=low
 
-  * Update RTEMS dependencies (use rtems-debhelper)
-  * rename epics-libs to libepics3.14.10 to follow library
+  * Rename rtems packages to follow convention (rtems-modname-bsp)
+  * Rename epics-libs to libepics3.14.10 to follow library
     package naming convention.
+  * Symlink to makeBaseApp, makeBaseExt, and softIoc in usr/bin/
+  * move libCap5 to usr/epics/base/lib/linux-x86 to avoid
+    potential conflicts with user compiled versions
+  * For bin and lib create a symlink usr/epics/base/*/host
+    to the host target name.
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 22 Dec 2009 15:13:41 -0500
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 23 Dec 2009 14:49:43 -0500
 
 epics-base (3.14.10-9) unstable; urgency=low
 
