@@ -1,5 +1,4 @@
-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
-    if $running_under_some_shell; # makeBaseApp 
+#!/usr/bin/perl
 
 # Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
 # makeBaseApp.pl,v 1.32.2.17 2008/08/29 21:03:36 anj Exp

@@ -1,5 +1,4 @@
-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
-    if $running_under_some_shell; # makeDbDepends.pl
+#!/usr/bin/perl
 
 # Called from within RULES.Db in the Db directories.
 # Searches .substitutions and .template files (from the command line) for

@@ -1,5 +1,4 @@
-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
-    if $running_under_some_shell; # makeBaseExt 
+#!/usr/bin/perl
 
 # Authors: Ralph Lange and Marty Kraimer
 # makeBaseExt.pl,v 1.1 2000/09/27 16:06:43 jba Exp

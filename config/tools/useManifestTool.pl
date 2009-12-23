@@ -1,5 +1,4 @@
-eval 'exec perl -S -w  $0 ${1+"$@"}'  # -*- Mode: perl -*-
-        if 0; 
+#!/usr/bin/perl
 
 #
 # Use MS Visual C++ compiler version number to determine if
