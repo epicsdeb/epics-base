@@ -6,10 +6,6 @@ use warnings;
 
 my $version = '0.2';
 
-exists $ENV{EPICS_HOST_ARCH}
-    or die "EPICS_HOST_ARCH environment variable not set";
-
-
 package CA;
 
 our $VERSION = $version;
