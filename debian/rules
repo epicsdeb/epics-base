@@ -68,6 +68,9 @@ install/epics-dev::
 startup/EpicsHostArch startup/EpicsHostArch.pl \
 startup/Site.profile
 
+	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" \
+        debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl
+
 	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl debian/tmp/usr/bin/makeBaseApp
 	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl debian/tmp/usr/bin/makeBaseExt
 	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/softIoc debian/tmp/usr/bin/softIoc

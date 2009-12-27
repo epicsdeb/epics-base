@@ -172,9 +172,8 @@ sub get_commandline_opts { #no args
     } elsif ($release{"EPICS_BASE"}) { # second choice is configure/RELEASE
 	$epics_base = UnixPath($release{"EPICS_BASE"});
 	$epics_base =~s|^\$\(TOP\)/||;
-    } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
-	$epics_base = $command;
-	$epics_base =~ s|^(.*)/bin/.*makeBaseApp.*|$1|;
+    } elsif ($command =~ m|/bin/|) {
+	$epics_base = "/usr/epics/base";
     }
     $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
     $app_epics_base = LocalPath($epics_base);

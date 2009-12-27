@@ -123,9 +123,8 @@ sub get_commandline_opts { #no args
 	    s/EPICS_BASE\s*=\s*// and $epics_base = UnixPath($_), break;
 	}
 	close IN;
-    } elsif ($command =~ m|/bin/|) { # assume script was called with full path to base
-	$epics_base = $command;
-	$epics_base =~ s|(/.*)/bin/.*makeBaseExt.*|$1|;
+    } elsif ($command =~ m|/bin/|) {
+	$epics_base = "/usr/epics/base";
     }
     "$epics_base" or Cleanup(1, "Cannot find EPICS base");
 
