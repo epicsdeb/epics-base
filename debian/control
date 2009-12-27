@@ -21,6 +21,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: epics-perl (<= 3.14.10-7), epics-libs
 Provides: epics-libs, libepics
+Replaces: epics-libs
 Description: EPICS Base libraries for clients and servers
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -94,6 +95,7 @@ Architecture: any
 Depends: ${rtems:Depends}, epics-dev (= ${binary:Version})
 Conflicts: epics-rtems-mvme2100
 Provides: epics-rtems-mvme2100
+Replaces: epics-rtems-mvme2100
 Description: EPICS targeted to the MVME2100
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -106,6 +108,7 @@ Architecture: any
 Depends: ${rtems:Depends}, epics-dev (= ${binary:Version})
 Conflicts: epics-rtems-mvme3100
 Provides: epics-rtems-mvme3100
+Replaces: epics-rtems-mvme3100
 Description: EPICS targeted to the MVME3100
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -118,6 +121,7 @@ Architecture: any
 Depends: ${rtems:Depends}, epics-dev (= ${binary:Version})
 Conflicts: epics-rtems-mvme5500
 Provides: epics-rtems-mvme5500
+Replaces: epics-rtems-mvme5500
 Description: EPICS targeted to the MVME5500
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -130,6 +134,7 @@ Architecture: any
 Depends: ${rtems:Depends}, epics-dev (= ${binary:Version})
 Conflicts: epics-rtems-pc386
 Provides: epics-rtems-pc386
+Replaces: epics-rtems-pc386
 Description: EPICS targeted to the PC system with >= 386 cpus
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
