@@ -34,7 +34,11 @@ DEB_MAKE_CHECK_TARGET =
 DEB_DH_STRIP_ARGS := -Xdebug -XRTEMS
 
 # prevent the .so symlinks in usr/epics/base/lib from being detected.
-DEB_DH_MAKESHLIBS_ARGS_epics-dev := -Xusr/epics/base
+DEB_DH_MAKESHLIBS_ARGS_epics-dev += -Xusr/epics/base
+
+# Prevent self dependency
+#  This would happen because the package provides several dependent libraries
+DEB_DH_SHLIBDEPS_ARGS_libepics3.14.10 += -- -xlibepics3.14.10
 
 epics_libs+= asHost asIoc ca cas Com
 epics_libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
