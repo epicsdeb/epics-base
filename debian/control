@@ -35,6 +35,7 @@ Depends: libepics3.14.10 (= ${binary:Version}), epics-catools (= ${binary:Versio
          epics-perl (= ${binary:Version}),
          libreadline5-dev,
         ${shlibs:Depends}, ${misc:Depends}
+Recommends: epics-msi
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
