@@ -1,3 +1,10 @@
+epics-base (3.14.10-11) unstable; urgency=low
+
+  * Recommend: msi
+  * Depends on RTEMS 4.9.3
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 16 Feb 2010 16:54:34 -0500
+
 epics-base (3.14.10-10) unstable; urgency=low
 
   * Rename rtems packages to follow convention (rtems-modname-bsp)
