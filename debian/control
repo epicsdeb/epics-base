@@ -5,6 +5,8 @@ Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7), rtems-debhelper, cdbs, libreadline5-dev,
                rtems-libbspext-mvme2100,
                rtems-cexp-mvme2100,
+               rtems-libbspext-mvme2307,
+               rtems-cexp-mvme2307,
                rtems-libbspext-mvme3100,
                rtems-cexp-mvme3100,
                rtems-libbspext-mvme5500,
@@ -103,6 +105,19 @@ Description: EPICS targeted to the MVME2100
  control systems.
  .
  EPICS for the MVME2100 powerpc based vme bus processor card
+
+Package: rtems-epics-mvme2307
+Architecture: any
+Depends: ${rtems:Depends}, epics-dev (= ${binary:Version})
+Conflicts: epics-rtems-mvme2307
+Provides: epics-rtems-mvme2307
+Replaces: epics-rtems-mvme2307
+Description: EPICS targeted to the MVME2307
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS for the MVME2307 powerpc based vme bus processor card
 
 Package: rtems-epics-mvme3100
 Architecture: any

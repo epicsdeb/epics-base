@@ -10,7 +10,7 @@ EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 # chop out the source version from Changelog (ie 3.14.10)
 SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
 
-RTEMS_TARGETS=RTEMS-mvme2100 RTEMS-mvme3100 RTEMS-mvme5500 RTEMS-pc386
+RTEMS_TARGETS=RTEMS-mvme2100 RTEMS-mvme2307 RTEMS-mvme3100 RTEMS-mvme5500 RTEMS-pc386
 DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
 TARGETS+=$(DEBUG_TAGETS) $(RTEMS_TARGETS)
 
