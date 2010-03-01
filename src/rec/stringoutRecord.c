@@ -146,7 +146,6 @@ static long process(stringoutRecord *prec)
 
         if(prec->udf == TRUE ){
                 recGblSetSevr(prec,UDF_ALARM,INVALID_ALARM);
-                goto finish;
         }
 
         if (prec->nsev < INVALID_ALARM )
@@ -173,7 +172,7 @@ static long process(stringoutRecord *prec)
 
 	/* check if device support set pact */
 	if ( !pact && prec->pact ) return(0);
-finish:
+
 	prec->pact = TRUE;
 	recGblGetTimeStamp(prec);
 	monitor(prec);
