@@ -101,6 +101,10 @@ GESYS_LIBS += -lc -lm -lrtemscpu -lrtemsbsp -lrtems++ -lbspExt
 GESYS_LIBS += -lcexp -ltecla_r -lspencer_regexp -lpmelf -lpmbfd
 GESYS_LIBS += -lnfs -ltelnetd -lrtems-gdb-stub
 
+# While not part of the Generic Image it provides symbols which
+# would conflict.
+GESYS_LIBS += -lrtemsCom
+
 #--------------------------------------------------
 # Options for building GeSys loadable objects
 
