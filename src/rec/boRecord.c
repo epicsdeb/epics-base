@@ -170,6 +170,7 @@ static long init_record(boRecord *pbo,int pass)
 		pbo->udf = FALSE;
 	} else if (status==2) status=0;
     }
+    pbo->mlst=pbo->val;
     /* convert val to rval */
     if ( pbo->mask != 0 ) {
 	if(pbo->val==0) pbo->rval = 0;
