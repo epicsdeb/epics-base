@@ -1,0 +1,51 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH CAPUT 1 "April 17, 2006"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+caput \- write to channel access process variables
+.SH SYNOPSIS
+.B caput
+.RI [ options ] " PV value"
+.br
+.B caput
+.RI [ options "] -a" " PV array_size value0 value1" ...
+.SH DESCRIPTION
+.B caput
+writes the specified value to a Channel Access Process Variable (PV).  The PV's values are read before and after writing and printed to
+.IR stdout .
+.SH OPTIONS
+.TP
+.B \-a
+write the following values as an array
+.TP
+.B \-h
+display usage information and exit
+.TP
+.B \-n
+interpret values as numbers
+.TP
+.B \-s
+interpret values as strings
+.TP
+.B \-t
+output only the PV's final value
+.SH AUTHOR
+EPICS was collaboratively developed by Los Alamos National Laboratory, Argonne
+National Laboratory, and numerous other inividuals and organizations.
+.PP
+This manual page was written by Ken McIvor <mcivor@iit.edu>,
+for the Debian project (but may be used by others).
