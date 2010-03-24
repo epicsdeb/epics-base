@@ -81,7 +81,7 @@ Description: Perl bindings for EPICS
  tools, libraries and applications for creating a distributed soft real-time
  control systems.
  .
- Perl bindings for for EPICS
+ Perl bindings for EPICS
 
 Package: epics-doc
 Architecture: all

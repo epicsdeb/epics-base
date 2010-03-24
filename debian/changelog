@@ -1,3 +1,15 @@
+epics-base (3.14.10-13) unstable; urgency=low
+
+  * osdWireConfig.h: Replace C++ style comments with C style
+  * Add manpages for caget, caput, camonitor, cainfo, and caRepeater
+    (from Ken McIvor <mcivor@iit.edu> and Carlo Segre <segre@debian.org>)
+  * RTEMS: Add rtemsCom to the list of libraries to exclude from
+    GeSys loadable objects.
+  * boRecord: initialize the mlst field so that monitors are posted 
+    correctly
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 24 Mar 2010 11:18:18 -0400
+
 epics-base (3.14.10-12) unstable; urgency=low
 
   * Build for RTEMS-mvme2307
