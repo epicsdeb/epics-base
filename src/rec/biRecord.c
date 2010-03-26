@@ -110,6 +110,9 @@ static long init_record(biRecord *pbi, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(pbi))) return(status);
     }
+    pbi->mlst = pbi->val;
+    pbi->lalm = pbi->val;
+    pbi->oraw = pbi->rval;
     return(0);
 }
 

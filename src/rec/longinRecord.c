@@ -120,6 +120,9 @@ static long init_record(longinRecord *plongin, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(plongin))) return(status);
     }
+    plongin->mlst = plongin->val;
+    plongin->alst = plongin->val;
+    plongin->lalm = plongin->val;
     return(0);
 }
 

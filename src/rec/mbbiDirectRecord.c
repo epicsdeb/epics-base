@@ -158,6 +158,9 @@ static long init_record(mbbiDirectRecord *pmbbiDirect, int pass)
 	if((status=(*pdset->init_record)(pmbbiDirect))) return(status);
         refresh_bits(pmbbiDirect, 0);
     }
+    pmbbiDirect->mlst = pmbbiDirect->val;
+    pmbbiDirect->lalm = pmbbiDirect->val;
+    pmbbiDirect->oraw = pmbbiDirect->rval;
     return(0);
 }
 

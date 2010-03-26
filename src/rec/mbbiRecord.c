@@ -134,6 +134,9 @@ static long init_record(mbbiRecord *pmbbi, int pass)
 	if((status=(*pdset->init_record)(pmbbi))) return(status);
     }
     init_common(pmbbi);
+    pmbbi->mlst = pmbbi->val;
+    pmbbi->lalm = pmbbi->val;
+    pmbbi->oraw = pmbbi->rval;
     return(0);
 }
 

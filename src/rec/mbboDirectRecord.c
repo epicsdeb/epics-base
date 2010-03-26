@@ -140,6 +140,10 @@ static long init_record(mbboDirectRecord *pmbboDirect, int pass)
 		pmbboDirect->udf = FALSE;
 	} else if (status == 2) status = 0;
     }
+    pmbboDirect->mlst = pmbboDirect->val;
+    pmbboDirect->lalm = pmbboDirect->val;
+    pmbboDirect->oraw = pmbboDirect->rval;
+    pmbboDirect->orbv = pmbboDirect->rbv;
     return(status);
 }
 

@@ -175,6 +175,11 @@ static long init_record(boRecord *pbo,int pass)
 	if(pbo->val==0) pbo->rval = 0;
 	else pbo->rval = pbo->mask;
     } else pbo->rval = (epicsUInt32)pbo->val;
+
+    pbo->mlst = pbo->val;
+    pbo->lalm = pbo->val;
+    pbo->oraw = pbo->rval;
+    pbo->orbv = pbo->rbv;
     return(status);
 }
 
