@@ -98,10 +98,6 @@ install: build
 	install -d $(prefix)/bin
 	install -d $(epicsbase)/startup
 
-	# Install shortcut symlinks to host arch
-	ln -s ${EPICS_HOST_ARCH} $(epicsbase)/bin/host
-	ln -s ${EPICS_HOST_ARCH} $(epicsbase)/lib/host
-
 	install -m 755 -t $(epicsbase)/startup \
 startup/EpicsHostArch startup/EpicsHostArch.pl \
 startup/Site.profile
