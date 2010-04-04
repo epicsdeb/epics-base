@@ -112,6 +112,8 @@ startup/Site.profile
 
 	install -d $(prefix)/share
 	mv $(epicsbase)/lib/perl $(prefix)/share/perl5
+	# This path is used by CA.pm
+	ln -s ${EPICS_HOST_ARCH} $(epicsbase)/lib/host
 
 	# Move some utilities to /usr/bin
 	# Leave a symlink in /usr/epics/base/bin/$(EPICS_HOST_ARCH)
