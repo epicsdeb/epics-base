@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7), rtems-debhelper (>= 3),
-               libreadline5-dev,
+               libreadline5-dev, perl,
                rtems-libbspext-mvme2100,
                rtems-cexp-mvme2100,
                rtems-libbspext-mvme2307,
