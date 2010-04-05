@@ -1,3 +1,16 @@
+epics-base (3.14.10-14) unstable; urgency=low
+
+  * init script for caRepeater (from IIT)
+  * base.dbd: include histogram record
+  * debian/rules: use dh
+  * build debug package libepics3.14.10-dbg
+  * epics-dev: remove /usr/epics/base/bin/host symlink
+  * epics-perl: move /usr/epics/base/lib/host symlink
+  * patches:
+     rec: initialize all old/prev./last value fields
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 26 Mar 2010 13:25:29 -0400
+
 epics-base (3.14.10-13) unstable; urgency=low
 
   * osdWireConfig.h: Replace C++ style comments with C style
