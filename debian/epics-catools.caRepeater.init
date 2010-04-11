@@ -15,8 +15,8 @@
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/lib/epics/caRepeater
-SCRIPT=/usr/sbin/caRepeater
+DAEMON=/usr/bin/caRepeater
+SCRIPT=/usr/bin/caRepeater
 NAME=caRepeater
 DESC="Channel Access repeater"
 
