@@ -132,14 +132,7 @@ startup/Site.profile
 
 	dh_installdocs -A README
 
-	dh install --after dh_installdocs --before installinit --with rtems
-
-	dh_installinit --name=caRepeater
-
-	dh install --after installinit --with rtems
-
-# common-binary-fixup-arch::
-# 	dh_rtems
+	dh install --after dh_installdocs --with rtems
 
 binary-arch: install
 	dh binary-arch --before dh_strip_rtems --with rtems

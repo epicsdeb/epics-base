@@ -1,8 +1,9 @@
 epics-base (3.14.10-16) unstable; urgency=low
 
   * Forgot device() entry for historgram record
+  * Remove caRepeater init script.  It isn't working correctly.
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 12 Apr 2010 20:47:52 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 12 Apr 2010 23:14:19 -0400
 
 epics-base (3.14.10-15) unstable; urgency=low
 
