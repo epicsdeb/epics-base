@@ -211,7 +211,7 @@ epicsShareAPI macExpandString(
     s  = src;
     d  = dest;
     *d = '\0';
-    trans( handle, &entry, 0, "", &s, &d, d + maxlen );
+    trans( handle, &entry, 0, "", &s, &d, d + maxlen - 1);
 
     /* return +/- #chars copied depending on successful expansion */
     length = d - dest;
