@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* devAiSoft.c,v 1.10.2.1 2008/08/06 22:11:49 anj Exp
+/* devAiSoft.c,v 1.10.2.2 2009/04/09 15:03:09 anj Exp
  *
  *      Original Authors: Bob Dalesio and Marty Kraimer
  *      Date: 3/6/91
@@ -70,12 +70,27 @@ static long init_record(aiRecord *prec)
 
 static long read_ai(aiRecord *prec)
 {
-    if (!dbGetLink(&prec->inp, DBR_DOUBLE, &prec->val, 0, 0)) {
-        if (prec->inp.type != CONSTANT)
-            prec->udf = FALSE;
+    double val;
+
+    if (prec->inp.type == CONSTANT)
+        return 2;
+
+    if (!dbGetLink(&prec->inp, DBR_DOUBLE, &val, 0, 0)) {
+
+        /* Apply smoothing algorithm */
+        if (prec->smoo != 0.0 && prec->dpvt)
+            prec->val = val * (1.00 - prec->smoo) + (prec->val * prec->smoo);
+        else
+            prec->val = val;
+
+        prec->udf = FALSE;
+        prec->dpvt = &devAiSoft;        /* Any non-zero value */
+
         if (prec->tsel.type == CONSTANT &&
             prec->tse == epicsTimeEventDeviceTime)
             dbGetTimeStamp(&prec->inp, &prec->time);
+    } else {
+        prec->dpvt = NULL;
     }
     return 2;
 }

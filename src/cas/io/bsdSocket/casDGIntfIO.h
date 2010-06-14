@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// casDGIntfIO.h,v 1.2 2003/02/18 18:22:18 jhill Exp
+// casDGIntfIO.h,v 1.2.2.2 2009/07/30 23:50:45 jhill Exp
 //
 
 #ifndef casDGIntfIOh
@@ -39,10 +39,10 @@ public:
         inBufClient::fillParameter parm, bufSizeT & nBytesActual, caNetAddr & addr );
 	virtual void show ( unsigned level ) const;
 
-	static bufSizeT optimumOutBufferSize ();
 	static bufSizeT optimumInBufferSize ();
 
-    bufSizeT incomingBytesPresent () const;
+    bufSizeT dgInBytesPending () const;
+    bufSizeT osSendBufferSize () const ;
 
 private:
     tsFreeList < ipIgnoreEntry, 128 > ipIgnoreEntryFreeList;

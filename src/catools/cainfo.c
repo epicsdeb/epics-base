@@ -1,21 +1,24 @@
 /*************************************************************************\
- * Copyright (c) 2002 The University of Chicago, as Operator of Argonne
- *     National Laboratory.
- * Copyright (c) 2002 The Regents of the University of California, as
- *     Operator of Los Alamos National Laboratory.
- * Copyright (c) 2002 Berliner Elektronenspeicherringgesellschaft fuer
- *     Synchrotronstrahlung.
- * EPICS BASE Versions 3.13.7
- * and higher are distributed subject to a Software License Agreement found
- * in file LICENSE that is included with this distribution. 
+* Copyright (c) 2009 Helmholtz-Zentrum Berlin fuer Materialien und Energie.
+* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+*     National Laboratory.
+* Copyright (c) 2002 The Regents of the University of California, as
+*     Operator of Los Alamos National Laboratory.
+* Copyright (c) 2002 Berliner Elektronenspeicherringgesellschaft fuer
+*     Synchrotronstrahlung.
+* EPICS BASE Versions 3.13.7
+* and higher are distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* 
+/*
  *  Author: Ralph Lange (BESSY)
  *
  *  Modification History
  *  2008/04/16 Ralph Lange (BESSY)
  *     Updated usage info
+ *  2009/04/01 Ralph Lange (HZB/BESSY)
+ *     Clarified output for native data type
  *
  */
 
@@ -37,8 +40,9 @@ void usage (void)
     "Channel Access options:\n"
     "  -w <sec>:   Wait time, specifies CA timeout, default is %f second(s)\n"
     "  -s <level>: Call ca_client_status with the specified interest level\n"
+    "  -p <prio>:  CA priority (0-%u, default 0=lowest)\n"
     "\nExample: cainfo my_channel another_channel\n\n"
-	, DEFAULT_TIMEOUT);
+             , DEFAULT_TIMEOUT, CA_PRIORITY_MAX);
 }
 
 
@@ -83,18 +87,19 @@ int cainfo (pv *pvs, int nPvs)
             dbrType = dbf_type_to_DBR(dbfType);
 
             printf("%s\n"
-                   "    State:         %s\n"
-                   "    Host:          %s\n"
-                   "    Access:        %sread, %swrite\n"
-                   "    Data type:     %s (native: %s)\n"
-                   "    Element count: %lu\n"
+                   "    State:            %s\n"
+                   "    Host:             %s\n"
+                   "    Access:           %sread, %swrite\n"
+                   "    Native data type: %s\n"
+                   "    Request type:     %s\n"
+                   "    Element count:    %lu\n"
                    , pvs[n].name,
                    stateStrings[state],
                    ca_host_name(pvs[n].chid),
                    boolStrings[ca_read_access(pvs[n].chid)],
                    boolStrings[ca_write_access(pvs[n].chid)],
-                   dbr_type_to_text(dbrType),
                    dbf_type_to_text(dbfType),
+                   dbr_type_to_text(dbrType),
                    nElems
                 );
         }
@@ -133,7 +138,7 @@ int main (int argc, char *argv[])
 
     setvbuf(stdout,NULL,_IOLBF,BUFSIZ);    /* Set stdout to line buffering */
 
-    while ((opt = getopt(argc, argv, ":nhw:s:")) != -1) {
+    while ((opt = getopt(argc, argv, ":nhw:s:p:")) != -1) {
         switch (opt) {
         case 'h':               /* Print usage */
             usage();
@@ -142,7 +147,7 @@ int main (int argc, char *argv[])
             if(epicsScanDouble(optarg, &caTimeout) != 1)
             {
                 fprintf(stderr, "'%s' is not a valid timeout value "
-                        "- ignored. ('caget -h' for help.)\n", optarg);
+                        "- ignored. ('cainfo -h' for help.)\n", optarg);
                 caTimeout = DEFAULT_TIMEOUT;
             }
             break;
@@ -150,18 +155,27 @@ int main (int argc, char *argv[])
             if (sscanf(optarg,"%du", &statLevel) != 1)
             {
                 fprintf(stderr, "'%s' is not a valid interest level "
-                        "- ignored. ('caget -h' for help.)\n", optarg);
+                        "- ignored. ('cainfo -h' for help.)\n", optarg);
                 statLevel = 0;
             }
             break;
+        case 'p':               /* CA priority */
+            if (sscanf(optarg,"%u", &caPriority) != 1)
+            {
+                fprintf(stderr, "'%s' is not a valid CA priority "
+                        "- ignored. ('cainfo -h' for help.)\n", optarg);
+                caPriority = DEFAULT_CA_PRIORITY;
+            }
+            if (caPriority > CA_PRIORITY_MAX) caPriority = CA_PRIORITY_MAX;
+            break;
         case '?':
             fprintf(stderr,
-                    "Unrecognized option: '-%c'. ('caget -h' for help.)\n",
+                    "Unrecognized option: '-%c'. ('cainfo -h' for help.)\n",
                     optopt);
             return 1;
         case ':':
             fprintf(stderr,
-                    "Option '-%c' requires an argument. ('caget -h' for help.)\n",
+                    "Option '-%c' requires an argument. ('cainfo -h' for help.)\n",
                     optopt);
             return 1;
         default :
@@ -174,7 +188,7 @@ int main (int argc, char *argv[])
 
     if (!statLevel && nPvs < 1)
     {
-        fprintf(stderr, "No pv name specified. ('caget -h' for help.)\n");
+        fprintf(stderr, "No pv name specified. ('cainfo -h' for help.)\n");
         return 1;
     }
                                 /* Start up Channel Access */

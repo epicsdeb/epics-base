@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casDGClient.cc,v 1.50.2.4 2008/09/19 23:03:31 jhill Exp
+ *      casDGClient.cc,v 1.50.2.8 2009/07/30 23:29:43 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -18,6 +18,7 @@
 #include "gddApps.h"
 #include "caerr.h"
 #include "osiWireFormat.h"
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "casDGClient.h"
@@ -407,18 +408,15 @@ void casDGClient::sendBeacon ( ca_uint32_t beaconNumber )
 //
 // casDGClient::xSend()
 //
-outBufClient::flushCondition casDGClient::xSend ( char *pBufIn, // X aCC 361
-        bufSizeT nBytesAvailableToSend, bufSizeT nBytesNeedToBeSent,
-        bufSizeT &nBytesSent ) 
+outBufClient::flushCondition casDGClient::xSend ( char *pBufIn, 
+                        bufSizeT nBytesToSend, bufSizeT & nBytesSent ) 
 {
-    assert ( nBytesAvailableToSend >= nBytesNeedToBeSent );
-
     bufSizeT totalBytes = 0;
-    while ( totalBytes < nBytesNeedToBeSent ) {
+    while ( totalBytes < nBytesToSend ) {
         cadg *pHdr = reinterpret_cast < cadg * > ( & pBufIn[totalBytes] );
 
-        assert ( totalBytes <= bufSizeT_MAX-pHdr->cadg_nBytes );
-        assert ( totalBytes + pHdr->cadg_nBytes <= nBytesAvailableToSend );
+        assert ( totalBytes <= bufSizeT_MAX - pHdr->cadg_nBytes );
+        assert ( totalBytes + pHdr->cadg_nBytes <= nBytesToSend );
 
         char * pDG = reinterpret_cast < char * > ( pHdr + 1 );
         unsigned sizeDG = pHdr->cadg_nBytes - sizeof ( *pHdr );
@@ -709,13 +707,15 @@ void casDGClient::inBufFill ( inBufClient::fillParameter parm )
     this->in.fill ( parm );
 }
 
-bufSizeT casDGClient::inBufBytesAvailable () const
+bufSizeT casDGClient ::
+    inBufBytesPending () const
 {
     epicsGuard < epicsMutex > guard ( this->mutex );
-    return this->in.bytesAvailable ();
+    return this->in.bytesPresent ();
 }
 
-bufSizeT casDGClient::outBufBytesPresent () const
+bufSizeT casDGClient ::
+    outBufBytesPending () const
 {
     epicsGuard < epicsMutex > guard ( this->mutex );
     return this->out.bytesPresent ();
@@ -838,26 +838,19 @@ caStatus casDGClient::processMsg ()
             this->in.removeMsg ( msgSize );
 	    }
     }
-    catch ( std::bad_alloc & ) {
-        status = this->sendErr ( 
-            this->ctx.getMsg(), invalidResID, ECA_ALLOCMEM, 
-            "inablility to allocate memory in "
-            "the server disconnected client" );
-        status = S_cas_noMemory;
-    }
     catch ( std::exception & except ) {
+        this->in.removeMsg ( this->in.bytesPresent() );
 		status = this->sendErr ( 
             this->ctx.getMsg(), invalidResID, ECA_INTERNAL, 
-            "C++ exception \"%s\" in server "
-            "diconnected client",
+            "C++ exception \"%s\" in CA circuit server",
             except.what () );
         status = S_cas_internal;
     }
     catch (...) {
+        this->in.removeMsg ( this->in.bytesPresent() );
 		status = this->sendErr ( 
             this->ctx.getMsg(), invalidResID, ECA_INTERNAL, 
-            "unexpected C++ exception in server "
-            "diconnected client" );
+            "unexpected C++ exception in CA datagram server" );
         status = S_cas_internal;
     }
 

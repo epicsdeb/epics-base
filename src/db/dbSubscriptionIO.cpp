@@ -1,15 +1,14 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
 /*  
- *  dbSubscriptionIO.cpp,v 1.39.2.4 2004/01/23 19:53:45 jhill Exp
+ *  dbSubscriptionIO.cpp,v 1.39.2.5 2009/07/09 15:27:42 anj Exp
  *
  *                              
  *                    L O S  A L A M O S
@@ -35,6 +34,7 @@
 
 #include "db_access.h" // need to eliminate this
 #include "cadef.h" // this can be eliminated when the callbacks use the new interface
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "dbCAC.h"

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbAccessDefs.h	*/
-/* dbAccessDefs.h,v 1.12.2.7 2008/09/18 19:23:48 anj Exp */
+/* dbAccessDefs.h,v 1.12.2.9 2009/04/03 20:53:59 lange Exp */
 
 #ifndef INCdbAccessDefsh
 #define INCdbAccessDefsh
@@ -200,21 +200,23 @@ struct dbr_alDouble     {DBRalDouble};
 #define S_db_noMemory   (M_dbAccess|66) /*unable to allocate data structure from pool*/
 
 /* Global Database Access Routines*/
-#define dbGetLink(PLNK,DBRTYPE,PBUFFER,OPTIONS,NREQUEST) \
-    ((((PLNK)->type == CONSTANT) && (!(NREQUEST) &&(!OPTIONS))) \
-      ? 0\
+#define dbGetLink(PLNK, DBRTYPE, PBUFFER, OPTIONS, NREQUEST) \
+    ( ( ( (PLNK)->type == CONSTANT ) && \
+        ( (NREQUEST) == 0) &&\
+        ( (OPTIONS) == 0) ) \
+      ? 0 \
       : dbGetLinkValue((PLNK),(DBRTYPE), \
-	(void *)(PBUFFER),(OPTIONS),(NREQUEST)))
-#define dbPutLink(PLNK,DBRTYPE,PBUFFER,NREQUEST) \
-    (((PLNK)->type == CONSTANT) \
-    ? 0\
-    : dbPutLinkValue((PLNK),(DBRTYPE),(void *)(PBUFFER),(NREQUEST)))
+        (void *)(PBUFFER), (OPTIONS), (NREQUEST) ) )
+#define dbPutLink(PLNK, DBRTYPE, PBUFFER, NREQUEST) \
+    ( ( (PLNK)->type == CONSTANT) \
+      ? 0 \
+      : dbPutLinkValue( (PLNK), (DBRTYPE), (void *)(PBUFFER), (NREQUEST) ) )
 #define dbGetPdbAddrFromLink(PLNK) \
-    (\
-        ((PLNK)->type != DB_LINK) \
-        ? 0\
-        : (((struct dbAddr *)((PLNK)->value.pv_link.pvt))) \
-    )
+    ( ( (PLNK)->type != DB_LINK ) \
+      ? 0 \
+      : ( ( (struct dbAddr *)( (PLNK)->value.pv_link.pvt) ) ) )
+#define dbGetSevr(PLINK,PSEVERITY) \
+    dbGetAlarm((PLINK),NULL,(PSEVERITY));
 
 epicsShareFunc long epicsShareAPI dbPutSpecial(struct dbAddr *paddr,int pass);
 epicsShareFunc struct rset * epicsShareAPI dbGetRset(const struct dbAddr *paddr);
@@ -262,8 +264,8 @@ epicsShareFunc long epicsShareAPI dbGetPrecision(
     const struct link *plink,short *precision);
 epicsShareFunc long epicsShareAPI dbGetUnits(
     const struct link *plink,char *units,int unitsSize);
-epicsShareFunc long epicsShareAPI dbGetSevr(
-    const struct link *plink,short *severity);
+epicsShareFunc long epicsShareAPI dbGetAlarm(
+    const struct link *plink, epicsEnum16 *status,epicsEnum16 *severity);
 epicsShareFunc long epicsShareAPI dbGetTimeStamp(
     const struct link *plink,epicsTimeStamp *pstamp);
 

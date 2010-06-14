@@ -3,12 +3,11 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* errMdef.h  err.h - Error Handling definitions */
-/* share/epicsH errMdef.h,v 1.11 2002/08/29 16:45:16 jhill Exp */
+/* Error Handling definitions */
+/* errMdef.h,v 1.11.2.3 2009/07/09 20:11:01 anj Exp */
 /*
  *      Author:          Marty Kraimer
  *      Date:            6-1-90
@@ -17,29 +16,11 @@
 #ifndef INCerrMdefh
 #define INCerrMdefh
 
-#ifdef __cplusplus
-extern "C" {
-#define errMDefUseProtoANSI
-#endif
-
-#ifdef __STDC__
-#ifndef errMDefUseProtoANSI
-#define errMDefUseProtoANSI
-#endif
-#endif
-
-#ifdef errMDefUseProtoANSI
-#       include <stdarg.h>
-#else
-#       include <varargs.h>
-#endif
-
-#include "ellLib.h"
 #include "shareLib.h"
 
-/*The following is only included because before 3.13.0beta12 errMessage */
-/*and errPrintf were defined here					*/
-#include "errlog.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define RTN_SUCCESS(STATUS) ((STATUS)==0)
 
@@ -68,7 +49,6 @@ extern "C" {
 #define M_bucket	(525 <<16) /*Bucket Hash*/
 #define M_gddFuncTbl	(526 <<16) /*gdd jump table*/
 
-#ifdef errMDefUseProtoANSI
 epicsShareFunc void epicsShareAPI errSymLookup(long status, char *pBuf, unsigned bufLength);
 epicsShareFunc void epicsShareAPI errSymTest(unsigned short modnum, unsigned short begErrNum, unsigned short endErrNum);
 epicsShareFunc void epicsShareAPI errSymTestPrint(long errNum);
@@ -76,20 +56,6 @@ epicsShareFunc int epicsShareAPI errSymBld(void);
 epicsShareFunc int epicsShareAPI errSymbolAdd (long errNum,char *name);
 epicsShareFunc void epicsShareAPI errSymDump(void);
 epicsShareFunc void epicsShareAPI tstErrSymFind(void);
-
-epicsShareFunc int epicsShareAPI errSymFind(long status, char *pBuf); /* depricated */
-
-#else /* errMDefUseProtoANSI */ 
-
-epicsShareFunc void epicsShareAPI errSymTest();
-epicsShareFunc void epicsShareAPI errSymTestPrint();
-epicsShareFunc int epicsShareAPI errSymBld();
-epicsShareFunc int epicsShareAPI errSymbolAdd();
-epicsShareFunc void epicsShareAPI errSymDump();
-epicsShareFunc void epicsShareAPI tstErrSymFind();
-
-epicsShareFunc void epicsShareAPI errSymFind();/* depricated */
-#endif /* errMDefUseProtoANSI */ 
 
 #ifdef __cplusplus
 }

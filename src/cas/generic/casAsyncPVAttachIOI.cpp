@@ -4,17 +4,18 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casAsyncPVAttachIOI.cpp,v 1.4.2.1 2003/09/29 22:58:41 jhill Exp
+ *      casAsyncPVAttachIOI.cpp,v 1.4.2.3 2009/08/06 02:24:00 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
  *              505 665 1831
  */
+
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "casAsyncPVAttachIOI.h"
@@ -24,6 +25,7 @@ casAsyncPVAttachIOI::casAsyncPVAttachIOI (
 	casAsyncIOI ( ctx ), msg ( *ctx.getMsg() ),
     asyncPVAttachIO ( intf ), retVal ( S_cas_badParameter )
 {
+    ctx.getServer()->incrementIOInProgCount ();
     ctx.getClient()->installAsynchIO ( *this );
 }
 
@@ -41,6 +43,7 @@ caStatus casAsyncPVAttachIOI::cbFuncAsyncIO (
     // uninstall here in case the channel is deleted 
     // further down the call stack
     this->client.uninstallAsynchIO ( *this );
+    this->client.getCAS().decrementIOInProgCount ();
 
 	if ( this->msg.m_cmmd == CA_PROTO_CREATE_CHAN ) {
         casCtx tmpCtx;
@@ -57,6 +60,7 @@ caStatus casAsyncPVAttachIOI::cbFuncAsyncIO (
 	}
 
     if ( status == S_cas_sendBlocked ) {
+        this->client.getCAS().incrementIOInProgCount ();
         this->client.installAsynchIO ( *this );
     }
 

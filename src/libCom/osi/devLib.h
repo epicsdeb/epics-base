@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devLib.h */
-/* devLib.h,v 1.1.2.7 2008/10/23 19:27:24 anj Exp */
+/* devLib.h,v 1.1.2.8 2009/07/09 15:27:43 anj Exp */
 
 /*
  * Original Author: Marty Kraimer 
@@ -20,6 +20,7 @@
 
 #include "dbDefs.h"
 #include "osdVME.h"
+#include "errMdef.h"
 #include "shareLib.h"
 
 #ifdef __cplusplus

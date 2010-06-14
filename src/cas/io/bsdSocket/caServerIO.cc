@@ -3,12 +3,11 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// caServerIO.cc,v 1.20.2.1 2004/01/15 17:30:00 jhill Exp
+// caServerIO.cc,v 1.20.2.2 2009/07/09 15:27:41 anj Exp
 //
 // verify connection state prior to doing anything in this file
 //
@@ -19,6 +18,7 @@
 #include "epicsSignal.h"
 #include "envDefs.h"
 #include "caProto.h"
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "caServerIO.h"

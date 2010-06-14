@@ -3,15 +3,12 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
 // casStreamOS.cc
-// casStreamOS.cc,v 1.38.2.2 2005/11/04 15:25:07 lange Exp
-//
-//
+// casStreamOS.cc,v 1.38.2.7 2009/08/13 23:55:03 jhill Exp
 //
 // TO DO:
 // o armRecv() and armSend() should return bad status when
@@ -19,9 +16,38 @@
 //
 
 #include "fdManager.h"
+#include "errlog.h"
 
 #define epicsExportSharedFunc
 #include "casStreamOS.h"
+
+#if 0
+#define DEBUG
+#endif
+
+//
+// printStatus ()
+//
+#if defined(DEBUG) 
+void casStreamOS :: printStatus ( const char * pCtx ) const
+{
+    static epicsTime beginTime = epicsTime :: getCurrent ();
+    epicsTime current = epicsTime :: getCurrent ();
+    printf (
+        "%03.3f, "
+        "Sock %d, %s, "
+        "RecvBuf %u, "
+        "SendBuf %u\n",
+        current - beginTime,
+        this->getFD(),
+        pCtx,
+        this->inBufBytesPending (),
+        this->outBufBytesPending () );
+    fflush ( stdout );
+}
+#else
+inline void casStreamOS :: printStatus ( const char * ) const {}
+#endif
 
 //
 // casStreamReadReg
@@ -44,13 +70,7 @@ private:
 inline casStreamReadReg::casStreamReadReg (casStreamOS &osIn) :
 	fdReg (osIn.getFD(), fdrRead), os (osIn)
 {
-#	if defined(DEBUG) 
-        printf ("Read on %d\n", this->os.getFD());
-        printf ("Recv backlog %u\n", 
-	        this->os.in.bytesPresent());
-        printf ("Send backlog %u\n", 
-	        this->os.out.bytesPresent());
-#	endif		
+    this->os.printStatus ( "read schedualed" );
 }
 
 //
@@ -58,13 +78,7 @@ inline casStreamReadReg::casStreamReadReg (casStreamOS &osIn) :
 //
 inline casStreamReadReg::~casStreamReadReg ()
 {
-#	if defined(DEBUG) 
-		printf ("Read off %d\n", this->os.getFD());
-		printf ("Recv backlog %u\n", 
-			this->os.in.bytesPresent());
-		printf ("Send backlog %u\n", 
-			this->os.out.bytesPresent());
-#	endif
+    this->os.printStatus ( "read unschedualed" );
 }
 
 //
@@ -89,13 +103,7 @@ private:
 inline casStreamWriteReg::casStreamWriteReg (casStreamOS &osIn) :
 	fdReg (osIn.getFD(), fdrWrite, true), os (osIn)
 {
-#	if defined(DEBUG) 
-		printf ("Write on %d\n", this->os.getFD());
-		printf ("Recv backlog %u\n", 
-			this->os.in.bytesPresent());
-		printf ("Send backlog %u\n", 
-			this->os.out.bytesPresent());
-#	endif
+    this->os.printStatus ( "write schedualed" );
 }
 
 //
@@ -103,13 +111,7 @@ inline casStreamWriteReg::casStreamWriteReg (casStreamOS &osIn) :
 //
 inline casStreamWriteReg::~casStreamWriteReg ()
 {
-#	if defined(DEBUG) 
-		printf ("Write off %d\n", this->os.getFD());
-		printf ("Recv backlog %u\n", 
-			this->os.in.bytesPresent());
-		printf ("Send backlog %u\n", 
-			this->os.out.bytesPresent());
-#	endif
+    this->os.printStatus ( "write unschedualed" );
 }
 
 //
@@ -142,13 +144,31 @@ void casStreamEvWakeup::show(unsigned level) const
 //
 // casStreamEvWakeup::expire()
 //
-epicsTimerNotify::expireStatus casStreamEvWakeup::expire ( const epicsTime & /* currentTime */ )
+epicsTimerNotify::expireStatus casStreamEvWakeup::
+    expire ( const epicsTime & /* currentTime */ )
 {
-    casEventSys::processStatus ps = os.eventSysProcess ();
-    if ( ps.nAccepted > 0u ) {
-        this->os.eventFlush ();
+    this->os.printStatus ( "casStreamEvWakeup tmr expire" );
+    casProcCond pc = os.eventSysProcess ();
+ 	if ( pc == casProcOk ) {
+        // We do not wait for any impartial, or complete, 
+        // messages in the input queue to be processed
+        // because.
+        // A) IO postponement might be preventing the 
+        // input queue processing from proceeding.
+        // B) We dont want to interrupt subscription 
+        // updates while waiting for very large arrays 
+        // to be read in a packet at a time.
+        // C) Since both reads and events get processed
+        // before going back to select to find out if we
+        // can do a write then we naturally tend to
+        // combine get responses and subscription responses
+        // into one write.
+        // D) Its probably questionable to hold up event 
+        // traffic (introduce latency) because a partial
+        // message is pending in the input queue.
+        this->os.armSend ();
     }
-	if ( ps.cond != casProcOk ) {
+    else {
 		//
 		// ok to delete the client here
 		// because casStreamEvWakeup::expire()
@@ -170,14 +190,16 @@ epicsTimerNotify::expireStatus casStreamEvWakeup::expire ( const epicsTime & /* 
 //
 // casStreamEvWakeup::start()
 //
+// care is needed here because this is called
+// asynchronously by postEvent
+//
+// there is some overhead here but care is taken
+// in the caller of this routine to call this
+// only when its the 2nd event on the queue
+//
 void casStreamEvWakeup::start( casStreamOS & )
 {    
-    // care is needed here because this is called
-    // asynchronously by postEvent
-    //
-    // there is some overhead here but care is taken
-    // in the caller of this routine to call this
-    // only when its the 2nd event on the queue
+    this->os.printStatus ( "casStreamEvWakeup tmr start" );
     this->timer.start ( *this, 0.0 );
 }
 
@@ -211,15 +233,52 @@ void casStreamIOWakeup::show ( unsigned level ) const
 //
 // casStreamIOWakeup::expire()
 //
+// This is called whenever asynchronous IO completes
+//
 // Running this indirectly off of the timer queue
-// guarantees that we will not call processInput()
+// guarantees that we will not call processMsg()
 // recursively
 //
-epicsTimerNotify::expireStatus casStreamIOWakeup::expire ( const epicsTime & /* currentTime */ )
+epicsTimerNotify::expireStatus casStreamIOWakeup ::
+    expire ( const epicsTime & /* currentTime */ )
 {
+    assert ( this->pOS );
+    this->pOS->printStatus ( "casStreamIOWakeup tmr expire" );
     casStreamOS	& tmpOS = *this->pOS;
     this->pOS = 0;
-	tmpOS.processInput();
+    caStatus status = tmpOS.processMsg ();
+    if ( status == S_cas_success ) {
+        tmpOS.armRecv ();
+        if ( tmpOS._sendNeeded () ) {
+            tmpOS.armSend ();
+        }
+    }
+    else if ( status == S_cas_sendBlocked ) {
+        tmpOS.armSend ();
+        // always activate receives if space is available
+        // in the in buf
+        tmpOS.armRecv ();
+    }
+    else if ( status == S_casApp_postponeAsyncIO ) {
+        // we should be back on the IO blocked list
+        // if S_casApp_postponeAsyncIO was returned
+        // so this function will be called again when
+        // another asynchronous request completes
+        tmpOS.armSend ();
+        // always activate receives if space is available
+        // in the in buf
+        tmpOS.armRecv ();
+    }
+    else {
+        errMessage ( status,
+    "- unexpected problem with client's input - forcing disconnect");
+        tmpOS.getCAS().destroyClient ( tmpOS );
+        //
+        // must _not_ touch "tmpOS" ref
+        // after the destroy 
+        //
+        return noRestart;
+    }
     return noRestart;
 }
 
@@ -235,6 +294,7 @@ void casStreamIOWakeup::start ( casStreamOS &os  )
         this->pOS = &os;
         this->timer.start ( *this, 0.0 );
     }
+    this->pOS->printStatus ( "casStreamIOWakeup tmr start" );
 }
 
 //
@@ -263,7 +323,7 @@ inline void casStreamOS::disarmRecv ()
 //
 inline void casStreamOS::armSend()
 {
-	if ( this->outBufBytesPresent() == 0u ) {
+	if ( this->outBufBytesPending() == 0u ) {
 		return;
 	}
 
@@ -283,6 +343,7 @@ inline void casStreamOS::disarmSend ()
 
 //
 // casStreamOS::ioBlockedSignal()
+// (called by main thread when lock is applied)
 //
 void casStreamOS::ioBlockedSignal()
 {
@@ -291,24 +352,12 @@ void casStreamOS::ioBlockedSignal()
 
 //
 // casStreamOS::eventSignal()
+// (called by any thread asynchronously
+// when an event is posted)
 //
 void casStreamOS::eventSignal()
 {
     this->evWk.start ( *this );
-}
-
-//
-// casStreamOS::eventFlush()
-//
-void casStreamOS::eventFlush()
-{
-	//
-	// if there is nothing pending in the input
-	// queue, then flush the output queue
-	//
-	if ( this->inBufBytesAvailable() == 0u ) {
-		this->armSend ();
-	}
 }
 
 //
@@ -318,9 +367,14 @@ casStreamOS::casStreamOS (
         caServerI & cas, clientBufMemoryManager & bufMgrIn,
         const ioArgsToNewStreamIO & ioArgs ) : 
     casStreamIO ( cas, bufMgrIn, ioArgs ),
-    evWk ( *this ), pWtReg ( 0 ), pRdReg ( 0 ), 
-    sendBlocked ( false )
+    evWk ( *this ), 
+    pWtReg ( 0 ), 
+    pRdReg ( 0 ), 
+    _sendBacklogThresh ( osSendBufferSize () / 2u )
 {
+ 	if ( _sendBacklogThresh < MAX_TCP / 2 ) {
+	    _sendBacklogThresh = MAX_TCP / 2;
+	}
 	this->xSetNonBlocking ();
 	this->armRecv ();
 }
@@ -347,7 +401,6 @@ void casStreamOS::show ( unsigned level ) const
 	this->casStrmClient::show ( level );
 	printf ( "casStreamOS at %p\n", 
         static_cast <const void *> ( this ) );
-	printf ( "\tsendBlocked = %d\n", this->sendBlocked );
 	if ( this->pWtReg ) {
 		this->pWtReg->show ( level );
 	}
@@ -383,9 +436,11 @@ void casStreamReadReg::callBack ()
 //
 // casStreamOS::recvCB()
 //
-void casStreamOS::recvCB ()
+void casStreamOS :: recvCB ()
 {
 	assert ( this->pRdReg );
+	
+    printStatus ( "receiving" );
 
     //
     // copy in new messages 
@@ -393,38 +448,50 @@ void casStreamOS::recvCB ()
     inBufClient::fillCondition fillCond = this->inBufFill ();
 	if ( fillCond == casFillDisconnect ) {
         this->getCAS().destroyClient ( *this );
+        //
+        // must _not_ touch "this" pointer
+        // after the destroy 
+        //
+        return;
 	}
-    else {
-	   casProcCond procCond = this->processInput ();
-	    if ( procCond == casProcDisconnect ) {
-            this->getCAS().destroyClient ( *this );
-	    }	
-	    else if ( this->inBufFull() ) {
-		    //
-		    // If there isnt any space then temporarily 
-		    // stop calling this routine until problem is resolved 
-		    // either by:
-		    // (1) sending or
-		    // (2) a blocked IO op unblocks
-		    //
-		    // (casStreamReadReg is _not_ a onceOnly fdReg - 
-		    // therefore an explicit delete is required here)
-		    //
-		    this->disarmRecv (); // this deletes the casStreamReadReg object
-	    }
+    else if ( fillCond == casFillNone ) {
+        if ( this->inBufFull() ) {
+            this->disarmRecv ();
+        }
     }
-	//
-	// NO CODE HERE
-	// (see delete above)
-	//
+    else {
+	    printStatus ( "recv CB req proc" );
+	    caStatus status = this->processMsg ();
+	    if ( status == S_cas_success ) {
+	        this->armRecv ();
+            if ( _sendNeeded () ) {
+	            this->armSend ();
+            }
+	    }
+	    else if ( status == S_cas_sendBlocked ) {
+	        this->armSend ();
+	    }
+	    else if ( status == S_casApp_postponeAsyncIO ) {
+            this->armSend ();
+        }
+        else {
+	        errMessage ( status,
+        "- unexpected problem with client's input - forcing disconnect");
+            this->getCAS().destroyClient ( *this );
+            //
+            // must _not_ touch "this" pointer
+            // after the destroy 
+            //
+            return;
+        }
+    }
 }
 
 //
-// casStreamOS::sendBlockSignal()
+// casStreamOS :: sendBlockSignal()
 //
-void casStreamOS::sendBlockSignal ()
+void casStreamOS :: sendBlockSignal ()
 {
-	this->sendBlocked = true;
 	this->armSend ();
 }
 
@@ -455,18 +522,21 @@ void casStreamWriteReg::callBack()
 //
 void casStreamOS::sendCB ()
 {
+    // we know that the fdManager will destroy the write 
+    // registration after this function returns, and that
+    // it is robust in situations where the callback
+    // deletes its fdReg derived object so delete it now,
+    // because we can now reschedule a send as needed
+    //
     this->disarmSend ();
 
+    printStatus ( "writing" );
+    
 	//
 	// attempt to flush the output buffer 
 	//
 	outBufClient::flushCondition flushCond = this->flush ();
-	if ( flushCond == flushProgress ) {
-		if ( this->sendBlocked ) {
-			this->sendBlocked = false;
-		}
-	}
-	else if ( flushCond == outBufClient::flushDisconnect ) {
+	if ( flushCond == outBufClient::flushDisconnect ) {
 		//
 		// ok to delete the client here
 		// because casStreamWriteReg::callBack()
@@ -490,8 +560,8 @@ void casStreamOS::sendCB ()
 	// we _are_ able to write to see if additional events 
 	// can be sent to the slow client.
 	//
-    casEventSys::processStatus ps = this->eventSysProcess ();
-	if ( ps.cond != casProcOk ) {
+    casProcCond pc = this->eventSysProcess ();
+	if ( pc != casProcOk ) {
 		//
 		// ok to delete the client here
 		// because casStreamWriteReg::callBack()
@@ -507,80 +577,57 @@ void casStreamOS::sendCB ()
 		//
 		return;
 	}
-
-#	if defined(DEBUG)
-		printf ( "write attempted on %d result was %d\n", 
-				this->getFD(), flushCond );
-		printf ( "Recv backlog %u\n", this->in.bytesPresent() );
-		printf ( "Send backlog %u\n", this->out.bytesPresent() );
-#	endif
+	
+	printStatus ( ppFlushCondText [ flushCond ] );
 
 	//
 	// If we were able to send something then we need
 	// to process the input queue in case we were send
 	// blocked.
 	//
-	casProcCond procCond = this->processInput ();
-	if ( procCond == casProcDisconnect ) {
-        this->getCAS().destroyClient ( *this );
-	}
-	else {
-		//
-		// if anything is left in the send buffer that
-		// still needs to be sent and there are not
-		// requests pending in the input buffer then
-		// keep sending the output buffer until it is
-		// empty
-		//
-		// do not test for this with flushCond since
-		// additional bytes may have been added since
-		// we flushed the out buffer
-		//
-		if ( this->outBufBytesPresent() > 0u &&
-			this->inBufBytesAvailable() == 0u ) {
-			this->armSend();
-		}
-	}
-	//
-	// NO CODE HERE
-	// (see deletes above)
-	//
+
+    bufSizeT inBufBytesPend = this->inBufBytesPending ();
+	if ( flushCond == flushProgress && inBufBytesPend ) {
+	    printStatus ( "send CB req proc" );
+	    caStatus status = this->processMsg ();
+	    if ( status == S_cas_success ) {
+	        this->armRecv ();
+	    }
+        else if ( status == S_cas_sendBlocked 
+            || status == S_casApp_postponeAsyncIO ) {
+            bufSizeT inBufBytesPendNew = this->inBufBytesPending ();
+            if ( inBufBytesPendNew < inBufBytesPend ) {
+                this->armRecv ();
+            }
+        }
+        else {
+	        errMessage ( status,
+        "- unexpected problem with client's input - forcing disconnect");
+            this->getCAS().destroyClient ( *this );
+		    //
+		    // must _not_ touch "this" pointer
+		    // after the destroy 
+		    //
+            return;
+        }
+    }
+
+    // Once a send starts we will keep going with it until
+    // it flushes all of the way out. Its important to 
+    // perform this step only after processMsg so that we 
+    // flush out any send blocks detected by processMsg.
+    this->armSend ();
 }
 
 //
-// casStreamOS::processInput()
+// casStreamOS :: sendNeeded ()
 //
-casProcCond casStreamOS::processInput() // X aCC 361
+bool casStreamOS :: 
+    _sendNeeded () const 
 {
-	caStatus status;
-
-#	ifdef DEBUG
-		printf(
-			"Resp bytes to send=%d, Req bytes pending %d\n", 
-			this->out.bytesPresent(),
-			this->in.bytesPresent());
-#	endif
-
-	status = this->processMsg();
-	if (status==S_cas_success ||
-		status==S_cas_sendBlocked ||
-		status==S_casApp_postponeAsyncIO) {
-
-		//
-		// if there is nothing pending in the input
-		// queue, then flush the output queue
-		//
-		if ( this->inBufBytesAvailable() == 0u ) {
-			this->armSend ();
-		}
-		this->armRecv ();
-
-		return casProcOk;
-	}
-	else {
-		errMessage ( status,
-	"- unexpected problem with client's input - forcing disconnect");
-		return casProcDisconnect;
-	}
-}
+    bool sn = this->outBufBytesPending() >= this->_sendBacklogThresh;
+    bufSizeT inBytesPending = this->inBufBytesPending ();
+    return sn || ( inBytesPending == 0u );
+}   
+    
 

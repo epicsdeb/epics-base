@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// casStreamIO.h,v 1.2.2.1 2004/09/22 17:55:00 jhill Exp
+// casStreamIO.h,v 1.2.2.3 2009/07/30 23:51:48 jhill Exp
 //
 
 #ifndef casStreamIOh
@@ -31,16 +31,16 @@ public:
 	void xSetNonBlocking ();
     const caNetAddr getAddr() const;
 	void hostName ( char *pBuf, unsigned bufSize ) const;
-
+	bufSizeT inCircuitBytesPending () const;
+	bufSizeT osSendBufferSize () const;
 private:
 	SOCKET sock;
 	struct sockaddr_in addr;
+	bufSizeT _osSendBufferSize;
 	xBlockingStatus blockingFlag;
 
     bool sockHasBeenShutdown;
 	xBlockingStatus blockingState() const;
-	bufSizeT incomingBytesPresent() const;
-	static bufSizeT optimumBufferSize ();
 	void osdShow ( unsigned level ) const;
 	outBufClient::flushCondition osdSend ( const char *pBuf, bufSizeT nBytesReq, 
 		bufSizeT & nBytesActual );

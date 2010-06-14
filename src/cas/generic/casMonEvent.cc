@@ -3,12 +3,11 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casMonEvent.cc,v 1.15.2.1 2003/08/01 19:13:34 soliday Exp
+ *      casMonEvent.cc,v 1.15.2.2 2009/07/09 15:27:40 anj Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -17,6 +16,8 @@
 
 #include <string>
 #include <stdexcept>
+
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "casMonEvent.h"

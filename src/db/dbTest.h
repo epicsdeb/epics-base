@@ -23,6 +23,8 @@ epicsShareFunc long epicsShareAPI dbl(
     const char *precordTypename,const char *fields);
 /*list number of records of each type*/
 epicsShareFunc long epicsShareAPI dbnr(int verbose);
+/* list aliases */
+epicsShareFunc long epicsShareAPI dbla(const char *pmask);
 /*list records with mask*/
 epicsShareFunc long epicsShareAPI dbgrep(const char *pmask);
 /*get field value*/
@@ -41,7 +43,7 @@ epicsShareFunc long epicsShareAPI dbtpf(const char *pname,const char *pvalue);
 epicsShareFunc long epicsShareAPI dbior(
     const char *pdrvName,int interest_level);
 /*Hardware Configuration Report*/
-epicsShareFunc int epicsShareAPI dbhcr();
+epicsShareFunc int epicsShareAPI dbhcr(void);
 
 #ifdef __cplusplus
 }

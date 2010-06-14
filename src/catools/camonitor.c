@@ -1,21 +1,26 @@
 /*************************************************************************\
- * Copyright (c) 2002 The University of Chicago, as Operator of Argonne
- *     National Laboratory.
- * Copyright (c) 2002 The Regents of the University of California, as
- *     Operator of Los Alamos National Laboratory.
- * Copyright (c) 2002 Berliner Elektronenspeicherringgesellschaft fuer
- *     Synchrotronstrahlung.
- * EPICS BASE Versions 3.13.7
- * and higher are distributed subject to a Software License Agreement found
- * in file LICENSE that is included with this distribution. 
+* Copyright (c) 2009 Helmholtz-Zentrum Berlin fuer Materialien und Energie.
+* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+*     National Laboratory.
+* Copyright (c) 2002 The Regents of the University of California, as
+*     Operator of Los Alamos National Laboratory.
+* Copyright (c) 2002 Berliner Elektronenspeicherringgesellschaft fuer
+*     Synchrotronstrahlung.
+* EPICS BASE Versions 3.13.7
+* and higher are distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* 
+/*
  *  Author: Ralph Lange (BESSY)
  *
  *  Modification History
  *  2008/04/16 Ralph Lange (BESSY)
  *     Updated usage info
+ *  2009/03/31 Larry Hoff (BNL)
+ *     Added field separators
+ *  2009/04/01 Ralph Lange (HZB/BESSY)
+ *     Added support for long strings (array of char) and quoting of nonprintable characters
  *
  */
 
@@ -43,7 +48,8 @@ void usage (void)
     "Channel Access options:\n"
     "  -w <sec>:  Wait time, specifies CA timeout, default is %f second(s)\n"
     "  -m <mask>: Specify CA event mask to use, with <mask> being any combination of\n"
-    "             'v' (value), 'a' (alarm), 'l' (log). Default: va\n"
+    "             'v' (value), 'a' (alarm), 'l' (log/archive), 'p' (property). Default: va\n"
+    "  -p <prio>: CA priority (0-%u, default 0=lowest)\n"
     "Timestamps:\n"
     "  Default: Print absolute timestamps (as reported by CA server)\n"
     "  -t <key>:  Specify timestamp source(s) and type, with <key> containing\n"
@@ -58,6 +64,7 @@ void usage (void)
     "Arrays: Value format: print number of requested values, then list of values\n"
     "  Default:    Print all values\n"
     "  -# <count>: Print first <count> elements of an array\n"
+    "  -S:         Print array of char as a string (long string)\n"
     "Floating point type format:\n"
     "  Default: Use %%g format\n"
     "  -e <nr>: Use %%e format, with a precision of <nr> digits\n"
@@ -69,9 +76,11 @@ void usage (void)
     "  -0x: Print as hex number\n"
     "  -0o: Print as octal number\n"
     "  -0b: Print as binary number\n"
+    "Alternate output field separator:\n"
+    "  -F <ofs>: Use <ofs> as an alternate output field separator\n"
     "\nExample: camonitor -f8 my_channel another_channel\n"
     "  (doubles are printed as %%f with precision of 8)\n\n"
-	, DEFAULT_TIMEOUT);
+             , DEFAULT_TIMEOUT, CA_PRIORITY_MAX);
 }
 
 
@@ -87,7 +96,7 @@ void usage (void)
  *
  **************************************************************************-*/
 
-void event_handler (evargs args)
+static void event_handler (evargs args)
 {
     pv* pv = args.usr;
 
@@ -97,7 +106,7 @@ void event_handler (evargs args)
         pv->dbrType = args.type;
         memcpy(pv->value, args.dbr, dbr_size_n(args.type, args.count));
 
-        print_time_val_sts(pv, pv->reqElems);
+        print_time_val_sts(pv, reqElems);
         fflush(stdout);
     }
 }
@@ -113,11 +122,10 @@ void event_handler (evargs args)
  *
  **************************************************************************-*/
 
-void connection_handler ( struct connection_handler_args args )
+static void connection_handler ( struct connection_handler_args args )
 {
     pv *ppv = ( pv * ) ca_puser ( args.chid );
     if ( args.op == CA_OP_CONN_UP ) {
-        int dbrType;
                                 /* Set up pv structure */
                                 /* ------------------- */
 
@@ -126,17 +134,17 @@ void connection_handler ( struct connection_handler_args args )
         ppv->dbfType = ca_field_type(ppv->chid);
 
                                 /* Set up value structures */
-        dbrType = dbf_type_to_DBR_TIME(ppv->dbfType); /* Use native type */
-        if (dbr_type_is_ENUM(dbrType))                  /* Enums honour -n option */
+        ppv->dbrType = dbf_type_to_DBR_TIME(ppv->dbfType); /* Use native type */
+        if (dbr_type_is_ENUM(ppv->dbrType))                  /* Enums honour -n option */
         {
-            if (enumAsNr) dbrType = DBR_TIME_INT;
-            else          dbrType = DBR_TIME_STRING;
+            if (enumAsNr) ppv->dbrType = DBR_TIME_INT;
+            else          ppv->dbrType = DBR_TIME_STRING;
         }
-        
+
         else if (floatAsString &&
-                 (dbr_type_is_FLOAT(dbrType) || dbr_type_is_DOUBLE(dbrType)))
+                 (dbr_type_is_FLOAT(ppv->dbrType) || dbr_type_is_DOUBLE(ppv->dbrType)))
         {
-            dbrType = DBR_TIME_STRING;
+            ppv->dbrType = DBR_TIME_STRING;
         }
                                 /* Adjust array count */
         if (reqElems == 0 || ppv->nElems < reqElems){
@@ -145,9 +153,6 @@ void connection_handler ( struct connection_handler_args args )
             ppv->reqElems = reqElems; /* Limit to specified number */
         }
 
-                                /* Remember dbrType */
-        ppv->dbrType  = dbrType;
-
         ppv->onceConnected = 1;
         nConn++;
                                 /* Issue CA request */
@@ -155,9 +160,9 @@ void connection_handler ( struct connection_handler_args args )
         /* install monitor once with first connect */
         if ( ! ppv->value ) {
                                     /* Allocate value structure */
-            ppv->value = calloc(1, dbr_size_n(dbrType, ppv->reqElems));           
+            ppv->value = calloc(1, dbr_size_n(ppv->dbrType, ppv->reqElems));
             if ( ppv->value ) {
-                ppv->status = ca_create_subscription(dbrType,
+                ppv->status = ca_create_subscription(ppv->dbrType,
                                                 ppv->reqElems,
                                                 ppv->chid,
                                                 eventMask,
@@ -173,7 +178,7 @@ void connection_handler ( struct connection_handler_args args )
     else if ( args.op == CA_OP_CONN_DOWN ) {
         nConn--;
         ppv->status = ECA_DISCONN;
-        print_time_val_sts(ppv, ppv->reqElems);
+        print_time_val_sts(ppv, reqElems);
     }
 }
 
@@ -208,7 +213,7 @@ int main (int argc, char *argv[])
 
     setvbuf(stdout,NULL,_IOLBF,BUFSIZ);   /* Set stdout to line buffering */
 
-    while ((opt = getopt(argc, argv, ":nhm:se:f:g:#:d:0:w:t:")) != -1) {
+    while ((opt = getopt(argc, argv, ":nhm:sSe:f:g:#:d:0:w:t:p:F:")) != -1) {
         switch (opt) {
         case 'h':               /* Print usage */
             usage();
@@ -240,7 +245,7 @@ int main (int argc, char *argv[])
             if(epicsScanDouble(optarg, &caTimeout) != 1)
             {
                 fprintf(stderr, "'%s' is not a valid timeout value "
-                        "- ignored. ('caget -h' for help.)\n", optarg);
+                        "- ignored. ('camonitor -h' for help.)\n", optarg);
                 caTimeout = DEFAULT_TIMEOUT;
             }
             break;
@@ -248,9 +253,18 @@ int main (int argc, char *argv[])
             if (sscanf(optarg,"%ld", &reqElems) != 1)
             {
                 fprintf(stderr, "'%s' is not a valid array element count "
-                        "- ignored. ('caget -h' for help.)\n", optarg);
+                        "- ignored. ('camonitor -h' for help.)\n", optarg);
                 reqElems = 0;
             }
+            break;
+        case 'p':               /* CA priority */
+            if (sscanf(optarg,"%u", &caPriority) != 1)
+            {
+                fprintf(stderr, "'%s' is not a valid CA priority "
+                        "- ignored. ('camonitor -h' for help.)\n", optarg);
+                caPriority = DEFAULT_CA_PRIORITY;
+            }
+            if (caPriority > CA_PRIORITY_MAX) caPriority = CA_PRIORITY_MAX;
             break;
         case 'm':               /* Select CA event mask */
             eventMask = 0;
@@ -262,16 +276,20 @@ int main (int argc, char *argv[])
                     case 'v': eventMask |= DBE_VALUE; break;
                     case 'a': eventMask |= DBE_ALARM; break;
                     case 'l': eventMask |= DBE_LOG; break;
-                    default :
-                        fprintf(stderr, "Invalid argument '%s' "
-                                "for option '-m' - ignored.\n", optarg);
-                        eventMask = DBE_VALUE | DBE_ALARM;
-                        err = 1;
+                    case 'p': eventMask |= DBE_PROPERTY; break;
+                        default :
+                            fprintf(stderr, "Invalid argument '%s' "
+                                    "for option '-m' - ignored.\n", optarg);
+                            eventMask = DBE_VALUE | DBE_ALARM;
+                            err = 1;
                     }
             }
             break;
         case 's':               /* Select string dbr for floating type data */
             floatAsString = 1;
+            break;
+        case 'S':               /* Treat char array as (long) string */
+            charArrAsStr = 1;
             break;
         case 'e':               /* Select %e/%f/%g format, using <arg> digits */
         case 'f':
@@ -299,14 +317,17 @@ int main (int argc, char *argv[])
                         "for option '-0' - ignored.\n", optarg);
             }
             break;
+        case 'F':               /* Store this for output and tool_lib formatting */
+            fieldSeparator = (char) *optarg;
+            break;
         case '?':
             fprintf(stderr,
-                    "Unrecognized option: '-%c'. ('caget -h' for help.)\n",
+                    "Unrecognized option: '-%c'. ('camonitor -h' for help.)\n",
                     optopt);
             return 1;
         case ':':
             fprintf(stderr,
-                    "Option '-%c' requires an argument. ('caget -h' for help.)\n",
+                    "Option '-%c' requires an argument. ('camonitor -h' for help.)\n",
                     optopt);
             return 1;
         default :
@@ -355,7 +376,7 @@ int main (int argc, char *argv[])
     for (n = 0; n < nPvs; n++)
     {
         if (!pvs[n].onceConnected)
-            print_time_val_sts(&pvs[n], pvs[n].reqElems);
+            print_time_val_sts(&pvs[n], reqElems);
     }
 
                                 /* Read and print data forever */

@@ -8,17 +8,19 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      caServerI.cc,v 1.51.2.2 2006/11/16 19:32:12 anj Exp
+ *      caServerI.cc,v 1.51.2.4 2009/08/06 02:21:22 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
  *              505 665 1831
  */
 
+#include <stdarg.h>
 #include <stdexcept>
 
 #include "epicsGuard.h"
 #include "epicsVersion.h"
+#include "errlog.h"
 
 #include "addrList.h"
 
@@ -34,7 +36,7 @@
 static const char pVersionCAS[] = 
     "@(#) " EPICS_VERSION_STRING 
     ", CA Portable Server Library " 
-    "2006/11/16 19:32:12";
+    "2009/08/06 02:21:22";
 
 caServerI::caServerI ( caServer & tool ) :
     adapter (tool),
@@ -42,7 +44,8 @@ caServerI::caServerI ( caServer & tool ) :
     beaconAnomalyGov ( * new beaconAnomalyGovernor ( *this ) ),
     debugLevel ( 0u ),
     nEventsProcessed ( 0u ),
-    nEventsPosted ( 0u )
+    nEventsPosted ( 0u ),
+    ioInProgressCount ( 0u )
 {
 	assert ( & adapter != NULL );
 

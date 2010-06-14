@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* epicsUnitTestTest.c,v 1.1.2.1 2006/03/30 20:46:16 anj Exp
+/* epicsUnitTestTest.c,v 1.1.2.2 2009/04/03 17:46:25 lange Exp
  * Author: Andrew Johnson
  *
  * Test for the unit test module...
@@ -16,7 +16,7 @@
 #define testOk1_success 1
 #define testOk1_failure 0
 
-int main () {
+int main (void) {
     testPlan(11);
     testOk(1, "testOk(1)");
     testOk(0, "testOk(0)");

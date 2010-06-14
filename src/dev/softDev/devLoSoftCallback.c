@@ -28,7 +28,7 @@
 #include "epicsExport.h"
 
 /* Create the dset for devLoSoftCallback */
-static long write_longout();
+static long write_longout(longoutRecord *prec);
 struct {
 	long		number;
 	DEVSUPFUN	report;
@@ -46,22 +46,22 @@ struct {
 };
 epicsExportAddress(dset,devLoSoftCallback);
 
-static long write_longout(longoutRecord	*plongout)
+static long write_longout(longoutRecord	*prec)
 {
-    struct link *plink = &plongout->out;
+    struct link *plink = &prec->out;
     long status;
 
-    if(plongout->pact) return(0);
+    if(prec->pact) return(0);
     if(plink->type!=CA_LINK) {
-        status = dbPutLink(plink,DBR_LONG,&plongout->val,1);
+        status = dbPutLink(plink,DBR_LONG,&prec->val,1);
         return(status);
     }
-    status = dbCaPutLinkCallback(plink,DBR_LONG,&plongout->val,1,
-        (dbCaCallback)dbCaCallbackProcess,plink);
+    status = dbCaPutLinkCallback(plink,DBR_LONG,&prec->val,1,
+        dbCaCallbackProcess,plink);
     if(status) {
-        recGblSetSevr(plongout,LINK_ALARM,INVALID_ALARM);
+        recGblSetSevr(prec,LINK_ALARM,INVALID_ALARM);
         return(status);
     }
-    plongout->pact = TRUE;
+    prec->pact = TRUE;
     return(0);
 }

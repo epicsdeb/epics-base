@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* stateRecord.c,v 1.11.2.1 2008/07/01 16:49:06 anj Exp */
+/* stateRecord.c,v 1.11.2.2 2009/04/02 21:40:38 lange Exp */
 
 /* recState.c - Record Support Routines for State records */
 /*
@@ -78,28 +78,28 @@ epicsExportAddress(rset,stateRSET);
 
 static void monitor(stateRecord *);
 
-static long process(stateRecord *pstate)
+static long process(stateRecord *prec)
 {
 
-	pstate->udf = FALSE;
-        pstate->pact=TRUE;
-	recGblGetTimeStamp(pstate);
-	monitor(pstate);
+	prec->udf = FALSE;
+        prec->pact=TRUE;
+	recGblGetTimeStamp(prec);
+	monitor(prec);
         /* process the forward scan link record */
-        recGblFwdLink(pstate);
-        pstate->pact=FALSE;
+        recGblFwdLink(prec);
+        prec->pact=FALSE;
 	return(0);
 }
 
-static void monitor(stateRecord *pstate)
+static void monitor(stateRecord *prec)
 {
     unsigned short  monitor_mask;
 
     /* get previous stat and sevr  and new stat and sevr*/
-    monitor_mask = recGblResetAlarms(pstate);
-    if(strncmp(pstate->oval,pstate->val,sizeof(pstate->val))) {
-        db_post_events(pstate,&(pstate->val[0]),monitor_mask|DBE_VALUE|DBE_LOG);
-	strncpy(pstate->oval,pstate->val,sizeof(pstate->val));
+    monitor_mask = recGblResetAlarms(prec);
+    if(strncmp(prec->oval,prec->val,sizeof(prec->val))) {
+        db_post_events(prec,&(prec->val[0]),monitor_mask|DBE_VALUE|DBE_LOG);
+	strncpy(prec->oval,prec->val,sizeof(prec->val));
     }
     return;
 }

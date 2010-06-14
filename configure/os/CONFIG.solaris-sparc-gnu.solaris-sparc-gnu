@@ -1,6 +1,6 @@
 # CONFIG.solaris-sparc-gnu.solaris-sparc-gnu
 #
-# CONFIG.solaris-sparc-gnu.solaris-sparc-gnu,v 1.10.2.11 2007/12/11 20:22:06 jba Exp
+# CONFIG.solaris-sparc-gnu.solaris-sparc-gnu,v 1.10.2.12 2009/07/09 21:53:27 jba Exp
 # This file is maintained by the build community.
 #
 # Definitions for solaris-sparc gnu compiler host - solaris-sparc gnu compiler target builds
@@ -21,3 +21,6 @@ STATIC_LDLIBS_NO=
 
 OP_SYS_LDFLAGS += -z ignore -z combreloc -z lazyload
 
+SHRLIB_LDFLAGS += -Wl,-z,defs -Wl,-z,text -Wl,-h,$@
+LOADABLE_SHRLIB_LDFLAGS += -Wl,-z,text -Wl,-h,$@
+GNU_LDLIBS_YES += -lc

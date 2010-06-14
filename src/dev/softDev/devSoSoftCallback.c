@@ -7,10 +7,10 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* devSoSoftCallback.c */
+/* devSoSoftCallback.c,v 1.1.2.6 2009/04/29 18:24:25 anj Exp */
 /*
- *      Author:  Marty Kraimer
- *      Date:    04NOV2003
+ *      Author: Marty Kraimer
+ *      Date:   04NOV2003
  */
 
 #include <stdlib.h>
@@ -27,41 +27,42 @@
 #include "epicsExport.h"
 
 /* Create the dset for devSoSoftCallback */
-static long write_stringout();
+static long write_stringout(stringoutRecord *prec);
 struct {
-	long		number;
-	DEVSUPFUN	report;
-	DEVSUPFUN	init;
-	DEVSUPFUN	init_record;
-	DEVSUPFUN	get_ioint_info;
-	DEVSUPFUN	write_stringout;
-}devSoSoftCallback={
-	5,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	write_stringout
+    long        number;
+    DEVSUPFUN   report;
+    DEVSUPFUN   init;
+    DEVSUPFUN   init_record;
+    DEVSUPFUN   get_ioint_info;
+    DEVSUPFUN   write_stringout;
+} devSoSoftCallback = {
+    5,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    write_stringout
 };
-epicsExportAddress(dset,devSoSoftCallback);
+epicsExportAddress(dset, devSoSoftCallback);
 
-static long write_stringout(pstringout)
-    struct stringoutRecord	*pstringout;
+static long write_stringout(stringoutRecord *prec)
 {
-    struct link *plink = &pstringout->out;
+    struct link *plink = &prec->out;
     long status;
 
-    if(pstringout->pact) return(0);
-    if(plink->type!=CA_LINK) {
-        status = dbPutLink(plink,DBR_STRING,&pstringout->val,1);
-        return(status);
+    if (prec->pact) return 0;
+
+    if (plink->type != CA_LINK) {
+        return dbPutLink(plink, DBR_STRING, &prec->val, 1);
     }
-    status = dbCaPutLinkCallback(plink,DBR_STRING,&pstringout->val,1,
-        (dbCaCallback)dbCaCallbackProcess,plink);
-    if(status) {
-        recGblSetSevr(pstringout,LINK_ALARM,INVALID_ALARM);
-        return(status);
+
+    status = dbCaPutLinkCallback(plink, DBR_STRING, &prec->val, 1,
+        dbCaCallbackProcess, plink);
+    if (status) {
+        recGblSetSevr(prec, LINK_ALARM, INVALID_ALARM);
+        return status;
     }
-    pstringout->pact = TRUE;
-    return(0);
+
+    prec->pact = TRUE;
+    return 0;
 }

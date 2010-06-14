@@ -1,4 +1,4 @@
-# RULES_IDL,v 1.1.2.2 2006/03/29 21:59:14 jba Exp
+# RULES_IDL,v 1.1.2.3 2009/05/06 15:13:45 jba Exp
 
 ifdef T_A
 ifeq ($(findstring Host,$(VALID_BUILDS)),Host)
@@ -6,8 +6,8 @@ ifeq ($(findstring Host,$(VALID_BUILDS)),Host)
 INSTALL_IDL                = $(INSTALL_LOCATION)/idllib
 DIRECTORY_TARGETS += $(INSTALL_IDL)
 
-ifneq ($(strip $(IDLS_$(ARCH_CLASS))),)
-IDLS += $(subst -nil-,,$(IDLS_$(ARCH_CLASS)))
+ifneq ($(strip $(IDLS_$(OS_CLASS))),)
+IDLS += $(subst -nil-,,$(IDLS_$(OS_CLASS)))
 else
 ifdef IDLS_DEFAULT
 IDLS += $(IDLS_DEFAULT)

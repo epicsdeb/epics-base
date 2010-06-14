@@ -78,7 +78,7 @@ typedef struct epicsThreadOSD {
 static pthread_key_t getpthreadInfo;
 static pthread_mutex_t onceLock;
 static pthread_mutex_t listLock;
-static ELLLIST pthreadList;
+static ELLLIST pthreadList = ELLLIST_INIT;
 static commonAttr *pcommonAttr = 0;
 static int epicsThreadOnceCalled = 0;
 
@@ -111,42 +111,6 @@ if(status) { \
     exit(-1);\
 }
 
-/* myAtExit just cancels all threads. Someday propercleanup is needed*/
-static void myAtExit(void)
-{
-    epicsThreadOSD *pthreadInfo;
-    epicsThreadOSD *pthreadSelf;
-    static int ntimes=0;
-    int status;
-
-    ntimes++;
-    if(ntimes>1) {
-        fprintf(stderr,"osdThread myAtExit extered multiple times\n");
-        return;
-    }
-    epicsExitCallAtExits();
-    status = mutexLock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_lock","myAtExit");
-    pthreadSelf = (epicsThreadOSD *)pthread_getspecific(getpthreadInfo);
-    if(pthreadSelf==NULL)
-        pthreadSelf = createImplicit();
-    pthreadInfo=(epicsThreadOSD *)ellLast(&pthreadList);
-    while(pthreadInfo) {
-        if(pthreadInfo != pthreadSelf /*dont cancel this thread*/
-        && (strcmp("_main_",pthreadInfo->name)!=0)){/* dont cancel main*/
-            pthread_cancel(pthreadInfo->tid);
-        }
-        pthreadInfo=(epicsThreadOSD *)ellPrevious(&pthreadInfo->node);
-    }
-    status = pthread_mutex_unlock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_unlock","myAtExit");
-
-    /* delete all resources created by once */
-    free(pcommonAttr); pcommonAttr=0;
-    pthread_mutex_destroy(&listLock);
-    pthread_mutex_destroy(&onceLock);
-    pthread_key_delete(getpthreadInfo);
-}
 
 #if defined (_POSIX_THREAD_PRIORITY_SCHEDULING)
 static int getOssPriorityValue(epicsThreadOSD *pthreadInfo)
@@ -247,7 +211,6 @@ static void once(void)
     checkStatusQuit(status,"pthread_mutex_init","epicsThreadInit");
     status = pthread_mutex_init(&listLock,0);
     checkStatusQuit(status,"pthread_mutex_init","epicsThreadInit");
-    ellInit(&pthreadList);
     pcommonAttr = calloc(1,sizeof(commonAttr));
     if(!pcommonAttr) checkStatusOnceQuit(errno,"calloc","epicsThreadInit");
     status = pthread_attr_init(&pcommonAttr->attr);
@@ -291,7 +254,7 @@ static void once(void)
     pthreadInfo->isOnThreadList = 1;
     status = pthread_mutex_unlock(&listLock);
     checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadInit");
-    status = atexit(myAtExit);
+    status = atexit(epicsExitCallAtExits);
     checkStatusOnce(status,"atexit");
     epicsThreadOnceCalled = 1;
 }
@@ -606,7 +569,9 @@ epicsShareFunc void epicsShareAPI epicsThreadSleep(double seconds)
     delayTime.tv_sec = (time_t)seconds;
     nanoseconds = (seconds - (double)delayTime.tv_sec) *1e9;
     delayTime.tv_nsec = (long)nanoseconds;
-    nanosleep(&delayTime,&remainingTime);
+    while (nanosleep(&delayTime, &remainingTime) == -1 &&
+           errno == EINTR)
+        delayTime = remainingTime;
 }
 
 epicsShareFunc epicsThreadId epicsShareAPI epicsThreadGetIdSelf(void) {

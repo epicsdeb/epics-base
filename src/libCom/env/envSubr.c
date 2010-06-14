@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*	envSubr.c,v 1.33.2.4 2006/12/22 21:52:51 jhill Exp
+/*	envSubr.c,v 1.33.2.6 2009/07/09 15:27:43 anj Exp
  *	Author:	Roger A. Cole
  *	Date:	07-20-91
  */
@@ -44,6 +44,7 @@
 #include "epicsStdlib.h"
 #include "epicsStdioRedirect.h"
 #include "errMdef.h"
+#include "errlog.h"
 #include "envDefs.h"
 #include "epicsAssert.h"
 #include "osiSock.h"
@@ -368,7 +369,7 @@ const ENV_PARAM *pParam)	/* pointer to config param structure */
 *
 *-*/
 long epicsShareAPI
-epicsPrtEnvParams()
+epicsPrtEnvParams(void)
 {
     const ENV_PARAM **ppParam = env_param_list;
      

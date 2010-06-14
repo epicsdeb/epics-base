@@ -25,6 +25,7 @@
 #define epicsAssertAuthor "Jeff Hill johill@lanl.gov"
 
 #include "envDefs.h"
+#include "dbDefs.h"
 #include "osiProcess.h"
 #include "osiWireFormat.h"
 #include "epicsAlgorithm.h"
@@ -684,6 +685,8 @@ bool udpiiu::beaconAction (
     const osiSockAddr & net_addr, const epicsTime & currentTime )
 {
     struct sockaddr_in ina;
+
+    memset(&ina, 0, sizeof(struct sockaddr_in));
 
     if ( net_addr.sa.sa_family != AF_INET ) {
         return false;

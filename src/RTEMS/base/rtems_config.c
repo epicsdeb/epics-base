@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS configuration for EPICS
- *  rtems_config.c,v 1.2.2.20 2008/09/15 16:12:33 norume Exp
+ *  rtems_config.c,v 1.2.2.23 2009/07/29 20:58:37 norume Exp
  *      Author: W. Eric Norum
  *              norume@aps.anl.gov
  *              (630) 252-4793
@@ -19,17 +19,21 @@
  *                         RTEMS CONFIGURATION                         *
  ***********************************************************************
  */
-
 #define CONFIGURE_RTEMS_INIT_TASKS_TABLE
 
-#define CONFIGURE_EXECUTIVE_RAM_SIZE        (2000*1024)
+#if __RTEMS_MAJOR__>4 || ( __RTEMS_MAJOR__==4 && __RTEMS_MINOR__>9 )
+#  define CONFIGURE_UNIFIED_WORK_AREAS
+#else
+#  define CONFIGURE_EXECUTIVE_RAM_SIZE (2000*1024)
+#endif
+
 #define CONFIGURE_MAXIMUM_TASKS             rtems_resource_unlimited(30)
 #define CONFIGURE_MAXIMUM_SEMAPHORES        rtems_resource_unlimited(500)
 #define CONFIGURE_MAXIMUM_TIMERS            rtems_resource_unlimited(20)
 #define CONFIGURE_MAXIMUM_MESSAGE_QUEUES    rtems_resource_unlimited(5)
 #define CONFIGURE_MAXIMUM_USER_EXTENSIONS   1
 
-#define CONFIGURE_LIBIO_MAXIMUM_FILE_DESCRIPTORS 100
+#define CONFIGURE_LIBIO_MAXIMUM_FILE_DESCRIPTORS 150
 #define CONFIGURE_USE_IMFS_AS_BASE_FILESYSTEM
 #define CONFIGURE_MAXIMUM_DRIVERS       8
 
@@ -56,9 +60,10 @@ rtems_task Init (rtems_task_argument argument);
  * appropriate conditionals to use.
  * The new general time support makes including the RTC driverr less important.
  */
-#if !defined(__mc68040__) && !defined(__mcf5200__) && !defined(mpc7455) && !defined(__arm__)  /* don't have RTC code */
+#if !defined(mpc604) && !defined(__mc68040__) && !defined(__mcf5200__) && !defined(mpc7455) && !defined(__arm__)  /* don't have RTC code */
 #define CONFIGURE_APPLICATION_NEEDS_RTC_DRIVER
 #endif
+
 
 #include <bsp.h>
 #include <rtems/confdefs.h>

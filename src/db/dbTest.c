@@ -1,5 +1,5 @@
 /*************************************************************************\
-* Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* dbTest.c,v 1.88.2.19 2008/08/26 14:20:37 anj Exp */
+/* dbTest.c,v 1.88.2.23 2009/07/08 19:08:22 anj Exp */
 /*	database access test subroutines */
 
 #include <stddef.h>
@@ -118,8 +118,7 @@ long epicsShareAPI dbl(const char *precordTypename, const char *fields)
     if (fields) {
         char *pnext;
 
-        fieldnames = calloc(strlen(fields) + 1, sizeof(char));
-        strcpy(fieldnames, fields);
+        fieldnames = epicsStrDup(fields);
         nfields = 1;
         pnext = fieldnames;
         while (*pnext && (pnext = strchr(pnext,' '))) {
@@ -183,7 +182,9 @@ long epicsShareAPI dbnr(int verbose)
     DBENTRY *pdbentry=&dbentry;
     long status;
     int nrecords;
-    int total = 0;
+    int naliases;
+    int trecords = 0;
+    int taliases = 0;
 
     if (!pdbbase) {
         printf("No database loaded\n");
@@ -191,19 +192,55 @@ long epicsShareAPI dbnr(int verbose)
     }
     dbInitEntry(pdbbase, pdbentry);
     status = dbFirstRecordType(pdbentry);
-    if (status) printf("No record types loaded\n");
+    if (status) {
+        printf("No record types loaded\n");
+        return 0;
+    }
+    printf("Records  Aliases  Record Type\n");
     while (!status) {
-        nrecords = dbGetNRecords(pdbentry);
-        total += nrecords;
+        naliases = dbGetNAliases(pdbentry);
+        taliases += naliases;
+        nrecords = dbGetNRecords(pdbentry) - naliases;
+        trecords += nrecords;
         if (verbose || nrecords)
-            printf("%4d %s\n", nrecords, dbGetRecordTypeName(pdbentry));
+            printf(" %5d    %5d    %s\n",
+                nrecords, naliases, dbGetRecordTypeName(pdbentry));
         status = dbNextRecordType(pdbentry);
     }
     dbFinishEntry(pdbentry);
-    printf("Total Records: %d\n", total);
+    printf("Total %d records, %d aliases\n", trecords, taliases);
     return 0;
 }
 
+long epicsShareAPI dbla(const char *pmask)
+{
+    DBENTRY dbentry;
+    DBENTRY *pdbentry = &dbentry;
+    long status;
+
+    if (!pdbbase) {
+        printf("No database loaded\n");
+        return 0;
+    }
+    dbInitEntry(pdbbase, pdbentry);
+    status = dbFirstRecordType(pdbentry);
+    while (!status) {
+        for (status = dbFirstRecord(pdbentry); !status;
+             status = dbNextRecord(pdbentry)) {
+            char *palias;
+
+            if (!dbIsAlias(pdbentry)) continue;
+            palias = dbGetRecordName(pdbentry);
+            if (pmask && *pmask && !epicsStrGlobMatch(palias, pmask)) continue;
+            dbFindField(pdbentry, "NAME");
+            printf("%s -> %s\n", palias, dbGetString(pdbentry));
+        }
+        status = dbNextRecordType(pdbentry);
+    }
+    dbFinishEntry(pdbentry);
+    return 0;
+}
+
 long epicsShareAPI dbgrep(const char *pmask)
 {
     DBENTRY dbentry;
@@ -284,12 +321,12 @@ long epicsShareAPI dbpf(const char *pname,const char *pvalue)
         unsigned short value;
 
         sscanf(pvalue, "%hu", &value);
-        status=dbPutField(&addr, DBR_ENUM, &value, 1L);
+        status = dbPutField(&addr, DBR_ENUM, &value, 1L);
     } else if (addr.dbr_field_type == DBR_CHAR &&
         addr.no_elements > 1) {
         status = dbPutField(&addr, DBR_CHAR, pvalue, strlen(pvalue) + 1);
     } else {
-        status=dbPutField(&addr, DBR_STRING, pvalue, 1L);
+        status = dbPutField(&addr, DBR_STRING, pvalue, 1L);
     }
     if (status) {
          errMessage(status,"- dbPutField error\n");

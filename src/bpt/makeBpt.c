@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*  makeBpt.c,v 1.11 2003/04/23 15:22:55 lange Exp
+/*  makeBpt.c,v 1.11.2.5 2009/04/24 16:53:20 anj Exp
  *	Author: Marty Kraimer
  *	Date:	9/28/95
  *	Replacement for old bldCvtTable
@@ -71,14 +71,12 @@ static int getNumber(char **pbeg, double *value)
 	
 static void errExit(char *pmessage)
 {
-    fprintf(stderr,pmessage);
-    fprintf(stderr,"\n");
+    fprintf(stderr, "%s\n", pmessage);
+    fflush(stderr);
     exit(-1);
 }
 
-int main(argc, argv)
-    int             argc;
-    char          **argv;
+int main(int argc, char **argv)
 {
     char	*pbeg;
     char	*pend;
@@ -102,19 +100,27 @@ int main(argc, argv)
 	exit(-1);
     }
     if (argc==2) {
-    plastSlash = strrchr(argv[1],'/');
-    plastSlash = (plastSlash ? plastSlash+1 : argv[1]);
-    outFilename = calloc(1,strlen(plastSlash)+2);
-    strcpy(outFilename,plastSlash);
-    pext = strstr(outFilename,".data");
-    if(!pext) {
-	fprintf(stderr,"Input file MUST have .data  extension\n");
-	exit(-1);
-    }
-    strcpy(pext,".dbd");
+	plastSlash = strrchr(argv[1],'/');
+	plastSlash = (plastSlash ? plastSlash+1 : argv[1]);
+	outFilename = calloc(1,strlen(plastSlash)+2);
+	if(!outFilename) {
+	    fprintf(stderr,"calloc failed\n");
+	    exit(-1);
+	}
+	strcpy(outFilename,plastSlash);
+	pext = strstr(outFilename,".data");
+	if(!pext) {
+	    fprintf(stderr,"Input file MUST have .data  extension\n");
+	    exit(-1);
+	}
+	strcpy(pext,".dbd");
     } else {
-    outFilename = calloc(1,strlen(argv[2])+1);
-    strcpy(outFilename,argv[2]);
+	outFilename = calloc(1,strlen(argv[2])+1);
+	if(!outFilename) {
+	    fprintf(stderr,"calloc failed\n");
+	    exit(-1);
+	}
+	strcpy(outFilename,argv[2]);
     }
     inFile = fopen(argv[1],"r");
     if(!inFile) {
@@ -128,7 +134,6 @@ int main(argc, argv)
     }
     while(fgets(inbuf,MAX_LINE_SIZE,inFile)) {
 	linenum++;
-	inbuf[strlen(inbuf)] = '\0'; /* remove newline*/
 	pbeg = inbuf;
 	while(isspace((int)*pbeg) && *pbeg!= '\0') pbeg++;
 	if(*pbeg == '!' || *pbeg == '\0') continue;
@@ -140,6 +145,10 @@ int main(argc, argv)
 	len = pend - pbeg;
 	if(len<=1) errExit("Illegal Header");
 	pname = calloc(len,sizeof(char));
+	if(!pname) {
+	    fprintf(stderr,"calloc failed while processing line %d\n",linenum);
+	    exit(-1);
+	}
 	strncpy(pname,pbeg,len);
 	pbeg = pend + 1;
 	if(getNumber(&pbeg,&value)) errExit("Illegal Header");
@@ -168,11 +177,16 @@ got_header:
     while(fgets(inbuf,MAX_LINE_SIZE,inFile)) {
 	double	value;
 
-	inbuf[strlen(inbuf)] = '\0'; /* remove newline*/
+	linenum++;
 	pbeg = inbuf;
 	while(!getNumber(&pbeg,&value)) {
 	    ndata++;
 	    pdataList = (dataList *)calloc(1,sizeof(dataList));
+	    if(!pdataList) {
+		fprintf(stderr,"calloc failed (after header)"
+			" while processing line %d\n",linenum);
+		exit(-1);
+	    }
 	    if(!phead) 
 		phead = pdataList;
 	    else
@@ -186,6 +200,10 @@ got_header:
     }
     brkCreateInfo.nTable = ndata;
     pdata = (double *)calloc(brkCreateInfo.nTable,sizeof(double));
+    if(!pdata) {
+	fprintf(stderr,"calloc failed for table length %ld\n",brkCreateInfo.nTable);
+	exit(-1);
+    }
     pnext = phead;
     for(n=0; n<brkCreateInfo.nTable; n++) {
 	pdata[n] = pnext->value;
@@ -315,7 +333,7 @@ static int create_break( struct brkCreateInfo *pbci, brkInt *pabrkInt,
  *************************************************************************/
 
     /* Must start with table entry corresponding to engLow; */
-    i = ilow;
+    i = (int) ilow;
     if (i >= ntable - 1)
 	i = ntable - 2;
     rawBeg = table[i] + (table[i + 1] - table[i]) * (ilow - (double) i);

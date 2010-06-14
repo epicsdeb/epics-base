@@ -1,4 +1,4 @@
-# RULES_TOP,v 1.1 2000/09/27 16:06:53 jba Exp
+# RULES_TOP,v 1.1.2.1 2009/03/31 19:48:17 jba Exp
 
-include $(EPICS_BASE)/configure/RULES_TOP
+include $(CONFIG)/RULES_TOP
 

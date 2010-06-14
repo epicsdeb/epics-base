@@ -14,7 +14,7 @@
  * Author: Jim Kowalkowski
  * Date: 2/96
  *
- * aitTypes.h,v 1.16.2.1 2004/01/27 21:54:06 anj Exp
+ * aitTypes.h,v 1.16.2.2 2008/12/10 21:51:19 anj Exp
  *
  */
 
@@ -35,7 +35,14 @@ typedef float               aitFloat32;
 typedef double              aitFloat64;
 typedef aitUint32           aitIndex;
 typedef void*               aitPointer;
-typedef aitUint32           aitStatus;
+
+typedef union {
+    struct {
+        aitUint16 aitStat;
+        aitUint16 aitSevr;
+    } s;
+    aitUint32 u;
+} aitStatus;
 
 /* should the bool be added as a conversion type? it currently is not */
 typedef enum {

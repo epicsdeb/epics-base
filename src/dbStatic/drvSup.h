@@ -1,14 +1,13 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* drvSup.h	Driver Support	*/
-/* share/epicsH drvSup.h,v 1.3 2003/04/01 21:06:09 mrk Exp */
+/* share/epicsH drvSup.h,v 1.3.2.1 2009/07/09 15:27:42 anj Exp */
 
 /*
  *      Author:          Marty Kraimer
@@ -17,6 +16,8 @@
 
 #ifndef INCdrvSuph
 #define INCdrvSuph 1
+
+#include "errMdef.h"
 
 typedef long (*DRVSUPFUN) ();	/* ptr to driver support function*/
 

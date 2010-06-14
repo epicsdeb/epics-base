@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- * dbContextReadNotifyCache.cpp,v 1.1.2.2 2005/04/12 22:41:20 jhill Exp
+ * dbContextReadNotifyCache.cpp,v 1.1.2.3 2009/07/07 23:54:41 jhill Exp
  * Auther Jeff Hill
  */
 
@@ -155,8 +155,9 @@ void dbContextReadNotifyCacheAllocator::show ( unsigned level ) const
             pNext = _pReadNotifyCache->pNext;
             count++;
         }
-        printf ( "\tcount %u and size %lu\n", 
-            count, _readNotifyCacheSize );
+        printf ( "\tcount %lu and size %lu\n", 
+            static_cast < unsigned long > ( count ), 
+            _readNotifyCacheSize );
     }
 }
 

@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
@@ -18,9 +17,6 @@ int nstates;
 core *first_state;
 shifts *first_shift;
 reductions *first_reduction;
-
-int get_state();
-core *new_state();
 
 static core **state_set;
 static core *this_state;
@@ -38,16 +34,27 @@ static short **kernel_base;
 static short **kernel_end;
 static short *kernel_items;
 
+static int get_state(int symbol);
+static void initialize_states(void);
+static void new_itemsets(void);
+static core *new_state(int symbol);
+static void save_shifts(void);
+static void save_reductions(void);
+#ifdef DEBUG
+static void print_derives(void);
+#endif
 
-allocate_itemsets()
+
+static void
+allocate_itemsets(void)
 {
-    register short *itemp;
-    register short *item_end;
-    register int symbol;
-    register int i;
-    register int count;
-    register int max;
-    register short *symbol_count;
+    short *itemp;
+    short *item_end;
+    int symbol;
+    int i;
+    int count;
+    int max;
+    short *symbol_count;
 
     count = 0;
     symbol_count = NEW2(nsyms, short);
@@ -80,8 +87,8 @@ allocate_itemsets()
     kernel_end = NEW2(nsyms, short *);
 }
 
-
-allocate_storage()
+static void
+allocate_storage(void)
 {
     allocate_itemsets();
     shiftset = NEW2(nsyms, short);
@@ -89,12 +96,12 @@ allocate_storage()
     state_set = NEW2(nitems, core *);
 }
 
-
-append_states()
+static void
+append_states(void)
 {
-    register int i;
-    register int j;
-    register int symbol;
+    int i;
+    int j;
+    int symbol;
 
 #ifdef	TRACE
     fprintf(stderr, "Entering append_states()\n");
@@ -118,8 +125,8 @@ append_states()
     }
 }
 
-
-free_storage()
+static void
+free_storage(void)
 {
     FREE(shift_symbol);
     FREE(redset);
@@ -131,8 +138,8 @@ free_storage()
 }
 
 
-
-generate_states()
+static void
+generate_states(void)
 {
     allocate_storage();
     itemset = NEW2(nitems, short);
@@ -159,17 +166,16 @@ generate_states()
 
 
 
-int
-get_state(symbol)
-int symbol;
+static int
+get_state(int symbol)
 {
-    register int key;
-    register short *isp1;
-    register short *isp2;
-    register short *iend;
-    register core *sp;
-    register int found;
-    register int n;
+    int key;
+    short *isp1;
+    short *isp2;
+    short *iend;
+    core *sp;
+    int found;
+    int n;
 
 #ifdef	TRACE
     fprintf(stderr, "Entering get_state(%d)\n", symbol);
@@ -223,12 +229,12 @@ int symbol;
 }
 
 
-
-initialize_states()
+static void
+initialize_states(void)
 {
-    register int i;
-    register short *start_derives;
-    register core *p;
+    int i;
+    short *start_derives;
+    core *p;
 
     start_derives = derives[start_symbol];
     for (i = 0; start_derives[i] >= 0; ++i)
@@ -250,14 +256,14 @@ initialize_states()
     nstates = 1;
 }
 
-
-new_itemsets()
+static void
+new_itemsets(void)
 {
-    register int i;
-    register int shiftcount;
-    register short *isp;
-    register short *ksp;
-    register int symbol;
+    int i;
+    int shiftcount;
+    short *isp;
+    short *ksp;
+    int symbol;
 
     for (i = 0; i < nsyms; i++)
 	kernel_end[i] = 0;
@@ -287,15 +293,14 @@ new_itemsets()
 
 
 
-core *
-new_state(symbol)
-int symbol;
+static core *
+new_state(int symbol)
 {
-    register int n;
-    register core *p;
-    register short *isp1;
-    register short *isp2;
-    register short *iend;
+    int n;
+    core *p;
+    short *isp1;
+    short *isp2;
+    short *iend;
 
 #ifdef	TRACE
     fprintf(stderr, "Entering new_state(%d)\n", symbol);
@@ -326,9 +331,9 @@ int symbol;
 }
 
 
-/* show_cores is used for debugging */
-
-show_cores()
+#ifdef DEBUG
+static void
+show_cores(void)
 {
     core *p;
     int i, j, k, n;
@@ -361,9 +366,8 @@ show_cores()
 }
 
 
-/* show_ritems is used for debugging */
-
-show_ritems()
+static void
+show_ritems(void)
 {
     int i;
 
@@ -372,8 +376,8 @@ show_ritems()
 }
 
 
-/* show_rrhs is used for debugging */
-show_rrhs()
+static void
+show_rrhs(void)
 {
     int i;
 
@@ -382,9 +386,8 @@ show_rrhs()
 }
 
 
-/* show_shifts is used for debugging */
-
-show_shifts()
+static void
+show_shifts(void)
 {
     shifts *p;
     int i, j, k;
@@ -400,14 +403,15 @@ show_shifts()
 	    printf("\t%d\n", p->shift[i]);
     }
 }
+#endif
 
-
-save_shifts()
+static void
+save_shifts(void)
 {
-    register shifts *p;
-    register short *sp1;
-    register short *sp2;
-    register short *send;
+    shifts *p;
+    short *sp1;
+    short *sp2;
+    short *send;
 
     p = (shifts *) allocate((unsigned) (sizeof(shifts) +
 			(nshifts - 1) * sizeof(short)));
@@ -435,16 +439,16 @@ save_shifts()
 }
 
 
-
-save_reductions()
+static void
+save_reductions(void)
 {
-    register short *isp;
-    register short *rp1;
-    register short *rp2;
-    register int item;
-    register int count;
-    register reductions *p;
-    register short *rend;
+    short *isp;
+    short *rp1;
+    short *rp2;
+    int item;
+    int count;
+    reductions *p;
+    short *rend;
 
     count = 0;
     for (isp = itemset; isp < itemsetend; isp++)
@@ -484,12 +488,12 @@ save_reductions()
     }
 }
 
-
-set_derives()
+static void
+set_derives(void)
 {
-    register int i, k;
-    register int lhs;
-    register short *rules;
+    int i, k;
+    int lhs;
+    short *rules;
 
     derives = NEW2(nsyms, short *);
     rules = NEW2(nvars + nrules, short);
@@ -515,17 +519,19 @@ set_derives()
 #endif
 }
 
-free_derives()
+static void
+free_derives(void)
 {
     FREE(derives[start_symbol]);
     FREE(derives);
 }
 
 #ifdef	DEBUG
-print_derives()
+static void
+print_derives(void)
 {
-    register int i;
-    register short *sp;
+    int i;
+    short *sp;
 
     printf("\nDERIVES\n\n");
 
@@ -543,11 +549,11 @@ print_derives()
 }
 #endif
 
-
-set_nullable()
+static void
+set_nullable(void)
 {
-    register int i, j;
-    register int empty;
+    int i, j;
+    int empty;
     int done;
 
     nullable = MALLOC(nsyms);
@@ -592,14 +598,14 @@ set_nullable()
 #endif
 }
 
-
-free_nullable()
+static void
+free_nullable(void)
 {
     FREE(nullable);
 }
 
-
-lr0()
+void
+lr0(void)
 {
     set_derives();
     set_nullable();

@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# convertRelease.pl,v 1.1.2.3 2008/09/23 22:13:50 anj Exp
+# convertRelease.pl,v 1.1.2.4 2009/06/24 19:27:33 anj Exp
 #
 # Convert configure/RELEASE file(s) into something else.
 #
@@ -103,7 +103,7 @@ EOF
 # List the module names defined in RELEASE* files
 #
 sub releaseTops {
-    my @includes = grep !/^(TOP|TEMPLATE_TOP)$/, @apps;
+    my @includes = grep !m/^ (TOP | TEMPLATE_TOP) $/x, @apps;
     print join(' ', @includes), "\n";
 }
 
@@ -119,7 +119,7 @@ sub dllPath {
 }
 
 sub binDirs {
-    my @includes = grep !/^TEMPLATE_TOP$/, @apps;
+    my @includes = grep !m/^ (RULES | TEMPLATE_TOP) $/x, @apps;
     my @path;
     foreach my $app (@includes) {
         my $path = $macros{$app} . "/bin/$arch";
@@ -135,7 +135,7 @@ sub binDirs {
 #
 sub cdCommands {
     die "Architecture not set (use -a option)" unless ($arch);
-    my @includes = grep !/^TEMPLATE_TOP$/, @apps;
+    my @includes = grep !m/^(RULES | TEMPLATE_TOP)$/x, @apps;
     
     unlink($outfile);
     open(OUT,">$outfile") or die "$! creating $outfile";
@@ -167,7 +167,7 @@ sub cdCommands {
 #
 sub envPaths {
     die "Architecture not set (use -a option)" unless ($arch);
-    my @includes = grep !/^TEMPLATE_TOP$/, @apps;
+    my @includes = grep !m/^ (RULES | TEMPLATE_TOP) $/x, @apps;
     
     unlink($outfile);
     open(OUT,">$outfile") or die "$! creating $outfile";
@@ -191,6 +191,7 @@ sub envPaths {
 #
 sub checkRelease {
     my $status = 0;
+    delete $macros{RULES};
     delete $macros{TOP};
     delete $macros{TEMPLATE_TOP};
     
@@ -207,9 +208,9 @@ sub checkRelease {
                 abs_path($macros{$parent}) ne abs_path($ppath)) {
                 print "\n" unless ($status);
                 print "Definition of $parent conflicts with $app support.\n";
-                print "In this application configure/RELEASE defines\n";
+                print "In this application a RELEASE file defines\n";
                 print "\t$parent = $macros{$parent}\n";
-                print "but $app at $path has\n";
+                print "but $app at $path defines\n";
                 print "\t$parent = $ppath\n";
                 $status = 1;
             }

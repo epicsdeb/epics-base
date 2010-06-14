@@ -4,12 +4,11 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      beaconTimer.cc,v 1.2 2003/02/12 19:05:50 jhill Exp
+ *      beaconTimer.cc,v 1.2.2.1 2009/07/09 15:27:39 anj Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -18,6 +17,7 @@
 
 #include "fdManager.h"
 #include "envDefs.h"
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "caServerI.h"

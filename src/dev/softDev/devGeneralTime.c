@@ -3,7 +3,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* devGeneralTime.c,v 1.1.2.5 2008/09/12 22:55:51 anj Exp */
+/* devGeneralTime.c,v 1.1.2.6 2009/01/28 20:01:41 anj Exp */
 /*
  *   Original Author:	Sheng Peng, ORNL / SNS Project
  *   Date:		07/2004
@@ -222,12 +222,17 @@ epicsExportAddress(dset, devLiGeneralTime);
 /********** stringin record **********/
 static const char * timeProvider(void)
 {
-    return generalTimeCurrentTpName();
+    return generalTimeCurrentProviderName();
+}
+
+static const char * highestProvider(void)
+{
+    return generalTimeHighestCurrentName();
 }
 
 static const char * eventProvider(void)
 {
-    return generalTimeEventTpName();
+    return generalTimeEventProviderName();
 }
 
 static struct si_channel {
@@ -235,6 +240,7 @@ static struct si_channel {
     const char * (*get)(void);
 } si_channels[] = {
     {"BESTTCP", timeProvider},
+    {"TOPTCP", highestProvider},
     {"BESTTEP", eventProvider},
 };
 

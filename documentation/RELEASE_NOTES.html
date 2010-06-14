@@ -3,22 +3,626 @@
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-  <title>EPICS Base R3.14.x Release Notes</title>
+  <title>EPICS Base R3.14.11 Release Notes</title>
 </head>
 
 <body lang="en">
-<h1 align="center">EPICS Base Release 3.14.10</h1>
+<h1 align="center">EPICS Base Release 3.14.11</h1>
 
-<h2 align="center">Changes between 3.14.9 and 3.14.10</h2>
-<!-- Insert new items below here ... -->
+<h2 align="center">Changes between 3.14.10 and 3.14.11</h2>
+<!-- Insert new items immediately below here ... -->
+
+<h4>Time provider on Win32</h4>
+
+<p>A race condition meant that sometimes EPICS programs (including the internal
+programs such as flex and antelope) built for Win32 architectures would not
+start properly on Windows systems that have multiple CPUs. This race has been
+fixed.</p>
+
+<h4>Build system dependency change</h4>
+
+<p>In order to get GNU make parallel execution (-j option) to work proprely for
+multiple target architectures, a new dependency had to be added. Now all
+cross-compiled builds depend on their host build. This means that when a
+<tt>make <i>crosstargetarch</i></tt> command is issued, the EPICS_HOST_ARCH
+target build will be executed first, followed by the <i>crosstargetarch</i>
+build. Builds done in an O.<i>arch</i> directory will still only build the
+<i>arch</i> targets however.</p>
+
+<h4>Channel Access changes</h4>
+
+<p>Mantis 361 fix - ca_add_fd_registration users might not receive select
+wakeup</p>
+
+<p>Mantis 359 fix - ca client library flow control mode related issues</p>
+
+<p>Mantis 357 fix - high throughput multithreaded ca client appl thread could
+be trapped in lib.</p>
+
+<ul>
+<li>Discovered during code review. Not seen in practice, but possible</li>
+</ul>
+
+<p>Mantis 285 fix  - CA Documentation doesn't distinguish sync groups from
+ca_put_callback()</p>
+
+<p>Mantis 346 fix - deleting the chid passed in from within put cb handler
+causes failure</p>
+
+<p>Mantis 284 fix - channel clear protocol warning messages from PCAS</p>
+
+<p>Mantis 237 fix - SEGV from simple CA client during context destroy</p>
+
+<p>Mantis 242 fix - invalid DBR type not screened in client library when
+doing a put</p>
+
+<h4>Portable Channel Access Server changes</h4>
+
+<p> These changes impact the Gateway (Proxy server) and other servers but not
+the IOC.</h4>
+
+<p>Mantis 360 fix - server is unresponsive for one of its clients, when 
+async io postponed and in flow control mode</p>
+
+<p>Mantis 358 fix - PCAS service snap-in has no way to determine if its a put,
+or a put calback.</p>
+
+<p>Mantis 356 fix - medm display sometimes hangs until the motor stops when
+controling motor through gw.</p>
+
+<p>Mantis 350 fix - Incoming data corruption under heavy CAS load.</p>
+
+<p>Mantis 340 fix - leak when performing a read and conversion fails.</p>
+
+<p>Mantis 348 fix - A call to 'assert (item.pList == this)' 
+failed in ../../../../src/cas/generic/st/ioBlocked.cc line 112</p>
+
+<p>Mantis 345 fix - Compilation warning: complaint about missing
+gddDestructor</p>
+
+<p>Mantis 343 fix - gddScalar::new() operator is not fully thread safe</p>
+
+<p>Mantis 333 fix - resTable::removeAll() does not reset the item count</p>
+
+<p>Mantis 335 fix - excas fails in clearOutstandingReads - maybe requires an
+R3.13 client</p>
+
+<p>Mantis 329 fix - GW hang, pthread_mutex_lock failed: error Invalid
+argument message</p>
+
+<p>Mantis 352 fix - gateway hangs temporarily under heavy load on 8-core 
+64bit RHEL5</p>
+
+<ul>
+<li>High throughput performance appears to be much better now for both scalars
+and large arrays, but more testing needed in operational gateways</li>
+</ul>
+
+<h4>Timer Queue Library</h4>
+
+<p>Mantis 336 fix - timer queue should have try / catch block around call to
+user's expiration callback</p>
+
+<p>Mantis 332 fix - epicsTimerTest failure, windows vista 64, dual core
+SMP system</p>
+
+<h4>LibCom</h4>
+
+<p>Mantis 328 fixed - orderly shutdown for soft IOC fails</p>
+
+<h4>Application configure files</h4>
+
+<p>The configuration directory files installed by makeBaseApp.pl have been
+changing in recent releases to make them work more like the files in the Base
+configuration directory. The CONFIG_APP file has gone, and its functionality is
+now performed by the CONFIG file which should only be modified in exceptional
+circumstances. The variables that used to be set in the CONFIG file now appear
+in the new CONFIG_SITE file, and can be overridden for specific combinations of
+host and target architectures by creating a file with name matching one of these
+patterns:</p>
+
+<ul>
+  <li>CONFIG_SITE.&lt;host-arch&gt;.Common</li>
+  <li>CONFIG_SITE.Common.&lt;target-arch&gt;</li>
+  <li>CONFIG_SITE.&lt;host-arch&gt;.&lt;target-arch&gt;</li>
+</ul>
+
+<p>Note that the setting for <tt>CHECK_RELEASE</tt> in the CONFIG_SITE files is
+not compatible with previous releases of Base; if you are creating an
+application that has to work with earlier releases, move the
+<tt>CHECK_RELEASE</tt> setting back to the configure/Makefile where it used to
+live.</p>
+
+<p>The RELEASE file(s) can now define the variable <tt>RULES</tt> if you wish
+the application to use build rules from some module other than EPICS_BASE. The
+rules must appear in a configure subdirectory just like they do in Base.</p>
+
+<h4>Compile-time assertions</h4>
+
+<p>A new macro has been added to epicsAssert.h which performs assertion checks
+at compile-time. <tt>STATIC_ASSERT(<i>expr</i>)</tt> can only be used when
+<tt><i>expr</i></tt> can be evaluated by the compiler, and will cause the
+compilation to fail if it evaluates to false. The resulting compiler error
+message might appear a little obscure, but it does provide some explanation and
+contains the line where the failure was discovered. Future versions of the C++
+standard will probably contain a similar facility <tt>static_assert(<i>expr</i>,
+<i>message</i>)</tt> but will require compiler support to be implemented.</p>
+
+<h4>Several changes made to dbDefs.h</h4>
+
+<p>The definitions for the macros <tt>YES</tt>, <tt>NO</tt>, <tt>NONE</tt>,
+<tt>min()</tt> and <tt>max()</tt> have been deleted. <tt>YES</tt> and
+<tt>NO</tt> have been replaced by <tt>menuYesNoYES</tt> and <tt>menuYesNoNO</tt>
+from the menuYesNo.h file where they were used in several record types. The
+other macros were not being used anywhere in Base, sncseq or Asyn.</p>
+
+<p>The macro <tt>LOCAL</tt> that was a synonym for <tt>static</tt> is now
+deprecated and will be deleted in R3.15, please adjust your code to use the
+latter keyword.  All uses of the <tt>READONLY</tt> macro from shareLib.h must
+now be replaced by the keyword <tt>const</tt> as the macro has been deleted.</p>
+
+<p>The dbDefs.h file was unnecessarily including various other libCom header
+files which may have to be manually added to out-of-tree source files that
+relied on this. The general rule for header files is that a header should only
+include other headers that are needed for its own inclusion in any source file.
+The <tt>#include</tt> statements that might need to be added are:</p>
+
+<ul>
+  <li>#include &lt;stdarg.h&gt;</li>
+  <li>#include "errlog.h"</li>
+  <li>#include "errMdef.h"</li>
+  <li>#include "ellLib.h"</li>
+  <li>#include "epicsTypes.h"</li>
+</ul>
+
+<p>A new macro <tt>CONTAINER(pointer, type, member)</tt> has been added which
+calculates and returns a pointer to the parent structure when given a pointer to
+a member, the structure type and the name of the member in that structure.  On
+GNU compilers the type of the pointer is checked to ensure that it matches the
+member, so code using this macro should be built using gcc for additional
+confidence.</p>
+
+<h4>Long-deprecated errSymFind() function deleted</h4>
+
+<p>This functionality was replaced by errSymLookup() many releases ago.</p>
+
+<h4>Perl CA library shutdown</h4>
+
+<p>The Perl CA library has been modified to properly flush the Channel Access
+I/O queues when a program using the library exits.</p>
+
+<h4>bi, bo, mbbi, mbbo ENUM string fields</h4>
+
+<p>The existing Channel Access protocol transports 26 bytes for each ENUM
+string, but the fields used to hold ENUM strings in the discrete record types
+were configured to be 16 (mbbi/mbbo) or 20 (bi/bo) bytes long. These have all
+been increased to match the CA limit.</p>
+
+<h4>Use of SIGALRM disabled</h4>
+
+<p>Previous releases that supported HPUX required that EPICS trap and be able to
+generate the SIGALRM signal in order to break out of a blocking socket system
+call on those systems (Posix only). There were two API routines that had to be
+called by any code using sockets to properly support this. Since we no longer
+support HPUX this code is no longer required, and as it breaks the Posix timer
+interface on Linux it has been disabled in this release. The API routines now do
+nothing on all platforms, and will be removed before the 3.15 Release of
+Base.</p>
+
+<h4>Universal Binaries on Darwin</h4>
+
+<p>It is now possible to configure Base on Darwin to build universal binaries
+containing an installation-specific choice of 32- and 64-bit CPU architectures.
+This is controlled through the definition of the ARCH_CLASS variable in the
+configure/os/CONFIG_SITE.Common.&lt;arch&gt; file for the particular target
+architecture you are using (darwin-ppc, darwin-x86 or darwin-ppcx86). There are
+comments and example settings in those files.  Note that to my knowledge EPICS
+Base has not been thoroughly tested on the 64-bit darwin architectures.</p>
+
+<h4>HPUX, SGI and VMS files deleted</h4>
+
+<p>We have not supported or tested EPICS Base on HPUX for several releases; the
+support files for this and other unsupported operating systems have been
+removed.</p>
+
+<h4>PINI Processing and PHAS values</h4>
+
+<p>The PINI field now has its own menu type with four more choices,
+<tt>RUN</tt>, <tt>RUNNING</tt>, <tt>PAUSE</tt> and <tt>PAUSED</tt>. The earlier
+<tt>NO</tt> and <tt>YES</tt> values for this field remain as before and cause
+the same processing as before. The new values cause records to be processed
+during the announcement of the new <tt>initHookAtIocRun</tt>,
+<tt>initHookAfterIocRunning</tt>, <tt>initHookAtIocPause</tt> and
+<tt>initHookAfterIocPaused</tt> states respectively.</p>
+
+<p>Records with <tt>PINI=YES</tt> will be processed during the <tt>iocBuild</tt>
+stage of <tt>iocInit</tt>, follwed by records with <tt>PINI=RUN</tt> during the
+<tt>iocRun</tt> stage and records with <tt>PINI=RUNNING</tt> during the
+<tt>initHookAfterIocRunning</tt> stage. If an <tt>iocPause</tt> command is
+given, any records with <tt>PINI=PAUSE</tt> will be processed at the
+<tt>initHookAtIocPause</tt> stage followed by records with <tt>PINI=PAUSED</tt>
+will be processed at the <tt>initHookAfterIocPaused</tt> stage. A subsequent
+<tt>iocRun</tt> command causes the <tt>PINI=RUN</tt> and <tt>PINI=RUNNING</tt>
+records to be processed again.</p>
+
+<p>The PHAS field now controls the order in which records are processed as a
+result of the PINI mechanism; within each stage, lower values of PHAS are
+scanned before higher ones.</p>
+
+<h4>Additional initHook states</h4>
+
+<p>Several new initHook states have been added which are announced while the IOC
+is being paused or restarted.  The original states remain unchanged, although a
+couple of the later ones are deprecated where using the new states makes more
+sense.  The enum that defines all the states is now:</p>
+
+<blockquote>
+<pre>typedef enum {
+    initHookAtIocBuild = 0,         /* Start of iocBuild/iocInit commands */
+    initHookAtBeginning,
+    initHookAfterCallbackInit,
+    initHookAfterCaLinkInit,
+    initHookAfterInitDrvSup,
+    initHookAfterInitRecSup,
+    initHookAfterInitDevSup,
+    initHookAfterInitDatabase,
+    initHookAfterFinishDevSup,
+    initHookAfterScanInit,
+    initHookAfterInitialProcess,
+    initHookAfterCaServerInit,
+    initHookAfterIocBuilt,          /* End of iocBuild command */
+
+    initHookAtIocRun,               /* Start of iocRun command */
+    initHookAfterDatabaseRunning,
+    initHookAfterCaServerRunning,
+    initHookAfterIocRunning,        /* End of iocRun/iocInit commands */
+
+    initHookAtIocPause,             /* Start of iocPause command */
+    initHookAfterCaServerPaused,
+    initHookAfterDatabasePaused,
+    initHookAfterIocPaused,         /* End of iocPause command */
+
+/* Deprecated states, provided for backwards compatibility.
+ * These states are announced at the same point they were before,
+ * but will not be repeated if the IOC gets paused and restarted.
+ */
+    initHookAfterInterruptAccept,   /* After initHookAfterDatabaseRunning */
+    initHookAtEnd,                  /* Before initHookAfterIocRunning */
+} initHookState;</pre>
+</blockquote>
+
+<p>The two deprecated states will only ever be announced once, whereas the newer
+ones will repeat as often as the <tt>iocPause</tt> and <tt>iocRun</tt> commands
+are executed.</p>
+
+<h4>Soft Channel ai device support and SMOO</h4>
+
+<p>The (probably unwritten) rules for ai device support have always required
+that any device support which sets the VAL field and returns "2" should also
+perform any other operations normally performed by the ai's convert() routine.
+In practice very few devices did this, but there are some which makes it
+impossible to move that smoothing function into the body of the record.  This
+change adds the support for SMOO filtering to the soft channel device support
+for the ai record.  The filter is short-circuited when a link recovers from a
+failure.</p>
+
+<h4>New link flags for alarm severity/status inheritance</h4>
+
+<p>Two new options have been introduced as alternatives to the existing NMS and
+MS flags: MSI (Maximize Severity INVALID) and MSS (Maximize Severity and
+Status).</p>
+
+<p>When a link is flagged MSI the receiving record inherits the target's alarm
+severity just as it does with the MS flag, but only if that severity is
+INVALID.</p>
+
+<p>When a link is flagged MSS the receiving record inherits the target's alarm
+status as well as its severity, thereby preserving the alarm status through MSS
+chains instead of setting that status to LINK.</p>
+
+<h4>Analog records get_alarm_double() semantics changed</h4>
+
+<p>The get_alarm_double() routine in several record types has been changed to
+make it easier for CA client applications to display the correct warning and
+alarm limits for a record.</p>
+
+<p>Originally these routines would always return the current values from the
+associated alarm limit fields, but now they will return epicsNAN (not-a-number)
+instead if the severity field of the corresponding limit is NO_ALARM. This
+allows CA clients to suppress the display of unused limits.</p>
+
+<h4>New math constants epicsNAN and epicsINF</h4>
+
+<p>Two new math constants have been added to epicsMath.h: <tt>epicsNAN</tt>
+(not a number) and <tt>epicsINF</tt> (infinity).
+
+<h4>New event type DBE_PROPERTY</h4>
+
+<p>A new event type (flag in the Channel Access event mask) has been added
+to support subscriptions that get events whenever a property of the PV
+changes. This will allow clients to get notified on changes of control
+limits, graphical limits, state strings etc.</p>
+
+<p>The CA commandline tool camonitor and the CA Perl interface support the new
+event type. As a first working example, the mbbi and mbbo records have been
+extended to send a DBE_PROPERTY event when their status strings are modified.
+A more general mechanism to specify sending DBE_PROPERTY events through the DBD
+file will appear in 3.15.</p>
+
+<p>Client application developers are encouraged to start using DBE_PROPERTY
+subscriptions to fetch channel attribute data.</p>
+
+<h4>Channel Access command line tool changes</h4>
+
+<p>The caget/caput/camonitor programs in src/catools now use '\' escape
+sequences for non-printable characters.</p>
+
+<p>They provide a new option <tt>-F</tt> to set an output field separator
+to be used instead of the default space character.</p>
+
+<h4>New functions for escaping non-printables in epicsString.h</h4>
+
+<p>The existing routines used to escape non-printable characters have been
+replaced by a new set of functions that are prototyped in the epicsString.h
+header file:</p>
+
+<pre>int epicsStrnRawFromEscaped(char *outbuf, size_t outsize, const char *inbuf, size_t inlen);
+epicsShareFunc int epicsStrnEscapedFromRaw(char *outbuf, size_t outsize, const char *inbuf, size_t inlen);
+epicsShareFunc size_t epicsStrnEscapedFromRawSize(const char *inbuf, size_t inlen);</pre>
+
+<p>Both conversion functions take the output buffer (and its size), and the
+input buffer (and its size) as argument. They will convert non-printable
+characters from/to their '\'-escaped versions. The third function scans a raw
+input string and returns the number of characters needed for the escaped
+version.</p>
+
+<p>The existing function interfaces will be kept for compatibility, but their
+further use is deprecated.</p>
+
+<h4>epicsRingBytes</h4>
+
+<p>Partial puts are not supported.
+An attempt to put more bytes than currently free will be rejected.</p>
+
+<h4>Long string support</h4>
+
+<p>The IOC now provides support for strings longer than 40 characters through
+Channel Access in a manner that is fully backwards compatible with older
+versions of the CA library, although not all CA clients can make use of this at
+the moment.</p>
+
+<p>Adding the suffix '$' to the field name of an IOC PV name (through either
+Channel Access or Database Access) causes the native type of that field to be
+reported as an array of DBF_CHAR, as long as the field type is DBF_STRING,
+DBF_INLINK, DBF_OUTLINK or DBF_FWDLINK. It is then possible to use a DBF_CHAR
+array to read, write and monitor values from that field, and the 40 character
+string length limit imposed by the DBF_STRING type is replaced by the amount of
+storage allocated for the string on the IOC (for link fields the limit is
+related to the maximum length of a record name).</p>
+
+<p>The caget/caput/camonitor programs in src/catools can now use long strings by
+adding the command-line option <tt>-S</tt> which causes them to handle an array
+of DBF_CHAR as a string.  Both MEDM and EDM can already present such DBF_CHAR
+arrays as strings in their text widgets (although you do have to configure the
+widget to format it as text), so this solution already works with some CA
+clients, although by no means all clients support it yet.</p>
+
+<h4>Darwin no longer uses _environ</h4>
+
+<p>The Darwin version of epicsEnvShow (in src/libCom/osi/os/Darwin/osdEnv.c)
+now uses _NSGetEnviron() to get the pointer to the environment string
+table.</p>
+
+<h4>gpHash argument type changed</h4>
+
+<p>Out-of-tree users of libCom's gpHash routines should change the type of their
+pointer to their gpHash table to avoid compiler warnings. The first argument to
+all of the <tt>gph...()</tt> routines used to be a <tt>void&nbsp;*</tt> (or a
+pointer to one for <tt>gphInit()</tt>) but is now a <tt>struct
+gphPvt&nbsp;*</tt> (<tt>struct gphPvt&nbsp;**</tt> for <tt>gphInit</tt>) for
+better type safety. The definition of the structure has not been made public,
+although a declaration is provided in <tt>gpHash.h</tt>.</p>
+
+<h4>New hash functions in epicsString.h</h4>
+
+<p>The existing routines used to hash strings have been replaced by a new
+pair of functions that are prototyped in the epicsString.h header file:</p>
+
+<pre>unsigned int epicsStrHash(const char *str, unsigned int seed);
+unsigned int epicsMemHash(const char *str, size_t length, unsigned int seed);</pre>
+
+<p>The seed argument should normally be zero, but can be used to chain
+several hash calculations together to create a single value from multiple
+strings or memory buffers.  The resulting value should be masked with the
+appropriate number of bits for the desired hash width. These functions both
+use the same algorithm, and on most CPUs should be faster that the previous
+hash functions used in Base.  Use epicsStrHash() on nil-terminated strings,
+epicsMemHash() if the data might contain zero bytes.</p>
+
+<h4>Support for dynamic loading</h4>
+
+<p>The existing OSI epicsFindSymbol API has been expanded to support dynamic
+loading of binary files, on architectures where the facilities necessary to
+implement this are provided (currently Linux, Solaris, Darwin and vxWorks). A
+new but optional command is provided for iocsh which calls the new
+<tt>epicsLoadLibrary()</tt> function. In order to include this command in an
+IOC, you must include the <tt>dlload.dbd</tt> file; the command will then be
+installed when the IOC's <tt>ioc_registerRecordDeviceDriver</tt> routine is
+run.</p>
+
+<p>To dynamically load a new routine for use with the sub or aSub record
+types, you also have to register the subroutines at runtime. You can use the
+EPICS build system and the registerRecordDeviceDriver.pl script to write the
+necessary code for you, you just have to create a .dbd file that declares the
+functions in the library and add the derived .cpp file to the library
+sources. The product of your build should be a <tt>LOADABLE_LIBRARY</tt> to
+ensure that the correct linker commands are used.</p>
+
+<p>After a shared library is loaded into the IOC using the new iocsh
+<tt>dlload</tt> command you will usually have to run the
+<tt>lib_registerRecordDeviceDriver</tt> routine to register the components
+that were mentioned in the .dbd file. After registration the functions can be
+found as normal by setting the SNAM field of your sub or aSub record
+instances. Once loaded, shared libraries cannot be unloaded again as there is
+no way to be sure that some other part of the IOC doesn't still have a
+pointer to something inside the module.</p>
+
+<p>Components provided by a shared library can include functions for sub and
+aSub records, iocsh commands, time providers and sequence programs. Record
+and device support code may be possible, but there are complications in
+creating the .dbd file so we don't recommend it yet. It is possible to load
+libraries after iocInit, but the code is not re-entrant so should only be
+used from the main thread.  Adding new record types or device support will
+not work after iocInit.</p>
+
+<h4>Perl5 CA library</h4>
+
+<p>The <tt>CA::put</tt> and <tt>CA::put_callback</tt> methods now use the
+native type of the PV to determine which data type to use in all cases;
+earlier versions looked at the Perl data type for single-valued PVs, but this
+was truncating some double values into integers.</p>
+
+<h4>generalTime and epicsTime updates</h4>
+
+<p>Allow time providers to supply timestamps in interrupt context.  A pair of
+new API routines in epicsTime.h <tt>epicsTimeGetCurrentInt()</tt> and
+<tt>epicsTimeGetEventInt()</tt> will check the most recently successful
+current-time or event-time provider and forward requests to the routine
+registered by that provider, if any.  The priority list is not traversed, so
+if the latest provider has not registered an interrupt-safe routine by
+calling <tt>generalTimeAddIntCurrentProvider()</tt> or
+<tt>generalTimeAddIntEventProvider()</tt> as appropriate, these API routines
+will return failure.  The resulting timestamp is not protected against
+backwards movement either.</p>
+
+<p>Added a routine <tt>generalTimeHighestCurrentName()</tt> which returns the
+name of the highest prority registered current time provider.  Comparing this
+with the name returned by <tt>generalTimeCurrentProviderName()</tt> permits
+an alarm to be generated if an IOC is not able to use the time provider it
+was designed to use. The General Time stringin device support keyword
+<tt>@TOPTCP</tt> has been added to make this name available in a database
+record.</p>
+
+<p>The following routines have been renamed, but the old name may still be
+used since a macro with the old name has been added:</p>
+
+<blockquote>
+
+  <table border="1">
+    <tbody>
+      <tr>
+        <th>Old Name</th>
+        <th>New Name</th>
+      </tr>
+      <tr>
+        <td><tt>generalTimeCurrentTpRegister</tt></td>
+        <td><tt>generalTimeRegisterCurrentProvider</tt></td>
+      </tr>
+      <tr>
+        <td><tt>generalTimeEventTpRegister</tt></td>
+        <td><tt>generalTimeRegisterEventProvider</tt></td>
+      </tr>
+      <tr>
+        <td><tt>generalTimeCurrentTpName</tt></td>
+        <td><tt>generalTimeCurrentProviderName</tt></td>
+      </tr>
+      <tr>
+        <td><tt>generalTimeEventTpName</tt></td>
+        <td><tt>generalTimeEventProviderName</tt></td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+
+<p>The routine <tt>generalTimeCreateSyncTimer()</tt> was not useful in
+practice due to time provider initialization issues, nor was its
+implementation protected properly for use on SMP systems so it has been
+deleted.  The deprecated and empty <tt>synchronize()</tt> method from the
+epicsTime class has also gone.</p>
 
 <h4>RTEMS Release</h4>
 
-<p>RTEMS release 4.9 or newer is required.  If you are using the RTEMS NFS time provider you need to use RTEMS 4.9.1 or newer.</p>
+<p>RTEMS release 4.9.2 or newer is required.  EPICS now configures RTEMS to use
+unified executive/malloc memory pools if available (RTEMS 4.10 and up).</p>
+<h4>RTEMS</h4>
+
+<p>RTEMS stack sizes have been reduced.  This allows more clients in machines
+with limited memory.</p>
+
+<p>RTEMS file descriptor allocation has been increased.</p>
+
+<h4>Added record aliases</h4>
+
+<p>Record definitions can declare their own alias names along with the field
+values, or a separate alias statement can also be used:</p>
+
+<blockquote>
+  <pre>record(ai,"canonicalName")
+{
+   alias("firstAlias")
+}
+alias("canonicalName","secondAlias")</pre>
+</blockquote>
+
+<p>Aliases can only be created for records that have already been loaded by
+the IOC, although they don't have to appear in the same .db file. A CA client
+can discover that a record name is an alias by fetching its .NAME field,
+which will always return the canonical name for the record. These new
+routines in the dbStaticLib library handle aliases:</p>
+
+<blockquote>
+  <pre>long dbCreateAlias(DBENTRY *pdbentry, const char *paliasName);
+int dbIsAlias(DBENTRY *pdbentry);
+int dbGetNAliases(DBENTRY *pdbentry)
+long dbDeleteAliases(DBENTRY *pdbentry);</pre>
+</blockquote>
+
+<p>Aliases are located using the existing record instance API. Use
+<tt>dbIsAlias()</tt> to test whether a record is actually an alias or not.
+Aliasees can be deleted like record instances using <tt>dbDeleteRecord()</tt>
+which will not delete the underlying record if the DBENTRY refers to the
+alias (deleting a record instance does delete all its aliases though).  The
+<tt>dbDeleteAliases()</tt> routine deletes all aliases of the selected
+record, and will return an error if used on an alias.</p>
+
+<p>Any out-of-tree tools that scan through all the records in the database
+using <tt>dbFirstRecord()</tt> and <tt>dbNextRecord()</tt> may need modifying
+to avoid duplicate processing of aliased record instances.  Also note that
+the set of info items for a record instance are not shared with its aliases,
+which each have their own info item namespace.</p>
+
+<h4>Added support for RTEMS-mvme2700</h4>
+
+<p>Supplied by Matt Rippa &lt;mrippa@gemini.edu&gt;. Should work for
+MVME2400, too.</p>
+
+<h4>CA Commandline tools: priority support</h4>
+
+<p>A new option <tt>-p</tt> was added to all Channel Access command line
+tools to allow specifying the CA priority.</p>
+
+<h4>Linux: Use libncurses</h4>
+
+<p>Changed linux builds to link against libncurses instead of libcurses
+(suggested by Peter Zumbruch).</p>
+
+
+<h2 align="center">Changes between 3.14.9 and 3.14.10</h2>
+
+<h4>GCC_EXEC_PREFIX references removed from configuration files
+
+<p>Definition of GCC_EXEC_PREFIX removed from CONFIG.CrossCommon and 
+unexport of GCC_EXEC_PREFIX removed from vxWorks and RTEMS builds.</p>
+
+<h4>RTEMS Release</h4>
+
+<p>RTEMS release 4.9 or newer is required.  If you are using the RTEMS NFS
+time provider you need to use RTEMS 4.9.1 or newer.</p>
 
 <h4>RTEMS epicsEventWaitWithTimeout</h4>
 
-<p>Correctly return epicsEventWaitTimeout when event is not pending and timeout value is 0.0 secondsmore agressive.</p>
+<p>Correctly return epicsEventWaitTimeout when event is not pending and
+timeout value is 0.0 seconds.</p>
 
 <h4>epicsRingPointer, epicsRingBytes</h4>
 
@@ -29,75 +633,77 @@ optimization.</p>
 
 <p>The <tt>camonitor</tt> program now supports the ability to display both
 server- and client-side timestamps, simultaneously if requested. The old
-command-line options <tt>-r</tt> <tt>-i</tt> and <tt>-I</tt> that controlled the
-timestamp display have been replaced with a new <tt>-t</tt> option that takes
-additional argument letters to control which timestamp sources and output format
-should be used.</p>
+command-line options <tt>-r</tt> <tt>-i</tt> and <tt>-I</tt> that controlled
+the timestamp display have been replaced with a new <tt>-t</tt> option that
+takes additional argument letters to control which timestamp sources and
+output format should be used.</p>
 
-<p>See the Command Line Tools section of the Channel Access reference manual or
-run <tt>camonitor -h</tt> for a summary of the options.</p>
+<p>See the Command Line Tools section of the Channel Access reference manual
+or run <tt>camonitor -h</tt> for a summary of the options.</p>
 
 <h4>New "stdio" stringout device support</h4>
 
-<p>A new device support has been added that allows a stringout record to output
-one-line messages to stdout, stderr or the errlog subsystem.  Use DTYP="stdio"
-and set the OUT field to one of "@stdout", "@stderr" or "@errlog" to control the
-message destination.  A newline is appended to the contents of the record's VAL
-field when printing.</p>
+<p>A new device support has been added that allows a stringout record to
+output one-line messages to stdout, stderr or the errlog subsystem.  Use
+DTYP="stdio" and set the OUT field to one of "@stdout", "@stderr" or
+"@errlog" to control the message destination.  A newline is appended to the
+contents of the record's VAL field when printing.</p>
 
 <h4>General Time subsystem</h4>
 
 <p>The way in which EPICS gets the time has been significantly revised since
 R3.14.9 with the introduction of the General Time subsystem.  Two kinds of
-pluggable time providers are now supported, which return either the current time
-or the latest timestamp of a numbered Time Event from a hardware event system.
-All IOCs must have at least one Current Time provider, but Event Time providers
-are optional.  The General Time subsystem guarantees that the timestamps
-returned never step backwards, even when switching between time providers.</p>
+pluggable time providers are now supported, which return either the current
+time or the latest timestamp of a numbered Time Event from a hardware event
+system. All IOCs must have at least one Current Time provider, but Event Time
+providers are optional.  The General Time subsystem guarantees that the
+timestamps returned never step backwards, even when switching between time
+providers.</p>
 
-<p>A Current Time Provider reports the current wall-clock time if it is able to
-when asked; if it can't it says so, and the time subsystem will then ask the
-next provider in its list and so on until someone replies with the time.  Event
-Time providers are handled similarly, except that they are asked for the
-timestamp associated with a particular Time Event number rather than the current
-wall-clock time. The registered time providers can be listed using the IOC
-command <tt>generalTimeReport(int interest)</tt> and some time providers also
-have their own separate report commands.</p>
+<p>A Current Time Provider reports the current wall-clock time if it is able
+to when asked; if it can't it says so, and the time subsystem will then ask
+the next provider in its list and so on until someone replies with the time.
+Event Time providers are handled similarly, except that they are asked for
+the timestamp associated with a particular Time Event number rather than the
+current wall-clock time. The registered time providers can be listed using
+the IOC command <tt>generalTimeReport(int interest)</tt> and some time
+providers also have their own separate report commands.</p>
 
 <p>Different target architectures come with different default Current Time
-providers in Base.  The Unix-like architectures rely on the underlying operating
-system clock, which normally involves running something like ntpd as a separate
-process. The real-time operating systems vxWorks and RTEMS install two Current
-Time providers; the native operating system clock at the lowest priority (this provider
-includes a task to periodically reset the operating system clock from a higher priority time
-provider), and an NTP time provider which synchronizes the underlying operating sytem tick
-timer with an NTP server. Microsoft Windows targets using the Win32 API use a
+providers in Base.  The Unix-like architectures rely on the underlying
+operating system clock, which normally involves running something like ntpd
+as a separate process. The real-time operating systems vxWorks and RTEMS
+install two Current Time providers; the native operating system clock at the
+lowest priority (this provider includes a task to periodically reset the
+operating system clock from a higher priority time provider), and an NTP time
+provider which synchronizes the underlying operating sytem tick timer with an
+NTP server. Microsoft Windows targets using the Win32 API use a
 Windows-specific time provider which contains a built-in PLL.</p>
 
-<p>There are no Event Time providers included with Base except for an optional
-"Last Resort" Event provider which can be installed if a site wants to be sure
-that every Time Event number will have a recent timestamp associated with it
-even if the hardware event system goes down. The Last Resort Event Time provider
-returns the current time for every Time Event number. To install this provider,
-run the command <tt>installLastResortEventProvider</tt> from your IOC startup
-script.</p>
+<p>There are no Event Time providers included with Base except for an
+optional "Last Resort" Event provider which can be installed if a site wants
+to be sure that every Time Event number will have a recent timestamp
+associated with it even if the hardware event system goes down. The Last
+Resort Event Time provider returns the current time for every Time Event
+number. To install this provider, run the command
+<tt>installLastResortEventProvider</tt> from your IOC startup script.</p>
 
 <p>Additional information about General Time and the time providers included
 with Base can be found in the IOC Application Developers Guide for R3.14.10,
-sections 9.7 and 20.6. General Time was originally written by David H. Thompson
-and Sheng Peng at ORNL, subsequently worked on by Babak Kalantari and Timo
-Korhonen of PSI, and merged into Base by Peter Denison from Diamond.  Andrew
-Johnson provided input into the design at various points and made various code
-revisions after the merge.</p>
+sections 9.7 and 20.6. General Time was originally written by David H.
+Thompson and Sheng Peng at ORNL, subsequently worked on by Babak Kalantari
+and Timo Korhonen of PSI, and merged into Base by Peter Denison from Diamond.
+Andrew Johnson provided input into the design at various points and made
+various code revisions after the merge.</p>
 
 <h4>New ioc/dllPath.bat file for Win32</h4>
 
-<p>When creating an IOC with one of the win32-x86 target architectures, a file
-<tt>dllPath.bat</tt> is now generated in the iocBoot/iocxxx directory which can
-be run to adjust the PATH variable to include all of the support application
-bin directories which might contain DLLs that the IOC uses.  The PATH also
-includes the IOC application's own bin directory, which simplifies starting up
-the IOC as well.</p>
+<p>When creating an IOC with one of the win32-x86 target architectures, a
+file <tt>dllPath.bat</tt> is now generated in the iocBoot/iocxxx directory
+which can be run to adjust the PATH variable to include all of the support
+application bin directories which might contain DLLs that the IOC uses.  The
+PATH also includes the IOC application's own bin directory, which simplifies
+starting up the IOC as well.</p>
 
 <h4>New epicsEndian.h header</h4>
 
@@ -108,75 +714,74 @@ EPICS_ENDIAN_LITTLE or EPICS_ENDIAN_BIG (these are numeric constants 1234 and
 needed because some ARM systems use mixed-endian format floats.</p>
 
 <p>Note that just knowing the CPU's endianness doesn't tell you the complete
-story about the byte order that your hardware registers will present to the CPU;
-byte swapping is often performed automatically by PCI to VME bridge devices and
-by other kinds of bus converter, so "portable" drivers aren't always.</p>
+story about the byte order that your hardware registers will present to the
+CPU; byte swapping is often performed automatically by PCI to VME bridge
+devices and by other kinds of bus converter, so "portable" drivers aren't
+always.</p>
 
 <h4>Array Subroutine Record added (aSub)</h4>
 
 <p>A heavily modified version of Andy Foster's genSub record type has been
-added, called the aSub (Array Subroutine) record type.  The new name is so that
-genSub records can continue to be used in IOCs that need those features that
-have changed or been removed in creating the aSub record type.  The main
+added, called the aSub (Array Subroutine) record type.  The new name is so
+that genSub records can continue to be used in IOCs that need those features
+that have changed or been removed in creating the aSub record type.  The main
 differences between genSub and aSub are:</p>
-
 <ul>
-
-<li>The fields <tt>UFA..UFU</tt>, <tt>UFVA..UFVU</tt>, <tt>TOVA..TOVU</tt> and
-<tt>VERS</tt> have been removed.</li>
-<li>The <tt>INPA..INPU</tt> and <tt>OUTA..OUTU</tt> link fields can now be
-changed at runtime.</li>
-<li>A new set of fields <tt>NEA..NEU</tt> and <tt>NEVA..NEVU</tt> have been
-added which hold the current element count for the associated input and ouput
-fields. These count fields ensure that putting an array to the <tt>A..U</tt> or
-<tt>VALA..VALU</tt> fields cannot permanently shorten the number of elements
-that the array fields can hold.</li>
-<li>The default value for the <tt>FTA..FTU</tt> and <tt>FTVA..FTVU</tt> fields
-has been changed from "STRING" to "DOUBLE", to reduce the memory footprint of
-unneeded fields.</li>
-<li>aSub subroutines can be asynchronous, using the usual method of setting
-prec-&gt;pact to <tt>TRUE</tt> before returning and arranging for the record's
-<tt>process()</tt> routine to be called to signal completion.  The output links
-are not written until the asynchronous completion callback, and input links are
-not read at asnychronous completion.</li>
-
+  <li>The fields <tt>UFA..UFU</tt>, <tt>UFVA..UFVU</tt>, <tt>TOVA..TOVU</tt>
+    and <tt>VERS</tt> have been removed.</li>
+  <li>The <tt>INPA..INPU</tt> and <tt>OUTA..OUTU</tt> link fields can now be
+    changed at runtime.</li>
+  <li>A new set of fields <tt>NEA..NEU</tt> and <tt>NEVA..NEVU</tt> have been
+    added which hold the current element count for the associated input and
+    ouput fields. These count fields ensure that putting an array to the
+    <tt>A..U</tt> or <tt>VALA..VALU</tt> fields cannot permanently shorten
+    the number of elements that the array fields can hold.</li>
+  <li>The default value for the <tt>FTA..FTU</tt> and <tt>FTVA..FTVU</tt>
+    fields has been changed from "STRING" to "DOUBLE", to reduce the memory
+    footprint of unneeded fields.</li>
+  <li>aSub subroutines can be asynchronous, using the usual method of setting
+    prec-&gt;pact to <tt>TRUE</tt> before returning and arranging for the
+    record's <tt>process()</tt> routine to be called to signal completion.
+    The output links are not written until the asynchronous completion
+    callback, and input links are not read at asnychronous completion.</li>
 </ul>
 
 <h4>epicsTimeEventDeviceTime support for soft channel input records</h4>
 
-<p>The Soft Channel device support for all input record types now supports the
-fetching of the timestamp along with the data when the record's TSE field is set
-to epicsTimeEventDeviceTime (-2). This works for both DB and CA links. However
-the timestamp will only be fetched if the record's TSEL link is not set, so you
-can't point TSEL to another record to read the -2 value into TSE (that's because
-to make this work properly would require that the TSEL link be read twice every
-time the record processes; once in the soft channel device support, and again
-when the record type calls <tt>recGblGetTimeStamp()</tt>.</p>
+<p>The Soft Channel device support for all input record types now supports
+the fetching of the timestamp along with the data when the record's TSE field
+is set to epicsTimeEventDeviceTime (-2). This works for both DB and CA links.
+However the timestamp will only be fetched if the record's TSEL link is not
+set, so you can't point TSEL to another record to read the -2 value into TSE
+(that's because to make this work properly would require that the TSEL link
+be read twice every time the record processes; once in the soft channel
+device support, and again when the record type calls
+<tt>recGblGetTimeStamp()</tt>.</p>
 
 <h4>devLib: CR/CSR Support added</h4>
 
-<p>Thanks to Eric Bjorklund for providing a patch to devLib that gives access to
-the CR/CSR address space (for those on a VME64 CPU with appropriate support from
-your BSP).</p>
+<p>Thanks to Eric Bjorklund for providing a patch to devLib that gives access
+to the CR/CSR address space (for those on a VME64 CPU with appropriate
+support from your BSP).</p>
 
 <h4>ascaStats, dbcaStats, seqcaStats</h4>
 
 <p>Query routines have been added that count CA client connections made by
-Access Security rules and Database Channel Access links.  A similar routine will
-be added to version 2.0.12 of the sequencer for counting sequence program CA
-links:</p>
+Access Security rules and Database Channel Access links.  A similar routine
+will be added to version 2.0.12 of the sequencer for counting sequence
+program CA links:</p>
 
-<blockquote><pre>
-void ascaStats(int *pchans, int *pdiscon);
+<blockquote>
+  <pre>void ascaStats(int *pchans, int *pdiscon);
 void dbcaStats(int *pchans, int *pdiscon);
 void seqcaStats(int *pchans, int *pdiscon);</pre>
 </blockquote>
 
-<p>The pchans parameter should point to integer storage which will be set to the
-total number of channels open, while the value at the pdiscon pointer will be
-set to the number of channels currently disconnected. Prototypes for these
-routines can be found in the header files asCa.h and dbCaTest.h (seqCom.h for
-the sequencer).</p>
+<p>The pchans parameter should point to integer storage which will be set to
+the total number of channels open, while the value at the pdiscon pointer
+will be set to the number of channels currently disconnected. Prototypes for
+these routines can be found in the header files asCa.h and dbCaTest.h
+(seqCom.h for the sequencer).</p>
 
 <h4>Messages from errlog</h4>
 
@@ -186,60 +791,62 @@ rather than to stdout.</p>
 
 <h4>ipToAsciiProxy</h4>
 
-<p>This thread calls upon vendor libraries which may use significant amounts of stack.  Account for this by providing the ipToAsciiProxy thread with an epicsThreadStackBig stack.</p>
+<p>This thread calls upon vendor libraries which may use significant amounts
+of stack.  Account for this by providing the ipToAsciiProxy thread with an
+epicsThreadStackBig stack.</p>
 
 <h4>iocBuild, iocRun and iocPause</h4>
 
 <p>These three new commands are mainly intended for use with DESY's redundant
 IOC software but they might have some uses for others too.  <tt>iocBuild</tt>
 allow an IOC to be initialized and set up ready for a quick start without
-actually making it live; a subsequent <tt>iocRun</tt> will bring it to the same
-state as an <tt>iocInit</tt> would have.  Once an IOC has been started (using
-either <tt>iocInit</tt> or <tt>iocBuild</tt> + <tt>iocRun</tt>) the
+actually making it live; a subsequent <tt>iocRun</tt> will bring it to the
+same state as an <tt>iocInit</tt> would have.  Once an IOC has been started
+(using either <tt>iocInit</tt> or <tt>iocBuild</tt> + <tt>iocRun</tt>) the
 <tt>iocPause</tt> command can be used to freeze it, disconnecting its PVs and
-stopping all scan activity.  The <tt>iocRun</tt> command restarts the IOC from
-this state.</p>
+stopping all scan activity.  The <tt>iocRun</tt> command restarts the IOC
+from this state.</p>
 
 <p>While this might seem like a useful thing to be able to do, we have not
-tested it on IOCs using real-world I/O, and it is not unlikely that pausing an
-operational IOC could cause irremdial havok to any device support, sequence
-programs and other software which is not expecting it, so use with care and make
-sure you test it first.  An IOC that is kept paused for more than a minute or
-two could fill up its network buffers and become impossible to restart without
-rebooting.</p>
+tested it on IOCs using real-world I/O, and it is not unlikely that pausing
+an operational IOC could cause irremdial havok to any device support,
+sequence programs and other software which is not expecting it, so use with
+care and make sure you test it first.  An IOC that is kept paused for more
+than a minute or two could fill up its network buffers and become impossible
+to restart without rebooting.</p>
 
 <h4>IOC Support on 64-bit archs</h4>
 
-<p>A fairly significant number of changes have been that were necessary to allow
-the IOC code to run properly on 64-bit CPU architectures where a <tt>long</tt>
-is 64 bits wide.  This was not as simple as replacing every instance of the
-typename <tt>long</tt> with <tt>epicsInt32</tt> because that would have broken a
-lot of external code unnecessarily.  The generated record.h file now uses the
-typenames from epicsTypes.h to declare record fields, thus field sizes are the
-same on both 32- and 64-bit platforms (on 64-bit, a <tt>DBF_LONG</tt> does
-<em>not</em> map to <tt>long</tt> but to <tt>int</tt>).  This change does not
-affect status return values, which are still implemented using the native
-<tt>long</tt> type for the platform.</p>
+<p>A fairly significant number of changes have been that were necessary to
+allow the IOC code to run properly on 64-bit CPU architectures where a
+<tt>long</tt> is 64 bits wide.  This was not as simple as replacing every
+instance of the typename <tt>long</tt> with <tt>epicsInt32</tt> because that
+would have broken a lot of external code unnecessarily.  The generated
+record.h file now uses the typenames from epicsTypes.h to declare record
+fields, thus field sizes are the same on both 32- and 64-bit platforms (on
+64-bit, a <tt>DBF_LONG</tt> does <em>not</em> map to <tt>long</tt> but to
+<tt>int</tt>).  This change does not affect status return values, which are
+still implemented using the native <tt>long</tt> type for the platform.</p>
 
 <h4>Conversion of empty strings to character types</h4>
 
 <p>While changing the conversion routines in db/dbConvert.c and
-db/dbFastLinkConv.c to support 64-bit architectures as described above, it was
-noticed that an empty string converts to the value 0 for all types other than
-<tt>DBF_CHAR</tt> and <tt>DBF_UCHAR</tt> where it converts to the ASCII
+db/dbFastLinkConv.c to support 64-bit architectures as described above, it
+was noticed that an empty string converts to the value 0 for all types other
+than <tt>DBF_CHAR</tt> and <tt>DBF_UCHAR</tt> where it converts to the ASCII
 character <tt>'0'</tt>, value 0x30.  Since these types are usually used for
 storing small integers or boolean values rather than ASCII characters, it was
-decided that this conversion is wrong so it has been changed to match the other
-numeric conversions.</p>
+decided that this conversion is wrong so it has been changed to match the
+other numeric conversions.</p>
 
 <h4>epicsShareAPI deprecated inside IOC</h4>
 
 <p>APIs that are intended for use inside the IOC, the <tt>epicsShareAPI</tt>
 attribute is slowly being removed.  This keyword is only used on MS Windows
-where it indicates to the compiler that the function should use Pascal calling
-conventions rather than C ones, and was necessary to be able to call such
-functions from MS Visual Basic.  APIs for use by client code (CA and libCom)
-will generally retain the attribute if they already had it.</p>
+where it indicates to the compiler that the function should use Pascal
+calling conventions rather than C ones, and was necessary to be able to call
+such functions from MS Visual Basic.  APIs for use by client code (CA and
+libCom) will generally retain the attribute if they already had it.</p>
 
 <h4>Record types ANSIfied</h4>
 
@@ -249,10 +856,10 @@ implementations have been converted from K&amp;R to ANSI C prototypes.</p>
 <h4>Added Perl5 CA library</h4>
 
 <p>Base now provides a CA client library interface for Perl5 scripts in
-<tt>src/cap5</tt> and includes as examples some implementations of the catools
-programs written in Perl. Documentation on how to use the Perl library is
-available in <tt>base/html/CA.html</tt> after the build completes. This library
-cannot currently be built on Windows targets.</p>
+<tt>src/cap5</tt> and includes as examples some implementations of the
+catools programs written in Perl. Documentation on how to use the Perl
+library is available in <tt>base/html/CA.html</tt> after the build completes.
+This library cannot currently be built on Windows targets.</p>
 
 <h4>IOC ignores SIGHUP</h4>
 
@@ -268,18 +875,15 @@ should not affect the contents of <tt>Makefile</tt>s or any applications
 using Base. They do however require that the version of GNU Make used be 3.81
 or later. These changes are briefly:</p>
 <ul>
-
   <li><p>A new tool is provided that expands out <tt>@VAR@</tt> macros. By
     default it knows the value of <tt>@TOP@</tt>, <tt>@ARCH@</tt> and any
     paths defined in the application's <tt>configure/RELEASE</tt> file such
     as @EPICS_BASE@, but additional macros can be defined in the
     <tt>Makefile</tt> that uses it by adding to the <tt>EXPAND_VARS</tt>
     variable like the example following, which creates an <tt>@EXE@</tt>
-    macro that expands out to <tt>.exe</tt> on windows targets and to
-    nothing on other platforms:</p>
-
+    macro that expands out to <tt>.exe</tt> on windows targets and to nothing
+    on other platforms:</p>
     <pre>  EXPAND_VARS += EXE=$(EXE)</pre>
-
     <p>Files that contain <tt>@VAR@</tt> macros to be substituted must have
     an at sign <tt><b>@</b></tt> as the last character of their name and be
     listed in the <tt>EXPAND</tt> variable of their <tt>Makefile</tt>. The
@@ -287,29 +891,24 @@ or later. These changes are briefly:</p>
     <tt><b>@</b></tt> suffix removed, and is then available for compiling or
     installing using any other build mechanism.</p>
   </li>
-
   <li><p>Support has been added for installing Perl library modules. The
     <tt>Makefile</tt> variable <tt>PERL_MODULES</tt> can be set to a list of
     names of files to be installed into the <tt>$(TOP)/lib/perl</tt>
     directory. The above macro expansion facility can then be used in perl
     programs that use these libraries to set the perl search path to include
     that directory. The syntax for this is as follows:</p>
-
     <pre>  use lib '@TOP@/lib/perl';
   use MyModule;</pre>
-
     <p>The filenames listed in <tt>PERL_MODULES</tt> can include subdirectory
     path components and the build system will preserve these in the installed
     result.</p>
   </li>
-
   <li>The Perl scripts that were in <tt>configure/tools</tt> are now found in
     the new <tt>src/tools</tt> directory, and get installed into the
     appropriate <tt>bin/<i>hostarch</i></tt> directory at build time. Some of
     these scripts are no longer required and have been removed, and others
     are being modified to make them more modular, extracting common routines
     into perl library modules.</li>
-
   <li>The generated files that were created by running make in the
     <tt>configure</tt> directory are no longer required, having been replaced
     by additional mechanisms inside the build system files. This removes a
@@ -323,7 +922,7 @@ configuration file, from an *.acs file using the C preprocessor. An .acs file
 has the same format as an .acf file with the addition of '#include
 "&lt;filename&gt;"' and '#define &lt;macroname&gt; &lt;value&gt;' lines. The
 C preprocessor includes the #include files and performs the macro
-substitutions. </p>
+substitutions.</p>
 
 <h4>Changes to subArray record error behaviour</h4>
 
@@ -337,12 +936,12 @@ alarm will be generated.</p>
 <h4>scanOnce(precord) argument</h4>
 
 <p>The argument to <tt>scanOnce()</tt> is a pointer to the record to be
-scanned.  This used to be a <tt>void *</tt> pointer, but is now a <tt>dbCommon
-*</tt> pointer.  Record types written in C that call <tt>scanOnce()</tt> will
-still compile without having to change the source code (although a comiler
-warning may be generated), but any record types implemented in C++ will have to
-be fixed to cast the record instance pointer to a <tt>dbCommon *</tt>
-instead.</p>
+scanned.  This used to be a <tt>void *</tt> pointer, but is now a
+<tt>dbCommon *</tt> pointer.  Record types written in C that call
+<tt>scanOnce()</tt> will still compile without having to change the source
+code (although a comiler warning may be generated), but any record types
+implemented in C++ will have to be fixed to cast the record instance pointer
+to a <tt>dbCommon *</tt> instead.</p>
 
 <h4>New Architectures</h4>
 
@@ -355,7 +954,7 @@ although the core developers lack the ability to test all of them:</p>
       <li>linux-cris_v32</li>
     </ul>
   </li>
-  <li>linux-xscale_be (tested with MOXA UC-7408 Plus)
+  <li>linux-xscale_be (tested with MOXA UC-7408 Plus)</li>
 </ul>
 
 <h4>Added compile line header search directories</h4>
@@ -363,7 +962,7 @@ although the core developers lack the ability to test all of them:</p>
 <p>The compile line list of directories to search for header files now
 includes O.Common and the existing os subdirectories of SRC_DIRS
 &lt;src_dir&gt;/os/&lt;OS_CLASS&gt;, &lt;src_dir&gt;/os/posix, and
-&lt;src_dir&gt;/os/default. </p>
+&lt;src_dir&gt;/os/default.</p>
 
 <h4>Parallel make now supported</h4>
 
@@ -487,7 +1086,7 @@ discussion on the cygwin mailing list it looks like this will be fixed in
 make version 3.82. In the meantime make version 3.80 or a fixed make can be
 downloaded from <a
 href="https://projects.coin-or.org/BuildTools/wiki/current-issues">this
-website</a>. </p>
+website</a>.</p>
 
 <h4>New Architectures</h4>
 
@@ -524,7 +1123,7 @@ this version of Base.</p>
 <h4>dbLoadTemplate</h4>
 
 <p>The parser for the substitutions file accepted by dbLoadTemplate() has
-been revised, and is now stricter than it used to be &mdash; unmatched
+been revised, and is now stricter than it used to be &#x2014; unmatched
 characters that were accepted and discarded without warning before will now
 generate errors. The quote characters at the two ends of a quoted string
 value must now match, although either single or double quotes can be used.
@@ -610,7 +1209,7 @@ assignments. The value of the whole string is determined by the single
 non-assignment expression, which may appear anywhere in the string. For
 example, the following string causes a single CALC record to output the
 successive values of a sine curve in 1 degree intervals:
-<tt>sin(a); a:=a+d2r</tt></p>
+<tt>sin(a); a:=a+d2r</tt></p>
 
 <p>Previously any expression that performed an invalid operation which would
 generate a NaN or Inf result would be stopped immediately and return an error
@@ -625,7 +1224,7 @@ added to the expression language. The literal values <tt>Inf</tt> and
 <p>The only incompatible change to the expression language was to change the
 <tt>NOT</tt> operator from performing a unary minus operation to an integer
 bitwise not; the former meaning is illogical and as a result was probably not
-used much, if at all &mdash; nobody complained when I discussed this on
+used much, if at all &#x2014; nobody complained when I discussed this on
 tech-talk...</p>
 
 <p>The extended API and the expression language are now discussed in detail
@@ -649,8 +1248,8 @@ and an Undefined/INVALID_ALARM being raised as a result.</p>
 <p>An empty string is no longer a legal expression, therefor the CALC and
 OCAL fields have been changed so that their default value is a literal
 <tt>"0"</tt> string. Also any calcout record device support must now add the
-line <tt>#include "postfix.h"</tt> before the
-<tt>#include "calcoutRecord.h"</tt> line in the source code.</p>
+line <tt>#include "postfix.h"</tt> before the
+<tt>#include "calcoutRecord.h"</tt> line in the source code.</p>
 
 <h4>recGblAlarmHook</h4>
 
@@ -786,20 +1385,20 @@ reconnect</p>
 <p>These changes are required to allow software outside of Base to be built
 on win32 architectures.</p>
 <ul>
-  <li>win32 epicsShareAPI changes to libCom 
+  <li>win32 epicsShareAPI changes to libCom
     <p>The win32 Pascal calling convention (epicsShareAPI) has been removed
     from the following header files in libCom/misc: adjustment.h,
     cantProceed.h, epicsConvert.h, epicsStdlib.h, epicsString.h.</p>
   </li>
-  <li>epicsString 
+  <li>epicsString
     <p>A new function epicsStrtok_r has been added because win32 does not
     implement strtok_r.</p>
   </li>
-  <li>epicsStdlib 
+  <li>epicsStdlib
     <p>All function described in epicsStdlib.h are now implemented in
     epicsStdlib.c</p>
   </li>
-  <li>win32 epicsShareExtern changes in dbStaticLib 
+  <li>win32 epicsShareExtern changes in dbStaticLib
     <p>The type name mapping array mapdbfType defined in dbFldTypes.h has had
     the correct export modifier keywords added to it for use on win32.</p>
   </li>
@@ -856,7 +1455,7 @@ configure/RELEASE* files should contain location definitions for EPICS
 modules only.</p>
 
 <h4>event generator and event receiver record support</h4>
-All apsEvent specific record support has been removed from base 
+All apsEvent specific record support has been removed from base
 
 <h4>drvTS and apsEvent support</h4>
 
@@ -1110,7 +1709,7 @@ For example the former command:</p>
 <pre>Is now:</pre>
 <pre>    dbl &gt; reportName</pre>
 Note that this does NOT work on the vxWorks shell only on iocsh. On the
-vxWorks shell the following command can be given: 
+vxWorks shell the following command can be given:
 <pre>    iocshCmd("dbl &gt; reportName")</pre>
 
 <h4>errlog</h4>
@@ -1275,17 +1874,17 @@ channels)</p>
 <h4>Channel Access Client Library</h4>
 <ul>
   <li>Fixed "subscription updates intermittently do not resume when
-    unresponsive circuit reconnects" bug 
+    unresponsive circuit reconnects" bug
     <ul>
-      <li>Scope: 
+      <li>Scope:
         <p>This bug was introduced in R3.14.5 and does not exist in any other
         release.</p>
       </li>
-      <li>Symptom: 
+      <li>Symptom:
         <p>Subscription updates intermittently do not resume depending on
         circumstances when unresponsive circuit reconnects</p>
       </li>
-      <li>Additional Information: 
+      <li>Additional Information:
         <p>A decision was made to add a change to EPICS R3.14.5 so that when
         a TCP circuit is temporarily unresponsive the channel, but not the
         circuit, is immediately disconnected. This change was determined to
@@ -1298,33 +1897,33 @@ channels)</p>
     </ul>
   </li>
   <li>Fixed "ca_replace_access_rights_event() fails if passed a nill function
-    pointer" bug 
+    pointer" bug
     <ul>
-      <li>Scope: 
+      <li>Scope:
         <p>This bug probably exists in all R3.14 releases.</p>
       </li>
-      <li>Symptom: 
+      <li>Symptom:
         <p>Passing a nill function pointer to
         ca_replace_access_rights_event() should install a noop handler, but
         this currently causes a failure.</p>
       </li>
-      <li>Additional information: 
+      <li>Additional information:
         <p>Regression tests have been installed to detect this mistake.</p>
       </li>
     </ul>
   </li>
   <li>Fixed "CA client library crash when clear channel request occurs in get
-    callback handler" bug 
+    callback handler" bug
     <ul>
-      <li>Scope: 
+      <li>Scope:
         <p>This bug was introduced in R3.14.5 and does not exist in any other
         release.</p>
       </li>
-      <li>Symptom: 
+      <li>Symptom:
         <p>CA client library crash when clear channel request occurs in get
         callback handler</p>
       </li>
-      <li>Additional information: 
+      <li>Additional information:
         <p>When testing the striptool application, Ken Evans, discovered a
         bug in the CA client library occurring when a clear channel request
         occurs in get callback handler. Regression tests have been updated so
@@ -1334,43 +1933,43 @@ channels)</p>
     </ul>
   </li>
   <li>Fixed "Double server subscription install when subscription request
-    occurs in connection callback handler" bug 
+    occurs in connection callback handler" bug
     <ul>
-      <li>Scope: 
+      <li>Scope:
         <p>This bug was introduced in R3.14.5 and does not exist in any other
         release. Subscription request must be made from within connection
         callback handler</p>
       </li>
-      <li>Symptom: 
+      <li>Symptom:
         <p>It has been discovered (by Ken Evans while testing the gateway)
         that certain subscription requests were persisting in the gateway
         after clients had deleted them. This bug causes additional resources
         to be consumed, but does not result in a crash.</p>
       </li>
-      <li>Additional information 
+      <li>Additional information
         <p>Additional debugging has revealed that the CA client library in
         this situation inadvertently made the subscription request twice:
-        once at the users&rsquo; request, and later on again when the library
-        auto installed subscriptions for disconnected channels.</p>
+        once at the users&#x2019; request, and later on again when the
+        library auto installed subscriptions for disconnected channels.</p>
       </li>
     </ul>
   </li>
-  <li>Fixed "failure when deleting channel in get callback handler" bug 
+  <li>Fixed "failure when deleting channel in get callback handler" bug
     <ul>
-      <li>Scope: 
+      <li>Scope:
         <p>Probably introduced in a previous R3.14 release.</p>
       </li>
-      <li>Symptom: 
+      <li>Symptom:
         <p>An intermittent C++ exceptions during regression testing.</p>
       </li>
     </ul>
   </li>
 </ul>
 <ul>
-  <li>Behavior Changes 
+  <li>Behavior Changes
     <ul>
       <li>Process blocks attempting to exit if the application does not call
-        ca_context_destroy() 
+        ca_context_destroy()
         <p>In EPICS release R3.14 the CA client library is implemented using
         axillary threads. If the application does not call
         ca_context_destroy() these threads will still be running, and
@@ -1385,23 +1984,23 @@ channels)</p>
 
 <h4>Channel Access Portable Server (used by the CA gateway and others)</h4>
 <ul>
-  <li>Fixed "assert fail when writing string through Portable CA Server" bug 
+  <li>Fixed "assert fail when writing string through Portable CA Server" bug
     <ul>
-      <li>Scope: 
+      <li>Scope:
         <p>This bug is only present in the portable CA server and so it does
         <em>not</em> impact IOC based applications. The bug is present in the
         CA gateway and any portable CA server based application. This problem
         may have been recently introduced when GDD was patched to properly
         handle fixed sized strings.</p>
       </li>
-      <li>Symptom: 
+      <li>Symptom:
         <p>Failure, when writing large string through the portable CA server.
         There appears to be a possibility of the wrong string being written
         when a smaller string is used. You may see the following message.</p>
         <p>A call to "assert (! this-&gt;pValue-&gt;unreference ())" failed
         in ..\..\..\..\include\smartGDDPointer.h line 88.</p>
       </li>
-      <li>Additional Information: 
+      <li>Additional Information:
         <p>Thanks to Stephanie Alison at SLAC for discovering the bug and to
         Ken Evans at the APS for reminding me to fix it.</p>
       </li>
@@ -1435,11 +2034,11 @@ build. configure/CONFIG_SITE contains two new macros for building
 compatibility files. They are set to NO but can be set to YES. The macros
 are:</p>
 <ul>
-  <li>COMPAT_TOOLS_313 
+  <li>COMPAT_TOOLS_313
     <p>This will install the compatibility files needed to build R3.13
     extensions built with this R3.14 base.</p>
   </li>
-  <li>COMPAT_313 
+  <li>COMPAT_313
     <p>This will install the compatibility files needed to build R3.13
     extensions and IOC applications built with this R3.14 base.</p>
   </li>
@@ -1468,7 +2067,7 @@ to experiment with other CA client tools.</p>
 
 <h4>Stringin record time-stamp soft device support</h4>
 Add simple device support for converting time to nicely-formatted string
-using INP field as epicsTimeToStrftime format string: 
+using INP field as epicsTimeToStrftime format string:
 <pre>record(stringin, "$(user)now")
 {
     field(DESC, "Current time and date")
@@ -1674,7 +2273,7 @@ support allocating A24 addresss and an init method.</p>
 The following have been moved from src/vxWorks/src to
 src/libCom/osi/os/vxWorks: camacLib.h, drvTS.c, drvTS.h, epicsDynLink.c,
 epicsDynLink.h, module_types.h, task_params.h, veclist.c. Brief documentation
-has been added to the Application Developer's Guide. 
+has been added to the Application Developer's Guide.
 
 <h4>Close-On-Exec flag set for all sockets created in EPICS base</h4>
 
@@ -2223,7 +2822,7 @@ removed. A new routine dbDumpField replaces dbDumpFldDes.</p>
 <center>
 <h2>Changes since alpha2</h2>
 </center>
-All changes for release 3.13.5 that also apply to 3.14 have been made. 
+All changes for release 3.13.5 that also apply to 3.14 have been made.
 
 <p><b>devAiSoftRaw and devAoSoftRaw</b></p>
 
@@ -2243,7 +2842,7 @@ be given as</p>
 <h1>EPICS Release base 3.14.0alpha2</h1>
 </center>
 Since the alpha1 release some major changes were made to the build system, to
-some of the libCom facilities, and to the iocsh facilities. 
+some of the libCom facilities, and to the iocsh facilities.
 
 <p>The unbundled version of the sequencer has been build and tested with this
 release. You must obtain a version of the sequencer that has been built
@@ -2271,47 +2870,47 @@ release.</p>
 
 <h3>Converting alpha1 applications to alpha2</h3>
 Build modifications in alpha2 require the following changes to existing R3.14
-applications. 
+applications.
 <ul>
-  <li>Remove the now unused RULES files 
+  <li>Remove the now unused RULES files
 
     <blockquote>
       ./configure/RULES.Db<br>
       ./configure/RULES.registerRecordDeviceDriver</blockquote>
   </li>
-  <li>Delete the following line in ./configure/RULES 
+  <li>Delete the following line in ./configure/RULES
 
     <blockquote>
       include $(TOP)/configure/RULES.registerRecordDeviceDriver</blockquote>
   </li>
-  <li>In &lt;top&gt;/configure/Makefile change 
+  <li>In &lt;top&gt;/configure/Makefile change
 
     <blockquote>
       @$(PERL) $(TOOLS)/makeConfigAppInclude.pl $(T_A) $@ $(TOP)</blockquote>
-    to 
+    to
 
     <blockquote>
       @$(PERL) $(TOOLS)/makeConfigAppInclude.pl $(EPICS_HOST_ARCH) $(T_A) $@
       $(TOP)</blockquote>
-    and add the line 
+    and add the line
 
     <blockquote>
       depends: install</blockquote>
     to the bottom of the Makefile.</li>
-  <li>In all *App/*Db/Makefiles change 
+  <li>In all *App/*Db/Makefiles change
 
     <blockquote>
       include $(TOP)/configure/RULES.Db</blockquote>
-    to 
+    to
 
     <blockquote>
       include $(TOP)/configure/RULES</blockquote>
   </li>
-  <li>In all *App/src/Makefile files change 
+  <li>In all *App/src/Makefile files change
 
     <blockquote>
       DBDNAME = &lt;name&gt;App</blockquote>
-    to 
+    to
 
     <blockquote>
       DBD += &lt;name&gt;</blockquote>
@@ -2322,73 +2921,73 @@ applications.
       DBDEXPAND = &lt;name&gt;Include.dbd</blockquote>
     NOTE: If any of your *App/*Db/Makefiles contain "DBDNAME =" lines you
     should make these same changes in that *Db dirctory.</li>
-  <li>In all *App/src/Makefile Makefiles change 
+  <li>In all *App/src/Makefile Makefiles change
 
     <blockquote>
       RECTYPES=&lt;name&gt;.h</blockquote>
-    to 
+    to
 
     <blockquote>
       DBDINC+=&lt;name&gt;</blockquote>
-    change 
+    change
 
     <blockquote>
       MENUS=&lt;name&gt;.h</blockquote>
-    to 
+    to
 
     <blockquote>
       DBDINC+=&lt;name&gt;</blockquote>
-    change 
+    change
 
     <blockquote>
       BPTS</blockquote>
-    to 
+    to
 
     <blockquote>
       DBD</blockquote>
-    change 
+    change
 
     <blockquote>
       INSTALLDB</blockquote>
-    to 
+    to
 
     <blockquote>
       DB</blockquote>
-    change 
+    change
 
     <blockquote>
       DBDINSTALL</blockquote>
-    to 
+    to
 
     <blockquote>
       DBD</blockquote>
   </li>
-  <li>In all example *App/src/Makefile files change 
+  <li>In all example *App/src/Makefile files change
 
     <blockquote>
       example_SRCS_DEFAULT += registerRecordDeviceDriver.c</blockquote>
-    to 
+    to
 
     <blockquote>
-      example_SRCS_DEFAULT += &lt;name&gt;_registerRecordDeviceDriver.cpp
-    </blockquote>
+      example_SRCS_DEFAULT +=
+    &lt;name&gt;_registerRecordDeviceDriver.cpp</blockquote>
     where &lt;name&gt; is the base name of a &lt;name&gt;.dbd file which was
     created from a &lt;name&gt;Include.dbd file and which will be loaded in a
     st.cmd or stcmd.host script (e.g. example).</li>
-  <li>In ./iocBoot/ioc&lt;name&gt;/st.cmd files change 
+  <li>In ./iocBoot/ioc&lt;name&gt;/st.cmd files change
 
     <blockquote>
       dbLoadDatabase("dbd/exampleApp.dbd")</blockquote>
-    to 
+    to
 
     <blockquote>
       dbLoadDatabase("dbd/example.dbd")</blockquote>
   </li>
-  <li>In &lt;top&gt;/iocBoot/ioc&lt;name&gt;/stcmd.host files change 
+  <li>In &lt;top&gt;/iocBoot/ioc&lt;name&gt;/stcmd.host files change
 
     <blockquote>
       dbLoadDatabase("../../dbd/exampleApp.dbd",0,0)</blockquote>
-    to 
+    to
 
     <blockquote>
       dbLoadDatabase("../../dbd/example.dbd",0,0)</blockquote>
@@ -2420,31 +3019,31 @@ iocCore on platforms besides vxWorks.</p>
 
 <p>iocCore is now supported on the following platforms:</p>
 <ul>
-  <li>vxWorks 
+  <li>vxWorks
 
     <blockquote>
       Tornado II is required.</blockquote>
   </li>
-  <li>RTEMS 
+  <li>RTEMS
 
     <blockquote>
       An open source real time operating system. It has been tested on
       MVME167 and MC68360 processors. RTEMS also supports
     powerPC.</blockquote>
   </li>
-  <li>solaris 
+  <li>solaris
 
     <blockquote>
       Has been tested on solaris 2.6 and solaris 8 with Sun workshop 6.0 (C++
       5.2). Sun workshop 5.0 (C++ 5.0) will not compile this version of
     EPICS.</blockquote>
   </li>
-  <li>Linux 
+  <li>Linux
 
     <blockquote>
       Has been tested on Redhat x86 platforms.</blockquote>
   </li>
-  <li>winNT 
+  <li>winNT
 
     <blockquote>
       Testing has been done with visual C++ 6.0.</blockquote>

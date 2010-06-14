@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* dbScan.h,v 1.9.2.4 2008/09/05 15:17:45 anj Exp
+/* dbScan.h,v 1.9.2.5 2009/04/02 14:11:27 anj Exp
  *
  *      Author:         Marty Kraimer
  *      Date:           07-17-91
@@ -14,6 +14,8 @@
 
 #ifndef INCdbScanH
 #define INCdbScanH
+
+#include <limits.h>
 
 #include "menuScan.h"
 #include "shareLib.h"
@@ -26,6 +28,9 @@ extern "C" {
 #define SCAN_EVENT          menuScanEvent
 #define SCAN_IO_EVENT       menuScanI_O_Intr
 #define SCAN_1ST_PERIODIC   (menuScanI_O_Intr + 1)
+
+#define MAX_PHASE           SHRT_MAX
+#define MIN_PHASE           SHRT_MIN
 
 /*definitions for I/O Interrupt Scanning */
 struct io_scan_list;

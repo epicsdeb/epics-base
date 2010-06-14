@@ -18,6 +18,7 @@
 
 #define epicsExportSharedSymbols
 #include "timerPrivate.h"
+#include "errlog.h"
 
 #ifdef _MSC_VER
 #   pragma warning ( push )
@@ -38,11 +39,13 @@ epicsTimerQueueActive & epicsTimerQueueActive::allocate ( bool okToShare, unsign
 {
     epicsSingleton < timerQueueActiveMgr >::reference pMgr = 
         timerQueueMgrEPICS.getReference ();
-    return pMgr->allocate ( okToShare, threadPriority );
+    return pMgr->allocate ( pMgr, okToShare, threadPriority );
 }
 
-timerQueueActive::timerQueueActive ( bool okToShareIn, unsigned priority ) :
-    queue ( *this ), thread ( *this, "timerQueue", 
+timerQueueActive ::
+    timerQueueActive ( RefMgr & refMgr, 
+        bool okToShareIn, unsigned priority ) :
+    _refMgr ( refMgr ), queue ( *this ), thread ( *this, "timerQueue", 
         epicsThreadGetStackSize ( epicsThreadStackMedium ), priority ),
     sleepQuantum ( epicsThreadSleepQuantum() ), okToShare ( okToShareIn ), 
     exitFlag ( false ), terminateFlag ( false )
@@ -61,13 +64,44 @@ timerQueueActive::~timerQueueActive ()
     this->exitEvent.signal ();
 }
 
-void timerQueueActive::run ()
+void timerQueueActive :: _printLastChanceExceptionMessage ( 
+    const char * pExceptionTypeName,
+    const char * pExceptionContext )
+{ 
+    char date[64];
+    try {
+        epicsTime cur = epicsTime :: getCurrent ();
+        cur.strftime ( date, sizeof ( date ), "%a %b %d %Y %H:%M:%S.%f");
+    }
+    catch ( ... ) {
+        strcpy ( date, "<UKN DATE>" );
+    }
+    errlogPrintf ( 
+        "timerQueueActive: Unexpected C++ exception \"%s\" with type \"%s\" "
+        "while processing timer queue, at %s\n",
+        pExceptionContext, pExceptionTypeName, date );
+}
+
+
+void timerQueueActive :: run ()
 {
     this->exitFlag = false;
     while ( ! this->terminateFlag ) {
-        double delay = this->queue.process ( epicsTime::getCurrent() );
-        debugPrintf ( ( "timer thread sleeping for %g sec (max)\n", delay ) );
-        this->rescheduleEvent.wait ( delay );
+        try {
+            double delay = this->queue.process ( epicsTime::getCurrent() );
+            debugPrintf ( ( "timer thread sleeping for %g sec (max)\n", delay ) );
+            this->rescheduleEvent.wait ( delay );
+        }
+        catch ( std :: exception & except ) {
+            _printLastChanceExceptionMessage (
+                typeid ( except ).name (), except.what () );
+            epicsThreadSleep ( 10.0 );
+        }
+        catch ( ... ) {
+            _printLastChanceExceptionMessage (
+                "catch ( ... )", "Non-standard C++ exception" );
+            epicsThreadSleep ( 10.0 );
+        }
     }
     this->exitFlag = true; 
     this->exitEvent.signal (); // no access to queue after exitEvent signal
@@ -97,7 +131,10 @@ void timerQueueActive::show ( unsigned int level ) const
 {
     printf ( "EPICS threaded timer queue at %p\n", 
         static_cast <const void *> ( this ) );
-    if ( level >=1u ) {
+    if ( level > 0u ) {
+        // specifying level one here avoids recursive 
+        // show callback
+        this->thread.show ( 1u );
         this->queue.show ( level - 1u );
         printf ( "reschedule event\n" );
         this->rescheduleEvent.show ( level - 1u );

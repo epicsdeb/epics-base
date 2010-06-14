@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// casStreamOS.h,v 1.1.2.1 2004/11/24 22:11:20 jhill Exp
+// casStreamOS.h,v 1.1.2.3 2009/07/31 00:00:42 jhill Exp
 //
 
 #ifndef casStreamOSh
@@ -66,14 +66,13 @@ public:
         const ioArgsToNewStreamIO & );
 	~casStreamOS ();
 	void show ( unsigned level ) const;
-	casProcCond processInput ();
-	void eventFlush ();
+    void printStatus ( const char * pCtx ) const;
 private:
 	casStreamEvWakeup evWk;
 	casStreamIOWakeup ioWk;
 	class casStreamWriteReg * pWtReg;
 	class casStreamReadReg * pRdReg;
-	bool sendBlocked;
+	bufSizeT _sendBacklogThresh;
 	void armSend ();
 	void armRecv ();
 	void disarmSend();
@@ -83,10 +82,13 @@ private:
 	void sendBlockSignal ();
 	void ioBlockedSignal ();
 	void eventSignal ();
+    bool _sendNeeded () const;
 	casStreamOS ( const casStreamOS & );
 	casStreamOS & operator = ( const casStreamOS & );
     friend class casStreamWriteReg;
     friend class casStreamReadReg;
+    friend class casStreamIOWakeup;
+    friend class casStreamEvWakeup;
 };
 
 #endif // casStreamOSh

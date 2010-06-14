@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casChannelI.cc,v 1.29.2.1 2003/07/18 15:48:28 jhill Exp
+ *      casChannelI.cc,v 1.29.2.2 2009/08/03 22:09:50 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -97,6 +97,17 @@ caStatus casChannelI::write ( const casCtx & ctx, const gdd & value )
         return status;
     }
     status = this->chan.write ( ctx, value );
+    this->chan.endTransaction ();
+    return status;
+}
+
+caStatus casChannelI::writeNotify ( const casCtx & ctx, const gdd & value )
+{
+    caStatus status = this->chan.beginTransaction ();
+    if ( status != S_casApp_success ) {
+        return status;
+    }
+    status = this->chan.writeNotify ( ctx, value );
     this->chan.endTransaction ();
     return status;
 }

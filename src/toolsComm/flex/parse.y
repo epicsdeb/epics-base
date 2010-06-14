@@ -32,7 +32,7 @@
 
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/parse.y,v 1.2 1994/11/23 19:30:54 tang Exp (LBL)";
+    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/parse.y,v 1.2.20.1 2009/04/30 20:45:31 anj Exp (LBL)";
 #endif
 
 #include "flexdef.h"
@@ -634,7 +634,7 @@ string		:  string CHAR
 void build_eof_action()
 
     {
-    register int i;
+    int i;
 
     for ( i = 1; i <= actvp; ++i )
 	{

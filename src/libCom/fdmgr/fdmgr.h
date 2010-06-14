@@ -9,7 +9,7 @@
 \*************************************************************************/
 /* fdmgr.h
  *
- *      share/epicsH/fdmgr.h,v 1.13 2002/07/12 21:34:32 jba Exp
+ *      share/epicsH/fdmgr.h,v 1.13.2.1 2009/04/27 18:31:50 anj Exp
  *
  *      Header file associated with a file descriptor manager 
  *	for use with the UNIX system call select
@@ -61,8 +61,6 @@ typedef void (*pCallBackFDMgr)(void *);
  */
 typedef unsigned fdmgrAlarmId;
 #define NEW_FDMGR_ALARMID
-
-#if defined(__STDC__) || defined(__cplusplus)
 
 /*
  *
@@ -164,24 +162,6 @@ void    *param
 );
 
 epicsShareFunc int epicsShareAPI fdmgr_delete(fdctx *pfdctx);
-
-#else
-
-epicsShareFunc fdctx * epicsShareAPI fdmgr_init();
-epicsShareFunc fdmgrAlarmId epicsShareAPI fdmgr_add_timeout();
-epicsShareFunc int epicsShareAPI fdmgr_clear_timeout();
-epicsShareFunc int epicsShareAPI fdmgr_add_callback();
-epicsShareFunc int epicsShareAPI fdmgr_clear_callback();
-epicsShareFunc int epicsShareAPI fdmgr_pend_event();
-epicsShareFunc int epicsShareAPI fdmgr_delete();
-
-/*
- * obsolete interface
- */
-epicsShareFunc int epicsShareAPI fdmgr_clear_fd();
-epicsShareFunc int epicsShareAPI fdmgr_add_fd();
-
-#endif
 
 #ifdef __cplusplus
 }

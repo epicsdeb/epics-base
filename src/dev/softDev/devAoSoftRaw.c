@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devAoSoftRaw.c */
-/* base/src/dev devAoSoftRaw.c,v 1.12 2003/04/01 21:02:15 mrk Exp */
+/* base/src/dev devAoSoftRaw.c,v 1.12.2.1 2009/04/03 15:45:02 lange Exp */
 
 /* Device Support Routines for soft raw Analog Output Records*/
 /*
@@ -33,7 +33,7 @@
 #include "epicsExport.h"
 
 /* Create the dset for devAoSoftRaw */
-static long write_ao(aoRecord *pao);
+static long write_ao(aoRecord *prec);
 struct {
 	long		number;
 	DEVSUPFUN	report;
@@ -53,11 +53,11 @@ struct {
 };
 epicsExportAddress(dset,devAoSoftRaw);
 
-static long write_ao(aoRecord *pao)
+static long write_ao(aoRecord *prec)
 {
     long status;
 
-    status = dbPutLink(&pao->out,DBR_LONG,&pao->rval,1);
+    status = dbPutLink(&prec->out,DBR_LONG,&prec->rval,1);
 
     return(status);
 }

@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  CONFIG,v 1.17.2.10 2008/09/15 15:08:45 jba Exp
+#  CONFIG,v 1.17.2.11 2009/03/03 19:54:05 jba Exp
 #
 #  The developer may edit this file.
 # assume T_A is the host arch if not specified
@@ -130,6 +130,4 @@ endif
 #etc.
 
 #CROSS_COMPILER_TARGET_ARCHS=vxWorks-68040
-#CMPLR=STRICT
-#CXXCMPLR=STRICT
 

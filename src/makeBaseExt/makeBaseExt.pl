@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# Authors: Ralph Lange and Marty Kraimer
-# makeBaseExt.pl,v 1.1 2000/09/27 16:06:43 jba Exp
+# Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
+# makeBaseExt.pl,v 1.1.2.2 2009/04/24 12:35:36 lange Exp
 
 use Cwd;
 use Getopt::Std;
@@ -13,6 +13,7 @@ $user = GetUser();
 $cwd  = cwd();
 $eEXTTYPE = $ENV{EPICS_MBE_DEF_EXT_TYPE};
 $eTOP     = $ENV{EPICS_MBE_TEMPLATE_TOP};
+$eBASE    = $ENV{EPICS_MBE_BASE};
 
 &get_commandline_opts;		# Read and check options
 
@@ -123,7 +124,9 @@ sub get_commandline_opts { #no args
 	    s/EPICS_BASE\s*=\s*// and $epics_base = UnixPath($_), break;
 	}
 	close IN;
-    } elsif ($command =~ m|/bin/|) {
+    } elsif ($eBASE) { # third choice is env var EPICS_MBE_BASE
+        $epics_base = UnixPath($eBASE);
+    } elsif ($command =~ m|/bin/|) { # assume script was called with full path to base
 	$epics_base = "/usr/epics/base";
     }
     "$epics_base" or Cleanup(1, "Cannot find EPICS base");
@@ -260,12 +263,14 @@ where
 	  If this is specified the other options are not used
  -b base  Set the location of EPICS base (full path)
           If not specified, base path is taken from configure/RELEASE
-          If configure does not exist, base path is taken from command
+          If configure does not exist, from environment
+          If not found in environment, from makeBaseApp.pl location
  -d       Verbose output (useful for debugging)
 
 Environment:
 EPICS_MBE_DEF_EXT_TYPE  Ext type you want to use as default
 EPICS_MBE_TEMPLATE_TOP  Template top directory
+EPICS_MBE_BASE          Location of EPICS base
 
 Example: Create example extension 
 

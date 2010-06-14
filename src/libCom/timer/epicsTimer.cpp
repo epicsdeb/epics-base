@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      epicsTimer.cpp,v 1.38.2.1 2003/08/01 19:13:38 soliday Exp
+ *      epicsTimer.cpp,v 1.38.2.3 2009/05/11 22:50:06 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -64,8 +64,10 @@ epicsTimerNotify::expireStatus epicsTimerForC::expire ( const epicsTime & )
     return noRestart;
 }
 
-epicsTimerQueueActiveForC::epicsTimerQueueActiveForC ( bool okToShare, unsigned priority ) :
-    timerQueueActive ( okToShare, priority )
+epicsTimerQueueActiveForC ::
+    epicsTimerQueueActiveForC ( RefMgr & refMgr, 
+        bool okToShare, unsigned priority ) :
+    timerQueueActive ( refMgr, okToShare, priority )
 {
 }
 
@@ -75,9 +77,7 @@ epicsTimerQueueActiveForC::~epicsTimerQueueActiveForC ()
 
 void epicsTimerQueueActiveForC::release ()
 {
-    epicsSingleton < timerQueueActiveMgr >::reference pMgr = 
-        timerQueueMgrEPICS.getReference ();
-    pMgr->release ( *this );
+    _refMgr->release ( *this );
 }
 
 epicsTimerQueuePassiveForC::epicsTimerQueuePassiveForC ( 
@@ -173,7 +173,12 @@ extern "C" void epicsShareAPI
 extern "C" double epicsShareAPI 
     epicsTimerQueuePassiveProcess ( epicsTimerQueuePassiveId pQueue )
 {
-    return pQueue->process ( epicsTime::getCurrent() );
+    try {
+        return pQueue->process ( epicsTime::getCurrent() );
+    }
+    catch ( ... ) {
+        return 1.0;
+    }
 }
 
 extern "C" epicsTimerId epicsShareAPI epicsTimerQueuePassiveCreateTimer (
@@ -203,10 +208,10 @@ extern "C" epicsTimerQueueId epicsShareAPI
     epicsTimerQueueAllocate ( int okToShare, unsigned int threadPriority )
 {
     try {
-        epicsSingleton < timerQueueActiveMgr >::reference ref = 
+        epicsSingleton < timerQueueActiveMgr > :: reference ref = 
             timerQueueMgrEPICS.getReference ();
         epicsTimerQueueActiveForC & tmr = 
-            ref->allocate ( okToShare ? true : false, threadPriority );
+            ref->allocate ( ref, okToShare ? true : false, threadPriority );
         return &tmr;
     }
     catch ( ... ) {

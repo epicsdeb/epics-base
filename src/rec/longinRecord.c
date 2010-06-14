@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* longinRecord.c,v 1.15.2.1 2008/07/01 16:49:02 anj Exp */
+/* longinRecord.c,v 1.15.2.4 2009/07/08 18:14:10 anj Exp */
 
 /* recLongin.c - Record Support Routines for Longin records */
 /*
@@ -31,6 +31,7 @@
 #include "errMdef.h"
 #include "recSup.h"
 #include "recGbl.h"
+#include "menuYesNo.h"
 #define GEN_SIZE_OFFSET
 #include "longinRecord.h"
 #undef  GEN_SIZE_OFFSET
@@ -86,12 +87,12 @@ struct longindset { /* longin input dset */
 	DEVSUPFUN	get_ioint_info;
 	DEVSUPFUN	read_longin; /*returns: (-1,0)=>(failure,success)*/
 };
-static void checkAlarms(longinRecord *plongin);
-static void monitor(longinRecord *plongin);
-static long readValue(longinRecord *plongin);
+static void checkAlarms(longinRecord *prec);
+static void monitor(longinRecord *prec);
+static long readValue(longinRecord *prec);
 
 
-static long init_record(longinRecord *plongin, int pass)
+static long init_record(longinRecord *prec, int pass)
 {
     struct longindset *pdset;
     long status;
@@ -99,26 +100,26 @@ static long init_record(longinRecord *plongin, int pass)
     if (pass==0) return(0);
 
     /* longin.siml must be a CONSTANT or a PV_LINK or a DB_LINK */
-    if (plongin->siml.type == CONSTANT) {
-	recGblInitConstantLink(&plongin->siml,DBF_USHORT,&plongin->simm);
+    if (prec->siml.type == CONSTANT) {
+	recGblInitConstantLink(&prec->siml,DBF_USHORT,&prec->simm);
     }
 
     /* longin.siol must be a CONSTANT or a PV_LINK or a DB_LINK */
-    if (plongin->siol.type == CONSTANT) {
-	recGblInitConstantLink(&plongin->siol,DBF_LONG,&plongin->sval);
+    if (prec->siol.type == CONSTANT) {
+	recGblInitConstantLink(&prec->siol,DBF_LONG,&prec->sval);
     }
 
-    if(!(pdset = (struct longindset *)(plongin->dset))) {
-	recGblRecordError(S_dev_noDSET,(void *)plongin,"longin: init_record");
+    if(!(pdset = (struct longindset *)(prec->dset))) {
+	recGblRecordError(S_dev_noDSET,(void *)prec,"longin: init_record");
 	return(S_dev_noDSET);
     }
     /* must have read_longin function defined */
     if( (pdset->number < 5) || (pdset->read_longin == NULL) ) {
-	recGblRecordError(S_dev_missingSup,(void *)plongin,"longin: init_record");
+	recGblRecordError(S_dev_missingSup,(void *)prec,"longin: init_record");
 	return(S_dev_missingSup);
     }
     if( pdset->init_record ) {
-	if((status=(*pdset->init_record)(plongin))) return(status);
+	if((status=(*pdset->init_record)(prec))) return(status);
     }
     plongin->mlst = plongin->val;
     plongin->alst = plongin->val;
@@ -126,85 +127,85 @@ static long init_record(longinRecord *plongin, int pass)
     return(0);
 }
 
-static long process(longinRecord *plongin)
+static long process(longinRecord *prec)
 {
-	struct longindset	*pdset = (struct longindset *)(plongin->dset);
+	struct longindset	*pdset = (struct longindset *)(prec->dset);
 	long		 status;
-	unsigned char    pact=plongin->pact;
+	unsigned char    pact=prec->pact;
 
 	if( (pdset==NULL) || (pdset->read_longin==NULL) ) {
-		plongin->pact=TRUE;
-		recGblRecordError(S_dev_missingSup,(void *)plongin,"read_longin");
+		prec->pact=TRUE;
+		recGblRecordError(S_dev_missingSup,(void *)prec,"read_longin");
 		return(S_dev_missingSup);
 	}
 
-	status=readValue(plongin); /* read the new value */
+	status=readValue(prec); /* read the new value */
 	/* check if device support set pact */
-	if ( !pact && plongin->pact ) return(0);
-	plongin->pact = TRUE;
+	if ( !pact && prec->pact ) return(0);
+	prec->pact = TRUE;
 
-	recGblGetTimeStamp(plongin);
-	if (status==0) plongin->udf = FALSE;
+	recGblGetTimeStamp(prec);
+	if (status==0) prec->udf = FALSE;
 
 	/* check for alarms */
-	checkAlarms(plongin);
+	checkAlarms(prec);
 	/* check event list */
-	monitor(plongin);
+	monitor(prec);
 	/* process the forward scan link record */
-	recGblFwdLink(plongin);
+	recGblFwdLink(prec);
 
-	plongin->pact=FALSE;
+	prec->pact=FALSE;
 	return(status);
 }
 
 static long get_units(DBADDR *paddr,char *units)
 {
-    longinRecord *plongin=(longinRecord *)paddr->precord;
+    longinRecord *prec=(longinRecord *)paddr->precord;
 
-    strncpy(units,plongin->egu,DB_UNITS_SIZE);
+    strncpy(units,prec->egu,DB_UNITS_SIZE);
     return(0);
 }
 
 
 static long get_graphic_double(DBADDR *paddr, struct dbr_grDouble *pgd)
 {
-    longinRecord *plongin=(longinRecord *)paddr->precord;
+    longinRecord *prec=(longinRecord *)paddr->precord;
 
-    if(paddr->pfield==(void *)&plongin->val
-    || paddr->pfield==(void *)&plongin->hihi
-    || paddr->pfield==(void *)&plongin->high
-    || paddr->pfield==(void *)&plongin->low
-    || paddr->pfield==(void *)&plongin->lolo){
-        pgd->upper_disp_limit = plongin->hopr;
-        pgd->lower_disp_limit = plongin->lopr;
+    if(paddr->pfield==(void *)&prec->val
+    || paddr->pfield==(void *)&prec->hihi
+    || paddr->pfield==(void *)&prec->high
+    || paddr->pfield==(void *)&prec->low
+    || paddr->pfield==(void *)&prec->lolo){
+        pgd->upper_disp_limit = prec->hopr;
+        pgd->lower_disp_limit = prec->lopr;
     } else recGblGetGraphicDouble(paddr,pgd);
     return(0);
 }
 
 static long get_control_double(DBADDR *paddr, struct dbr_ctrlDouble *pcd)
 {
-    longinRecord *plongin=(longinRecord *)paddr->precord;
+    longinRecord *prec=(longinRecord *)paddr->precord;
 
-    if(paddr->pfield==(void *)&plongin->val
-    || paddr->pfield==(void *)&plongin->hihi
-    || paddr->pfield==(void *)&plongin->high
-    || paddr->pfield==(void *)&plongin->low
-    || paddr->pfield==(void *)&plongin->lolo){
-        pcd->upper_ctrl_limit = plongin->hopr;
-        pcd->lower_ctrl_limit = plongin->lopr;
+    if(paddr->pfield==(void *)&prec->val
+    || paddr->pfield==(void *)&prec->hihi
+    || paddr->pfield==(void *)&prec->high
+    || paddr->pfield==(void *)&prec->low
+    || paddr->pfield==(void *)&prec->lolo){
+        pcd->upper_ctrl_limit = prec->hopr;
+        pcd->lower_ctrl_limit = prec->lopr;
     } else recGblGetControlDouble(paddr,pcd);
     return(0);
 }
 
 static long get_alarm_double(DBADDR *paddr, struct dbr_alDouble	*pad)
 {
-    longinRecord *plongin=(longinRecord *)paddr->precord;
+    longinRecord *prec=(longinRecord *)paddr->precord;
 
-    if(paddr->pfield==(void *)&plongin->val){
-         pad->upper_alarm_limit = plongin->hihi;
-         pad->upper_warning_limit = plongin->high;
-         pad->lower_warning_limit = plongin->low;
-         pad->lower_alarm_limit = plongin->lolo;
+    if(paddr->pfield==(void *)&prec->val){
+         pad->upper_alarm_limit = prec->hihi;
+         pad->upper_warning_limit = prec->high;
+         pad->lower_warning_limit = prec->low;
+         pad->lower_alarm_limit = prec->lolo;
     } else recGblGetAlarmDouble(paddr,pad);
     return(0);
 }
@@ -265,72 +266,68 @@ static void checkAlarms(longinRecord *prec)
     return;
 }
 
-static void monitor(longinRecord *plongin)
+/* DELTA calculates the absolute difference between its arguments
+ * expressed as an unsigned 32-bit integer */
+#define DELTA(last, val) \
+    ((epicsUInt32) ((last) > (val) ? (last) - (val) : (val) - (last)))
+
+static void monitor(longinRecord *prec)
 {
-	unsigned short	monitor_mask;
-	epicsInt32	delta;
+    unsigned short monitor_mask = recGblResetAlarms(prec);
 
-	/* get previous stat and sevr  and new stat and sevr*/
-        monitor_mask = recGblResetAlarms(plongin);
-	/* check for value change */
-	delta = plongin->mlst - plongin->val;
-	if(delta<0) delta = -delta;
-        if (delta > plongin->mdel || delta==0x80000000) {
-		/* post events for value change */
-		monitor_mask |= DBE_VALUE;
-		/* update last value monitored */
-		plongin->mlst = plongin->val;
-	}
+    if (prec->mdel < 0 ||
+        DELTA(prec->mlst, prec->val) > (epicsUInt32) prec->mdel) {
+        /* post events for value change */
+        monitor_mask |= DBE_VALUE;
+        /* update last value monitored */
+        prec->mlst = prec->val;
+    }
 
-	/* check for archive change */
-	delta = plongin->alst - plongin->val;
-	if(delta<0) delta = -delta;
-	if (delta > plongin->adel || delta==0x80000000) {
-		/* post events on value field for archive change */
-		monitor_mask |= DBE_LOG;
-		/* update last archive value monitored */
-		plongin->alst = plongin->val;
-	}
+    if (prec->adel < 0 ||
+        DELTA(prec->alst, prec->val) > (epicsUInt32) prec->adel) {
+        /* post events for archive value change */
+        monitor_mask |= DBE_LOG;
+        /* update last archive value monitored */
+        prec->alst = prec->val;
+    }
 
-	/* send out monitors connected to the value field */
-	if (monitor_mask){
-		db_post_events(plongin,&plongin->val,monitor_mask);
-	}
-	return;
+    /* send out monitors connected to the value field */
+    if (monitor_mask)
+        db_post_events(prec, &prec->val, monitor_mask);
 }
 
-static long readValue(longinRecord *plongin)
+static long readValue(longinRecord *prec)
 {
 	long status;
-        struct longindset *pdset = (struct longindset *) (plongin->dset);
+        struct longindset *pdset = (struct longindset *) (prec->dset);
 
-	if (plongin->pact == TRUE){
-		status=(*pdset->read_longin)(plongin);
+	if (prec->pact == TRUE){
+		status=(*pdset->read_longin)(prec);
 		return(status);
 	}
 
-	status=dbGetLink(&(plongin->siml),DBR_USHORT, &(plongin->simm),0,0);
+	status=dbGetLink(&(prec->siml),DBR_USHORT, &(prec->simm),0,0);
 	if (status)
 		return(status);
 
-	if (plongin->simm == NO){
-		status=(*pdset->read_longin)(plongin);
+	if (prec->simm == menuYesNoNO){
+		status=(*pdset->read_longin)(prec);
 		return(status);
 	}
-	if (plongin->simm == YES){
-		status=dbGetLink(&(plongin->siol),DBR_LONG,
-			&(plongin->sval),0,0);
+	if (prec->simm == menuYesNoYES){
+		status=dbGetLink(&(prec->siol),DBR_LONG,
+			&(prec->sval),0,0);
 
 		if (status==0) {
-			plongin->val=plongin->sval;
-			plongin->udf=FALSE;
+			prec->val=prec->sval;
+			prec->udf=FALSE;
 		}
 	} else {
 		status=-1;
-		recGblSetSevr(plongin,SOFT_ALARM,INVALID_ALARM);
+		recGblSetSevr(prec,SOFT_ALARM,INVALID_ALARM);
 		return(status);
 	}
-        recGblSetSevr(plongin,SIMM_ALARM,plongin->sims);
+        recGblSetSevr(prec,SIMM_ALARM,prec->sims);
 
 	return(status);
 }

@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
@@ -27,27 +26,7 @@
 #define epicsExportSharedSymbols
 #include "epicsAssert.h"
 #include "freeList.h"	/* bucketLib uses freeListLib inside the DLL */
-
-/*
- * force these to be included before bucketLib.h
- * includes them
- */
-#include "errMdef.h"
-#include "epicsTypes.h"
 #include "bucketLib.h"
-
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
-#ifndef LOCAL
-#define LOCAL static
-#endif /* LOCAL */
-#ifndef max
-#define max(A,B) ((A)>(B)?(A):(B))
-#endif /* max */
 
 /*
  * these data type dependent routines are
@@ -56,12 +35,12 @@
 typedef BUCKETID bucketHash(BUCKET *pb, const void *pId);
 typedef ITEM **bucketCompare(ITEM **ppi, const void *pId);
 
-LOCAL bucketCompare   bucketUnsignedCompare;
-LOCAL bucketCompare   bucketPointerCompare;
-LOCAL bucketCompare   bucketStringCompare;
-LOCAL bucketHash      bucketUnsignedHash;
-LOCAL bucketHash      bucketPointerHash;
-LOCAL bucketHash      bucketStringHash;
+static bucketCompare   bucketUnsignedCompare;
+static bucketCompare   bucketPointerCompare;
+static bucketCompare   bucketStringCompare;
+static bucketHash      bucketUnsignedHash;
+static bucketHash      bucketPointerHash;
+static bucketHash      bucketStringHash;
 
 typedef struct {
 	bucketHash      *pHash;
@@ -69,15 +48,15 @@ typedef struct {
 	buckTypeOfId	type;
 }bucketSET;
 
-LOCAL bucketSET BSET[] = {
+static bucketSET BSET[] = {
 	{bucketUnsignedHash, bucketUnsignedCompare, bidtUnsigned},
 	{bucketPointerHash, bucketPointerCompare, bidtPointer},
 	{bucketStringHash, bucketStringCompare, bidtString}
 };
 
-LOCAL int bucketAddItem(BUCKET *prb, bucketSET *pBSET, 
+static int bucketAddItem(BUCKET *prb, bucketSET *pBSET, 
 			const void *pId, const void *pApp);
-LOCAL void *bucketLookupItem(BUCKET *pb, bucketSET *pBSET, const void *pId);
+static void *bucketLookupItem(BUCKET *pb, bucketSET *pBSET, const void *pId);
 
 
 
@@ -91,81 +70,11 @@ LOCAL void *bucketLookupItem(BUCKET *pb, bucketSET *pBSET, const void *pId);
  */
 #define BUCKET_MAX_WIDTH	12	
 
-#ifdef DEBUG
-main()
-{
-        unsigned	id1;
-        unsigned	id2;
-        char            *pValSave1;
-        char            *pValSave2;
-        int             s;
-        BUCKET          *pb;
-        char            *pVal;
-        unsigned        i;
-        clock_t         start, finish;
-        double          duration;
-        const int       LOOPS = 500000;
- 
-        pb = bucketCreate(8);
-        if(!pb){
-                return -1;
-        }
- 
-        id1 = 0x1000a432;
-        pValSave1 = "fred";
-        s = bucketAddItemUnsignedId(pb, &id1, pValSave1);
-        assert (s == S_bucket_success);
- 
-        pValSave2 = "jane";
-	id2 = 0x0000a432;
-        s = bucketAddItemUnsignedId(pb, &id2, pValSave2);
-        assert (s == S_bucket_success);
- 
-        start = clock();
-        for(i=0; i<LOOPS; i++){
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id1);
-                assert(pVal == pValSave1);
-                pVal = bucketLookupItemUnsignedId(pb, &id2);
-                assert(pVal == pValSave2);
-        }
-        finish = clock();
- 
-        duration = finish-start;
-        duration = duration/CLOCKS_PER_SEC;
-        printf("It took %15.10f total sec\n", duration);
-        duration = duration/LOOPS;
-        duration = duration/10;
-        duration = duration * 1e6;
-        printf("It took %15.10f u sec per hash lookup\n", duration);
- 
-        bucketShow(pb);
- 
-        return S_bucket_success;
-}
-#endif
-
-
 
 /*
  * bucketUnsignedCompare()
  */
-LOCAL ITEM **bucketUnsignedCompare (ITEM **ppi, const void *pId)
+static ITEM **bucketUnsignedCompare (ITEM **ppi, const void *pId)
 {
 	unsigned	id;	
 	unsigned	*pItemId;
@@ -188,7 +97,7 @@ LOCAL ITEM **bucketUnsignedCompare (ITEM **ppi, const void *pId)
 /*
  * bucketPointerCompare()
  */
-LOCAL ITEM **bucketPointerCompare (ITEM **ppi, const void *pId)
+static ITEM **bucketPointerCompare (ITEM **ppi, const void *pId)
 {
 	void		*ptr;	
 	void		**pItemId;
@@ -211,7 +120,7 @@ LOCAL ITEM **bucketPointerCompare (ITEM **ppi, const void *pId)
 /*
  * bucketStringCompare ()
  */
-LOCAL ITEM **bucketStringCompare (ITEM **ppi, const void *pId)
+static ITEM **bucketStringCompare (ITEM **ppi, const void *pId)
 {
 	const char	*pStr = pId;	
 	ITEM		*pi;
@@ -233,7 +142,7 @@ LOCAL ITEM **bucketStringCompare (ITEM **ppi, const void *pId)
 /*
  * bucketUnsignedHash ()
  */
-LOCAL BUCKETID bucketUnsignedHash (BUCKET *pb, const void *pId)
+static BUCKETID bucketUnsignedHash (BUCKET *pb, const void *pId)
 {
 	const unsigned	*pUId = pId;	
 	unsigned 	src;
@@ -255,7 +164,7 @@ LOCAL BUCKETID bucketUnsignedHash (BUCKET *pb, const void *pId)
 /*
  * bucketPointerHash ()
  */
-LOCAL BUCKETID bucketPointerHash (BUCKET *pb, const void *pId)
+static BUCKETID bucketPointerHash (BUCKET *pb, const void *pId)
 {
 	void * const	*ppId = (void * const *) pId;	
 	unsigned long	src;
@@ -283,7 +192,7 @@ LOCAL BUCKETID bucketPointerHash (BUCKET *pb, const void *pId)
 /*
  * bucketStringHash ()
  */
-LOCAL BUCKETID bucketStringHash (BUCKET *pb, const void *pId)
+static BUCKETID bucketStringHash (BUCKET *pb, const void *pId)
 {
 	const char	*pStr = pId;	
 	BUCKETID	hashid;
@@ -411,7 +320,7 @@ epicsShareFunc int epicsShareAPI
 {
 	return bucketAddItem(prb, &BSET[bidtString], pId, pApp);
 }
-LOCAL int bucketAddItem(BUCKET *prb, bucketSET *pBSET, const void *pId, const void *pApp)
+static int bucketAddItem(BUCKET *prb, bucketSET *pBSET, const void *pId, const void *pApp)
 {
 	BUCKETID	hashid;
 	ITEM		**ppi;
@@ -455,7 +364,7 @@ LOCAL int bucketAddItem(BUCKET *prb, bucketSET *pBSET, const void *pId, const vo
 /*
  * bucketLookupAndRemoveItem ()
  */
-LOCAL void *bucketLookupAndRemoveItem (BUCKET *prb, bucketSET *pBSET, const void *pId)
+static void *bucketLookupAndRemoveItem (BUCKET *prb, bucketSET *pBSET, const void *pId)
 {
 	BUCKETID	hashid;
 	ITEM		**ppi;
@@ -486,15 +395,15 @@ LOCAL void *bucketLookupAndRemoveItem (BUCKET *prb, bucketSET *pBSET, const void
 
 	return pApp;
 }
-epicsShareFunc void * epicsShareAPI bucketLookupAndRemoveItemUnsignedId (BUCKET *prb, READONLY unsigned *pId)
+epicsShareFunc void * epicsShareAPI bucketLookupAndRemoveItemUnsignedId (BUCKET *prb, const unsigned *pId)
 {
     return bucketLookupAndRemoveItem(prb, &BSET[bidtUnsigned], pId);
 }
-epicsShareFunc void * epicsShareAPI bucketLookupAndRemoveItemPointerId (BUCKET *prb, void * READONLY *pId)
+epicsShareFunc void * epicsShareAPI bucketLookupAndRemoveItemPointerId (BUCKET *prb, void * const *pId)
 {
 	return bucketLookupAndRemoveItem(prb, &BSET[bidtPointer], pId);
 }
-epicsShareFunc void * epicsShareAPI bucketLookupAndRemoveItemStringId (BUCKET *prb, READONLY char *pId)
+epicsShareFunc void * epicsShareAPI bucketLookupAndRemoveItemStringId (BUCKET *prb, const char *pId)
 {
 	return bucketLookupAndRemoveItem(prb, &BSET[bidtString], pId);
 }
@@ -538,7 +447,7 @@ epicsShareFunc void * epicsShareAPI
 {
 	return bucketLookupItem(prb, &BSET[bidtString], pId);
 }
-LOCAL void *bucketLookupItem (BUCKET *pb, bucketSET *pBSET, const void *pId)
+static void *bucketLookupItem (BUCKET *pb, bucketSET *pBSET, const void *pId)
 {
 	BUCKETID	hashid;
 	ITEM		**ppi;
@@ -596,7 +505,7 @@ epicsShareFunc int epicsShareAPI bucketShow(BUCKET *pb)
 		}
 		X += count;
 		XX += count*count;
-		maxEntries = max (count, maxEntries);
+		if (count > maxEntries) maxEntries = count;
 		ppi++;
 	}
 

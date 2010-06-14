@@ -23,6 +23,7 @@
 #include <new>
 #include <float.h>
 
+#include "dbDefs.h"
 #include "epicsExit.h"
 
 #define epicsAssertAuthor "Jeff Hill johill@lanl.gov"
@@ -350,6 +351,13 @@ int epicsShareAPI ca_create_channel (
     catch ( cacChannel::unsupportedByService & ) {
         return ECA_UNAVAILINSERV;
     }
+    catch ( std :: exception & except ) {
+        pcac->printFormated ( 
+            "ca_create_channel: "
+            "unexpected exception was \"%s\"", 
+            except.what () );
+        return ECA_INTERNAL;
+    }
     catch ( ... ) {
         return ECA_INTERNAL;
     }
@@ -359,6 +367,10 @@ int epicsShareAPI ca_create_channel (
 
 /*
  *  ca_clear_channel ()
+ *
+ * a known defect here is that there will be a
+ * crash if they destroy the channel after destroying 
+ * its context
  */
 // extern "C"
 int epicsShareAPI ca_clear_channel ( chid pChan )

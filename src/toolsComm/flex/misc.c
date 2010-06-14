@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* misc - miscellaneous flex routines */
@@ -37,7 +36,7 @@
 
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/misc.c,v 1.3 2002/07/12 21:35:37 jba Exp (LBL)";
+    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/misc.c,v 1.3.2.3 2009/06/03 15:11:30 anj Exp (LBL)";
 #endif
 
 #include <ctype.h>
@@ -53,8 +52,8 @@ static char rcsid[] =
 
 /* declare functions that have forward references */
 
-void dataflush PROTO(());
-int otoi PROTO((Char []));
+void dataflush (void);
+int otoi (Char []);
 
 
 /* action_out - write the actions from the temporary file to lex.yy.c
@@ -65,9 +64,8 @@ int otoi PROTO((Char []));
  *     Copies the action file up to %% (or end-of-file) to lex.yy.c
  */
 
-void action_out()
-
-    {
+void action_out(void)
+{
     char buf[MAXLINE];
 
     while ( fgets( buf, MAXLINE, temp_action_file ) != NULL )
@@ -80,11 +78,9 @@ void action_out()
 
 /* allocate_array - allocate memory for an integer array of the given size */
 
-void *allocate_array( size, element_size )
-int size, element_size;
-
-    {
-    register void *mem;
+void *allocate_array(int size, int element_size)
+{
+    void *mem;
 
     /* on 16-bit int machines (e.g., 80286) we might be trying to
      * allocate more than a signed int can hold, and that won't
@@ -110,10 +106,8 @@ int size, element_size;
  *    true/false = all_lower( str );
  */
 
-int all_lower( str )
-register Char *str;
-
-    {
+int all_lower(Char *str)
+{
     while ( *str )
 	{
 	if ( ! isascii( *str ) || ! islower( *str ) )
@@ -133,10 +127,8 @@ register Char *str;
  *    true/false = all_upper( str );
  */
 
-int all_upper( str )
-register Char *str;
-
-    {
+int all_upper(Char *str)
+{
     while ( *str )
 	{
 	if ( ! isascii( *str ) || ! isupper( (char) *str ) )
@@ -162,11 +154,9 @@ register Char *str;
  *   v - the array to be sorted
  *   n - the number of elements of 'v' to be sorted */
 
-void bubble( v, n )
-int v[], n;
-
-    {
-    register int i, j, k;
+void bubble(int v[], int n)
+{
+    int i, j, k;
 
     for ( i = n; i > 1; --i )
 	for ( j = 1; j < i; ++j )
@@ -187,10 +177,8 @@ int v[], n;
  *    c = clower( c );
  */
 
-Char clower( c )
-register int c;
-
-    {
+Char clower(int c)
+{
     return ( (isascii( c ) && isupper( c )) ? tolower( c ) : c );
     }
 
@@ -202,11 +190,9 @@ register int c;
  *    copy = copy_string( str );
  */
 
-char *copy_string( str )
-register char *str;
-
-    {
-    register char *c;
+char *copy_string(char *str)
+{
+    char *c;
     char *copy;
 
     /* find length */
@@ -233,11 +219,9 @@ register char *str;
  *    copy = copy_unsigned_string( str );
  */
 
-Char *copy_unsigned_string( str )
-register Char *str;
-
-    {
-    register Char *c;
+Char *copy_unsigned_string(Char *str)
+{
+    Char *c;
     Char *copy;
 
     /* find length */
@@ -274,11 +258,8 @@ register Char *str;
  *   n - number of elements of v to be sorted
  */
 
-void cshell( v, n, special_case_0 )
-Char v[];
-int n, special_case_0;
-
-    {
+void cshell(Char *v, int n, int special_case_0)
+{
     int gap, i, j, jg;
     Char k;
 
@@ -313,9 +294,8 @@ int n, special_case_0;
  *    dataend();
  */
 
-void dataend()
-
-    {
+void dataend(void)
+{
     if ( datapos > 0 )
 	dataflush();
 
@@ -334,9 +314,8 @@ void dataend()
  *    dataflush();
  */
 
-void dataflush()
-
-    {
+void dataflush(void)
+{
     putchar( '\n' );
 
     if ( ++dataline >= NUMDATALINES )
@@ -360,10 +339,8 @@ void dataflush()
  *    flexerror( msg );
  */
 
-void flexerror( msg )
-char msg[];
-
-    {
+void flexerror(char *msg)
+{
     fprintf( stderr, "%s: %s\n", program_name, msg );
 
     flexend( 1 );
@@ -377,10 +354,8 @@ char msg[];
  *    flexfatal( msg );
  */
 
-void flexfatal( msg )
-char msg[];
-
-    {
+void flexfatal(char *msg)
+{
     fprintf( stderr, "%s: fatal internal error, %s\n", program_name, msg );
     flexend( 1 );
     }
@@ -412,13 +387,12 @@ char msg[];
 typedef long time_t;
 #endif
 
-char *flex_gettime()
+char *flex_gettime(void)
+{
+    time_t t, time(time_t *);
+    char *result, *ctime(const time_t *), *copy_string(char *str);
 
-    {
-    time_t t, time();
-    char *result, *ctime(), *copy_string();
-
-    t = time( (long *) 0 );
+    t = time( NULL );
 
     result = copy_string( ctime( &t ) );
 
@@ -437,11 +411,8 @@ char *flex_gettime()
  *    lerrif( msg, arg );
  */
 
-void lerrif( msg, arg )
-char msg[];
-int arg;
-
-    {
+void lerrif(char *msg, int arg)
+{
     char errmsg[MAXLINE];
     (void) sprintf( errmsg, msg, arg );
     flexerror( errmsg );
@@ -455,10 +426,8 @@ int arg;
  *    lerrsf( msg, arg );
  */
 
-void lerrsf( msg, arg )
-char msg[], arg[];
-
-    {
+void lerrsf(char *msg, char *arg)
+{
     char errmsg[MAXLINE];
 
     (void) sprintf( errmsg, msg, arg );
@@ -474,10 +443,8 @@ char msg[], arg[];
  *    val = htoi( str );
  */
 
-int htoi( str )
-Char str[];
-
-    {
+int htoi(unsigned char *str)
+{
     int result;
 
     (void) sscanf( (char *) str, "%x", &result );
@@ -495,10 +462,8 @@ Char str[];
  *    val = is_hex_digit( ch );
  */
 
-int is_hex_digit( ch )
-int ch;
-
-    {
+int is_hex_digit(int ch)
+{
     if ( isdigit( ch ) )
 	return ( 1 );
 
@@ -520,10 +485,8 @@ int ch;
 
 /* line_directive_out - spit out a "# line" statement */
 
-void line_directive_out( output_file_name )
-FILE *output_file_name;
-
-    {
+void line_directive_out(FILE *output_file_name)
+{
     if ( infilename && gen_line_dirs )
         fprintf( output_file_name, "# line %d \"%s\"\n", linenum, infilename );
     }
@@ -537,10 +500,8 @@ FILE *output_file_name;
  *
  *  generates a data statement initializing the current 2-D array to "value"
  */
-void mk2data( value )
-int value;
-
-    {
+void mk2data(int value)
+{
     if ( datapos >= NUMDATAITEMS )
 	{
 	putchar( ',' );
@@ -569,10 +530,8 @@ int value;
  *  generates a data statement initializing the current array element to
  *  "value"
  */
-void mkdata( value )
-int value;
-
-    {
+void mkdata(int value)
+{
     if ( datapos >= NUMDATAITEMS )
 	{
 	putchar( ',' );
@@ -601,10 +560,8 @@ int value;
  *
  */
 
-int myctoi( array )
-Char array[];
-
-    {
+int myctoi(Char *array)
+{
     int val = 0;
 
     (void) sscanf( (char *) array, "%d", &val );
@@ -621,23 +578,14 @@ Char array[];
  *
  */
 
-Char myesc( array )
-Char array[];
-
-    {
+Char myesc(Char *array)
+{
     Char c, esc_char;
-    register int sptr;
+    int sptr;
 
     switch ( array[1] )
 	{
-#if 0
 	case 'a': return ( '\a' );
-#else
-	case 'a':
-		assert(0);		/* \a causes some obscure problem with ANSI compilers */
-						/* EPICS never uses it anyway, so this should be OK */
-		break;
-#endif
 	case 'b': return ( '\b' );
 	case 'f': return ( '\f' );
 	case 'n': return ( '\n' );
@@ -710,10 +658,8 @@ Char array[];
  *    val = otoi( str );
  */
 
-int otoi( str )
-Char str[];
-
-    {
+int otoi(Char *str)
+{
     int result;
 
     (void) sscanf( (char *) str, "%o", &result );
@@ -732,10 +678,8 @@ Char str[];
  * The returned string is in static storage.
  */
 
-char *readable_form( c )
-register int c;
-
-    {
+char *readable_form(int c)
+{
     static char rform[10];
 
     if ( (c >= 0 && c < 32) || c >= 127 )
@@ -769,12 +713,9 @@ register int c;
 
 /* reallocate_array - increase the size of a dynamic array */
 
-void *reallocate_array( array, size, element_size )
-void *array;
-int size, element_size;
-
-    {
-    register void *new_array;
+void *reallocate_array(void *array, int size, int element_size)
+{
+    void *new_array;
 
     /* same worry as in allocate_array(): */
     if ( size * element_size <= 0 )
@@ -799,9 +740,8 @@ int size, element_size;
  *    Copies from skelfile to stdout until a line beginning with "%%" or
  *    EOF is found.
  */
-void skelout()
-
-    {
+void skelout(void)
+{
     char buf[MAXLINE];
 
     while ( fgets( buf, MAXLINE, skelfile ) != NULL )
@@ -822,10 +762,8 @@ void skelout()
  * element_n.  Formats the output with spaces and carriage returns.
  */
 
-void transition_struct_out( element_v, element_n )
-int element_v, element_n;
-
-    {
+void transition_struct_out(int element_v, int element_n)
+{
     printf( "%7d, %5d,", element_v, element_n );
 
     datapos += TRANS_STRUCT_PRINT_LENGTH;

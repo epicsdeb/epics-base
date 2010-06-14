@@ -1,13 +1,13 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* dbLexRoutines.c	*/
+/* dbLexRoutines.c,v 1.27.2.24 2009/07/22 22:58:09 anj Exp */
+
 /* Author:  Marty Kraimer Date:    13JUL95*/
 
 /*The routines in this module are serially reusable NOT reentrant*/
@@ -95,7 +95,7 @@ typedef struct inputFile{
 	FILE		*fp;
 	int		line_num;
 }inputFile;
-static ELLLIST inputFileList;
+static ELLLIST inputFileList = ELLLIST_INIT;
 
 static inputFile *pinputFileNow = NULL;
 static DBBASE *pdbbase = NULL;
@@ -105,7 +105,7 @@ typedef struct tempListNode {
 	void	*item;
 }tempListNode;
 
-static ELLLIST tempList;
+static ELLLIST tempList = ELLLIST_INIT;
 static void *freeListPvt = NULL;
 static int duplicate = FALSE;
 
@@ -212,8 +212,6 @@ static long dbReadCOM(DBBASE **ppdbbase,const char *filename, FILE *fp,
 	}
     }
     my_buffer = dbCalloc(MY_BUFFER_SIZE,sizeof(char));
-    ellInit(&inputFileList);
-    ellInit(&tempList);
     freeListInitPvt(&freeListPvt,sizeof(tempListNode),100);
     if(substitutions) {
 	if(macCreateHandle(&macHandle,NULL)) {
@@ -874,10 +872,14 @@ static void dbBreakBody(void)
 	double slope =
 	  (paBrkInt[i+1].eng - paBrkInt[i].eng)/
 	  (paBrkInt[i+1].raw - paBrkInt[i].raw);
+	if (!dbBptNotMonotonic && slope == 0) {
+	    yyerrorAbort("breaktable slope is zero");
+	    return;
+	}
 	if (i == 0) {
 	    down = (slope < 0);
 	} else if (!dbBptNotMonotonic && down != (slope < 0)) {
-	    yyerrorAbort("breaktable: curve slope changes sign");
+	    yyerrorAbort("breaktable slope changes sign");
 	    return;
 	}
 	paBrkInt[i].slope = slope;
@@ -984,6 +986,42 @@ static void dbRecordInfo(char *name, char *value)
 	yyerror(NULL);
 	return;
     }
+}
+
+static void dbRecordAlias(char *name)
+{
+    DBENTRY		*pdbentry;
+    tempListNode	*ptempListNode;
+    long		status;
+
+    if(duplicate) return;
+    ptempListNode = (tempListNode *)ellFirst(&tempList);
+    pdbentry = ptempListNode->item;
+    status = dbCreateAlias(pdbentry, name);
+    if(status) {
+        epicsPrintf("Can't create alias \"%s\" for \"%s\"\n",
+                    name, dbGetRecordName(pdbentry));
+        yyerror(NULL);
+        return;
+    }
+}
+
+static void dbAlias(char *name, char *alias)
+{
+    DBENTRY	dbEntry;
+    DBENTRY	*pdbEntry = &dbEntry;
+
+    dbInitEntry(pdbbase, pdbEntry);
+    if (dbFindRecord(pdbEntry, name)) {
+        epicsPrintf("Alias \"%s\" refers to unknown record \"%s\"\n",
+                    alias, name);
+        yyerror(NULL);
+    } else if (dbCreateAlias(pdbEntry, alias)) {
+        epicsPrintf("Can't create alias \"%s\" referring to \"%s\"\n",
+                    alias, name);
+        yyerror(NULL);
+    }
+    dbFinishEntry(pdbEntry);
 }
 
 static void dbRecordBody(void)

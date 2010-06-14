@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *	veclist.c,v 1.1.2.3 2006/12/05 22:28:28 anj Exp
+ *	veclist.c,v 1.1.2.4 2009/07/09 16:37:23 anj Exp
  *	@(#)veclist.c	1.10
  *
  *	list fuctions attached to the interrupt vector table
@@ -42,7 +42,7 @@
 #include "sysSymTbl.h"
 
 static const char sccsID[] = 
-	"@(#) veclist.c,v 1.1.2.3 2006/12/05 22:28:28 anj Exp";
+	"@(#) veclist.c,v 1.1.2.4 2009/07/09 16:37:23 anj Exp";
 
 /*
  *
@@ -213,7 +213,7 @@ union pointer{
 	struct char_array 	char_overlay;
 };
 
-LOCAL
+static
 void *fetch_pointer(unsigned char *plow_byte)
 {
 	union pointer	p;

@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*  
- *  epicsOnce.cpp,v 1.7 2002/11/01 18:13:50 jhill Exp
+ *  epicsOnce.cpp,v 1.7.2.1 2008/11/19 17:11:49 jhill Exp
  *
  *                              
  *                    L O S  A L A M O S
@@ -42,6 +42,8 @@ private:
     bool onceFlag;
     void destroy ();
     void once ();
+    epicsOnceImpl ( epicsOnceImpl & ); // disabled
+    epicsOnceImpl & operator = ( epicsOnceImpl & ); // disabled
 	static epicsSingleton < epicsMutex > mutex;
     static epicsSingleton < tsFreeList < class epicsOnceImpl, 16 > > freeList;
 };

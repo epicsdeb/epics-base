@@ -26,7 +26,7 @@
 # numbers, eg. "M_".  The table is created on standard output.
 #
 # This tool's primary use is for creating an error status table used
-# by errPrint, and errSymFind.
+# by errPrint, and errSymLookup.
 #
 # FILES
 # errMdef.h   module number file for each h directory
@@ -104,7 +104,7 @@ foreach $line ( @err_sym_line )
 
 
 print OUT "\n";
-print OUT "LOCAL ERRSYMBOL symbols[] =\n";
+print OUT "static ERRSYMBOL symbols[] =\n";
 print OUT "{\n";
 
 for ($i=0; $i<$count; ++$i)
@@ -115,7 +115,7 @@ for ($i=0; $i<$count; ++$i)
 
 print OUT "};\n";
 print OUT "\n";
-print OUT "LOCAL ERRSYMTAB symTbl =\n";
+print OUT "static ERRSYMTAB symTbl =\n";
 print OUT "{\n";
 print OUT "\tNELEMENTS(symbols),  /* current number of symbols in table */\n";
 print OUT "\tsymbols,             /* ptr to symbol array */\n";

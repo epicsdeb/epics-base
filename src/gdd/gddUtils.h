@@ -14,7 +14,7 @@
  * Author: Jim Kowalkowski
  * Date: 2/96
  *
- * gddUtils.h,v 1.7.2.1 2004/01/28 00:04:03 anj Exp
+ * gddUtils.h,v 1.7.2.2 2008/12/10 21:51:19 anj Exp
  *
  */
 
@@ -97,6 +97,7 @@ public:
 protected:
 	aitUint16 ref_cnt;
 	void* arg;
+	virtual ~gddDestructor () {}
 private:
 	gdd_NEWDEL_DATA
 };

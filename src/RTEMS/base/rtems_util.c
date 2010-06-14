@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS utilitiy routines for EPICS
- *  rtems_util.c,v 1.2.2.1 2003/07/25 21:11:42 norume Exp
+ *  rtems_util.c,v 1.2.2.2 2009/04/24 17:06:54 anj Exp
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
@@ -30,7 +30,7 @@ int connectWithTimeout (int sfd,
                         struct timeval *timeout)
 {
     struct timeval sv;
-    int svlen = sizeof sv;
+    socklen_t svlen = sizeof sv;
     int ret;
 
     if (!timeout)

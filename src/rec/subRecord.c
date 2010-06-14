@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* subRecord.c,v 1.25.2.6 2008/08/08 19:19:55 anj Exp */
+/* subRecord.c,v 1.25.2.9 2009/07/28 21:11:02 anj Exp */
 
 /* Record Support Routines for Subroutine records */
 /*
@@ -149,7 +149,7 @@ static long process(subRecord *prec)
     if (!pact && prec->pact) return 0;
     prec->pact = TRUE;
 
-    /* Old async signal, deprecated */
+    /* Asynchronous function (documented API!) */
     if (status == 1) return 0;
 
     recGblGetTimeStamp(prec);
@@ -274,10 +274,10 @@ static long get_alarm_double(DBADDR *paddr, struct dbr_alDouble *pad)
     int fieldIndex = dbGetFieldIndex(paddr);
 
     if (fieldIndex == subRecordVAL) {
-         pad->upper_alarm_limit = prec->hihi;
-         pad->upper_warning_limit = prec->high;
-         pad->lower_warning_limit = prec->low;
-         pad->lower_alarm_limit = prec->lolo;
+        pad->upper_alarm_limit = prec->hhsv ? prec->hihi : epicsNAN;
+        pad->upper_warning_limit = prec->hsv ? prec->high : epicsNAN;
+        pad->lower_warning_limit = prec->lsv ? prec->low : epicsNAN;
+        pad->lower_alarm_limit = prec->llsv ? prec->lolo : epicsNAN;
     } else {
         recGblGetAlarmDouble(paddr, pad);
     }

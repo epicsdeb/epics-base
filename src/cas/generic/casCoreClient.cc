@@ -8,12 +8,14 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casCoreClient.cc,v 1.37.2.3 2003/09/29 22:58:42 jhill Exp
+ *      casCoreClient.cc,v 1.37.2.4 2009/07/09 15:27:39 anj Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
  *              505 665 1831
  */
+
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "casCoreClient.h"

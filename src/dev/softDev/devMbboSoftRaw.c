@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devMbboSoftRaw.c */
-/* base/src/dev devMbboSoftRaw.c,v 1.11 2003/04/01 21:02:26 mrk Exp */
+/* base/src/dev devMbboSoftRaw.c,v 1.11.2.2 2009/04/03 17:46:22 lange Exp */
 /*
  *      Author:		Janet Anderson
  *      Date:		3-28-92
@@ -27,8 +27,8 @@
 #include "epicsExport.h"
 
 /* Create the dset for devMbboSoftRaw */
-static long init_record();
-static long write_mbbo();
+static long init_record(mbboRecord *prec);
+static long write_mbbo(mbboRecord *prec);
 struct {
 	long		number;
 	DEVSUPFUN	report;
@@ -46,26 +46,26 @@ struct {
 };
 epicsExportAddress(dset,devMbboSoftRaw);
 
-static long init_record(mbboRecord *pmbbo)
+static long init_record(mbboRecord *prec)
 {
  
     long status;
  
     /*to preserve old functionality*/
-    if(pmbbo->nobt == 0) pmbbo->mask = 0xffffffff;
-    pmbbo->mask <<= pmbbo->shft;
+    if(prec->nobt == 0) prec->mask = 0xffffffff;
+    prec->mask <<= prec->shft;
     /*dont convert*/
     status = 2;
     return status;
  
 } /* end init_record() */
 
-static long write_mbbo(mbboRecord *pmbbo)
+static long write_mbbo(mbboRecord *prec)
 {
     long status;
     unsigned long data;
 
-    data = pmbbo->rval & pmbbo->mask;
-    status = dbPutLink(&pmbbo->out,DBR_LONG, &data,1);
+    data = prec->rval & prec->mask;
+    status = dbPutLink(&prec->out,DBR_LONG, &data,1);
     return(0);
 }

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      timerQueueActiveMgr.cpp,v 1.10 2002/10/23 22:29:32 jhill Exp
+ *      timerQueueActiveMgr.cpp,v 1.10.2.1 2009/02/10 22:24:20 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -30,8 +30,8 @@ timerQueueActiveMgr::~timerQueueActiveMgr ()
     epicsGuard < epicsMutex > locker ( this->mutex );
 }
     
-epicsTimerQueueActiveForC & timerQueueActiveMgr::allocate (
-        bool okToShare, unsigned threadPriority )
+epicsTimerQueueActiveForC & timerQueueActiveMgr ::
+    allocate ( RefThis & refThis, bool okToShare, unsigned threadPriority )
 {
     epicsGuard < epicsMutex > locker ( this->mutex );
     if ( okToShare ) {
@@ -47,7 +47,7 @@ epicsTimerQueueActiveForC & timerQueueActiveMgr::allocate (
     }
 
     epicsTimerQueueActiveForC & queue = 
-        * new epicsTimerQueueActiveForC ( okToShare, threadPriority );
+        * new epicsTimerQueueActiveForC ( refThis, okToShare, threadPriority );
     queue.timerQueueActiveMgrPrivate::referenceCount = 1u;
     if ( okToShare ) {
         this->sharedQueueList.add ( queue );
@@ -55,18 +55,24 @@ epicsTimerQueueActiveForC & timerQueueActiveMgr::allocate (
     return queue;
 }
 
-void timerQueueActiveMgr::release ( epicsTimerQueueActiveForC &queue )
+void timerQueueActiveMgr ::
+    release ( epicsTimerQueueActiveForC & queue )
 {
-    epicsGuard < epicsMutex > locker ( this->mutex );
-    assert ( queue.timerQueueActiveMgrPrivate::referenceCount > 0u );
-    queue.timerQueueActiveMgrPrivate::referenceCount--;
-    if ( queue.timerQueueActiveMgrPrivate::referenceCount == 0u ) {
-        if ( queue.sharingOK () ) {
-            this->sharedQueueList.remove ( queue );
+    timerQueueActiveMgrPrivate * pPriv = & queue;
+    {
+        epicsGuard < epicsMutex > locker ( this->mutex );
+        assert ( queue.timerQueueActiveMgrPrivate::referenceCount > 0u );
+        queue.timerQueueActiveMgrPrivate::referenceCount--;
+        if ( queue.timerQueueActiveMgrPrivate::referenceCount == 0u ) {
+            if ( queue.sharingOK () ) {
+                this->sharedQueueList.remove ( queue );
+            }
         }
-        timerQueueActiveMgrPrivate *pPriv = &queue;
-        delete pPriv;
     }
+    // delete only after we release the guard in case the embedded 
+    // reference is the last one and this object is destroyed
+    // as a side effect
+    delete pPriv;
 }
 
 timerQueueActiveMgrPrivate::timerQueueActiveMgrPrivate () :

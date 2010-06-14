@@ -1,6 +1,6 @@
 #  CONFIG.cygwin-x86.cygwin-x86
 #
-# CONFIG.cygwin-x86.cygwin-x86,v 1.1.2.4 2008/07/31 21:58:37 jba Exp
+# CONFIG.cygwin-x86.cygwin-x86,v 1.1.2.5 2009/03/03 19:54:13 jba Exp
 #
 # Definitions for cygwin-x86 host - cygwin-x86 target builds
 # Sites may override these definitions in CONFIG_SITE.cygwin-x86.cygwin-x86
@@ -22,15 +22,6 @@ RCCMD = windres $(INCLUDES) $< $@
 SHRLIB_CFLAGS =
 SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
 LOADABLE_SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
-
-CONFORM_CFLAGS_ANSI =
-CONFORM_CFLAGS_STRICT = -ansi
-CONFORM_CXXFLAGS_NORMAL =
-CONFORM_CXXFLAGS_STRICT = -ansi
-
-# -ansi build errors need fixing: u_long  undeclared, fd_set with no type
-CONFORM_CFLAGS_STRICT = 
-CONFORM_CXXFLAGS_STRICT = 
 
 # Override linking with gcc library from CONFIG.gnuCommon
 GNU_LDLIBS_YES =

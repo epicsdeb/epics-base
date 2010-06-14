@@ -149,6 +149,7 @@ public:
     bool isSuspended () const throw ();
     bool isCurrentThread () const throw ();
     bool operator == ( const epicsThread & ) const throw ();
+    void show ( unsigned level ) const throw ();
     /* these operate on the current thread */
     static void suspendSelf () throw ();
     static void sleep (double seconds) throw ();
@@ -158,7 +159,7 @@ public:
     static void setOkToBlock ( bool isOkToBlock ) throw ();
 
     /* exceptions */
-    class unableToCreateThread {};
+    class unableToCreateThread;
 private:
     epicsThreadRunable & runable;
     epicsThreadId id;
@@ -174,7 +175,9 @@ private:
     epicsThread ( const epicsThread & );
     epicsThread & operator = ( const epicsThread & );
     friend void epicsThreadCallEntryPoint ( void * );
-
+    void printLastChanceExceptionMessage ( 
+        const char * pExceptionTypeName,
+        const char * pExceptionContext );
     /* exceptions */
     class exitException {};
 };

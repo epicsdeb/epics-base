@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// casIntfIO.cc,v 1.33.2.3 2003/08/21 18:25:12 jhill Exp
+// casIntfIO.cc,v 1.33.2.4 2009/07/25 01:04:13 jhill Exp
 //
 // Author Jeff Hill
 //
@@ -236,4 +236,3 @@ caNetAddr casIntfIO::serverAddress () const
 {
     return caNetAddr (this->addr);
 }
-

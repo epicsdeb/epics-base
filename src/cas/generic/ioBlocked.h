@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      ioBlocked.h,v 1.1.2.1 2005/08/05 20:41:45 jhill Exp
+ *      ioBlocked.h,v 1.1.2.2 2009/07/14 22:51:06 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -36,6 +36,7 @@ friend class ioBlockedList;
 public:
 	ioBlocked ();
 	virtual ~ioBlocked ();
+    bool isBlocked ();
 private:
 	class ioBlockedList * pList;
 	virtual void ioBlockedSignal ();
@@ -51,6 +52,11 @@ public:
 	ioBlockedList ( const ioBlockedList & );
 	ioBlockedList & operator = ( const ioBlockedList & );
 };
+
+inline bool ioBlocked :: isBlocked ()
+{
+    return this->pList != NULL;
+}
 
 #endif // ioBlockedh
  

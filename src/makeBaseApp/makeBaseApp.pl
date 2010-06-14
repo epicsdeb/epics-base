@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
-# makeBaseApp.pl,v 1.32.2.17 2008/08/29 21:03:36 anj Exp
+# makeBaseApp.pl,v 1.32.2.18 2009/04/24 12:25:21 lange Exp
 
 use Cwd;
 use Getopt::Std;
@@ -172,7 +172,9 @@ sub get_commandline_opts { #no args
     } elsif ($release{"EPICS_BASE"}) { # second choice is configure/RELEASE
 	$epics_base = UnixPath($release{"EPICS_BASE"});
 	$epics_base =~s|^\$\(TOP\)/||;
-    } elsif ($command =~ m|/bin/|) {
+    } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
+        $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
+    } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
 	$epics_base = "/usr/epics/base";
     }
     $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
@@ -434,7 +436,8 @@ EOF
           If arch is not specified, you will be prompted
  -b base  Set the location of EPICS base (full path)
           If not specified, base path is taken from configure/RELEASE
-          If configure does not exist, base path is taken from command
+          If configure does not exist, from environment
+          If not found in environment, from makeBaseApp.pl location
  -d       Enable debug messages
  -i       Specifies that ioc boot directories will be generated
  -l       List valid application types for this installation
@@ -452,6 +455,7 @@ EOF
 Environment:
 EPICS_MBA_DEF_APP_TYPE  Application type you want to use as default
 EPICS_MBA_TEMPLATE_TOP  Template top directory
+EPICS_MBA_BASE          Location of EPICS base
 
 Example: Create exampleApp 
 

@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* flex - tool to generate fast lexical analyzers */
@@ -35,6 +34,8 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#define ENQUOTE(path) #path
+
 #ifndef lint
 char copyright[] =
 "@(#) Copyright (c) 1990 The Regents of the University of California.\n\
@@ -44,7 +45,7 @@ char copyright[] =
 /*
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/main.c,v 1.3.2.1 2004/04/27 17:34:37 jhill Exp (LBL)";
+    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/main.c,v 1.3.2.4 2009/07/22 20:37:32 jba Exp (LBL)";
 #endif
 
 #include "flexdef.h"
@@ -57,9 +58,9 @@ static char flex_version[] = "2.3";
 
 /* declare functions that have forward references */
 
-void flexinit PROTO((int, char**));
-void readin PROTO(());
-void set_up_initial_allocations PROTO(());
+void flexinit (int, char**);
+void readin (void);
+void set_up_initial_allocations (void);
 
 
 /* these globals are all defined and commented in flexdef.h */
@@ -118,11 +119,8 @@ static int use_stdout;
 static char *skelname = NULL;
 
 
-int main( argc, argv )
-int argc;
-char **argv;
-
-    {
+int main(int argc, char *argv[])
+{
     flexinit( argc, argv );
 
     readin();
@@ -182,7 +180,7 @@ char **argv;
     flexend( 0 );
 
     /*NOTREACHED*/
-    }
+}
 
 
 /* flexend - terminate flex
@@ -197,10 +195,8 @@ char **argv;
  *    This routine does not return.
  */
 
-void flexend( status )
-int status;
-
-    {
+void flexend(int status)
+{
     int tblsiz;
     char *flex_gettime();
 
@@ -300,7 +296,7 @@ int status;
 	if ( usemecs )
 	    putc( 'm', stderr );
 
-	if ( strcmp( skelname, DEFAULT_SKELETON_FILE ) )
+	if ( strcmp( skelname, ENQUOTE(DEFAULT_SKELETON_FILE) ) )
 	    fprintf( stderr, " -S%s", skelname );
 
 	putc( '\n', stderr );
@@ -389,7 +385,7 @@ int status;
 #else
     exit( status + 1 );
 #endif
-    }
+}
 
 
 /* flexinit - initialize flex
@@ -400,11 +396,8 @@ int status;
  *    flexinit( argc, argv );
  */
 
-void flexinit( argc, argv )
-int argc;
-char **argv;
-
-    {
+void flexinit(int argc, char **argv)
+{
     int i, sawcmpflag;
     char *arg, *flex_gettime(), *mktemp();
 
@@ -566,7 +559,7 @@ get_next_arg: /* used by -C and -S flags in lieu of a "continue 2" control */
 	static char skeleton_name_storage[400];
 
 	skelname = skeleton_name_storage;
-	(void) strcpy( skelname, DEFAULT_SKELETON_FILE );
+	(void) strcpy( skelname, ENQUOTE(DEFAULT_SKELETON_FILE) );
 	}
 
     if ( ! use_stdout )
@@ -657,7 +650,7 @@ get_next_arg: /* used by -C and -S flags in lieu of a "continue 2" control */
 	}
 
     set_up_initial_allocations();
-    }
+}
 
 
 /* readin - read in the rules section of the input file(s)
@@ -666,9 +659,8 @@ get_next_arg: /* used by -C and -S flags in lieu of a "continue 2" control */
  *    readin();
  */
 
-void readin()
-
-    {
+void readin(void)
+{
     skelout();
 
     if ( ddebug )
@@ -705,15 +697,14 @@ void readin()
 
     if ( useecs )
 	ccl2ecl();
-    }
+}
 
 
 
 /* set_up_initial_allocations - allocate memory for internal tables */
 
-void set_up_initial_allocations()
-
-    {
+void set_up_initial_allocations(void)
+{
     current_mns = INITIAL_MNS;
     firstst = allocate_integer_array( current_mns );
     lastst = allocate_integer_array( current_mns );
@@ -764,4 +755,4 @@ void set_up_initial_allocations()
     dfaacc = allocate_dfaacc_union( current_max_dfas );
 
     nultrans = (int *) 0;
-    }
+}

@@ -1,6 +1,6 @@
 # CONFIG.Common.solaris-sparc-debug
 #
-# CONFIG.Common.solaris-sparc-debug,v 1.1 2003/03/18 20:24:12 jba Exp
+# CONFIG.Common.solaris-sparc-debug,v 1.1.2.1 2009/05/06 15:31:09 jba Exp
 # This file is maintained by the build community.
 #
 # Definitions for solaris-sparc with debug compiler flags
@@ -10,3 +10,5 @@
 # Include definitions common to all solaris-sparc  target archs
 include $(CONFIG)/os/CONFIG.Common.solaris-sparc
 
+# Removes -O optimization and adds -g compile option
+HOST_OPT=NO

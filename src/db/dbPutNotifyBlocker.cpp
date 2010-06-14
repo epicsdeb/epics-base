@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*  
- *  dbPutNotifyBlocker.cpp,v 1.40.2.5 2005/11/04 14:51:16 lange Exp
+ *  dbPutNotifyBlocker.cpp,v 1.40.2.6 2009/07/09 15:27:42 anj Exp
  *
  *                              
  *                    L O S  A L A M O S
@@ -36,6 +36,7 @@
 #include "epicsTime.h"
 #include "tsFreeList.h"
 #include "errMdef.h"
+#include "errlog.h"
 
 #include "caerr.h" // this needs to be eliminated
 #include "db_access.h" // this needs to be eliminated

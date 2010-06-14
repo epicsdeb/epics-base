@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 #include <signal.h>
@@ -64,12 +63,9 @@ char  *rassoc;
 short **derives;
 char *nullable;
 
-extern char *mktemp();
-extern char *getenv();
 
-
-done(k)
-int k;
+void
+done(int k)
 {
     if (action_file) { fclose(action_file); }
     if (text_file) { fclose(text_file); }
@@ -78,13 +74,15 @@ int k;
 }
 
 
-void onintr(int StupidInconsistantSignalTypes)
+static void
+onintr(int StupidInconsistantSignalTypes)
 {
     done(1);
 }
 
 
-set_signals()
+static void
+set_signals(void)
 {
 #ifdef SIGINT
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
@@ -101,19 +99,19 @@ set_signals()
 }
 
 
-usage()
+static void
+usage(void)
 {
     fprintf(stderr, "usage: %s [-dlrtv] [-b file_prefix] [-p symbol_prefix] filename\n", myname);
     exit(1);
 }
 
 
-getargs(argc, argv)
-int argc;
-char *argv[];
+static int
+getargs(int argc, char *argv[])
 {
-    register int i;
-    register char *s;
+    int i;
+    char *s;
 
     if (argc > 0) myname = argv[0];
     for (i = 1; i < argc; ++i)
@@ -216,10 +214,9 @@ no_more_options:;
 
 
 char *
-allocate(n)
-unsigned n;
+allocate(unsigned int n)
 {
-    register char *p;
+    char *p;
 
     p = NULL;
     if (n)
@@ -231,10 +228,8 @@ unsigned n;
 }
 
 
-/*
- * joh - removed use TMPDIR variable by WIN32 here
- */
-create_file_names()
+static void
+create_file_names(void)
 {
     int len;
  
@@ -277,7 +272,8 @@ create_file_names()
 }
 
 
-open_files()
+static void
+open_files(void)
 {
     create_file_names();
 
@@ -329,9 +325,7 @@ open_files()
 
 
 int
-main(argc, argv)
-int argc;
-char *argv[];
+main(int argc, char *argv[])
 {
     set_signals();
     getargs(argc, argv);

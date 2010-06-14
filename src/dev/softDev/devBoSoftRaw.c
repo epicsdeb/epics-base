@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devBoSoftRaw.c */
-/* base/src/dev devBoSoftRaw.c,v 1.10 2003/04/01 21:02:17 mrk Exp */
+/* base/src/dev devBoSoftRaw.c,v 1.10.2.2 2009/04/03 17:46:21 lange Exp */
 
 /* devBoSoftRaw.c - Device Support Routines for  SoftRaw Binary Output*/
 /*
@@ -31,10 +31,10 @@
 #include "epicsExport.h"
 
 /* added for Channel Access Links */
-static long init_record();
+static long init_record(boRecord *prec);
 
 /* Create the dset for devBoSoftRaw */
-static long write_bo();
+static long write_bo(boRecord *prec);
 
 struct {
 	long		number;
@@ -53,7 +53,7 @@ struct {
 };
 epicsExportAddress(dset,devBoSoftRaw);
 
-static long init_record(boRecord *pbo)
+static long init_record(boRecord *prec)
 {
     long status;
     
@@ -63,11 +63,11 @@ static long init_record(boRecord *pbo)
  
 } /* end init_record() */
 
-static long write_bo(boRecord *pbo)
+static long write_bo(boRecord *prec)
 {
     long status;
 
-    status = dbPutLink(&pbo->out,DBR_LONG, &pbo->rval,1);
+    status = dbPutLink(&prec->out,DBR_LONG, &prec->rval,1);
 
     return(status);
 }

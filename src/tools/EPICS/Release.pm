@@ -5,7 +5,7 @@
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# Release.pm,v 1.1.2.2 2008/08/29 21:06:56 anj Exp
+# Release.pm,v 1.1.2.3 2009/01/06 16:41:56 anj Exp
 
 #
 # Parse all relevent configure/RELEASE* files and includes
@@ -84,6 +84,8 @@ sub expandRelease {
 
     while (my ($macro, $path) = each %$Rmacros) {
         while (my ($pre,$var,$post) = $path =~ m/(.*)\$\((\w+?)\)(.*)/) {
+            warn "Undefined macro \$($var) used in RELEASE file\n"
+                unless exists $Rmacros->{$var};
             $path = $pre . $Rmacros->{$var} . $post;
             $Rmacros->{$macro} = $path;
         }

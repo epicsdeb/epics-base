@@ -8,6 +8,10 @@
 RTEMS_BASE=/usr
 RTEMS_VERSION=4.9
 
+# Cross-compile toolchain in $(RTEMS_TOOLS)/bin
+#
+RTEMS_TOOLS=$(RTEMS_BASE)
+
 # Link Generic System loadable objects instead of full executable.
 #
 # A GeSys object is similar to a shared library.  It can be (un)loaded

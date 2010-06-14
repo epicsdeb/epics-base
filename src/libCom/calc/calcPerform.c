@@ -6,23 +6,24 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* calcPerform.c,v 1.37.2.8 2008/05/08 16:15:49 anj Exp */
+/* calcPerform.c,v 1.37.2.11 2009/08/25 18:19:49 anj Exp */
 /*
  *	Author: Julie Sander and Bob Dalesio
  *	Date:	07-27-87
  */
 
-#include	<stdlib.h>
-#include	<stddef.h>
-#include	<stdio.h>
-#include	<string.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
 #define epicsExportSharedSymbols
-#include	"osiUnistd.h"
-#include	"dbDefs.h"
-#include	"epicsMath.h"
-#include	"postfix.h"
-#include	"postfixPvt.h"
+#include "osiUnistd.h"
+#include "dbDefs.h"
+#include "epicsMath.h"
+#include "errlog.h"
+#include "postfix.h"
+#include "postfixPvt.h"
 
 static double calcRandom(void);
 static int cond_search(const char **ppinst, int match);
@@ -134,7 +135,7 @@ epicsShareFunc long
 	    if (itop)
 		*ptop = (long) *ptop % itop;
 	    else
-		*ptop = 0.0 / itop;   /* NaN */
+		*ptop = epicsNAN;   /* NaN */
 	    break;
 
 	case POWER:
@@ -429,7 +430,7 @@ static unsigned short seed = 0xa3bf;
 static unsigned short multy = 191 * 8 + 5;  /* 191 % 8 == 5 */
 static unsigned short addy = 0x3141;
 
-static double calcRandom()
+static double calcRandom(void)
 {
     seed = (seed * multy) + addy;
 

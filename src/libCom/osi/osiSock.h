@@ -3,13 +3,12 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
 /*
- *	    osiSock.h,v 1.20.2.5 2004/10/19 17:20:15 jhill Exp
+ *	    osiSock.h,v 1.20.2.6 2009/06/04 21:31:39 anj Exp
  *
  *      socket support library API def
  *
@@ -50,7 +49,7 @@ epicsShareFunc void epicsShareAPI
 enum epicsSocketSystemCallInterruptMechanismQueryInfo { 
     esscimqi_socketCloseRequired, 
     esscimqi_socketBothShutdownRequired,
-    esscimqi_socketSigAlarmRequired
+    esscimqi_socketSigAlarmRequired /* NO LONGER USED/SUPPORTED */
 };
 epicsShareFunc enum epicsSocketSystemCallInterruptMechanismQueryInfo 
         epicsSocketSystemCallInterruptMechanismQuery ();

@@ -34,6 +34,7 @@
 
 #define NSEC_PER_SEC 1000000000
 #define NTPTimeSyncInterval 60.0
+#define NTPTimeSyncRetries 4
 
 
 static struct {
@@ -116,7 +117,7 @@ static void NTPTime_InitOnce(void *pprio)
     iocshRegister(&ShutdownFuncDef, ShutdownCallFunc);
 
     /* Finally register as a time provider */
-    generalTimeCurrentTpRegister("NTP", *(int *)pprio, NTPTimeGetCurrent);
+    generalTimeRegisterCurrentProvider("NTP", *(int *)pprio, NTPTimeGetCurrent);
 }
 
 void NTPTime_Init(int priority)
@@ -138,8 +139,6 @@ void NTPTime_Shutdown(void *dummy)
 
 static void NTPTimeSync(void *dummy)
 {
-    int prevStatusBad = 0;
-
     taskwdInsert(0, NULL, NULL);
 
     for (epicsEventWaitWithTimeout(NTPTimePvt.loopEvent, NTPTimeSyncInterval);
@@ -155,25 +154,18 @@ static void NTPTimeSync(void *dummy)
         tickNow = osdTickGet();
 
         if (status) {
-            NTPTimePvt.syncsFailed++;
-
-            /* Keep trying for 1 minute before reporting failure */
-            if (NTPTimePvt.syncsFailed < 60 / NTPTimeSyncInterval)
-                continue;
-
-            if (!prevStatusBad)
+            if (++NTPTimePvt.syncsFailed > NTPTimeSyncRetries &&
+                NTPTimePvt.synchronized) {
                 errlogPrintf("NTPTimeSync: NTP requests failing - %s\n",
                     strerror(errno));
-
-            prevStatusBad = 1;
-            NTPTimePvt.synchronized = 0;
+                NTPTimePvt.synchronized = 0;
+            }
             continue;
         }
 
         NTPTimePvt.syncsFailed = 0;
-        if (prevStatusBad) {
+        if (!NTPTimePvt.synchronized) {
             errlogPrintf("NTPTimeSync: Sync recovered.\n");
-            prevStatusBad = 0;
         }
 
         epicsTimeFromTimespec(&timeNow, &timespecNow);

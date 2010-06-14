@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// epicsThread.cpp,v 1.16.2.23 2008/10/08 22:44:32 anj Exp
+// epicsThread.cpp,v 1.16.2.31 2009/08/24 17:08:41 jhill Exp
 //
 // Author: Jeff Hill
 //
@@ -18,6 +18,10 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <float.h>
+#include <string.h>
+
+// The following is required for Solaris builds
+#undef __EXTENSIONS__
 
 #define epicsExportSharedSymbols
 #include "epicsAlgorithm.h"
@@ -27,9 +31,48 @@
 #include "epicsGuard.h"
 #include "errlog.h"
 
+using namespace std;
+
 epicsThreadRunable::~epicsThreadRunable () {}
 void epicsThreadRunable::run () {}
 void epicsThreadRunable::show ( unsigned int ) const {}
+
+class epicsThread :: unableToCreateThread : 
+    public exception {
+public:
+    const char * what () const throw ();
+};
+
+const char * epicsThread :: 
+    unableToCreateThread :: what () const throw ()
+{
+    return "unable to create thread";
+}
+
+void epicsThread :: printLastChanceExceptionMessage ( 
+    const char * pExceptionTypeName,
+    const char * pExceptionContext )
+{ 
+    char date[64];
+    try {
+        epicsTime cur = epicsTime :: getCurrent ();
+        cur.strftime ( date, sizeof ( date ), "%a %b %d %Y %H:%M:%S.%f");
+    }
+    catch ( ... ) {
+        strcpy ( date, "<UKN DATE>" );
+    }
+    char name [128];
+    epicsThreadGetName ( this->id, name, sizeof ( name ) );
+    errlogPrintf ( 
+        "epicsThread: Unexpected C++ exception \"%s\" "
+        "with type \"%s\" in thread \"%s\" at %s\n",
+        pExceptionContext, pExceptionTypeName, name, date );
+    errlogFlush ();
+    // this should behave as the C++ implementation intends when an 
+    // exception isnt handled. If users dont like this behavior, they 
+    // can install an application specific unexpected handler.
+    std::unexpected ();
+}
 
 extern "C" void epicsThreadCallEntryPoint ( void * pPvt )
 {
@@ -49,38 +92,15 @@ extern "C" void epicsThreadCallEntryPoint ( void * pPvt )
     }
     catch ( std::exception & except ) {
         if ( ! waitRelease ) {
-            epicsTime cur = epicsTime::getCurrent ();
-            char date[64];
-            cur.strftime ( date, sizeof ( date ), "%a %b %d %Y %H:%M:%S.%f");
-            char name [128];
-            epicsThreadGetName ( pThread->id, name, sizeof ( name ) );
-            errlogPrintf ( 
-                "epicsThread: Unexpected C++ exception \"%s\" with type \"%s\" in thread \"%s\" at %s\n",
-                except.what (), typeid ( except ).name (), name, date );
-            // this should behave as the C++ implementation intends when an 
-            // exception isnt handled. If users dont like this behavior, they 
-            // can install an application specific unexpected handler.
-            std::unexpected (); 
+            pThread->printLastChanceExceptionMessage ( 
+                typeid ( except ).name (), except.what () );
         }
     }
     catch ( ... ) {
         if ( ! waitRelease ) {
-            epicsTime cur = epicsTime::getCurrent ();
-            char date[64];
-            cur.strftime ( date, sizeof ( date ), "%a %b %d %Y %H:%M:%S.%f");
-            char name [128];
-            epicsThreadGetName ( pThread->id, name, sizeof ( name ) );
-            errlogPrintf ( 
-                "epicsThread: Unknown C++ exception in thread \"%s\" at %s\n",
-                name, date );
-            errlogFlush ();
+            pThread->printLastChanceExceptionMessage ( 
+                "catch ( ... )", "Non-standard C++ exception" );
         }
-        // The Linux NPTL library requires us to re-throw here; it uses
-        // an untyped exception object to shut down threads when we call
-        // pthread_cancel() in the os/posix/osdThread.c myAtExit()
-        // handler, and aborts with "FATAL: exception not rethrown" if
-        // we don't re-throw it.  This solution is incomplete though...
-        throw;
     }
     if ( ! waitRelease ) {
         epicsGuard < epicsMutex > guard ( pThread->mutex );
@@ -108,7 +128,8 @@ void epicsThread::exit ()
 
 void epicsThread::exitWait () throw ()
 {
-    assert ( this->exitWait ( DBL_MAX ) );
+    bool success = this->exitWait ( DBL_MAX );
+    assert ( success );
 }
 
 bool epicsThread::exitWait ( const double delay ) throw ()
@@ -272,6 +293,27 @@ void epicsThread::setOkToBlock(bool isOkToBlock) throw ()
 void epicsThreadPrivateBase::throwUnableToCreateThreadPrivate ()
 {
     throw epicsThreadPrivateBase::unableToCreateThreadPrivate ();
+}
+
+void epicsThread :: show ( unsigned level ) const throw ()
+{
+    ::printf ( "epicsThread at %p\n", this->id );
+    if ( level > 0u ) {
+        epicsThreadShow ( this->id, level - 1 );
+        if ( level > 1u ) {
+            ::printf ( "pWaitReleaseFlag = %p\n", this->pWaitReleaseFlag );
+            ::printf ( "begin = %c, cancel = %c, terminated = %c\n",
+                this->begin ? 'T' : 'F',
+                this->cancel ? 'T' : 'F',
+                this->terminated ? 'T' : 'F' );
+            this->runable.show ( level - 2u );
+            this->mutex.show ( level - 2u );
+            ::printf ( "general purpose event\n" );
+            this->event.show ( level - 2u );
+            ::printf ( "exit event\n" );
+            this->exitEvent.show ( level - 2u );
+        }
+    }
 }
 
 extern "C" {

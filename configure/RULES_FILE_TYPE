@@ -6,7 +6,7 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
-# RULES_FILE_TYPE,v 1.1.2.7 2008/09/15 15:12:50 jba Exp
+# RULES_FILE_TYPE,v 1.1.2.9 2009/06/26 20:37:22 jba Exp
 #
 
 #---------------------------------------------------------------
@@ -49,16 +49,16 @@ endif
 
 define FILE_TYPE_template
 
-$(1) += $$(if $$(strip $$($(1)_$$(ARCH_CLASS))),$$(subst -nil-,,$$($(1)_$$(ARCH_CLASS))), $$($(1)_DEFAULT))
+$(1) += $$(if $$(strip $$($(1)_$$(OS_CLASS))),$$(subst -nil-,,$$($(1)_$$(OS_CLASS))), $$($(1)_DEFAULT))
 
 INSTALLS_$(1) = $$($(1):%=$$(INSTALL_$(1))/%)
 
 $$(INSTALL_$(1))/%: ../%
-	@echo "Installing $(1) file $$@"
+	$(ECHO) "Installing $(1) file $$@"
 	@$$(INSTALL) -d -m  $$(INSTALL_PERMISSIONS) $$< $$(dir $$@)
 
 $$(INSTALL_$(1))/%: %
-	@echo "Installing $(1) file $$@"
+	$(ECHO) "Installing $(1) file $$@"
 	@$$(INSTALL) -d -m  $$(INSTALL_PERMISSIONS) $$< $$(dir $$@)
 
 buildInstall : $$(INSTALLS_$(1))

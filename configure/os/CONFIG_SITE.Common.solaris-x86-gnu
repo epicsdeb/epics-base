@@ -1,0 +1,12 @@
+# CONFIG_SITE.Common.solaris-x86-gnu
+#
+# CONFIG_SITE.Common.solaris-x86-gnu,v 1.1.2.1 2009/03/03 19:54:15 jba Exp
+#
+# Site Specific definitions for solaris-x86-gnu target
+# Only the local epics system manager should modify this file
+
+# solaris 10 default location
+#GNU_DIR=/usr/sfw
+
+# APS site override
+GNU_DIR = /usr/local

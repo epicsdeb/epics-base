@@ -9,6 +9,7 @@
 \*************************************************************************/
 
 #include "envDefs.h"
+#include "errlog.h"
 
 #include "exServer.h"
 #include "fdManager.h"
@@ -17,48 +18,89 @@
 // main()
 // (example single threaded ca server tool main loop)
 //
-extern int main (int argc, const char **argv)
+extern int main ( int argc, const char **argv )
 {
     epicsTime   begin (epicsTime::getCurrent());
     exServer    *pCAS;
     unsigned    debugLevel = 0u;
     double      executionTime = 0.0;
+    double      asyncDelay = 0.1;
     char        pvPrefix[128] = "";
     unsigned    aliasCount = 1u;
     unsigned    scanOn = true;
     unsigned    syncScan = true;
     char        arraySize[64] = "";
     bool        forever = true;
+    unsigned    maxSimultAsyncIO = 1000u;
     int         i;
 
-    for ( i = 1; i < argc; i++ ) {
-        if ( sscanf(argv[i], "-d %u", & debugLevel ) == 1 ) {
-            continue;
+    i = 1;
+    while ( i < argc ) {
+        if ( strcmp ( argv[i], "-d" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%u", & debugLevel ) == 1 ) {
+                i += 2;
+                continue;
+            }
         }
-        if ( sscanf ( argv[i],"-t %lf", & executionTime ) == 1 ) {
-            forever = false;
-            continue;
+        if ( strcmp ( argv[i],"-t" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%lf", & executionTime ) == 1 ) {
+                forever = false;
+                i += 2;
+                continue;
+            }
         }
-        if ( sscanf ( argv[i], "-p %127s", pvPrefix ) == 1 ) {
-            continue;
+        if ( strcmp ( argv[i], "-p" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%127s", pvPrefix ) == 1 ) {
+                i += 2;
+                continue;
+            }
         }
-        if ( sscanf ( argv[i],"-c %u", & aliasCount ) == 1 ) {
-            continue;
+        if ( strcmp ( argv[i], "-c" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%u", & aliasCount ) == 1 ) {
+                i += 2;
+                continue;
+            }
         }
-        if ( sscanf ( argv[i],"-s %u", & scanOn ) == 1 ) {
-            continue;
+        if ( strcmp ( argv[i], "-s" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%u", & scanOn ) == 1 ) {
+                i += 2;
+                continue;
+            }
         }
-        if ( sscanf ( argv[i],"-a %63s", arraySize ) == 1 ) {
-            continue;
+        if ( strcmp ( argv[i], "-a" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%63s", arraySize ) == 1 ) {
+                i += 2;
+                continue;
+            }
         }
-        if ( sscanf ( argv[i],"-ss %u", & syncScan ) == 1 ) {
-            continue;
+        if ( strcmp ( argv[i],"-ss" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%u", & syncScan ) == 1 ) {
+                i += 2;
+                continue;
+            }        
         }
-        printf ("\"%s\"?\n", argv[i]);
+        if ( strcmp ( argv[i],"-ad" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%lf", & asyncDelay ) == 1 ) {
+                i += 2;
+                continue;
+            }        
+        }
+        if ( strcmp ( argv[i],"-an" ) == 0 ) {
+            if ( i+1 < argc && sscanf ( argv[i+1], "%u", & maxSimultAsyncIO ) == 1 ) {
+                i += 2;
+                continue;
+            }        
+        }
+        printf ( "\"%s\"?\n", argv[i] );
+        if ( i + 1 < argc ) {
+            printf ( "\"%s\"?\n", argv[i+1] );
+        }
         printf (
-            "usage: %s [-d<debug level> -t<execution time> -p<PV name prefix> " 
-            "-c<numbered alias count> -s<1=scan on (default), 0=scan off> "
-            "-ss<1=synchronous scan (default), 0=asynchronous scan>]\n", 
+            "usage: %s [-d <debug level> -t <execution time> -p <PV name prefix> " 
+            "-c <numbered alias count> -s <1=scan on (default), 0=scan off> "
+            "-ss <1=synchronous scan (default), 0=asynchronous scan> "
+            "-a <max array size> -ad <async delay> "
+            "-an <max simultaneous async>\n", 
             argv[0]);
 
         return (1);
@@ -70,7 +112,8 @@ extern int main (int argc, const char **argv)
 
     try {
         pCAS = new exServer ( pvPrefix, aliasCount, 
-            scanOn != 0, syncScan == 0 );
+            scanOn != 0, syncScan == 0, asyncDelay,
+            maxSimultAsyncIO );
     }
     catch ( ... ) {
         errlogPrintf ( "Server initialization error\n" );

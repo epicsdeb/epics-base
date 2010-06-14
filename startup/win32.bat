@@ -8,6 +8,12 @@ REM  EPICS BASE Versions 3.13.7
 REM  and higher are distributed subject to a Software License Agreement found
 REM  in file LICENSE that is included with this distribution.
 REM *************************************************************************
+REM  win32.bat,v 1.11.2.6 2009/05/06 18:50:46 jba Exp
+REM
+REM  Site-specific EPICS environment settings
+REM 
+REM  sites should modify these definitions
+
 
 REM    ===================================================
 REM    ====== REQUIRED ENVIRONMENT VARIABLES FOLLOW ======
@@ -36,9 +42,7 @@ REM    ---- Visual Studio 2005 -----
 REM call "C:\Program files\Microsoft Visual Studio 8\VC\bin\vcvars32.bat"
 REM    ---- Visual Studio 2008 -----
 call "C:\Program files\Microsoft Visual Studio 9.0\VC\bin\vcvars32.bat"
-set PATH=%PATH%;C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin
-set INCLUDE=%INCLUDE%;C:\Program Files\Microsoft SDKs\Windows\v6.0A\include
-set LIB=%LIB%;C:\Program Files\Microsoft SDKs\Windows\v6.0A\lib
+
 
 REM    --------------- EPICS -----------------------------
 REM    -- R3.14 requirements

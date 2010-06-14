@@ -1,19 +1,18 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* ellLib.h  ellLib.h,v 1.10 2002/07/12 21:34:29 jba Exp
+/* ellLib.h,v 1.10.2.6 2009/08/28 18:34:38 anj Exp
  *
  *      Author: John Winans (ANL)
  *      Date:   07-02-92
  */
-#ifndef INCellLibh
-#define INCellLibh
+#ifndef INC_ellLib_H
+#define INC_ellLib_H
 
 #include "shareLib.h"
 
@@ -21,60 +20,47 @@
 extern "C" {
 #endif
 
-#define DLLLIB_USE_MACROS
-
 typedef struct ELLNODE {
-  struct ELLNODE  *next;
-  struct ELLNODE  *previous;
-}ELLNODE;
+    struct ELLNODE *next;
+    struct ELLNODE *previous;
+} ELLNODE;
+
+#define ELLNODE_INIT {NULL, NULL}
 
 typedef struct ELLLIST {
-  ELLNODE  node;
-  int   count;
-}ELLLIST;
+    ELLNODE node;
+    int     count;
+} ELLLIST;
 
-#ifdef DLLLIB_USE_MACROS
+#define ELLLIST_INIT {ELLNODE_INIT, 0}
 
-#define ellInit(PLIST)	{ (PLIST)->node.next = NULL;\
-			  (PLIST)->node.previous = NULL;\
-			  (PLIST)->count = 0; }
+typedef void (*FREEFUNC)(void *);
 
-#define ellCount(PLIST)		((PLIST)->count)
+#define ellInit(PLIST) {\
+    (PLIST)->node.next = (PLIST)->node.previous = NULL;\
+    (PLIST)->count = 0;\
+}
+#define ellCount(PLIST)    ((PLIST)->count)
+#define ellFirst(PLIST)    ((PLIST)->node.next)
+#define ellLast(PLIST)     ((PLIST)->node.previous)
+#define ellNext(PNODE)     ((PNODE)->next)
+#define ellPrevious(PNODE) ((PNODE)->previous)
+#define ellFree(PLIST)     ellFree2(PLIST, free)
 
-#define	ellFirst(PLIST)		((PLIST)->node.next)
-
-#define ellLast(PLIST)		((PLIST)->node.previous)
-
-#define ellNext(PNODE)		((PNODE)->next)
-
-#define	ellPrevious(PNODE)	((PNODE)->previous)
-
-#else				/*DLLLIB_USE_MACROS*/
-
-epicsShareFunc void epicsShareAPI ellInit (ELLLIST *pList);
-epicsShareFunc int epicsShareAPI ellCount (ELLLIST *pList);
-epicsShareFunc ELLNODE * epicsShareAPI ellFirst (ELLLIST *pList);
-epicsShareFunc ELLNODE * epicsShareAPI ellLast (ELLLIST *pList);
-epicsShareFunc ELLNODE * epicsShareAPI ellNext (ELLNODE *pNode);
-epicsShareFunc ELLNODE * epicsShareAPI ellPrevious (ELLNODE *pNode);
-
-#endif				/*DLLLIB_USE_MACROS*/
-
-epicsShareFunc void epicsShareAPI ellAdd (ELLLIST *pList, ELLNODE *pNode);
-epicsShareFunc void epicsShareAPI ellConcat (ELLLIST *pDstList, ELLLIST *pAddList);
-epicsShareFunc void epicsShareAPI ellDelete (ELLLIST *pList, ELLNODE *pNode);
-epicsShareFunc void epicsShareAPI ellExtract (ELLLIST *pSrcList, ELLNODE *pStartNode, ELLNODE *pEndNode, ELLLIST *pDstList);
-epicsShareFunc ELLNODE * epicsShareAPI ellGet (ELLLIST *pList);
-epicsShareFunc void epicsShareAPI ellInsert (ELLLIST *plist, ELLNODE *pPrev, ELLNODE *pNode);
-epicsShareFunc ELLNODE * epicsShareAPI ellNth (ELLLIST *pList, int nodeNum);
-epicsShareFunc ELLNODE * epicsShareAPI ellNStep (ELLNODE *pNode, int nStep);
-epicsShareFunc int  epicsShareAPI ellFind (ELLLIST *pList, ELLNODE *pNode);
-/* use of ellFree on windows causes problems because the malloc and free are not in the same DLL */
-epicsShareFunc void epicsShareAPI ellFree (ELLLIST *pList);
-epicsShareFunc void epicsShareAPI ellVerify (ELLLIST *pList);
+epicsShareFunc void ellAdd (ELLLIST *pList, ELLNODE *pNode);
+epicsShareFunc void ellConcat (ELLLIST *pDstList, ELLLIST *pAddList);
+epicsShareFunc void ellDelete (ELLLIST *pList, ELLNODE *pNode);
+epicsShareFunc void ellExtract (ELLLIST *pSrcList, ELLNODE *pStartNode, ELLNODE *pEndNode, ELLLIST *pDstList);
+epicsShareFunc ELLNODE * ellGet (ELLLIST *pList);
+epicsShareFunc void ellInsert (ELLLIST *plist, ELLNODE *pPrev, ELLNODE *pNode);
+epicsShareFunc ELLNODE * ellNth (ELLLIST *pList, int nodeNum);
+epicsShareFunc ELLNODE * ellNStep (ELLNODE *pNode, int nStep);
+epicsShareFunc int  ellFind (ELLLIST *pList, ELLNODE *pNode);
+epicsShareFunc void ellFree2 (ELLLIST *pList, FREEFUNC freeFunc);
+epicsShareFunc void ellVerify (ELLLIST *pList);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif				/*INCellLibh*/
+#endif /* INC_ellLib_H */

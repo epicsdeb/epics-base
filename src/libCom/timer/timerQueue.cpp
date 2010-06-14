@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
@@ -15,16 +14,24 @@
  */
 
 #include <stdio.h>
+#include <float.h>
 
 #define epicsExportSharedSymbols
 #include "epicsGuard.h"
 #include "timerPrivate.h"
+#include "errlog.h"
+
+const double timerQueue :: exceptMsgMinPeriod = 60.0 * 5.0; // seconds
 
 epicsTimerQueue::~epicsTimerQueue () {}
 
 timerQueue::timerQueue ( epicsTimerQueueNotify & notifyIn ) :
-    notify ( notifyIn ), pExpireTmr ( 0 ),  
-    processThread ( 0 ), cancelPending ( false )
+    notify ( notifyIn ), 
+    pExpireTmr ( 0 ),  
+    processThread ( 0 ), 
+    exceptMsgTimeStamp ( 
+        epicsTime :: getCurrent () - exceptMsgMinPeriod ),
+    cancelPending ( false )
 {
 }
 
@@ -33,6 +40,39 @@ timerQueue::~timerQueue ()
     timer *pTmr;
     while ( ( pTmr = this->timerList.get () ) ) {    
         pTmr->curState = timer::stateLimbo;
+    }
+}
+
+void timerQueue ::
+    printExceptMsg ( const char * pName, const type_info & type )
+{
+    char date[64];
+    double delay;
+    try {
+        epicsTime cur = epicsTime :: getCurrent ();
+        delay = cur - this->exceptMsgTimeStamp;
+        cur.strftime ( date, sizeof ( date ), 
+                        "%a %b %d %Y %H:%M:%S.%f" );
+        if ( delay >= exceptMsgMinPeriod ) {
+            this->exceptMsgTimeStamp = cur;
+        }
+    }
+    catch ( ... ) {
+        delay = DBL_MAX;
+        strcpy ( date, "UKN DATE" );
+    }
+    if ( delay >= exceptMsgMinPeriod ) {
+        // we dont touch the typeid for the timer expiration
+        // notify interface here because they might have 
+        // destroyed the timer during its callback
+        errlogPrintf ( 
+            "timerQueue: Unexpected C++ exception \"%s\" "
+            "with type \"%s\" during timer expiration "
+            "callback at %s\n",
+            pName, 
+            type.name (), 
+            date );
+        errlogFlush ();
     }
 }
 
@@ -96,8 +136,15 @@ double timerQueue::process ( const epicsTime & currentTime )
             debugPrintf ( ( "%5u expired \"%s\" with error %f sec\n", 
                 N++, typeid ( this->pExpireTmr->notify ).name (), 
                 currentTime - this->pExpireTmr->exp ) );
-
-            expStat = pTmpNotify->expire ( currentTime );
+            try {
+                expStat = pTmpNotify->expire ( currentTime );
+            }
+            catch ( std::exception & except ) {
+                printExceptMsg ( except.what (), typeid ( except ) );
+            }
+            catch ( ... ) {
+                printExceptMsg ( "non-standard exception", typeid ( void ) );
+            }
         }
 
         //

@@ -36,6 +36,7 @@
 #include "epicsTimer.h"
 #include "epicsEvent.h"
 #include "freeList.h"
+#include "localHostName.h"
 
 #ifdef cach_restore_epicsExportSharedSymbols
 #   define epicsExportSharedSymbols
@@ -197,6 +198,7 @@ public:
     unsigned largeBufferSizeTCP () const;
     char * allocateLargeBufferTCP ();
     void releaseLargeBufferTCP ( char * );
+    unsigned maxContiguousFrames ( epicsGuard < epicsMutex > & ) const;
 
     // misc
     const char * userNamePointer () const;
@@ -212,8 +214,10 @@ public:
     static unsigned highestPriorityLevelBelow ( unsigned priority );
     void destroyIIU ( tcpiiu & iiu ); 
 
+    const char * pLocalHostName ();
+    
 private:
-    localHostName hostNameCache;
+    epicsSingleton < localHostName > :: reference _refLocalHostName;
     chronIntIdResTable < nciu > chanTable;
     //
     // !!!! There is at this point no good reason
@@ -269,8 +273,9 @@ private:
     epicsThreadId initializingThreadsId;
     unsigned initializingThreadsPriority;
     unsigned maxRecvBytesTCP;
+    unsigned maxContigFrames;
     unsigned beaconAnomalyCount;
-    bool iiuUninstallInProgress;
+    unsigned iiuExistenceCount;
 
     void recycleReadNotifyIO ( 
         epicsGuard < epicsMutex > &, netReadNotifyIO &io );
@@ -432,6 +437,17 @@ inline nciu * cac::lookupChannel (
 {
     guard.assertIdenticalMutex ( this->mutex );
     return this->chanTable.lookup ( idIn );
+}
+
+inline const char * cac :: pLocalHostName ()
+{
+    return _refLocalHostName->pointer ();
+}
+
+inline unsigned cac :: 
+    maxContiguousFrames ( epicsGuard < epicsMutex > & ) const
+{
+    return maxContigFrames;
 }
 
 #endif // ifdef cach

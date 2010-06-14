@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* epicsUnitTest.h,v 1.1.2.3 2008/09/03 16:48:03 anj Exp
+/* epicsUnitTest.h,v 1.1.2.4 2009/04/03 17:46:25 lange Exp
  * Author: Andrew Johnson
  */
 
@@ -28,7 +28,7 @@ epicsShareFunc void testFail(const char *fmt, ...)
 						EPICS_PRINTF_STYLE(1, 2);
 epicsShareFunc void testSkip(int skip, const char *why);
 epicsShareFunc void testTodoBegin(const char *why);
-epicsShareFunc void testTodoEnd();
+epicsShareFunc void testTodoEnd(void);
 epicsShareFunc int  testDiag(const char *fmt, ...)
 						EPICS_PRINTF_STYLE(1, 2);
 epicsShareFunc void testAbort(const char *fmt, ...)

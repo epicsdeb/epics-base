@@ -1,5 +1,5 @@
 #
-# CONFIG.Common.RTEMS-uC5282,v 1.1.2.2 2008/04/24 18:18:12 norume Exp
+# CONFIG.Common.RTEMS-uC5282,v 1.1.2.3 2009/04/09 18:56:06 jba Exp
 # Author: W. Eric Norum
 #         Canadian Light Source
 #         eric@cls.usask.ca
@@ -12,7 +12,7 @@ ARCH_DEP_CFLAGS += -DMY_DO_BOOTP=NULL
 MUNCH_SUFFIX = .boot
 MUNCHNAME = $(PRODNAME:%$(EXE)=%$(MUNCH_SUFFIX))
 define MUNCH_CMD
-	$(RTEMS_BASE)/bin/$(OBJCOPY_FOR_TARGET) -O binary -R .comment -S $< $@
+	$(RTEMS_TOOLS)/bin/$(OBJCOPY_FOR_TARGET) -O binary -R .comment -S $< $@
 endef
 
 include $(CONFIG)/os/CONFIG.Common.RTEMS

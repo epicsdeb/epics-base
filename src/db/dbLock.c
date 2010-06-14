@@ -67,9 +67,8 @@ since this will delay all other threads.
 #include "dbAccessDefs.h"
 #include "dbLock.h"
 
-#define STATIC static
 
-STATIC int dbLockIsInitialized = FALSE;
+static int dbLockIsInitialized = FALSE;
 
 typedef enum {
     listTypeScanLock = 0,
@@ -79,10 +78,11 @@ typedef enum {
 
 #define nlistType listTypeFree + 1
 
-STATIC ELLLIST lockSetList[nlistType];
-STATIC epicsMutexId globalLock;
-STATIC epicsMutexId lockSetModifyLock;
-STATIC unsigned long id = 0;
+static ELLLIST lockSetList[nlistType];
+static epicsMutexId globalLock;
+static epicsMutexId lockSetModifyLock;
+static unsigned long id = 0;
+static char *msstring[4]={"NMS","MS","MSI","MSS"};
 
 typedef enum {
     lockSetStateFree=0, lockSetStateScanLock, lockSetStateRecordLock
@@ -110,7 +110,7 @@ typedef struct lockRecord {
 } lockRecord;
 
 /*private routines */
-STATIC void dbLockInitialize(void)
+static void dbLockInitialize(void)
 {
     int i;
 
@@ -121,7 +121,7 @@ STATIC void dbLockInitialize(void)
     dbLockIsInitialized = TRUE;
 }
 
-STATIC lockSet * allocLockSet(
+static lockSet * allocLockSet(
     lockRecord *plockRecord, listType type,
     lockSetState state, epicsThreadId thread_id)
 {
@@ -327,7 +327,8 @@ void epicsShareAPI dbLockInitRecords(dbBase *pdbbase)
     for(pdbRecordType = (dbRecordType *)ellFirst(&pdbbase->recordTypeList);
     pdbRecordType;
     pdbRecordType = (dbRecordType *)ellNext(&pdbRecordType->node)) {
-        nrecords += ellCount(&pdbRecordType->recList);
+        nrecords += ellCount(&pdbRecordType->recList)
+                    - pdbRecordType->no_aliases;
     }
     /*Allocate all of them at once */
     plockRecord = dbCalloc(nrecords,sizeof(lockRecord));
@@ -338,6 +339,9 @@ void epicsShareAPI dbLockInitRecords(dbBase *pdbbase)
         pdbRecordNode;
         pdbRecordNode = (dbRecordNode *)ellNext(&pdbRecordNode->node)) {
             precord = pdbRecordNode->precord;
+            if (!precord->name[0] ||
+                pdbRecordNode->flags & DBRN_FLAGS_ISALIAS)
+                continue;
             plockRecord->precord = precord;
             precord->lset = plockRecord;
             plockRecord++;
@@ -350,7 +354,9 @@ void epicsShareAPI dbLockInitRecords(dbBase *pdbbase)
         pdbRecordNode;
         pdbRecordNode = (dbRecordNode *)ellNext(&pdbRecordNode->node)) {
             precord = pdbRecordNode->precord;
-            if(!(precord->name[0])) continue;
+            if (!precord->name[0] ||
+                pdbRecordNode->flags & DBRN_FLAGS_ISALIAS)
+                continue;
             plockRecord = precord->lset;
             if(!plockRecord->plockSet) 
                 allocLockSet(plockRecord,listTypeScanLock,lockSetStateFree,0);
@@ -541,7 +547,7 @@ long epicsShareAPI dblsr(char *recordname,int level)
                 }
                 printf(" %s %s",
                     ((plink->value.pv_link.pvlMask&pvlOptPP)?" PP":"NPP"),
-                    ((plink->value.pv_link.pvlMask&pvlOptMS)?" MS":"NMS"));
+                    msstring[plink->value.pv_link.pvlMask&pvlOptMsMode]);
                 printf(" %s\n",pdbAddr->precord->name);
             }
         }

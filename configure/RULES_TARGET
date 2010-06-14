@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 #
-#  RULES_TARGET,v 1.1.2.1 2008/07/10 18:28:17 jba Exp
+#  RULES_TARGET,v 1.1.2.2 2009/06/05 16:02:26 jba Exp
 #
 #  RULES_TARGET
 #
@@ -82,9 +82,9 @@ $(1)_DLL_DEPLIBS=$$(foreach lib, $$($(1)_DLL_LIBS),\
 
 $$(LIB_PREFIX)$(1)$$(LIB_SUFFIX):$$($(1)_OBJSNAME) $$($(1)_RESS)
 $$(LIB_PREFIX)$(1)$$(LIB_SUFFIX):$$($(1)_DEPLIBS)
-$$(LIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_OBJSNAME) $$($(1)_RESS)
-$$(LIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_DEPLIBS)
-$$(LIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_DLL_DEPLIBS)
+$$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_OBJSNAME) $$($(1)_RESS)
+$$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_DEPLIBS)
+$$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_DLL_DEPLIBS)
 endef
 
 $(foreach target, $(LIBRARY), \

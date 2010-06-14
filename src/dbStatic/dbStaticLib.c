@@ -1,14 +1,12 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*dbStaticLib.c*/
-/* share/src/db @(#)dbStaticLib.c	1.21     7/11/94 */
+/* dbStaticLib.c,v 1.60.2.29 2009/08/03 22:22:45 anj Exp */
 
 #include <stdio.h>
 #include <errno.h>
@@ -48,10 +46,9 @@ int dbStaticDebug = 0;
 static char *pNullString = "";
 #define messagesize	100
 #define RPCL_LEN 184
-#define MAX_FIELD_NAME_LENGTH 20
 
 static char *ppstring[5]={"NPP","PP","CA","CP","CPP"};
-static char *msstring[2]={"NMS","MS"};
+static char *msstring[4]={"NMS","MS","MSI","MSS"};
 
 epicsShareDef maplinkType pamaplinkType[LINK_NTYPES] = {
 	{"CONSTANT",CONSTANT},
@@ -94,7 +91,7 @@ static char *promptCONSTANT[] = {
 static char *promptINLINK[] = {
 	"         PV Name:",
 	"NPP PP CA CP CPP:",
-	"       NMS or MS:"};
+	"  NMS MS MSI MSS:"};
 static char *promptOUTLINK[] = {
 	"  PV Name:",
 	"NPP PP CA:",
@@ -238,53 +235,55 @@ static long setLinkType(DBENTRY *pdbentry)
     DBLINK	*plink;
     long	status=0;
     int		link_type,ind,type;
-    int		isSoftLink;
 
-    dbCopyEntryContents(pdbentry,&dbEntry);
-    status = dbFindField(&dbEntry,"DTYP");
-    if(status) {
+    dbCopyEntryContents(pdbentry, &dbEntry);
+    status = dbFindField(&dbEntry, "DTYP");
+    if (status) {
 	epicsPrintf("field DTYP does not exist for recordtype %s\n",
 		dbGetRecordTypeName(&dbEntry));
 	status = S_dbLib_fieldNotFound;
 	goto done;
     }
+
     precordType = dbEntry.precordType;
-    if(!precordType) {
+    if (!precordType) {
 	status = S_dbLib_badField;
 	goto done;
     }
-    if(ellCount(&precordType->devList)==0) goto done;
+
+    if (ellCount(&precordType->devList) == 0) goto done;
+
     ind = dbGetMenuIndex(&dbEntry);
-    if(ind==-1) {
+    if (ind == -1) {
 	char *pstring;
 
 	pstring = dbGetString(&dbEntry);
-	if(strstr(pstring,"$(") || strstr(pstring,"${")) {
+	if (strstr(pstring, "$(") || strstr(pstring, "${")) {
 	    link_type = MACRO_LINK;
 	} else {
 	    status = S_dbLib_badField;
 	    goto done;
 	}
     } else {
-	pdevSup = (devSup *)ellNth(&precordType->devList,ind+1);
-	if(!pdevSup) {
+	pdevSup = (devSup *)ellNth(&precordType->devList, ind + 1);
+	if (!pdevSup) {
 	    status = S_dbLib_badField;
 	    goto done;
 	}
 	link_type = pdevSup->link_type;
     }
+
     pflddes = pdbentry->pflddes;
-    plink = (DBLINK *)(pdbentry->pfield);
-    if(plink->type == link_type) goto done;
+    plink = (DBLINK *)pdbentry->pfield;
+    if (plink->type == link_type) goto done;
+
     type = plink->type;
-    if(type==CONSTANT || type==PV_LINK || type==DB_LINK || type==CA_LINK)
-	isSoftLink = TRUE;
-    else
-	isSoftLink = FALSE;
-    if(isSoftLink && (link_type==CONSTANT || link_type==PV_LINK)) goto done;
+    if ((type == CONSTANT || type == PV_LINK || type == DB_LINK || type == CA_LINK) &&
+	(link_type == CONSTANT || link_type == PV_LINK)) goto done;
+
     dbFreeLinkContents(plink);
     plink->type = link_type;
-    switch(plink->type) {
+    switch (plink->type) {
         case VME_IO: plink->value.vmeio.parm = pNullString; break;
         case CAMAC_IO: plink->value.camacio.parm = pNullString; break;
 	case AB_IO: plink->value.abio.parm = pNullString; break;
@@ -301,24 +300,19 @@ done:
 
 static long putParmString(char **pparm,const char *pstring)
 {
-    size_t	size;
-
-    if(*pparm && (*pparm != pNullString)){
-	free((void *)(*pparm));
-	*pparm = pNullString;
+    if (*pparm && *pparm != pNullString) {
+        free(*pparm);
+        *pparm = pNullString;
     }
-    if(!pstring) return(0);
-    if(!(pstring = strchr(pstring,'@'))) return(0);
-    pstring++;
-    size = strlen(pstring) + 1;
-    if(size==1) return(0);
-    *pparm = dbCalloc(size, sizeof(char *));
-    strcpy(*pparm,pstring);
-    return(0);
+    if (!pstring) return 0;
+    pstring = strchr(pstring, '@');
+    if (!pstring || !*++pstring) return 0;
+    *pparm = epicsStrDup(pstring);
+    return 0;
 }
 
 void dbFreeLinkContents(struct link *plink)
-{ 
+{
     char *parm = NULL;
 
     switch(plink->type) {
@@ -333,7 +327,7 @@ void dbFreeLinkContents(struct link *plink)
 	case INST_IO: parm = plink->value.instio.string; break;
 	case BBGPIB_IO: parm = plink->value.bbgpibio.parm;break;
 	case VXI_IO: parm = plink->value.vxiio.parm; break;
-   	default:
+	default:
 	     epicsPrintf("dbFreeLink called but link type unknown\n");
     }
     if(parm && (parm != pNullString)) free((void *)parm);
@@ -415,7 +409,10 @@ static void entryErrMessage(DBENTRY *pdbentry,long status,char *mess)
 	strcat(pmessage,pname);
     }
     if(precnode){
-	strcat(pmessage," Record:");
+        if (dbIsAlias(pdbentry))
+            strcat(pmessage," Record Alias:");
+        else
+            strcat(pmessage," Record:");
 	strcat(pmessage,(char *)precnode->precord);
     }
     if(pflddes) {
@@ -441,8 +438,13 @@ static void zeroDbentry(DBENTRY *pdbentry)
 
 static char *getpMessage(DBENTRY *pdbentry)
 {
-    if(!pdbentry->message) pdbentry->message = dbCalloc(1,messagesize);
-    return(pdbentry->message);
+    char *msg = pdbentry->message;
+    if (!msg) {
+        msg = dbCalloc(1, messagesize);
+        pdbentry->message = msg;
+    }
+    *msg = 0;
+    return msg;
 }
 
 static long putPvLink(DBENTRY *pdbentry,short pvlMask,const char *pvname)
@@ -512,20 +514,6 @@ dbDeviceMenu *dbGetDeviceMenu(DBENTRY *pdbentry)
 }
 
 /* Beginning of Public Routines */
-void * epicsShareAPI dbCalloc(size_t nobj,size_t size)
-{
-    void *p;
-
-    p=callocMustSucceed(nobj,size,"dbCalloc");
-    return(p);
-}
-void * epicsShareAPI dbMalloc(size_t size)
-{
-    void *p;
-
-    p=mallocMustSucceed(size,"dbMalloc");
-    return(p);
-}
 
 #define INC_SIZE	256
 void epicsShareAPI dbCatString(char **string,int *stringLength,char *new,char *separator)
@@ -811,8 +799,8 @@ long epicsShareAPI dbAddPath(DBBASE *pdbbase,const char *path)
     expectingPath = FALSE;
     sawMissingPath = FALSE;
     while (*path) {
-	int len;
-		
+	size_t len;
+
 	/* preceding white space is removed */
 	if (isspace((int)*path)) {
 	    path++;
@@ -918,6 +906,10 @@ long epicsShareAPI dbWriteRecordFP(
     while(!status) {
 	status = dbFirstRecord(pdbentry);
 	while(!status) {
+            if (dbIsAlias(pdbentry)) {
+                status = dbNextRecord(pdbentry);
+                continue;
+            }
 	    if(dbIsVisibleRecord(pdbentry))
 	    	fprintf(fp,"grecord(%s,\"%s\") {\n",
 		    dbGetRecordTypeName(pdbentry),dbGetRecordName(pdbentry));
@@ -952,6 +944,16 @@ long epicsShareAPI dbWriteRecordFP(
 	    fprintf(fp,"}\n");
 	    status = dbNextRecord(pdbentry);
 	}
+        status = dbFirstRecord(pdbentry);
+        while (!status) {
+            if (!dbIsAlias(pdbentry)) {
+                status = dbNextRecord(pdbentry);
+                continue;
+            }
+            fprintf(fp, "alias(\"%s\",\"%s\")\n",
+                dbRecordName(pdbentry), dbGetRecordName(pdbentry));
+            status = dbNextRecord(pdbentry);
+        }
 	if(precordTypename) break;
 	status = dbNextRecordType(pdbentry);
     }
@@ -1338,25 +1340,33 @@ long epicsShareAPI dbPutRecordAttribute(
     return(0);
 }
 
-long epicsShareAPI dbGetRecordAttribute(DBENTRY *pdbentry,const char *name)
+long epicsShareAPI dbGetAttributePart(DBENTRY *pdbentry, const char **ppname)
 {
-    dbRecordType	*precordType = pdbentry->precordType;
-    int			compare;
+    dbRecordType *precordType = pdbentry->precordType;
+    const char *pname = *ppname;
     dbRecordAttribute *pattribute;
 
-    if(!precordType) return(S_dbLib_recordTypeNotFound);
+    if (!precordType) return S_dbLib_recordTypeNotFound;
     pattribute = (dbRecordAttribute *)ellFirst(&precordType->attributeList);
-    while(pattribute) {
-	compare = strcmp(pattribute->name,name);
-	if(compare==0) {
-	    pdbentry->pflddes = pattribute->pdbFldDes;
-	    pdbentry->pfield = pattribute->value;
-	    return(0);
-	}
-	if(compare>=0) break;
-	pattribute = (dbRecordAttribute *)ellNext(&pattribute->node);
+    while (pattribute) {
+        int nameLen = strlen(pattribute->name);
+        int compare = strncmp(pattribute->name, pname, nameLen);
+        int ch = pname[nameLen];
+        if (compare == 0 && !(ch == '_' || isalnum(ch))) {
+            pdbentry->pflddes = pattribute->pdbFldDes;
+            pdbentry->pfield = pattribute->value;
+            *ppname = &pname[nameLen];
+            return 0;
+        }
+        if (compare >= 0) break;
+        pattribute = (dbRecordAttribute *)ellNext(&pattribute->node);
     }
-    return(S_dbLib_fieldNotFound);
+    return S_dbLib_fieldNotFound;
+}
+
+long epicsShareAPI dbGetRecordAttribute(DBENTRY *pdbentry, const char *pname)
+{
+    return dbGetAttributePart(pdbentry, &pname);
 }
 
 long epicsShareAPI dbFirstField(DBENTRY *pdbentry,int dctonly)
@@ -1512,25 +1522,63 @@ long epicsShareAPI dbCreateRecord(DBENTRY *pdbentry,const char *precordName)
     return(0);
 }
 
+long epicsShareAPI dbDeleteAliases(DBENTRY *pdbentry)
+{
+    dbBase		*pdbbase = pdbentry->pdbbase;
+    dbRecordType	*precordType = pdbentry->precordType;
+    dbRecordNode	*precnode = pdbentry->precnode;
+    ELLLIST     	*preclist = &precordType->recList;
+    dbRecordNode	*pAliasNode, *pAliasNodeNext;
+    DBENTRY		dbentry;
+    void *precord;
+
+    if (!precnode) return S_dbLib_recNotFound;
+    if (precnode->flags & DBRN_FLAGS_ISALIAS) return S_dbLib_recExists;
+    precord = precnode->precord;
+
+    dbInitEntry(pdbbase, &dbentry);
+    pAliasNode = (dbRecordNode *)ellFirst(preclist);
+    while (pAliasNode) {
+        pAliasNodeNext = (dbRecordNode *)ellNext(&pAliasNode->node);
+        if (pAliasNode->flags & DBRN_FLAGS_ISALIAS &&
+            pAliasNode->precord == precord &&
+            !dbFindRecord(&dbentry, pAliasNode->recordname)) {
+            dbDeleteRecord(&dbentry);
+        }
+        pAliasNode = pAliasNodeNext;
+    }
+    precnode->flags &= ~DBRN_FLAGS_HASALIAS;
+    return 0;
+}
+
 long epicsShareAPI dbDeleteRecord(DBENTRY *pdbentry)
 {
     dbBase		*pdbbase = pdbentry->pdbbase;
     dbRecordType	*precordType = pdbentry->precordType;
     dbRecordNode	*precnode = pdbentry->precnode;
-    ELLLIST           	*preclist;
+    ELLLIST     	*preclist;
     long		status;
 
-    if (!precnode) return (S_dbLib_recNotFound);
+    if (!precnode) return S_dbLib_recNotFound;
+    if (precnode->flags & DBRN_FLAGS_HASALIAS)
+        dbDeleteAliases(pdbentry);
+
     preclist = &precordType->recList;
-    ellDelete(preclist,&precnode->node);
-    dbPvdDelete(pdbbase,precnode);
+    ellDelete(preclist, &precnode->node);
+    dbPvdDelete(pdbbase, precnode);
     while (!dbFirstInfo(pdbentry)) {
-	dbDeleteInfo(pdbentry);
+        dbDeleteInfo(pdbentry);
     }
-    if((status = dbFreeRecord(pdbentry))) return(status);
-    free((void *)precnode);
+    if (precnode->flags & DBRN_FLAGS_ISALIAS) {
+        free(precnode->recordname);
+        precordType->no_aliases--;
+    } else {
+        status = dbFreeRecord(pdbentry);
+        if (status) return status;
+    }
+    free(precnode);
     pdbentry->precnode = NULL;
-    return (0);
+    return 0;
 }
 
 long epicsShareAPI dbFreeRecords(DBBASE *pdbbase)
@@ -1556,34 +1604,45 @@ long epicsShareAPI dbFreeRecords(DBBASE *pdbbase)
     return(0);
 }
 
-long epicsShareAPI dbFindRecord(DBENTRY *pdbentry,const char *precordName)
+long epicsShareAPI dbFindRecordPart(DBENTRY *pdbentry, const char **ppname)
 {
-    dbBase	*pdbbase = pdbentry->pdbbase;
-    int         lenName=0;
+    dbBase      *pdbbase = pdbentry->pdbbase;
+    const char  *pname = *ppname;
+    const char  *pfn;
+    int         lenName;
     PVDENTRY    *ppvdNode;
-    char        convName[PVNAME_SZ + 1];
-    char        *pconvName = &convName[0];
 
-    
     zeroDbentry(pdbentry);
-    /* convert the record name */
-    while (*precordName && (*precordName != '.') && (lenName < PVNAME_SZ)) {
-	*pconvName++ = *precordName++;
-	lenName++;
+    pfn = strchr(pname, '.');
+    if (pfn) {
+        lenName = pfn - pname;
+    } else {
+        lenName = strlen(pname);
     }
-    *pconvName = 0;
-    pconvName = &convName[0];
-    ppvdNode = dbPvdFind(pdbbase,pconvName,lenName);
-    if(!ppvdNode) return(S_dbLib_recNotFound);
+
+    ppvdNode = dbPvdFind(pdbbase, pname, lenName);
+    if (!ppvdNode)
+        return S_dbLib_recNotFound;
+
     pdbentry->precnode = ppvdNode->precnode;
     pdbentry->precordType = ppvdNode->precordType;
-    if(*precordName++=='.') return(dbFindField(pdbentry, precordName));
-    return (0);
+    *ppname = pname + lenName;
+    return 0;
+}
+
+long epicsShareAPI dbFindRecord(DBENTRY *pdbentry, const char *pname)
+{
+    long status = dbFindRecordPart(pdbentry, &pname);
+
+    if (status) return status;
+    if (*pname == '.')
+        return dbFindField(pdbentry, ++pname);
+    return 0;
 }
 
 long epicsShareAPI dbFirstRecord(DBENTRY *pdbentry)
 {
-    dbRecordType		*precordType = pdbentry->precordType;
+    dbRecordType	*precordType = pdbentry->precordType;
     dbRecordNode	*precnode;
 
     zeroDbentry(pdbentry);
@@ -1610,15 +1669,28 @@ long epicsShareAPI dbNextRecord(DBENTRY *pdbentry)
 
 int epicsShareAPI dbGetNRecords(DBENTRY *pdbentry)
 {
-    dbRecordType		*precordType = pdbentry->precordType;
+    dbRecordType	*precordType = pdbentry->precordType;
 
     if(!precordType) return(0);
     return(ellCount(&precordType->recList));
 }
 
+int epicsShareAPI dbGetNAliases(DBENTRY *pdbentry)
+{
+    dbRecordType	*precordType = pdbentry->precordType;
+
+    if(!precordType) return(0);
+    return(precordType->no_aliases);
+}
+
 char * epicsShareAPI dbGetRecordName(DBENTRY *pdbentry)
 {
-    return(dbRecordName(pdbentry));
+    dbRecordType *pdbRecordType = pdbentry->precordType;
+    dbRecordNode *precnode = pdbentry->precnode;
+
+    if(!pdbRecordType) return NULL;
+    if(!precnode) return NULL;
+    return precnode->recordname;
 }
 
 long epicsShareAPI dbRenameRecord(DBENTRY *pdbentry,const char *newName)
@@ -1639,7 +1711,7 @@ long epicsShareAPI dbRenameRecord(DBENTRY *pdbentry,const char *newName)
     if(!pdbFldDes || (strcmp(pdbFldDes->name,"NAME")!=0))
 	return(S_dbLib_nameLength);
     if((int)strlen(newName)>=pdbFldDes->size) return(S_dbLib_nameLength);
-    if(!precnode) return(S_dbLib_recNotFound);
+    if (!precnode || dbIsAlias(pdbentry)) return S_dbLib_recNotFound;
     dbInitEntry(pdbentry->pdbbase,&dbentry);
     status = dbFindRecord(&dbentry,newName);
     dbFinishEntry(&dbentry);
@@ -1656,7 +1728,7 @@ long epicsShareAPI dbRenameRecord(DBENTRY *pdbentry,const char *newName)
     plistnode = (dbRecordNode *)ellFirst(preclist);
     while(plistnode) {
 	pdbentry->precnode =  plistnode;
-	if(strcmp(newName,dbRecordName(pdbentry)) >=0) break;
+	if(strcmp(newName,dbGetRecordName(pdbentry)) >=0) break;
 	plistnode = (dbRecordNode *)ellNext(&plistnode->node);
     }
     if(plistnode)
@@ -1672,7 +1744,7 @@ long epicsShareAPI dbVisibleRecord(DBENTRY *pdbentry)
     dbRecordNode	*precnode = pdbentry->precnode;
 
     if(!precnode) return(S_dbLib_recNotFound);
-    precnode->visible=1;
+    precnode->flags |= DBRN_FLAGS_VISIBLE;
     return 0;
 }
 
@@ -1681,7 +1753,7 @@ long epicsShareAPI dbInvisibleRecord(DBENTRY *pdbentry)
     dbRecordNode	*precnode = pdbentry->precnode;
 
     if(!precnode) return(S_dbLib_recNotFound);
-    precnode->visible=0;
+    precnode->flags &= ~DBRN_FLAGS_VISIBLE;
     return 0;
 }
 
@@ -1690,7 +1762,57 @@ int epicsShareAPI dbIsVisibleRecord(DBENTRY *pdbentry)
     dbRecordNode	*precnode = pdbentry->precnode;
 
     if(!precnode) return 0;
-    return(precnode->visible?1:0);
+    return precnode->flags & DBRN_FLAGS_VISIBLE ? 1 : 0;
+}
+
+long epicsShareAPI dbCreateAlias(DBENTRY *pdbentry, const char *alias)
+{
+    dbRecordType	*precordType = pdbentry->precordType;
+    dbRecordNode	*precnode = pdbentry->precnode;
+    dbRecordNode	*pnewnode;
+    PVDENTRY    	*ppvd;
+    ELLLIST     	*preclist = NULL;
+    long		status;
+
+    if (!precordType) return S_dbLib_recordTypeNotFound;
+    if (!precnode) return S_dbLib_recNotFound;
+    zeroDbentry(pdbentry);
+    if (!dbFindRecord(pdbentry, alias)) return S_dbLib_recExists;
+    zeroDbentry(pdbentry);
+    pdbentry->precordType = precordType;
+    preclist = &precordType->recList;
+    pnewnode = dbCalloc(1, sizeof(dbRecordNode));
+    pnewnode->recordname = epicsStrDup(alias);
+    pnewnode->precord = precnode->precord;
+    pnewnode->flags = DBRN_FLAGS_ISALIAS;
+    if (!(precnode->flags & DBRN_FLAGS_ISALIAS))
+        precnode->flags |= DBRN_FLAGS_HASALIAS;
+    ellInit(&pnewnode->infoList);
+    /* install record node in list in sorted postion */
+    status = dbFirstRecord(pdbentry);
+    while (!status) {
+        if (strcmp(alias, dbGetRecordName(pdbentry)) < 0) break;
+        status = dbNextRecord(pdbentry);
+    }
+    if (!status) {
+        precnode = pdbentry->precnode;
+        ellInsert(preclist, ellPrevious(&precnode->node), &pnewnode->node);
+    } else {
+        ellAdd(preclist, &pnewnode->node);
+    }
+    precordType->no_aliases++;
+    pdbentry->precnode = pnewnode;
+    ppvd = dbPvdAdd(pdbentry->pdbbase, precordType, pnewnode);
+    if (!ppvd) {errMessage(-1,"Logic Err: Could not add to PVD");return(-1);}
+    return 0;
+}
+
+int epicsShareAPI dbIsAlias(DBENTRY *pdbentry)
+{
+    dbRecordNode	*precnode = pdbentry->precnode;
+
+    if(!precnode) return 0;
+    return precnode->flags & DBRN_FLAGS_ISALIAS ? 1 : 0;
 }
 
 long epicsShareAPI dbCopyRecord(DBENTRY *pdbentry,const char *newRecordName,int overWriteOK)
@@ -1708,7 +1830,7 @@ long epicsShareAPI dbCopyRecord(DBENTRY *pdbentry,const char *newRecordName,int 
     if(!pdbFldDes || (strcmp(pdbFldDes->name,"NAME")!=0))
 	return(S_dbLib_nameLength);
     if((int)strlen(newRecordName)>=pdbFldDes->size) return(S_dbLib_nameLength);
-    if(!precnode) return(S_dbLib_recNotFound);
+    if (!precnode || dbIsAlias(pdbentry)) return S_dbLib_recNotFound;
     dbInitEntry(pdbentry->pdbbase,&dbentry);
     status = dbFindRecord(&dbentry,newRecordName);
     if(!status) {
@@ -1747,64 +1869,86 @@ long epicsShareAPI dbCopyRecord(DBENTRY *pdbentry,const char *newRecordName,int 
     return(dbFindRecord(pdbentry,newRecordName));
 }
 
-long epicsShareAPI dbFindField(DBENTRY *pdbentry,const char *pname)
+long epicsShareAPI dbFindFieldPart(DBENTRY *pdbentry,const char **ppname)
 {
-    dbRecordType	*precordType = pdbentry->precordType;
-    dbRecordNode	*precnode = pdbentry->precnode;
-    char		*precord;
-    dbFldDes  		*pflddes;
-    short           	top, bottom, test;
-    char  		**papsortFldName;
-    short          	*sortFldInd;
-    int			compare,ind;
-    char		fieldName[MAX_FIELD_NAME_LENGTH+1];
-    char		*pfieldName;
+    dbRecordType *precordType = pdbentry->precordType;
+    dbRecordNode *precnode = pdbentry->precnode;
+    const char   *pname = *ppname;
+    char         *precord;
+    short        top, bottom, test;
+    char         **papsortFldName;
+    short        *sortFldInd;
+    int          ch;
+    int          nameLen;
 
-    if(!precordType) return(S_dbLib_recordTypeNotFound);
-    if(!precnode) return(S_dbLib_recNotFound);
+    if (!precordType) return S_dbLib_recordTypeNotFound;
+    if (!precnode) return S_dbLib_recNotFound;
     precord = precnode->precord;
     papsortFldName = precordType->papsortFldName;
     sortFldInd = precordType->sortFldInd;
-    /*copy field name. Stop at null or blank or tab*/
-    pfieldName = &fieldName[0];
-    for(ind=0; ind<MAX_FIELD_NAME_LENGTH; ind++) {
-	if(*pname=='\0' || *pname==' ' || *pname=='\t') break;
-	*pfieldName++ = *pname++;
+
+    /* Measure field name length; name is a valid C identifier */
+    nameLen = 0;
+    if ((ch = *pname) &&
+        (ch == '_' || isalpha(ch))) {
+        while ((ch = pname[++nameLen]))
+            if (!(ch == '_' || isalnum(ch))) break;
     }
-    *pfieldName = '\0';
-    pfieldName = &fieldName[0];
-    /* check for default field name or VAL to be supplied */
-    if((*pfieldName==0) || (strcmp(pfieldName,"VAL")==0) ) {
-	if(!(pflddes=precordType->pvalFldDes)) 
-		return(S_dbLib_recordTypeNotFound);
-	pdbentry->pflddes = pflddes;
-	pdbentry->indfield = precordType->indvalFlddes;
-	return(dbGetFieldAddress(pdbentry));
+
+    /* Handle absent field name */
+    if (nameLen == 0) {
+        dbFldDes *pflddes = precordType->pvalFldDes;
+
+        if (!pflddes)
+            return S_dbLib_recordTypeNotFound;
+        pdbentry->pflddes = pflddes;
+        pdbentry->indfield = precordType->indvalFlddes;
+        *ppname = &pname[nameLen];
+        return dbGetFieldAddress(pdbentry);
     }
+
     /* binary search through ordered field names */
     top = precordType->no_fields - 1;
     bottom = 0;
     test = (top + bottom) / 2;
     while (1) {
-	/* check the field name */
-	compare = strcmp(papsortFldName[test],pfieldName);
-	if (compare == 0) {
-	    if(!(pflddes=precordType->papFldDes[sortFldInd[test]]))
-		return(S_dbLib_recordTypeNotFound);
-	    pdbentry->pflddes = pflddes;
-	    pdbentry->indfield = sortFldInd[test];
-	    return(dbGetFieldAddress(pdbentry));
-	} else if (compare > 0) {
-	    top = test - 1;
-	    if (top < bottom) break;
-	    test = (top + bottom) / 2;
-	} else {
-	    bottom = test + 1;
-	    if (top < bottom) break;
-	    test = (top + bottom) / 2;
-	}
+        int compare = strncmp(papsortFldName[test], pname, nameLen);
+        if (compare == 0)
+            compare = strlen(papsortFldName[test]) - nameLen;
+        if (compare == 0) {
+            dbFldDes *pflddes = precordType->papFldDes[sortFldInd[test]];
+
+            if (!pflddes)
+                return S_dbLib_recordTypeNotFound;
+            pdbentry->pflddes = pflddes;
+            pdbentry->indfield = sortFldInd[test];
+            *ppname = &pname[nameLen];
+            return dbGetFieldAddress(pdbentry);
+        } else if (compare > 0) {
+            top = test - 1;
+            if (top < bottom) break;
+            test = (top + bottom) / 2;
+        } else {
+            bottom = test + 1;
+            if (top < bottom) break;
+            test = (top + bottom) / 2;
+        }
     }
-    return(dbGetRecordAttribute(pdbentry,pfieldName));
+    return S_dbLib_fieldNotFound;
+}
+
+long epicsShareAPI dbFindField(DBENTRY *pdbentry,const char *pname)
+{
+    long status = dbFindFieldPart(pdbentry, &pname);
+    int ch;
+
+    if (status == S_dbLib_fieldNotFound)
+        return dbGetRecordAttribute(pdbentry, pname);
+    if (status) return status;
+
+    ch = *pname;
+    if (ch == 0 || isspace(ch)) return 0;
+    return S_dbLib_recNotFound;
 }
 
 int epicsShareAPI dbFoundField(DBENTRY *pdbentry)
@@ -1819,7 +1963,6 @@ char * epicsShareAPI dbGetString(DBENTRY *pdbentry)
     DBLINK 	*plink;
 
     message = getpMessage(pdbentry);
-    *message = 0;
     if(!pflddes) {strcpy(message,"fldDes not found"); return(message);}
     cvttype = pflddes->base;
     switch (pflddes->field_type) {
@@ -1877,7 +2020,7 @@ char * epicsShareAPI dbGetString(DBENTRY *pdbentry)
 		strcat(message," ");
 		strcat(message,ppstring[ppind]);
 		strcat(message," ");
-		strcat(message,msstring[pvlMask&pvlOptMS]);
+		strcat(message,msstring[pvlMask&pvlOptMsMode]);
 		break;
 	    }
 	    case VME_IO:
@@ -2023,8 +2166,9 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
 	}
 	if((short)strlen(pstring) >= pflddes->size) status = S_dbLib_strLen;
 	break;
-    case DBF_CHAR :
-    case DBF_SHORT :
+
+    case DBF_CHAR:
+    case DBF_SHORT:
     case DBF_LONG:
     case DBF_UCHAR:
     case DBF_USHORT:
@@ -2035,68 +2179,75 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
     case DBF_MENU:
         status = dbPutStringNum(pdbentry,pstring);
         break;
+
     case DBF_DEVICE:  {
 	    DBENTRY	dbEntry;
 	    char	*name;
 
-	    status = dbPutStringNum(pdbentry,pstring);
-	    if(status) return(status);
+	    status = dbPutStringNum(pdbentry, pstring);
+	    if (status) return status;
+
 	    name = dbGetRelatedField(pdbentry);
-	    if(!name) return(0);
-	    dbCopyEntryContents(pdbentry,&dbEntry);
-	    status = dbFindField(&dbEntry,name);
-	    if(!status) status = setLinkType(&dbEntry);
+	    if (!name) return 0;
+
+	    dbCopyEntryContents(pdbentry, &dbEntry);
+	    status = dbFindField(&dbEntry, name);
+	    if (!status)
+		status = setLinkType(&dbEntry);
 	    dbFinishEntry(&dbEntry);
-	    return(status);
+	    return status;
 	}
+
     case DBF_INLINK:
     case DBF_OUTLINK:
     case DBF_FWDLINK: {
 	    DBLINK	*plink;
 	    char	string[80];
-	    char	*pstr=&string[0];
+	    char	*pstr = string;
 	    int		ind;
 
-	    if(!pfield) return(S_dbLib_fieldNotFound);
+	    if (!pfield)
+	        return S_dbLib_fieldNotFound;
+
 	    plink = (DBLINK *)pfield;
 	    dbFreeLinkContents(plink);
-	    if(!stringHasMacro &&(strcmp(pflddes->name,"INP")==0 
-	    || strcmp(pflddes->name,"OUT")==0)){
-		status = setLinkType(pdbentry);
-		if(status) {
-		    errMessage(status,"in dbPutString from setLinkType");
-		    return(status);
-		}
-	    } 
-	    if(stringHasMacro) {
+	    if (stringHasMacro) {
 		plink->type = MACRO_LINK;
-		plink->value.macro_link.macroStr = 
-		    dbCalloc(strlen(pstring)+1,sizeof(char));
-		strcpy(plink->value.macro_link.macroStr,pstring);
+		plink->value.macro_link.macroStr = epicsStrDup(pstring);
 		goto done;
 	    }
-	    if(strlen(pstring)>=sizeof(string)) {
+
+	    if (strcmp(pflddes->name, "INP") == 0 ||
+		strcmp(pflddes->name, "OUT") == 0) {
+		status = setLinkType(pdbentry); /* This uses DTYP to look up and set plink->type, necessary for default DTYP */
+		if (status) {
+		    errMessage(status,"in dbPutString from setLinkType");
+		    return status;
+		}
+	    }
+	    if (strlen(pstring) >= sizeof(string)) {
 	        status = S_dbLib_badField;
 	        errMessage(status,
 			"dbPutString received a string that is too long");
-	        return(status);
+	        return status;
             }
-	    strcpy(pstr,pstring);
-	    /*strip off leading blanks and tabs*/
-	    while(*pstr && (*pstr==' ' || *pstr=='\t')) pstr++;
-	    /*strip off trailing blanks and tabs*/
-	    if(pstr) for(ind = strlen(pstr)-1; ind>=0; ind--) {
-		if(pstr[ind]!=' ' && pstr[ind]!='\t') break;
-		pstr[ind] = '\0';
-	    }
-	    if(!pstr || (int)strlen(pstr)<=0 ) {
-		if(plink->type==PV_LINK) dbCvtLinkToConstant(pdbentry);
-		if(plink->type!=CONSTANT) return(S_dbLib_badField);
+	    strcpy(pstr, pstring);
+	    /* Strip leading blanks and tabs */
+	    while (*pstr && (*pstr == ' ' || *pstr == '\t')) pstr++;
+	    /* Strip trailing blanks and tabs */
+	    if (pstr)
+	        for (ind = strlen(pstr) - 1; ind >= 0; ind--) {
+		    if (pstr[ind] != ' ' && pstr[ind] != '\t') break;
+		    pstr[ind] = '\0';
+		}
+	    if (!pstr || !*pstr) {
+		if (plink->type == PV_LINK) dbCvtLinkToConstant(pdbentry);
+		if (plink->type != CONSTANT) return S_dbLib_badField;
 		free((void *)plink->value.constantStr);
 		plink->value.constantStr = NULL;
 		goto done;
 	    }
-	    switch(plink->type) {
+	    switch (plink->type) {
 	    case CONSTANT: 
 	    case PV_LINK: {
 	    	    short	ppOpt = 0;
@@ -2110,56 +2261,64 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
 		    /* Check first to see if string is a constant*/
 		    /*It is a string if epicsStrtod or strtol eats entire string*/
 		    /*leading and trailing blanks have already been stripped*/
-		    tempdouble = epicsStrtod(pstr,&enddouble);
-		    templong = strtol(pstr,&endlong,0);
-		    if((*enddouble == 0) || (*endlong == 0)) {
-			if(plink->type==PV_LINK) dbCvtLinkToConstant(pdbentry);
-			if((!plink->value.constantStr) ||
-			((int)strlen(plink->value.constantStr)<(int)strlen(pstr)
-			)) {
+		    tempdouble = epicsStrtod(pstr, &enddouble);
+		    templong = strtol(pstr, &endlong, 0);
+
+		    if (*enddouble == 0 || *endlong == 0) {
+			if (plink->type == PV_LINK) dbCvtLinkToConstant(pdbentry);
+			if (!plink->value.constantStr ||
+			    strlen(plink->value.constantStr) < strlen(pstr)) {
 			    free(plink->value.constantStr);
 			    plink->value.constantStr =
-				dbCalloc(strlen(pstr)+1,sizeof(char));
+				dbCalloc(strlen(pstr) + 1, sizeof(char));
 			}
-			strcpy(plink->value.constantStr,pstr);
+			strcpy(plink->value.constantStr, pstr);
 			goto done;
 		    }
-		    if(plink->type==CONSTANT) dbCvtLinkToPvlink(pdbentry);
+
+		    if (plink->type==CONSTANT) dbCvtLinkToPvlink(pdbentry);
 	    	    end = strchr(pstr,' ');
-		    if(end) {
+		    if (end) {
 			switch (pflddes->field_type) {
 			case DBF_INLINK: {
-			    if(strstr(end,"NPP")) ppOpt = 0;
-			    else if(strstr(end,"CPP")) ppOpt = pvlOptCPP;
-			    else if(strstr(end,"PP")) ppOpt = pvlOptPP;
-			    else if(strstr(end,"CA")) ppOpt = pvlOptCA;
-			    else if(strstr(end,"CP")) ppOpt = pvlOptCP;
+			    if (strstr(end, "NPP")) ppOpt = 0;
+			    else if (strstr(end, "CPP")) ppOpt = pvlOptCPP;
+			    else if (strstr(end, "PP")) ppOpt = pvlOptPP;
+			    else if (strstr(end, "CA")) ppOpt = pvlOptCA;
+			    else if (strstr(end, "CP")) ppOpt = pvlOptCP;
 			    else ppOpt = 0;
-		            if(strstr(end,"NMS")) msOpt = 0;
-		            else if(strstr(end,"MS")) msOpt = pvlOptMS;
+		            if (strstr(end, "NMS")) msOpt = pvlOptNMS;
+		            else if (strstr(end, "MSI")) msOpt = pvlOptMSI;
+		            else if (strstr(end, "MSS")) msOpt = pvlOptMSS;
+/*must be the last one:*/   else if (strstr(end, "MS")) msOpt = pvlOptMS;
 			    else msOpt = 0;
 		            *end = 0;
 			}
 			break;
+
 			case DBF_OUTLINK: {
-			    if(strstr(end,"NPP")) ppOpt = 0;
-			    else if(strstr(end,"PP")) ppOpt = pvlOptPP;
-			    else if(strstr(end,"CA")) ppOpt = pvlOptCA;
+			    if (strstr(end, "NPP")) ppOpt = 0;
+			    else if(strstr(end, "PP")) ppOpt = pvlOptPP;
+			    else if(strstr(end, "CA")) ppOpt = pvlOptCA;
 			    else ppOpt = 0;
-		            if(strstr(end,"NMS")) msOpt = 0;
-		            else if(strstr(end,"MS")) msOpt = pvlOptMS;
+		            if (strstr(end, "NMS")) msOpt = pvlOptNMS;
+		            else if(strstr(end, "MSI")) msOpt = pvlOptMSI;
+		            else if(strstr(end, "MSS")) msOpt = pvlOptMSS;
+/*must be the last one:*/   else if(strstr(end, "MS")) msOpt = pvlOptMS;
 			    else msOpt = 0;
 		            *end = 0;
 			}
 			break;
+
 			case DBF_FWDLINK: {
-			    if(strstr(end,"NPP")) ppOpt = 0;
-			    else if(strstr(end,"CA")) ppOpt = pvlOptCA;
+			    if (strstr(end, "NPP")) ppOpt = 0;
+			    else if (strstr(end, "CA")) ppOpt = pvlOptCA;
 			    else ppOpt = 0;
 			    msOpt = 0;
 		            *end = 0;
 			}
 			break;
+
 			default:
 			epicsPrintf("dbPutString: Logic Error\n");
 			}
@@ -2171,38 +2330,39 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
 	    case VME_IO: {
 	    	    char	*end;
 
-		    if(!(end = strchr(pstr,'#'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'#'))) return S_dbLib_badField;
 		    pstr = end + 1;
-		    if(!(end = strchr(pstr,'C'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'C'))) return S_dbLib_badField;
 		    pstr = end + 1;
                     cvtDecimalOrHexToShort(pstr,&plink->value.vmeio.card);
-		    if(!(end = strchr(pstr,'S'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'S'))) return S_dbLib_badField;
 		    pstr = end + 1;
-                    cvtDecimalOrHexToShort(pstr,&plink->value.vmeio.signal);
-		    status = putParmString(&plink->value.vmeio.parm,pstr);
+                    cvtDecimalOrHexToShort(pstr, &plink->value.vmeio.signal);
+		    status = putParmString(&plink->value.vmeio.parm, pstr);
 		}
 		break;
+
 	    case CAMAC_IO: {
 	    	    char	*end;
 
-		    if(!(end = strchr(pstr,'#'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'#'))) return (S_dbLib_badField);
 		    pstr = end + 1;
-		    if(!(end = strchr(pstr,'B'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'B'))) return (S_dbLib_badField);
 		    pstr = end + 1;
                     cvtDecimalOrHexToShort(pstr,&plink->value.camacio.b);
-		    if(!(end = strchr(pstr,'C'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'C'))) return (S_dbLib_badField);
 		    pstr = end + 1;
                     cvtDecimalOrHexToShort(pstr,&plink->value.camacio.c);
-		    if(!(end = strchr(pstr,'N'))) return (S_dbLib_badField);
+		    if (!(end = strchr(pstr,'N'))) return (S_dbLib_badField);
 		    pstr = end + 1;
                     cvtDecimalOrHexToShort(pstr,&plink->value.camacio.n);
- 		    if(!(end = strchr(pstr,'A')))  {
+ 		    if (!(end = strchr(pstr,'A')))  {
  			plink->value.camacio.a = 0;
  		    } else {
  		        pstr = end + 1;
                         cvtDecimalOrHexToShort(pstr,&plink->value.camacio.a);
  		    }
- 		    if(!(end = strchr(pstr,'F'))) {
+ 		    if (!(end = strchr(pstr,'F'))) {
  			plink->value.camacio.f = 0;
  		    } else {
  		        pstr = end + 1;
@@ -2211,6 +2371,7 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
 		    status = putParmString(&plink->value.camacio.parm,pstr);
 		}
 		break;
+
 	    case RF_IO: {
 	    	    char	*end;
 
@@ -2347,22 +2508,22 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
 		}
 		break;
 	    case INST_IO: {
-		    status = putParmString(&plink->value.instio.string,pstr);
+		    status = putParmString(&plink->value.instio.string, pstr);
 		}
 		break;
 	    }
 	}
 	break;
     default:
-	return (S_dbLib_badField);
+	return S_dbLib_badField;
     }
 done:
-    if(!status && strcmp(pflddes->name,"VAL")==0) {
+    if (!status && strcmp(pflddes->name, "VAL") == 0) {
 	DBENTRY	dbentry;
 
-	dbCopyEntryContents(pdbentry,&dbentry);
-	if(!dbFindField(&dbentry,"UDF")) {
-	    dbPutString(&dbentry,"0");
+	dbCopyEntryContents(pdbentry, &dbentry);
+	if (!dbFindField(&dbentry, "UDF")) {
+	    dbPutString(&dbentry, "0");
 	}
 	dbFinishEntry(&dbentry);
     }
@@ -2377,12 +2538,11 @@ char * epicsShareAPI dbVerify(DBENTRY *pdbentry,const char *pstring)
 
     stringHasMacro = strstr(pstring,"$(") || strstr(pstring,"${");
     message = getpMessage(pdbentry);
-    *message = 0;
     if(!pflddes) {strcpy(message,"fldDes not found"); return(message);}
     if(strstr(pstring,"$(") || strstr(pstring,"${")) return(NULL);
     switch (pflddes->field_type) {
     case DBF_STRING: {
-	    unsigned int length;
+	    size_t length;
 
 	    length=strlen(pstring);
 	    if(length>=pflddes->size) {
@@ -2530,7 +2690,6 @@ char *epicsShareAPI dbGetRange(DBENTRY *pdbentry)
     char		*message;
 
     message = getpMessage(pdbentry);
-    *message = 0;
     if(!pflddes) {strcpy(message,"fldDes not found"); return(message);}
     switch (pflddes->field_type) {
     case DBF_STRING: {strcpy(message,"STRING"); return(message);}
@@ -2951,8 +3110,7 @@ char  ** epicsShareAPI dbGetFormValue(DBENTRY *pdbentry)
 	else if(pvlMask&pvlOptCPP) strcpy(*value,"CPP");
 	else strcpy(*value,"NPP");
 	value++;
-	if(pvlMask&pvlOptMS) strcpy(*value,"MS");
-	else strcpy(*value,"NMS");
+	strcpy(*value, msstring[pvlMask&pvlOptMsMode]);
 	value++;
 	}
 	break;
@@ -2968,8 +3126,7 @@ char  ** epicsShareAPI dbGetFormValue(DBENTRY *pdbentry)
 	else if(pvlMask&pvlOptCA) strcpy(*value,"CA");
 	else strcpy(*value,"NPP");
 	value++;
-	if(pvlMask&pvlOptMS) strcpy(*value,"MS");
-	else strcpy(*value,"NMS");
+	strcpy(*value, msstring[pvlMask&pvlOptMsMode]);
 	value++;
 	}
 	break;
@@ -3142,7 +3299,10 @@ long epicsShareAPI dbPutForm(DBENTRY *pdbentry,char **value)
 	    value++; verify++;
 	    **verify = 0;  /*Initialize verify to NULL*/
 	    if((*value==NULL) || (strcmp(*value,"")==0)) msOpt = 0;
-	    else if(strstr(*value,"NMS")) msOpt = 0;
+	    else if(strstr(*value,"NMS")) msOpt = pvlOptNMS;
+	    else if(strstr(*value,"MSI")) msOpt = pvlOptMSI;
+	    else if(strstr(*value,"MSS")) msOpt = pvlOptMSS;
+            /*must be the last one:*/
 	    else if(strstr(*value,"MS")) msOpt = pvlOptMS;
 	    else strcpy(*verify,"Illegal. Chose a value");
 	    dbCopyEntryContents(pdbentry,plinkentry);
@@ -3176,7 +3336,10 @@ long epicsShareAPI dbPutForm(DBENTRY *pdbentry,char **value)
 	    value++; verify++;
 	    **verify = 0;  /*Initialize verify to NULL*/
 	    if((*value==NULL) || (strcmp(*value,"")==0)) msOpt = 0;
-	    else if(strstr(*value,"NMS")) msOpt = 0;
+	    else if(strstr(*value,"NMS")) msOpt = pvlOptNMS;
+	    else if(strstr(*value,"MSI")) msOpt = pvlOptMSI;
+	    else if(strstr(*value,"MSS")) msOpt = pvlOptMSS;
+            /*must be the last one:*/
 	    else if(strstr(*value,"MS")) msOpt = pvlOptMS;
 	    else strcpy(*verify,"Illegal. Chose a value");
 	    dbCopyEntryContents(pdbentry,plinkentry);
@@ -3799,14 +3962,14 @@ void  epicsShareAPI dbDumpDevice(DBBASE *pdbbase,const char *recordTypeName)
 	    gotMatch=TRUE;
 	}
 	if(!gotMatch) continue;
-	printf("recordtype(%s) \n",pdbRecordType->name);
+	printf("recordtype(%s)\n",pdbRecordType->name);
 	for(pdevSup = (devSup *)ellFirst(&pdbRecordType->devList);
 	pdevSup; pdevSup = (devSup *)ellNext(&pdevSup->node)) {
-	    printf("\t     name: %s\n",pdevSup->name);
-	    printf("\t   choice: %s\n",pdevSup->choice);
+	    printf("    device name:   %s\n",pdevSup->name);
+	    printf("\tchoice:    %s\n",pdevSup->choice);
 	    printf("\tlink_type: %d\n",pdevSup->link_type);
-	    printf("\t    pdset: %p\n",(void *)pdevSup->pdset);
-	    printf("\t    pdsxt: %p\n",(void *)pdevSup->pdsxt);
+	    printf("\tpdset:     %p\n",(void *)pdevSup->pdset);
+	    printf("\tpdsxt:     %p\n",(void *)pdevSup->pdsxt);
 	}
 	if(recordTypeName) break;
     }
