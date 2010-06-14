@@ -3,6 +3,11 @@
 
 export DH_VERBOSE=1
 
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+BMAKEFLAGS += -j$(NUMJOBS)
+endif
+
 EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
 # chop out the source version from Changelog (ie 3.14.11)
@@ -40,7 +45,7 @@ build: build-stamp
 build-stamp:
 	dh build --before configure
 
-	$(DEB_MAKE_INVOKE) all
+	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all
 
 	dh build --after auto_build
 
@@ -83,7 +88,7 @@ install: build
 	# Why is install trying to re-run build???
 	dh install --before auto_install --with rtems
 
-	$(DEB_MAKE_INVOKE) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
+	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
 
 	# Copy host sonamed libraries to /usr/lib
 	# Leave a symlink in /usr/epics/base/lib/$(EPICS_HOST_ARCH)
