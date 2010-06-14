@@ -11,7 +11,7 @@
  * Author: Jim Kowalkowski
  * Date: 2/96
  *
- * aitGen.c,v 1.16.2.2 2008/10/09 20:14:44 anj Exp
+ * aitGen.c,v 1.16.2.3 2009/04/03 17:46:23 lange Exp
  *
  */
 
@@ -76,7 +76,7 @@ static FILE *dfd;
 /*
  * maximum, minimum value for each ait type - joh
  */
-void initMinMaxAIT ()
+void initMinMaxAIT (void)
 {
     unsigned i;
 

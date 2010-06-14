@@ -48,12 +48,12 @@ public:
     caStatus sendErr ( const caHdrLargeArray * curp, 
         ca_uint32_t cid, const int reportedStatus, 
         const char *pformat, ... );
-protected:
     caStatus processDG ();
+protected:
     bool inBufFull () const;
     void inBufFill ( inBufClient::fillParameter );
-    bufSizeT inBufBytesAvailable () const;
-    bufSizeT outBufBytesPresent () const;
+    bufSizeT inBufBytesPending () const;
+    bufSizeT outBufBytesPending () const;
     outBufClient::flushCondition flush ();
 private:
     inBuf in;
@@ -80,8 +80,8 @@ private:
 		const caHdrLargeArray &, const pvExistReturn &,
         ca_uint16_t protocolRevision, ca_uint32_t sequenceNumber );
     void sendVersion ();
-	outBufClient::flushCondition xSend ( char *pBufIn, bufSizeT nBytesAvailableToSend, 
-		bufSizeT nBytesNeedToBeSent, bufSizeT &nBytesSent );
+	outBufClient::flushCondition xSend ( char *pBufIn, bufSizeT nBytesToSend, 
+		                                    bufSizeT &nBytesSent );
 	inBufClient::fillCondition xRecv ( char * pBufIn, bufSizeT nBytesToRecv, 
         fillParameter parm, bufSizeT & nByesRecv );
 	virtual outBufClient::flushCondition osdSend ( 

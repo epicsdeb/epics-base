@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbBkpt.c */
-/* base/src/db dbBkpt.c,v 1.29.2.1 2006/12/19 16:20:47 anj Exp */
+/* base/src/db dbBkpt.c,v 1.29.2.4 2009/08/28 18:34:38 anj Exp */
 /*
  *      Author:          Matthew Needes
  *      Date:            8-30-93
@@ -153,7 +153,7 @@ long lset_stack_count = 0;
  *    The semaphore is used to prevent conflicts while
  *    operating with this stack.
  */
-static ELLLIST lset_stack;
+static ELLLIST lset_stack = ELLLIST_INIT;
 static epicsMutexId bkpt_stack_sem = 0;
 
 /*
@@ -257,7 +257,6 @@ void epicsShareAPI dbBkptInit(void)
 {
     if (! bkpt_stack_sem) {
         bkpt_stack_sem = epicsMutexMustCreate();
-        ellInit(&lset_stack);
         lset_stack_count = 0;
     }
 }
@@ -613,21 +612,8 @@ static void dbBkptCont(dbCommon *precord)
   ellDelete(&lset_stack, (ELLNODE *)pnode);
   --lset_stack_count;
 
-  {
-    /*
-     * free entrypoint queue
-     *
-     * avoid use of ellFree because problems on windows occur if the
-     * free is in a different DLL than the malloc
-     */
-    ELLNODE * nnode = pnode->ep_queue.node.next;
-    while ( nnode )
-    {
-        ELLNODE * pnode = nnode;
-        nnode = nnode->next;
-        free ( pnode );
-    }
-  }
+ /* free entrypoint queue */
+  ellFree(&pnode->ep_queue);
 
  /* remove execution semaphore */
   epicsEventDestroy(pnode->ex_sem);

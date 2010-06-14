@@ -14,7 +14,7 @@
  * Author: Jim Kowalkowski
  * Date: 2/96
  *
- * gddNewDel.h,v 1.6.2.1 2004/01/28 00:04:03 anj Exp
+ * gddNewDel.h,v 1.6.2.4 2009/07/01 22:28:41 jhill Exp
  *
  */
 
@@ -60,9 +60,11 @@ void gddGlobalCleanupAdd ( void * pBuf );
 #define gdd_NEWDEL_FUNC(fld) \
     void* operator new(size_t); \
     void operator delete(void*); \
-    char* newdel_next(void) { char** x=(char**)&(fld); return *x; } \
-    void newdel_setNext(char* n) { char** x=(char**)&(fld); *x=n; } \
-    static void gddNewDelInit (void) { pNewdel_lock = new epicsMutex; } \
+    char* newdel_next(void) { char* pfld = (char *)&fld; \
+        char** x = (char**)pfld; return *x; } \
+    void newdel_setNext(char* n) { char* pfld = (char *)&fld; \
+        char** x=(char**)pfld; *x=n; } \
+    static void gddNewDelInit (void) { pNewdel_lock = new epicsMutex; } 
 
 
 // declaration of the static variable for the free list
@@ -93,18 +95,17 @@ void gddGlobalCleanupAdd ( void * pBuf );
     int tot; \
     clas *nn,*dn; \
     epicsThreadOnce ( &once, clas##_gddNewDelInit, 0 ); \
+    epicsGuard < epicsMutex > guard ( *clas::pNewdel_lock ); \
     if(!clas::newdel_freelist) { \
         tot=gdd_CHUNK_NUM; \
         nn=(clas*)malloc(gdd_CHUNK(clas)); \
         gddGlobalCleanupAdd (nn); \
         for(dn=nn;--tot;dn++) dn->newdel_setNext((char*)(dn+1)); \
-        epicsGuard < epicsMutex > guard ( *clas::pNewdel_lock ); \
         (dn)->newdel_setNext(clas::newdel_freelist); \
         clas::newdel_freelist=(char*)nn; \
     } \
     if(size==sizeof(clas)) { \
         { \
-            epicsGuard < epicsMutex > guard ( *clas::pNewdel_lock ); \
             dn=(clas*)clas::newdel_freelist; \
             clas::newdel_freelist=((clas*)clas::newdel_freelist)->newdel_next(); \
         } \

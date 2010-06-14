@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      osdMessageQueue.c,v 1.2.2.6 2007/12/17 20:50:24 norume Exp
+ *      osdMessageQueue.c,v 1.2.2.7 2009/04/24 17:01:39 anj Exp
  *
  *      Author  W. Eric Norum
  *              norume@aps.anl.gov
@@ -159,7 +159,7 @@ static int receiveMessage(
     uint32_t wait,
     rtems_interval delay)
 {
-    uint32_t rsize;
+    size_t rsize;
     rtems_status_code sc;
     
     if (size < id->maxSize) {

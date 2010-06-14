@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casCoreClient.h,v 1.6.2.3 2003/09/29 22:58:42 jhill Exp
+ *      casCoreClient.h,v 1.6.2.6 2009/08/13 23:37:30 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -99,7 +99,7 @@ public:
     bool okToStartAsynchIO ();
 	void setDestroyPending ();
 
-    casEventSys::processStatus eventSysProcess();
+    casProcCond eventSysProcess();
 
 	caStatus addToEventQueue ( casAsyncIOI &, 
         bool & onTheQueue, bool & posted );
@@ -172,7 +172,7 @@ inline void casCoreClient::postEvent (
     }
 }
 
-inline casEventSys::processStatus casCoreClient::eventSysProcess ()
+inline casProcCond casCoreClient :: eventSysProcess ()
 {
     epicsGuard < casClientMutex > guard ( this->mutex );
 	return this->eventSys.process ( guard );

@@ -1,6 +1,6 @@
 # CONFIG.solarisCommon.solarisCommon
 #
-# CONFIG.solarisCommon.solarisCommon,v 1.1.2.7 2008/07/22 19:33:44 jba Exp
+# CONFIG.solarisCommon.solarisCommon,v 1.1.2.9 2009/05/07 16:16:13 jba Exp
 # This file is maintained by the build community.
 #
 # Definitions for solaris-sparc host - solaris-sparc target build
@@ -8,6 +8,7 @@
 #-------------------------------------------------------
 
 SPARCWORKS = /opt/SUNWspro
+GNU = NO
 
 CC = $(SPARCWORKS)/bin/cc
 CCC = $(SPARCWORKS)/bin/CC
@@ -23,9 +24,6 @@ PROFILE=NO
 GPROF=NO
 
 # Configure OS vendor C compiler
-CONFORM_CFLAGS_ANSI = -Xa -v
-CONFORM_CFLAGS_STRICT = -Xa -v
-CONFORM_CFLAGS_TRAD = -Xs
 PROF_CFLAGS_YES = -p
 GPROF_CFLAGS_YES = -xpg
 CODE_CFLAGS = $(PROF_CFLAGS_$(PROFILE)) $(GPROF_CFLAGS_$(GPROF))
@@ -35,8 +33,6 @@ OPT_CFLAGS_YES = -xO4
 OPT_CFLAGS_NO = -g
 
 # Configure OS vendor C++ compiler
-CONFORM_CXXFLAGS_NORMAL =
-CONFORM_CXXFLAGS_STRICT =
 PROF_CXXFLAGS_YES = -p
 GPROF_CXXFLAGS_YES = -xpg
 CODE_CXXFLAGS = $(PROF_CXXFLAGS_$(PROFILE)) $(GPROF_CXXFLAGS_$(GPROF))
@@ -62,4 +58,7 @@ OP_SYS_LDFLAGS += -z ignore -z combreloc -z lazyload
 #COMPILE_FILTER.c = 2>&1 | $(EPICS_BASE)/configure/tools/filterWarnings.pl
 #COMPILE_FILTER.cpp = $(COMPILE_FILTER.c)
 
+#--------------------------------------------------
+# Allow site overrides
 -include $(CONFIG)/os/CONFIG_SITE.solarisCommon.solarisCommon
+-include $(CONFIG)/os/CONFIG_SITE.(EPICS_HOST_ARCH).solarisCommon

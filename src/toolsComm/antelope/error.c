@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* routines for printing error messages  */
@@ -12,30 +11,32 @@
 #include "defs.h"
 
 
-fatal(msg)
-char *msg;
+void
+fatal(char *msg)
 {
     fprintf(stderr, "%s: f - %s\n", myname, msg);
     done(2);
 }
 
 
-no_space()
+void
+no_space(void)
 {
     fprintf(stderr, "%s: f - out of space\n", myname);
     done(2);
 }
 
 
-open_error(filename)
-char *filename;
+void
+open_error(char *filename)
 {
     fprintf(stderr, "%s: f - cannot open \"%s\"\n", myname, filename);
     done(2);
 }
 
 
-unexpected_EOF()
+void
+unexpected_EOF(void)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", unexpected end-of-file\n",
 	    myname, lineno, input_file_name);
@@ -43,11 +44,10 @@ unexpected_EOF()
 }
 
 
-print_pos(st_line, st_cptr)
-char *st_line;
-char *st_cptr;
+static int
+print_pos(char *st_line, char *st_cptr)
 {
-    register char *s;
+    char *s;
 
     if (st_line == 0) return(0);
     for (s = st_line; *s != '\n'; ++s)
@@ -71,10 +71,8 @@ char *st_cptr;
 }
 
 
-syntax_error(st_lineno, st_line, st_cptr)
-int st_lineno;
-char *st_line;
-char *st_cptr;
+void
+syntax_error(int st_lineno, char *st_line, char *st_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", syntax error\n",
 	    myname, st_lineno, input_file_name);
@@ -83,10 +81,8 @@ char *st_cptr;
 }
 
 
-unterminated_comment(c_lineno, c_line, c_cptr)
-int c_lineno;
-char *c_line;
-char *c_cptr;
+void
+unterminated_comment(int c_lineno, char *c_line, char *c_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", unmatched /*\n",
 	    myname, c_lineno, input_file_name);
@@ -95,10 +91,8 @@ char *c_cptr;
 }
 
 
-unterminated_string(s_lineno, s_line, s_cptr)
-int s_lineno;
-char *s_line;
-char *s_cptr;
+void
+unterminated_string(int s_lineno, char *s_line, char *s_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", unterminated string\n",
 	    myname, s_lineno, input_file_name);
@@ -107,10 +101,8 @@ char *s_cptr;
 }
 
 
-unterminated_text(t_lineno, t_line, t_cptr)
-int t_lineno;
-char *t_line;
-char *t_cptr;
+void
+unterminated_text(int t_lineno, char *t_line, char *t_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", unmatched %%{\n",
 	    myname, t_lineno, input_file_name);
@@ -119,10 +111,8 @@ char *t_cptr;
 }
 
 
-unterminated_union(u_lineno, u_line, u_cptr)
-int u_lineno;
-char *u_line;
-char *u_cptr;
+void
+unterminated_union(int u_lineno, char *u_line, char *u_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", unterminated %%union \
 declaration\n", myname, u_lineno, input_file_name);
@@ -131,8 +121,8 @@ declaration\n", myname, u_lineno, input_file_name);
 }
 
 
-over_unionized(u_cptr)
-char *u_cptr;
+void
+over_unionized(char *u_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", too many %%union \
 declarations\n", myname, lineno, input_file_name);
@@ -141,10 +131,8 @@ declarations\n", myname, lineno, input_file_name);
 }
 
 
-illegal_tag(t_lineno, t_line, t_cptr)
-int t_lineno;
-char *t_line;
-char *t_cptr;
+void
+illegal_tag(int t_lineno, char *t_line, char *t_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", illegal tag\n",
 	    myname, t_lineno, input_file_name);
@@ -153,8 +141,8 @@ char *t_cptr;
 }
 
 
-illegal_character(c_cptr)
-char *c_cptr;
+void
+illegal_character(char *c_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", illegal character\n",
 	    myname, lineno, input_file_name);
@@ -163,8 +151,8 @@ char *c_cptr;
 }
 
 
-used_reserved(s)
-char *s;
+void
+used_reserved(char *s)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", illegal use of reserved symbol \
 %s\n", myname, lineno, input_file_name, s);
@@ -172,8 +160,8 @@ char *s;
 }
 
 
-tokenized_start(s)
-char *s;
+void
+tokenized_start(char *s)
 {
      fprintf(stderr, "%s: e - line %d of \"%s\", the start symbol %s cannot be \
 declared to be a token\n", myname, lineno, input_file_name, s);
@@ -181,32 +169,32 @@ declared to be a token\n", myname, lineno, input_file_name, s);
 }
 
 
-retyped_warning(s)
-char *s;
+void
+retyped_warning(char *s)
 {
     fprintf(stderr, "%s: w - line %d of \"%s\", the type of %s has been \
 redeclared\n", myname, lineno, input_file_name, s);
 }
 
 
-reprec_warning(s)
-char *s;
+void
+reprec_warning(char *s)
 {
     fprintf(stderr, "%s: w - line %d of \"%s\", the precedence of %s has been \
 redeclared\n", myname, lineno, input_file_name, s);
 }
 
 
-revalued_warning(s)
-char *s;
+void
+revalued_warning(char *s)
 {
     fprintf(stderr, "%s: w - line %d of \"%s\", the value of %s has been \
 redeclared\n", myname, lineno, input_file_name, s);
 }
 
 
-terminal_start(s)
-char *s;
+void
+terminal_start(char *s)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", the start symbol %s is a \
 token\n", myname, lineno, input_file_name, s);
@@ -214,14 +202,16 @@ token\n", myname, lineno, input_file_name, s);
 }
 
 
-restarted_warning()
+void
+restarted_warning(void)
 {
     fprintf(stderr, "%s: w - line %d of \"%s\", the start symbol has been \
 redeclared\n", myname, lineno, input_file_name);
 }
 
 
-no_grammar()
+void
+no_grammar(void)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", no grammar has been \
 specified\n", myname, lineno, input_file_name);
@@ -229,8 +219,8 @@ specified\n", myname, lineno, input_file_name);
 }
 
 
-terminal_lhs(s_lineno)
-int s_lineno;
+void
+terminal_lhs(int s_lineno)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", a token appears on the lhs \
 of a production\n", myname, s_lineno, input_file_name);
@@ -238,17 +228,16 @@ of a production\n", myname, s_lineno, input_file_name);
 }
 
 
-prec_redeclared()
+void
+prec_redeclared(void)
 {
     fprintf(stderr, "%s: w - line %d of  \"%s\", conflicting %%prec \
 specifiers\n", myname, lineno, input_file_name);
 }
 
 
-unterminated_action(a_lineno, a_line, a_cptr)
-int a_lineno;
-char *a_line;
-char *a_cptr;
+void
+unterminated_action(int a_lineno, char *a_line, char *a_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", unterminated action\n",
 	    myname, a_lineno, input_file_name);
@@ -257,19 +246,16 @@ char *a_cptr;
 }
 
 
-dollar_warning(a_lineno, i)
-int a_lineno;
-int i;
+void
+dollar_warning(int a_lineno, int i)
 {
     fprintf(stderr, "%s: w - line %d of \"%s\", $%d references beyond the \
 end of the current rule\n", myname, a_lineno, input_file_name, i);
 }
 
 
-dollar_error(a_lineno, a_line, a_cptr)
-int a_lineno;
-char *a_line;
-char *a_cptr;
+void
+dollar_error(int a_lineno, char *a_line, char *a_cptr)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", illegal $-name\n",
 	    myname, a_lineno, input_file_name);
@@ -278,7 +264,8 @@ char *a_cptr;
 }
 
 
-untyped_lhs()
+void
+untyped_lhs(void)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", $$ is untyped\n",
 	    myname, lineno, input_file_name);
@@ -286,9 +273,8 @@ untyped_lhs()
 }
 
 
-untyped_rhs(i, s)
-int i;
-char *s;
+void
+untyped_rhs(int i, char *s)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", $%d (%s) is untyped\n",
 	    myname, lineno, input_file_name, i, s);
@@ -296,8 +282,8 @@ char *s;
 }
 
 
-unknown_rhs(i)
-int i;
+void
+unknown_rhs(int i)
 {
     fprintf(stderr, "%s: e - line %d of \"%s\", $%d is untyped\n",
 	    myname, lineno, input_file_name, i);
@@ -305,23 +291,24 @@ int i;
 }
 
 
-default_action_warning()
+void
+default_action_warning(void)
 {
     fprintf(stderr, "%s: w - line %d of \"%s\", the default action assigns an \
 undefined value to $$\n", myname, lineno, input_file_name);
 }
 
 
-undefined_goal(s)
-char *s;
+void
+undefined_goal(char *s)
 {
     fprintf(stderr, "%s: e - the start symbol %s is undefined\n", myname, s);
     done(1);
 }
 
 
-undefined_symbol_warning(s)
-char *s;
+void
+undefined_symbol_warning(char *s)
 {
     fprintf(stderr, "%s: w - the symbol %s is undefined\n", myname, s);
 }

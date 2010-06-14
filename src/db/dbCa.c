@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* dbCa.c,v 1.67.2.9 2008/10/24 23:04:11 anj Exp
+/* dbCa.c,v 1.67.2.14 2009/07/09 18:37:26 anj Exp
  *
  *    Original Authors: Bob Dalesio and Marty Kraimer
  *    Date:             26MAR96
@@ -36,9 +36,10 @@
 #include "cadef.h"
 #include "epicsAssert.h"
 #include "epicsExit.h"
+#include "cantProceed.h"
 
 /* We can't include dbStaticLib.h here */
-epicsShareFunc void * epicsShareAPI dbCalloc(size_t nobj,size_t size);
+#define dbCalloc(nobj,size) callocMustSucceed(nobj,size,"dbCalloc")
 
 #define epicsExportSharedSymbols
 #include "db_access_routines.h"
@@ -52,7 +53,7 @@ epicsShareFunc void * epicsShareAPI dbCalloc(size_t nobj,size_t size);
 extern void dbServiceIOInit();
 
 
-static ELLLIST workList;    /* Work list for dbCaTask */
+static ELLLIST workList = ELLLIST_INIT;    /* Work list for dbCaTask */
 static epicsMutexId workListLock; /*Mutual exclusions semaphores for workList*/
 static epicsEventId workListEvent; /*wakeup event for dbCaTask*/
 static int removesOutstanding = 0;
@@ -162,8 +163,9 @@ static void addAction(caLink *pca, short link_action)
         epicsEventSignal(workListEvent);
 }
 
-void epicsShareAPI dbCaCallbackProcess(struct link *plink)
+void dbCaCallbackProcess(void *usrPvt)
 {
+    struct link *plink = (struct link *)usrPvt;
     dbCommon *pdbCommon = plink->value.pv_link.precord;
 
     dbScanLock(pdbCommon);
@@ -180,10 +182,9 @@ static void dbCaShutdown(void *arg)
     }
 }
 
-void epicsShareAPI dbCaLinkInit(void)
+void dbCaLinkInit(void)
 {
     dbServiceIOInit();
-    ellInit(&workList);
     workListLock = epicsMutexMustCreate();
     workListEvent = epicsEventMustCreate(epicsEventEmpty);
     startStopEvent = epicsEventMustCreate(epicsEventEmpty);
@@ -196,19 +197,19 @@ void epicsShareAPI dbCaLinkInit(void)
     epicsAtExit(dbCaShutdown, NULL);
 }
 
-void epicsShareAPI dbCaRun(void)
+void dbCaRun(void)
 {
     dbCaCtl = ctlRun;
     epicsEventSignal(workListEvent);
 }
 
-void epicsShareAPI dbCaPause(void)
+void dbCaPause(void)
 {
     dbCaCtl = ctlPause;
     epicsEventSignal(workListEvent);
 }
 
-void epicsShareAPI dbCaAddLinkCallback(struct link *plink,
+void dbCaAddLinkCallback(struct link *plink,
     dbCaCallback connect, dbCaCallback monitor, void *userPvt)
 {
     caLink *pca;
@@ -230,7 +231,7 @@ void epicsShareAPI dbCaAddLinkCallback(struct link *plink,
     epicsMutexUnlock(pca->lock);
 }
 
-void epicsShareAPI dbCaRemoveLink(struct link *plink)
+void dbCaRemoveLink(struct link *plink)
 {
     caLink *pca = (caLink *)plink->value.pv_link.pvt;
 
@@ -245,8 +246,8 @@ void epicsShareAPI dbCaRemoveLink(struct link *plink)
     addAction(pca, CA_CLEAR_CHANNEL);
 }
 
-long epicsShareAPI dbCaGetLink(struct link *plink,short dbrType, void *pdest,
-    unsigned short *psevr,long *nelements)
+long dbCaGetLink(struct link *plink,short dbrType, void *pdest,
+    epicsEnum16 *pstat, epicsEnum16 *psevr, long *nelements)
 {
     caLink *pca = (caLink *)plink->value.pv_link.pvt;
     long   status = 0;
@@ -258,6 +259,7 @@ long epicsShareAPI dbCaGetLink(struct link *plink,short dbrType, void *pdest,
     assert(pca->plink);
     if (!pca->isConnected || !pca->hasReadAccess) {
         pca->sevr = INVALID_ALARM;
+        pca->stat = LINK_ALARM;
         status = -1;
         goto done;
     }
@@ -271,6 +273,7 @@ long epicsShareAPI dbCaGetLink(struct link *plink,short dbrType, void *pdest,
         }
         if (!pca->gotInString) {
             pca->sevr = INVALID_ALARM;
+            pca->stat = LINK_ALARM;
             status = -1;
             goto done;
         }
@@ -285,6 +288,7 @@ long epicsShareAPI dbCaGetLink(struct link *plink,short dbrType, void *pdest,
     }
     if (!pca->gotInNative){
         pca->sevr = INVALID_ALARM;
+        pca->stat = LINK_ALARM;
         status = -1;
         goto done;
     }
@@ -315,13 +319,14 @@ long epicsShareAPI dbCaGetLink(struct link *plink,short dbrType, void *pdest,
         aConvert(&dbAddr, pdest, ntoget, ntoget, 0);
     }
 done:
+    if (pstat) *pstat = pca->stat;
     if (psevr) *psevr = pca->sevr;
     if (link_action) addAction(pca, link_action);
     epicsMutexUnlock(pca->lock);
     return status;
 }
 
-long epicsShareAPI dbCaPutLinkCallback(struct link *plink,short dbrType,
+long dbCaPutLinkCallback(struct link *plink,short dbrType,
     const void *pbuffer,long nRequest,dbCaCallback callback,void *userPvt)
 {
     caLink *pca = (caLink *)plink->value.pv_link.pvt;
@@ -391,7 +396,7 @@ long epicsShareAPI dbCaPutLinkCallback(struct link *plink,short dbrType,
     return status;
 }
 
-int epicsShareAPI dbCaIsLinkConnected(const struct link *plink)
+int dbCaIsLinkConnected(const struct link *plink)
 {
     caLink *pca;
 
@@ -413,7 +418,7 @@ int epicsShareAPI dbCaIsLinkConnected(const struct link *plink)
         return -1; \
     }
 
-long epicsShareAPI dbCaGetNelements(const struct link *plink, long *nelements)
+long dbCaGetNelements(const struct link *plink, long *nelements)
 {
     caLink *pca;
 
@@ -423,17 +428,19 @@ long epicsShareAPI dbCaGetNelements(const struct link *plink, long *nelements)
     return 0;
 }
 
-long epicsShareAPI dbCaGetSevr(const struct link *plink, short *severity)
+long dbCaGetAlarm(const struct link *plink,
+    epicsEnum16 *pstat, epicsEnum16 *psevr)
 {
     caLink *pca;
 
     pcaGetCheck
-    *severity = pca->sevr;
+    if (pstat) *pstat = pca->stat;
+    if (psevr) *psevr = pca->sevr;
     epicsMutexUnlock(pca->lock);
     return 0;
 }
 
-long epicsShareAPI dbCaGetTimeStamp(const struct link *plink,
+long dbCaGetTimeStamp(const struct link *plink,
     epicsTimeStamp *pstamp)
 {
     caLink *pca;
@@ -444,7 +451,7 @@ long epicsShareAPI dbCaGetTimeStamp(const struct link *plink,
     return 0;
 }
 
-int epicsShareAPI dbCaGetLinkDBFtype(const struct link *plink)
+int dbCaGetLinkDBFtype(const struct link *plink)
 {
     caLink *pca;
     int  type;
@@ -455,7 +462,7 @@ int epicsShareAPI dbCaGetLinkDBFtype(const struct link *plink)
     return type;
 }
 
-long epicsShareAPI dbCaGetAttributes(const struct link *plink,
+long dbCaGetAttributes(const struct link *plink,
     dbCaCallback callback,void *userPvt)
 {
     caLink *pca;
@@ -475,7 +482,7 @@ long epicsShareAPI dbCaGetAttributes(const struct link *plink,
     return 0;
 }
 
-long epicsShareAPI dbCaGetControlLimits(const struct link *plink,
+long dbCaGetControlLimits(const struct link *plink,
     double *low, double *high)
 {
     caLink *pca;
@@ -491,7 +498,7 @@ long epicsShareAPI dbCaGetControlLimits(const struct link *plink,
     return gotAttributes ? 0 : -1;
 }
 
-long epicsShareAPI dbCaGetGraphicLimits(const struct link *plink,
+long dbCaGetGraphicLimits(const struct link *plink,
     double *low, double *high)
 {
     caLink *pca;
@@ -507,7 +514,7 @@ long epicsShareAPI dbCaGetGraphicLimits(const struct link *plink,
     return gotAttributes ? 0 : -1;
 }
 
-long epicsShareAPI dbCaGetAlarmLimits(const struct link *plink,
+long dbCaGetAlarmLimits(const struct link *plink,
     double *lolo, double *low, double *high, double *hihi)
 {
     caLink *pca;
@@ -525,7 +532,7 @@ long epicsShareAPI dbCaGetAlarmLimits(const struct link *plink,
     return gotAttributes ? 0 : -1;
 }
 
-long epicsShareAPI dbCaGetPrecision(const struct link *plink, short *precision)
+long dbCaGetPrecision(const struct link *plink, short *precision)
 {
     caLink *pca;
     int gotAttributes;
@@ -537,7 +544,7 @@ long epicsShareAPI dbCaGetPrecision(const struct link *plink, short *precision)
     return gotAttributes ? 0 : -1;
 }
 
-long epicsShareAPI dbCaGetUnits(const struct link *plink,
+long dbCaGetUnits(const struct link *plink,
     char *units, int unitsSize)
 {
     caLink *pca;
@@ -677,6 +684,7 @@ static void eventCallback(struct event_handler_args arg)
     }
     pdbr_time_double = (struct dbr_time_double *)arg.dbr;
     pca->sevr = pdbr_time_double->severity;
+    pca->stat = pdbr_time_double->status;
     memcpy(&pca->timeStamp, &pdbr_time_double->stamp, sizeof(epicsTimeStamp));
     if (precord) {
         struct pv_link *ppv_link = &plink->value.pv_link;

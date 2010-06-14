@@ -33,8 +33,9 @@ DBFLAGS = $($*_DBFLAGS) $(USR_DBFLAGS) -I. -I.. $(INSTALL_DBFLAGS) $(RELEASE_DBF
 # Following line added for backward compatibilty
 DBD += $(DBDNAME)
 
-DBD += $(addsuffix .dbd,$(patsubst %.h,%,$(patsubst %.db,%,$(DBDINC))))
-INC += $(addsuffix .h,$(patsubst %.h,%,$(patsubst %.db,%,$(DBDINC))))
+DBDINC_NAME = $(patsubst %.h,%,$(patsubst %.db,%,$(DBDINC)))
+DBD += $(addsuffix .dbd,$(DBDINC_NAME))
+INC += $(addsuffix .h,$(DBDINC_NAME))
 
 INSTALL_DBDS += $(addprefix $(INSTALL_DBD)/,$(notdir $(DBD)))
 
@@ -90,8 +91,8 @@ ACF_CMD = $(CPP) $(ACF_CPPFLAGS) $(ACF_INCLUDES) $< > $@
 
 #####################################################  dependancies
 
-HINC += $(addsuffix .h,$(patsubst %.h,%,$(patsubst %.db,%,$(DBDINC))))
-COMMON_DBDINC += $(addprefix $(COMMON_DIR),$(HINC))
+HINC += $(addsuffix .h,$(DBDINC_NAME))
+COMMON_DBDINC += $(addprefix $(COMMON_DIR)/,$(HINC))
 
 DBDDEPENDS_FILES += $(addsuffix $(DEP),$(COMMON_DBDS) \
                     $(COMMON_DBDINC) $(COMMON_DBS))
@@ -105,6 +106,7 @@ MAKEDBDEPENDS = $(PERL) $(TOOLS)/makeDbDepends.pl
 
 ifndef T_A
 
+ECHO := $(if $(findstring s,$(MAKEFLAGS)),\#,@echo)
 COMMON_DIR = .
 INSTALL_DBDS =
 INSTALL_DBS =
@@ -161,13 +163,13 @@ $(COMMON_DIR)/%.edf: ../%.sch $(DEPSCHS)
 
 ifdef CREATESUBSTITUTIONS
 $(COMMON_DIR)/%.substitutions:
-	@echo "Create substitutions"
+	$(ECHO) "Create substitutions"
 	@$(RM) $@
-	$(CREATESUBSTITUTIONS) $(COMMON_DIR)/$*
+	$(CREATESUBSTITUTIONS) $@
 endif
 
 $(INSTALL_DB)/%.substitutions: %.substitutions
-	@echo "Installing db file $@"
+	$(ECHO) "Installing db file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 .PRECIOUS: $(COMMON_DIR)/%.substitutions
@@ -181,7 +183,7 @@ $(COMMON_DIR)/%.template: $(COMMON_DIR)/%.edf
 	@$(RM) $@.VAR
 
 $(INSTALL_DB)/%.template: %.template
-	@echo "Installing db file $@"
+	$(ECHO) "Installing db file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 .PRECIOUS: $(COMMON_DIR)/%.template
@@ -189,20 +191,32 @@ $(INSTALL_DB)/%.template: %.template
 ##################################################### INC files
 
 $(COMMON_DIR)/%Record.h: $(COMMON_DIR)/%Record.dbd
+	@$(RM) $@$(DEP)
+	@$(DBDDEPENDS_CMD)
+	@echo "$<:../Makefile" >> $@$(DEP)
 	@$(RM) $@
 	$(DBTORECORDTYPEH) $(DBDFLAGS)  $< $@
 
 $(COMMON_DIR)/%Record.h: %Record.dbd
+	@$(RM) $@$(DEP)
+	@$(DBDDEPENDS_CMD)
+	@echo "$<:../Makefile" >> $@$(DEP)
 	@$(RM) $@
 	$(DBTORECORDTYPEH) $(DBDFLAGS)  $< $@
 
 $(COMMON_DIR)/menu%.h: $(COMMON_DIR)/menu%.dbd
+	@$(RM) $@$(DEP)
+	@$(DBDDEPENDS_CMD)
+	@echo "$<:../Makefile" >> $@$(DEP)
 	@$(RM) $@
-	$(DBTOMENUH) $< $@
+	$(DBTOMENUH) $(DBDFLAGS) $< $@
 
 $(COMMON_DIR)/menu%.h: menu%.dbd
+	@$(RM) $@$(DEP)
+	@$(DBDDEPENDS_CMD)
+	@echo "$<:../Makefile" >> $@$(DEP)
 	@$(RM) $@
-	$(DBTOMENUH) $< $@
+	$(DBTOMENUH) $(DBDFLAGS) $< $@
 
 .PRECIOUS: $(COMMON_DIR)/%.h
 
@@ -216,14 +230,14 @@ $(COMMON_DIR)/%.dbd: $(COMMON_DIR)/%Include.dbd
 	@$(RM) $@$(DEP)
 	@$(DBDDEPENDS_CMD)
 	@echo "$<:../Makefile" >> $@$(DEP)
-	@echo "Expanding dbd"
+	$(ECHO) "Expanding dbd"
 	@$(RM) $@
 	$(DBEXPAND) $(DBDFLAGS) -o $@ $<
 
 $(COMMON_DIR)/%.dbd: %Include.dbd 
 	@$(RM) $@$(DEP)
 	@$(DBDDEPENDS_CMD)
-	@echo "Expanding dbd"
+	$(ECHO) "Expanding dbd"
 	@$(RM) $@
 	$(DBEXPAND) $(DBDFLAGS) -o $@ $<
 
@@ -232,16 +246,16 @@ $(COMMON_DIR)/%Include.dbd:
 	$(PERL) $(TOOLS)/makeIncludeDbd.pl $($*_DBD) $@
 
 $(INSTALL_DBD)/%: $(COMMON_DIR)/%
-	@echo "Installing created dbd file $@"
+	$(ECHO) "Installing created dbd file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_DBD)/%: %
-	@echo "Installing dbd file $@"
+	$(ECHO) "Installing dbd file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 define  DBD_INSTALLS_template
 $$(INSTALL_DBD)/$$(notdir $(1)) : $(1)
-	@echo "Installing $$@"
+	$(ECHO) "Installing $$@"
 	@$$(INSTALL) -d -m $$(INSTALL_PERMISSIONS) $$^ $$(INSTALL_DBD)
 endef
 $(foreach file, $(DBD_INSTALLS), $(eval $(call DBD_INSTALLS_template, $(file))))
@@ -258,7 +272,7 @@ $(COMMON_DIR)/%.db$(RAW): $(COMMON_DIR)/%.edf
 #$(COMMON_DIR)/%.db$(RAW): %.substitutions %.template
 #	@$(RM) $@$(DEP)
 #	@$(MAKEDBDEPENDS) $@ $^  >> $@$(DEP)
-#	@echo "Inflating database from $^"
+#	$(ECHO) "Inflating database from $^"
 #	@$(RM) $@
 #	$(MSI) $(DBFLAGS) -S$< $(firstword $(patsubst %.substitutions,,$^)) > msi.tmp
 #	$(MV) msi.tmp $@
@@ -267,7 +281,7 @@ $(COMMON_DIR)/%.db$(RAW): %.substitutions
 	@$(RM) $@$(DEP)
 	$(MAKEDBDEPENDS) $@ $< $(TEMPLATE_FILENAME) >> $@$(DEP)
 	@echo "$@:$(TEMPLATE_FILENAME)" >> $@$(DEP)
-	@echo "Inflating database from $< $(TEMPLATE_FILENAME)"
+	$(ECHO) "Inflating database from $< $(TEMPLATE_FILENAME)"
 	@$(RM) $@
 	$(MSI) $(DBFLAGS) -S$< $(TEMPLATE_FILENAME) > msi.tmp
 	$(MV) msi.tmp $@
@@ -275,7 +289,7 @@ $(COMMON_DIR)/%.db$(RAW): %.substitutions
 $(COMMON_DIR)/%.db$(RAW): %.template
 	@$(RM) $@$(DEP)
 	@$(MAKEDBDEPENDS) $@ $^  >> $@$(DEP)
-	@echo "Inflating database from $<"
+	$(ECHO) "Inflating database from $<"
 	@$(RM) $@
 	$(MSI) $(DBFLAGS)  $< > msi.tmp
 	$(MV) msi.tmp $@
@@ -283,7 +297,7 @@ $(COMMON_DIR)/%.db$(RAW): %.template
 $(COMMON_DIR)/%.acf: %.acs
 	@$(RM) $@$(DEP)
 	@$(ACFDEPENDS_CMD)
-	@echo "Creating acf file $@"
+	$(ECHO) "Creating acf file $@"
 	@$(RM) $@
 	$(ACF_CMD)
 
@@ -297,7 +311,7 @@ $(COMMON_DIR)/%.db$(RAW): ../%.db
 	$(CP) $< $@
 
 $(COMMON_DIR)/%.db: $(COMMON_DIR)/%.db$(RAW)
-	@echo "Optimizing database $@"
+	$(ECHO) "Optimizing database $@"
 	@$(RM) $@
 	$(DBST) . $< -d > $@
 
@@ -306,17 +320,17 @@ $(COMMON_DIR)/%.db: $(COMMON_DIR)/%.db$(RAW)
 else
 
 $(INSTALL_DB)/%: %
-	@echo "Installing db file $@"
+	$(ECHO) "Installing db file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 endif
 
 $(INSTALL_DB)/%.db: $(COMMON_DIR)/%.db
-	@echo "Installing created db file $@"
+	$(ECHO) "Installing created db file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 define  DB_INSTALLS_template
 $$(INSTALL_DB)/$$(notdir $(1)) : $(1)
-	@echo "Installing $$@"
+	$(ECHO) "Installing $$@"
 	@$$(INSTALL) -d -m $$(INSTALL_PERMISSIONS) $$^ $$(INSTALL_DB)
 endef
 $(foreach file, $(DB_INSTALLS), $(eval $(call DB_INSTALLS_template, $(file))))

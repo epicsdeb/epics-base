@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// casDGIntfOS.h,v 1.2.2.1 2005/08/31 21:09:27 jhill Exp
+// casDGIntfOS.h,v 1.2.2.2 2009/07/30 23:54:18 jhill Exp
 //
 
 #ifndef casDGIntfOSh
@@ -23,26 +23,21 @@ class casDGIntfOS : public casDGIntfIO {
     friend class casDGReadReg;
     friend class casDGBCastReadReg;
     friend class casDGWriteReg;
+    friend class casDGEvWakeup;
+    friend class casDGIOWakeup;
+    friend class casStreamEvWakeup;
 public:
     casDGIntfOS ( caServerI &, clientBufMemoryManager &,
         const caNetAddr & addr, bool autoBeaconAddr = true, 
         bool addConfigBeaconAddr = false);
-
 	virtual ~casDGIntfOS ();
-
 	virtual void show (unsigned level) const;
-
-    void processInput();
-
-	void eventFlush ();
-
 private:
     casDGIOWakeup ioWk;
     casDGEvWakeup evWk;
 	class casDGReadReg * pRdReg;
 	class casDGBCastReadReg * pBCastRdReg; // fix for solaris bug
 	class casDGWriteReg * pWtReg;
-	bool sendBlocked;
 
     void armRecv ();
     void armSend ();

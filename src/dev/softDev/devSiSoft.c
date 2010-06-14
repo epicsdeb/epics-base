@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* devSiSoft.c,v 1.10.2.1 2008/08/06 22:11:51 anj Exp
+/* devSiSoft.c,v 1.10.2.2 2009/04/03 17:46:22 lange Exp
  *
  *      Author: Janet Anderson
  *      Date: 04-21-91
@@ -28,8 +28,8 @@
 #include "epicsExport.h"
 
 /* Create the dset for devSiSoft */
-static long init_record();
-static long read_stringin();
+static long init_record(stringinRecord *prec);
+static long read_stringin(stringinRecord *prec);
 
 struct {
     long      number;

@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* errSymLib.c,v 1.31.2.1 2008/07/10 18:04:10 anj Exp
+/* errSymLib.c,v 1.31.2.4 2009/07/09 20:11:01 anj Exp
  * errSymLib.c
  *      Author:          Marty Kraimer
  *      Date:            6-1-90
@@ -35,6 +35,8 @@
 #include "dbDefs.h"
 #include "errMdef.h"
 #include "errSymTbl.h"
+#include "ellLib.h"
+#include "errlog.h"
 
 
 static unsigned short errhash(long errNum);
@@ -49,7 +51,7 @@ typedef struct errnumnode {
 #define NHASH 256
 
 
-static ELLLIST errnumlist;
+static ELLLIST errnumlist = ELLLIST_INIT;
 static ERRNUMNODE **hashtable;
 static int initialized = FALSE;
 extern ERRSYMTAB_ID errSymTbl;
@@ -62,10 +64,9 @@ extern ERRSYMTAB_ID errSymTbl;
  * ell nodes that have a common hash number.
  *
  ***************************************************************/
-int epicsShareAPI errSymBld()
+int epicsShareAPI errSymBld(void)
 {
     ERRSYMBOL      *errArray = errSymTbl->symbols;
-    ELLLIST        *perrnumlist = &errnumlist;
     ERRNUMNODE     *perrNumNode = NULL;
     ERRNUMNODE     *pNextNode = NULL;
     ERRNUMNODE    **phashnode = NULL;
@@ -88,7 +89,7 @@ int epicsShareAPI errSymBld()
 	    continue;
 	}
     }
-    perrNumNode = (ERRNUMNODE *) ellFirst(perrnumlist);
+    perrNumNode = (ERRNUMNODE *) ellFirst(&errnumlist);
     while (perrNumNode) {
 	/* hash each perrNumNode->errNum */
 	hashInd = errhash(perrNumNode->errNum);
@@ -128,13 +129,12 @@ unsigned short errnum;
  ***************************************************************/
 int epicsShareAPI errSymbolAdd (long errNum,char *name)
 {
-    ELLLIST        *perrnumlist = &errnumlist;
     ERRNUMNODE     *pNew;
 
     pNew = (ERRNUMNODE*)callocMustSucceed(1,sizeof(ERRNUMNODE),"errSymbolAdd");
     pNew->errNum = errNum;
     pNew->message = name;
-    ellAdd(perrnumlist,(ELLNODE*)pNew);
+    ellAdd(&errnumlist,(ELLNODE*)pNew);
     return(0);
 }
 
@@ -194,15 +194,6 @@ static void errRawCopy ( long statusToDecode, char *pBuf, unsigned bufLength )
 }
 
 /****************************************************************
- * errSymFind - deprecated
- ***************************************************************/
-int epicsShareAPI errSymFind (long status, char * pBuf)
-{
-    errSymLookup ( status, pBuf, UINT_MAX );
-    return 0;
-}
-
-/****************************************************************
  * errSymLookup
  ***************************************************************/
 void epicsShareAPI errSymLookup (long status, char * pBuf, unsigned bufLength)
@@ -245,7 +236,7 @@ void epicsShareAPI errSymLookup (long status, char * pBuf, unsigned bufLength)
 /****************************************************************
  * errSymDump
  ***************************************************************/
-void epicsShareAPI errSymDump()
+void epicsShareAPI errSymDump(void)
 {
 ERRNUMNODE    **phashnode = NULL;
 ERRNUMNODE     *pNextNode;

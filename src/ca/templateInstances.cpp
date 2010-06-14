@@ -60,7 +60,6 @@ template class tsFreeList < syncGroupWriteNotify, 128, epicsMutexNOOP >;
 template class tsFreeList < comBuf, 0x20 >;
 template class tsFreeList < getCallback, 1024, epicsMutexNOOP >;
 template class tsFreeList < getCopy, 1024, epicsMutexNOOP >;
-template class tsFreeList < hostNameCache, 16 >;
 template class tsFreeList < msgForMultiplyDefinedPV, 16 >;
 template class tsFreeList < nciu, 1024, epicsMutexNOOP>;
 template class tsFreeList < oldChannelNotify, 1024, epicsMutexNOOP >;
@@ -76,6 +75,9 @@ template unsigned comBuf :: push ( const short * pValue, unsigned nElem );
 template comBuf :: popStatus comBuf :: pop ( unsigned int & returnVal );
 template comBuf :: popStatus comBuf :: pop ( unsigned short & returnVal );
 template comBuf :: popStatus comBuf :: pop ( unsigned char & returnVal );
+template void WireSet ( float const &, unsigned char * );
+template void WireSet ( int const &, unsigned char * );
+template void WireSet ( short const &, unsigned char * );
 
 
 #ifdef _MSC_VER

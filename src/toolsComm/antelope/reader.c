@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 #include "defs.h"
@@ -42,9 +41,13 @@ char *name_pool;
 
 char line_format[] = "#line %d \"%s\"\n";
 
+#define static
 
-cachec(c)
-int c;
+static void start_rule(bucket *bp, int s_lineno);
+
+
+static void
+cachec(int c)
 {
     assert(cinc >= 0);
     if (cinc >= cache_size)
@@ -58,18 +61,19 @@ int c;
 }
 
 
-get_line()
+static void
+get_line(void)
 {
-    register FILE *f = input_file;
-    register int c;
-    register int i;
+    FILE *f = input_file;
+    int c;
+    int i;
 
     if (saw_eof || (c = getc(f)) == EOF)
     {
 	if (line) { FREE(line); line = 0; }
 	cptr = 0;
 	saw_eof = 1;
-	return(0);
+	return;
     }
 
     if (line == 0 || linesize != (LINESIZE + 1))
@@ -85,7 +89,7 @@ get_line()
     for (;;)
     {
 	line[i]  =  c;
-	if (c == '\n') { cptr = line; return(0); }
+	if (c == '\n') { cptr = line; return; }
 	if (++i >= linesize)
 	{
 	    linesize += LINESIZE;
@@ -98,16 +102,16 @@ get_line()
 	    line[i] = '\n';
 	    saw_eof = 1;
 	    cptr = line;
-	    return(0);
+	    return;
 	}
     }
 }
 
 
-char *
-dup_line()
+static char *
+dup_line(void)
 {
-    register char *p, *s, *t;
+    char *p, *s, *t;
 
     if (line == 0) return (0);
     s = line;
@@ -122,9 +126,10 @@ dup_line()
 }
 
 
-skip_comment()
+static void
+skip_comment(void)
 {
-    register char *s;
+    char *s;
 
     int st_lineno = lineno;
     char *st_line = dup_line();
@@ -137,7 +142,7 @@ skip_comment()
 	{
 	    cptr = s + 2;
 	    FREE(st_line);
-	    return(0);
+	    return;
 	}
 	if (*s == '\n')
 	{
@@ -152,10 +157,10 @@ skip_comment()
 }
 
 
-int
-nextc()
+static int
+nextc(void)
 {
-    register char *s;
+    char *s;
 
     if (line == 0)
     {
@@ -214,10 +219,10 @@ nextc()
 }
 
 
-int
-keyword()
+static int
+keyword(void)
 {
-    register int c;
+    int c;
     char *t_cptr = cptr;
 
     c = *++cptr;
@@ -277,10 +282,11 @@ keyword()
 }
 
 
-copy_ident()
+static void
+copy_ident(void)
 {
-    register int c;
-    register FILE *f = output_file;
+    int c;
+    FILE *f = output_file;
 
     c = nextc();
     if (c == EOF) unexpected_EOF();
@@ -293,24 +299,25 @@ copy_ident()
 	if (c == '\n')
 	{
 	    fprintf(f, "\"\n");
-	    return(0);
+	    return;
 	}
 	putc(c, f);
 	if (c == '"')
 	{
 	    putc('\n', f);
 	    ++cptr;
-	    return(0);
+	    return;
 	}
     }
 }
 
 
-copy_text()
+static void
+copy_text(void)
 {
-    register int c;
+    int c;
     int quote;
-    register FILE *f = text_file;
+    FILE *f = text_file;
     int need_newline = 0;
     int t_lineno = lineno;
     char *t_line = dup_line();
@@ -425,7 +432,7 @@ loop:
 	    if (need_newline) putc('\n', f);
 	    ++cptr;
 	    FREE(t_line);
-	    return(0);
+	    return;
 	}
 	/* fall through */
 
@@ -437,9 +444,10 @@ loop:
 }
 
 
-copy_union()
+static void
+copy_union(void)
 {
-    register int c;
+    int c;
     int quote;
     int depth;
     int u_lineno = lineno;
@@ -477,7 +485,7 @@ loop:
 	{
 	    fprintf(text_file, " YYSTYPE;\n");
 	    FREE(u_line);
-	    return(0);
+	    return;
 	}
 	goto loop;
 
@@ -577,9 +585,8 @@ loop:
 }
 
 
-int
-hexval(c)
-int c;
+static int
+hexval(int c)
 {
     if (c >= '0' && c <= '9')
 	return (c - '0');
@@ -591,14 +598,14 @@ int c;
 }
 
 
-bucket *
-get_literal()
+static bucket *
+get_literal(void)
 {
-    register int c, quote;
-    register int i;
-    register int n;
-    register char *s;
-    register bucket *bp;
+    int c, quote;
+    int i;
+    int n;
+    char *s;
+    bucket *bp;
     int s_lineno = lineno;
     char *s_line = dup_line();
     char *s_cptr = s_line + (cptr - line);
@@ -730,9 +737,8 @@ get_literal()
 }
 
 
-int
-is_reserved(name)
-char *name;
+static int
+is_reserved(char *name)
 {
     char *s;
 
@@ -752,10 +758,10 @@ char *name;
 }
 
 
-bucket *
-get_name()
+static bucket *
+get_name(void)
 {
-    register int c;
+    int c;
 
     cinc = 0;
     for (c = *cptr; IS_IDENT(c); c = *++cptr)
@@ -768,11 +774,11 @@ get_name()
 }
 
 
-int
-get_number()
+static int
+get_number(void)
 {
-    register int c;
-    register int n;
+    int c;
+    int n;
 
     n = 0;
     for (c = *cptr; isdigit(c); c = *++cptr)
@@ -782,12 +788,12 @@ get_number()
 }
 
 
-char *
-get_tag()
+static char *
+get_tag(void)
 {
-    register int c;
-    register int i;
-    register char *s;
+    int c;
+    int i;
+    char *s;
     int t_lineno = lineno;
     char *t_line = dup_line();
     char *t_cptr = t_line + (cptr - line);
@@ -833,11 +839,11 @@ get_tag()
 }
 
 
-declare_tokens(assoc)
-int assoc;
+static void
+declare_tokens(int assoc)
 {
-    register int c;
-    register bucket *bp;
+    int c;
+    bucket *bp;
     int value;
     char *tag = 0;
 
@@ -859,7 +865,7 @@ int assoc;
 	else if (c == '\'' || c == '"')
 	    bp = get_literal();
 	else
-	    return(0);
+	    return;
 
 	if (bp == goal) tokenized_start(bp->name);
 	bp->class = TERM;
@@ -895,10 +901,11 @@ int assoc;
 }
 
 
-declare_types()
+static void
+declare_types(void)
 {
-    register int c;
-    register bucket *bp;
+    int c;
+    bucket *bp;
     char *tag;
 
     c = nextc();
@@ -914,7 +921,7 @@ declare_types()
 	else if (c == '\'' || c == '"')
 	    bp = get_literal();
 	else
-	    return(0);
+	    return;
 
 	if (bp->tag && tag != bp->tag)
 	    retyped_warning(bp->name);
@@ -923,10 +930,11 @@ declare_types()
 }
 
 
-declare_start()
+static void
+declare_start(void)
 {
-    register int c;
-    register bucket *bp;
+    int c;
+    bucket *bp;
 
     c = nextc();
     if (c == EOF) unexpected_EOF();
@@ -941,9 +949,10 @@ declare_start()
 }
 
 
-read_declarations()
+static void
+read_declarations(void)
 {
-    register int c, k;
+    int c, k;
 
     cache_size = 256;
     cache = MALLOC(cache_size);
@@ -957,7 +966,7 @@ read_declarations()
 	switch (k = keyword())
 	{
 	case MARK:
-	    return(0);
+	    return;
 
 	case IDENT:
 	    copy_ident();
@@ -990,7 +999,8 @@ read_declarations()
 }
 
 
-initialize_grammar()
+static void
+initialize_grammar(void)
 {
     nitems = 4;
     maxitems = 300;
@@ -1021,7 +1031,8 @@ initialize_grammar()
 }
 
 
-expand_items()
+static void
+expand_items(void)
 {
     maxitems += 300;
     pitem = (bucket **) REALLOC(pitem, maxitems*sizeof(bucket *));
@@ -1029,7 +1040,8 @@ expand_items()
 }
 
 
-expand_rules()
+static void
+expand_rules(void)
 {
     maxrules += 100;
     plhs = (bucket **) REALLOC(plhs, maxrules*sizeof(bucket *));
@@ -1041,10 +1053,11 @@ expand_rules()
 }
 
 
-advance_to_start()
+static void
+advance_to_start(void)
 {
-    register int c;
-    register bucket *bp;
+    int c;
+    bucket *bp;
     char *s_cptr;
     int s_lineno;
 
@@ -1091,9 +1104,8 @@ advance_to_start()
 }
 
 
-start_rule(bp, s_lineno)
-register bucket *bp;
-int s_lineno;
+static void
+start_rule(bucket *bp, int s_lineno)
 {
     if (bp->class == TERM)
 	terminal_lhs(s_lineno);
@@ -1106,9 +1118,10 @@ int s_lineno;
 }
 
 
-end_rule()
+static void
+end_rule(void)
 {
-    register int i;
+    int i;
 
     if (!last_was_action && plhs[nrules]->tag)
     {
@@ -1125,9 +1138,10 @@ end_rule()
 }
 
 
-insert_empty_rule()
+static void
+insert_empty_rule(void)
 {
-    register bucket *bp, **bpp;
+    bucket *bp, **bpp;
 
     assert(cache);
     sprintf(cache, "$$%d", ++gensym);
@@ -1141,7 +1155,7 @@ insert_empty_rule()
 	expand_items();
     bpp = pitem + nitems - 1;
     *bpp-- = bp;
-    while (bpp[0] = bpp[-1]) --bpp;
+    while ((bpp[0] = bpp[-1])) --bpp;
 
     if (++nrules >= maxrules)
 	expand_rules();
@@ -1154,10 +1168,11 @@ insert_empty_rule()
 }
 
 
-add_symbol()
+static void
+add_symbol(void)
 {
-    register int c;
-    register bucket *bp;
+    int c;
+    bucket *bp;
     int s_lineno = lineno;
 
     c = *cptr;
@@ -1172,7 +1187,7 @@ add_symbol()
 	end_rule();
 	start_rule(bp, s_lineno);
 	++cptr;
-	return(0);
+	return;
     }
 
     if (last_was_action)
@@ -1185,14 +1200,15 @@ add_symbol()
 }
 
 
-copy_action()
+static void
+copy_action(void)
 {
-    register int c;
-    register int i, n;
+    int c;
+    int i, n;
     int depth;
     int quote;
     char *tag;
-    register FILE *f = action_file;
+    FILE *f = action_file;
     int a_lineno = lineno;
     char *a_line = dup_line();
     char *a_cptr = a_line + (cptr - line);
@@ -1314,7 +1330,8 @@ loop:
     case ';':
 	if (depth > 0) goto loop;
 	fprintf(f, "\nbreak;\n");
-	return(0);
+	FREE(a_line);
+	return;
 
     case '{':
 	++depth;
@@ -1323,7 +1340,8 @@ loop:
     case '}':
 	if (--depth > 0) goto loop;
 	fprintf(f, "\nbreak;\n");
-	return(0);
+	FREE(a_line);
+	return;
 
     case '\'':
     case '"':
@@ -1408,11 +1426,11 @@ loop:
 }
 
 
-int
-mark_symbol()
+static int
+mark_symbol(void)
 {
-    register int c;
-    register bucket *bp;
+    int c;
+    bucket *bp;
 
     c = cptr[1];
     if (c == '%' || c == '\\')
@@ -1452,9 +1470,10 @@ mark_symbol()
 }
 
 
-read_grammar()
+static void
+read_grammar(void)
 {
-    register int c;
+    int c;
 
     initialize_grammar();
     advance_to_start();
@@ -1485,11 +1504,12 @@ read_grammar()
 }
 
 
-free_tags()
+static void
+free_tags(void)
 {
-    register int i;
+    int i;
 
-    if (tag_table == 0) return(0);
+    if (tag_table == 0) return;
 
     for (i = 0; i < ntags; ++i)
     {
@@ -1497,14 +1517,14 @@ free_tags()
 	FREE(tag_table[i]);
     }
     FREE(tag_table);
-	return(0);
 }
 
 
-pack_names()
+static void
+pack_names(void)
 {
-    register bucket *bp;
-    register char *p, *s, *t;
+    bucket *bp;
+    char *p, *s, *t;
 
     name_pool_size = 13;  /* 13 == sizeof("$end") + sizeof("$accept") */
     for (bp = first_symbol; bp; bp = bp->next)
@@ -1519,16 +1539,17 @@ pack_names()
     {
 	p = t;
 	s = bp->name;
-	while (*t++ = *s++) continue;
+	while ((*t++ = *s++)) continue;
 	FREE(bp->name);
 	bp->name = p;
     }
 }
 
 
-check_symbols()
+static void
+check_symbols(void)
 {
-    register bucket *bp;
+    bucket *bp;
 
     if (goal->class == UNKNOWN)
 	undefined_goal(goal->name);
@@ -1544,11 +1565,12 @@ check_symbols()
 }
 
 
-pack_symbols()
+static void
+pack_symbols(void)
 {
-    register bucket *bp;
-    register bucket **v;
-    register int i, j, k, n;
+    bucket *bp;
+    bucket **v;
+    int i, j, k, n;
 
     nsyms = 2;
     ntokens = 1;
@@ -1668,9 +1690,10 @@ pack_symbols()
 }
 
 
-pack_grammar()
+static void
+pack_grammar(void)
 {
-    register int i, j;
+    int i, j;
     int assoc, prec;
 
     ritem = (short *) MALLOC(nitems*sizeof(short));
@@ -1727,13 +1750,14 @@ pack_grammar()
 }
 
 
-print_grammar()
+static void
+print_grammar(void)
 {
-    register int i, j, k;
-    int spacing;
-    register FILE *f = verbose_file;
+    int i, j, k;
+    int spacing = 0;
+    FILE *f = verbose_file;
 
-    if (!vflag) return(0);
+    if (!vflag) return;
 
     k = 1;
     for (i = 2; i < nrules; ++i)
@@ -1760,11 +1784,11 @@ print_grammar()
 	++k;
 	putc('\n', f);
     }
-	return(0);
 }
 
 
-reader()
+void
+reader(void)
 {
     write_section(banner);
     create_symbol_table();

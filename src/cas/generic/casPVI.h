@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casPVI.h,v 1.3 2003/05/15 23:57:18 jhill Exp
+ *      casPVI.h,v 1.3.2.2 2009/08/05 23:55:30 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -51,6 +51,7 @@ public:
     caServerI * getPCAS () const;
     caStatus attachToServer ( caServerI & cas );
     aitIndex nativeCount ();
+    bool ioIsPending () const;
 	void clearOutstandingReads ( tsDLList < class casAsyncIOI > &);
     void destroyAllIO ( 
         tsDLList < casAsyncIOI > & );
@@ -77,6 +78,7 @@ public:
     void show ( unsigned level ) const;
     caStatus read ( const casCtx & ctx, gdd & prototype );
     caStatus write ( const casCtx & ctx, const gdd & value );
+    caStatus writeNotify ( const casCtx & ctx, const gdd & value );
     casChannel * createChannel ( const casCtx & ctx,
         const char * const pUserName, const char * const pHostName );
     aitEnum bestExternalType () const;
@@ -110,6 +112,11 @@ inline const gddEnumStringTable & casPVI::enumStringTable () const
 inline casPV * casPVI::apiPointer ()
 {
     return this->pPV;
+}
+
+inline bool casPVI :: ioIsPending () const
+{
+    return this->nIOAttached > 0u;
 }
 
 #endif // casPVIh

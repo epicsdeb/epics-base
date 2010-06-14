@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* 
- * devLibOSD.c,v 1.1.2.7 2008/07/23 16:37:21 anj Exp
+ * devLibOSD.c,v 1.1.2.9 2009/07/09 16:37:23 anj Exp
  *
  * Archictecture dependent support for common device driver resources 
  *
@@ -29,6 +29,7 @@
 
 #include "epicsFindSymbol.h"
 #include "devLib.h"
+#include "errlog.h"
 
 typedef void    myISR (void *pParam);
 
@@ -37,15 +38,15 @@ typedef void    myISR (void *pParam);
  * A list of the names of the unexpected interrupt handlers
  * ( some of these are provided by wrs )
  */
-LOCAL char  *defaultHandlerNames[] = {
+static char  *defaultHandlerNames[] = {
             "excStub",
             "excIntStub",
             "unsolicitedHandlerEPICS"};
 
-LOCAL myISR *defaultHandlerAddr[NELEMENTS(defaultHandlerNames)];
+static myISR *defaultHandlerAddr[NELEMENTS(defaultHandlerNames)];
 #endif
 
-LOCAL myISR *isrFetch(unsigned vectorNumber);
+static myISR *isrFetch(unsigned vectorNumber);
 
 /*
  * this routine needs to be in the symbol table
@@ -87,14 +88,14 @@ int EPICStovxWorksAddrType[]
             };
 
 #if CPU_FAMILY != PPC
-LOCAL void initHandlerAddrList(void);
+static void initHandlerAddrList(void);
 #endif
 
 /*
  * maps logical address to physical address, but does not detect
  * two device drivers that are using the same address range
  */
-LOCAL long vxDevMapAddr (epicsAddressType addrType, unsigned options,
+static long vxDevMapAddr (epicsAddressType addrType, unsigned options,
         size_t logicalAddress, size_t size, volatile void **ppPhysicalAddress);
 
 /*
@@ -266,7 +267,7 @@ long devDisableInterruptLevelVME (unsigned level)
 /*
  * vxDevMapAddr ()
  */
-LOCAL long vxDevMapAddr (epicsAddressType addrType, unsigned options,
+static long vxDevMapAddr (epicsAddressType addrType, unsigned options,
             size_t logicalAddress, size_t size, volatile void **ppPhysicalAddress)
 {
     long status;
@@ -326,7 +327,7 @@ static long vxDevWriteProbe (unsigned wordSize, volatile void *ptr, const void *
 /*
  *      isrFetch()
  */
-LOCAL myISR *isrFetch(unsigned vectorNumber)
+static myISR *isrFetch(unsigned vectorNumber)
 {
     myISR   *psub;
     myISR   *pCISR;
@@ -420,7 +421,7 @@ void unsolicitedHandlerEPICS(int vectorNumber)
  *      init list of interrupt handlers to ignore
  *
  */
-LOCAL 
+static 
 void initHandlerAddrList(void)
 {
     int i;

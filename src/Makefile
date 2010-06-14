@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# Makefile,v 1.41.2.18 2008/09/26 16:17:15 anj Exp
+# Makefile,v 1.41.2.19 2009/03/12 15:50:50 jba Exp
 #
 
 TOP = ..
@@ -67,7 +67,7 @@ DIRS += dev
 dev_DEPEND_DIRS = rec misc
 
 DIRS += vxWorks
-vxWorks_DEPEND_DIRS = ca
+vxWorks_DEPEND_DIRS = registry misc dbtools
 
 DIRS += RTEMS
 RTEMS_DEPEND_DIRS = libCom

@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <string> // vxWorks 6.0 requires this include 
 
+#include "dbDefs.h"
 #include "epicsGuard.h"
 #include "epicsVersion.h"
 #include "osiProcess.h"
@@ -126,6 +127,7 @@ cac::cac (
     epicsMutex & mutualExclusionIn, 
     epicsMutex & callbackControlIn, 
     cacContextNotify & notifyIn ) :
+    _refLocalHostName ( localHostNameCache.getReference () ),
     programBeginTime ( epicsTime::getCurrent() ),
     connTMO ( CA_CONN_VERIFY_PERIOD ),
     mutex ( mutualExclusionIn ),
@@ -141,8 +143,9 @@ cac::cac (
     initializingThreadsId ( epicsThreadGetIdSelf() ),
     initializingThreadsPriority ( epicsThreadGetPrioritySelf() ),
     maxRecvBytesTCP ( MAX_TCP ),
+    maxContigFrames ( contiguousMsgCountWhichTriggersFlowControl ),
     beaconAnomalyCount ( 0u ),
-    iiuUninstallInProgress ( false )
+    iiuExistenceCount ( 0u )
 {
 	if ( ! osiSockAttach () ) {
         throwWithLocation ( caErrorCode (ECA_INTERNAL) );
@@ -213,6 +216,11 @@ cac::cac (
         if ( ! this->tcpLargeRecvBufFreeList ) {
             throw std::bad_alloc ();
         }
+        unsigned bufsPerArray = this->maxRecvBytesTCP / comBuf::capacityBytes ();
+        if ( bufsPerArray > 1u ) {
+            maxContigFrames = bufsPerArray * 
+                contiguousMsgCountWhichTriggersFlowControl;
+        }
     }
     catch ( ... ) {
         osiSockRelease ();
@@ -262,7 +270,7 @@ cac::~cac ()
     //
     {
         epicsGuard < epicsMutex > guard ( this->mutex );
-        while ( this->circuitList.count() > 0 || this->iiuUninstallInProgress ) {
+        while ( this->iiuExistenceCount > 0 ) {
             epicsGuardRelease < epicsMutex > unguard ( guard );
             this->iiuUninstall.wait ();
         }
@@ -540,16 +548,20 @@ void cac::transferChanToVirtCircuit (
             }
             this->serverTable.add ( *pnewiiu );
             this->circuitList.add ( *pnewiiu );
+            this->iiuExistenceCount++;
             pBHE->registerIIU ( guard, *pnewiiu );
             piiu = pnewiiu.release ();
             newIIU = true;
         }
-        catch ( std::bad_alloc & ) {
+        catch ( std :: exception & except ) {
+            errlogPrintf ( 
+                "CAC: exception during virtual circuit creation \"%s\"\n",
+                except.what () );
             return;
         }
         catch ( ... ) {
             errlogPrintf ( 
-                "CAC: Unexpected exception during virtual circuit creation\n" );
+                "CAC: nonstandard exception during virtual circuit creation\n" );
             return;
         }
     }
@@ -1043,9 +1055,16 @@ bool cac::createChannelRespAction (
         else {
             sidTmp = pChan->getSID (guard);
         }
-        iiu.connectNotify ( guard, *pChan );
-        pChan->connect ( hdr.m_dataType, hdr.m_count, sidTmp, 
-            mgr.cbGuard, guard );
+        bool wasExpected = iiu.connectNotify ( guard, *pChan );
+        if ( wasExpected ) {
+            pChan->connect ( hdr.m_dataType, hdr.m_count, sidTmp, 
+                mgr.cbGuard, guard );
+        }
+        else {
+            errlogPrintf ( 
+                "CA Client Library: Ignored duplicate create channel "
+                "response from CA server?\n" );
+        }
     }
     else if ( iiu.ca_v44_ok ( guard ) ) {
         // this indicates a claim response for a resource that does
@@ -1120,7 +1139,6 @@ void cac::destroyIIU ( tcpiiu & iiu )
     {
         callbackManager mgr ( this->notify, this->cbMutex );
         epicsGuard < epicsMutex > guard ( this->mutex );
-        this->iiuUninstallInProgress = true;
         if ( iiu.channelCount ( guard ) ) {
             char hostNameTmp[64];
             iiu.getHostName ( guard, hostNameTmp, sizeof ( hostNameTmp ) );
@@ -1153,7 +1171,7 @@ void cac::destroyIIU ( tcpiiu & iiu )
     {
         epicsGuard < epicsMutex > guard ( this->mutex );
         this->freeListVirtualCircuit.release ( & iiu );
-        this->iiuUninstallInProgress = false;
+        this->iiuExistenceCount--;
         // signal iiu uninstal event so that cac can properly shut down
         this->iiuUninstall.signal();
     }

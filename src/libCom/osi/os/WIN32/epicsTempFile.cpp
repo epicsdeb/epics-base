@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *  epicsTempFile.cpp,v 1.1.2.4 2005/11/22 21:52:29 jba Exp
+ *  epicsTempFile.cpp,v 1.1.2.5 2009/06/05 19:10:46 anj Exp
  *  Author: Jeff Hill 
  */
 
@@ -17,7 +17,7 @@
 #include <string.h>
 #include <io.h>
 #include <fcntl.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 
 #define epicsExportSharedSymbols
 #include "epicsStdio.h"

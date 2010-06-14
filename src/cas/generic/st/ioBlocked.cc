@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 //
-// ioBlocked.cc,v 1.10 2003/02/12 19:06:13 jhill Exp
+// ioBlocked.cc,v 1.10.2.1 2009/07/14 22:51:06 jhill Exp
 // Author Jeff Hill
 //
 // IO Blocked list class
@@ -69,9 +69,7 @@ ioBlockedList::ioBlockedList ()
 //
 ioBlockedList::~ioBlockedList ()
 {
-    ioBlocked *pB;
-    
-    while ( (pB = this->get ()) ) {
+    for ( ioBlocked * pB = this->get (); pB; pB = this->get () ) {
         pB->pList = NULL;
     }
 }
@@ -86,14 +84,13 @@ ioBlockedList::~ioBlockedList ()
 void ioBlockedList::signal ()
 {
     tsDLList<ioBlocked> tmp;
-    ioBlocked *pB;
     
     //
     // move all of the items onto tmp
     //
     tmp.add(*this);
     
-    while ( (pB = tmp.get ()) ) {
+    for ( ioBlocked * pB = tmp.get (); pB; pB = tmp.get () ) {
         pB->pList = NULL;
         pB->ioBlockedSignal ();
     }

@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  CONFIG_BASE_VERSION,v 1.10.2.28 2008/10/27 19:39:04 jba Exp
+#  CONFIG_BASE_VERSION,v 1.10.2.32 2009/08/28 18:47:36 jba Exp
 #
 #  EPICS Version information
 #
@@ -26,7 +26,7 @@ EPICS_VERSION = 3
 EPICS_REVISION = 14
 
 # EPICS_MODIFICATION must be a number >=0 and <256 
-EPICS_MODIFICATION = 10
+EPICS_MODIFICATION = 11
 
 # EPICS_PATCH_LEVEL must be a number  (win32 resource file requirement)
 # Not included if zero
@@ -56,5 +56,5 @@ EPICS_SHORT_VERSION=$(EPICS_VERSION).$(EPICS_REVISION).$(EPICS_MODIFICATION)$(EP
 EPICS_VERSION_NUMBER=$(EPICS_SHORT_VERSION)$(EPICS_CVS_SNAPSHOT)$(EPICS_SITE_VSTRING)
 EPICS_VERSION_STRING="EPICS Version $(EPICS_VERSION_NUMBER)"
 
-CVS_DATE="\$2008/10/27 19:39:04$"
-CVS_TAG="\$R3-14-10$"
+CVS_DATE="\$2009/08/28 18:47:36$"
+CVS_TAG="\$R3-14-11$"

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devAoSoft.c */
-/* base/src/dev devAoSoft.c,v 1.10 2003/04/01 21:02:15 mrk Exp */
+/* base/src/dev devAoSoft.c,v 1.10.2.2 2009/04/03 17:46:21 lange Exp */
 
 /* Device Support Routines for soft Analog Output Records*/
 /*
@@ -33,10 +33,10 @@
 #include "epicsExport.h"
 
 /* added for Channel Access Links */
-static long init_record();
+static long init_record(aoRecord *prec);
 
 /* Create the dset for devAoSoft */
-static long write_ao();
+static long write_ao(aoRecord *prec);
 struct {
 	long		number;
 	DEVSUPFUN	report;
@@ -56,7 +56,7 @@ struct {
 epicsExportAddress(dset,devAoSoft);
 
 
-static long init_record(aoRecord *pao)
+static long init_record(aoRecord *prec)
 {
 
     long status=0;
@@ -65,11 +65,11 @@ static long init_record(aoRecord *pao)
 
 } /* end init_record() */
 
-static long write_ao(aoRecord *pao)
+static long write_ao(aoRecord *prec)
 {
     long status;
 
-    status = dbPutLink(&pao->out,DBR_DOUBLE, &pao->oval,1);
+    status = dbPutLink(&prec->out,DBR_DOUBLE, &prec->oval,1);
 
     return(status);
 }

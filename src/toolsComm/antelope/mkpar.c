@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
@@ -23,15 +22,21 @@ short final_state;
 static int SRcount;
 static int RRcount;
 
-extern action *parse_actions();
-extern action *get_shifts();
-extern action *add_reductions();
-extern action *add_reduce();
 
+static action *parse_actions(int stateno);
+static action *get_shifts(int stateno);
+static action *add_reductions(int stateno, action *actions);
+static action *add_reduce(action *actions, int ruleno, int symbol);
+static void find_final_state(void);
+static void unused_rules(void);
+static void remove_conflicts(void);
+static void total_conflicts(void);
+static void defreds(void);
 
-make_parser()
+void
+make_parser(void)
 {
-    register int i;
+    int i;
 
     parser = NEW2(nstates, action *);
     for (i = 0; i < nstates; i++)
@@ -45,11 +50,10 @@ make_parser()
 }
 
 
-action *
-parse_actions(stateno)
-register int stateno;
+static action *
+parse_actions(int stateno)
 {
-    register action *actions;
+    action *actions;
 
     actions = get_shifts(stateno);
     actions = add_reductions(stateno, actions);
@@ -57,15 +61,14 @@ register int stateno;
 }
 
 
-action *
-get_shifts(stateno)
-int stateno;
+static action *
+get_shifts(int stateno)
 {
-    register action *actions, *temp;
-    register shifts *sp;
-    register short *to_state;
-    register int i, k;
-    register int symbol;
+    action *actions, *temp;
+    shifts *sp;
+    short *to_state;
+    int i, k;
+    int symbol;
 
     actions = 0;
     sp = shift_table[stateno];
@@ -92,14 +95,12 @@ int stateno;
     return (actions);
 }
 
-action *
-add_reductions(stateno, actions)
-int stateno;
-register action *actions;
+static action *
+add_reductions(int stateno, action *actions)
 {
-    register int i, j, m, n;
-    register int ruleno, tokensetsize;
-    register unsigned *rowp;
+    int i, j, m, n;
+    int ruleno, tokensetsize;
+    unsigned *rowp;
 
     tokensetsize = WORDSIZE(ntokens);
     m = lookaheads[stateno];
@@ -118,12 +119,10 @@ register action *actions;
 }
 
 
-action *
-add_reduce(actions, ruleno, symbol)
-register action *actions;
-register int ruleno, symbol;
+static action *
+add_reduce(action *actions, int ruleno, int symbol)
 {
-    register action *temp, *prev, *next;
+    action *temp, *prev, *next;
 
     prev = 0;
     for (next = actions; next && next->symbol < symbol; next = next->next)
@@ -159,11 +158,12 @@ register int ruleno, symbol;
 }
 
 
-find_final_state()
+static void
+find_final_state(void)
 {
-    register int goal, i;
-    register short *to_state;
-    register shifts *p;
+    int goal, i;
+    short *to_state;
+    shifts *p;
 
     p = shift_table[0];
     to_state = p->shift;
@@ -176,10 +176,11 @@ find_final_state()
 }
 
 
-unused_rules()
+static void
+unused_rules(void)
 {
-    register int i;
-    register action *p;
+    int i;
+    action *p;
 
     rules_used = (short *) MALLOC(nrules*sizeof(short));
     if (rules_used == 0) no_space();
@@ -201,18 +202,21 @@ unused_rules()
 	if (!rules_used[i]) ++nunused;
 
     if (nunused)
+    {
 	if (nunused == 1)
 	    fprintf(stderr, "%s: 1 rule never reduced\n", myname);
 	else
 	    fprintf(stderr, "%s: %d rules never reduced\n", myname, nunused);
+    }
 }
 
 
-remove_conflicts()
+static void
+remove_conflicts(void)
 {
-    register int i;
-    register int symbol;
-    register action *p, *pref;
+    int i;
+    int symbol;
+    action *p, *pref = NULL;
 
     SRtotal = 0;
     RRtotal = 0;
@@ -235,7 +239,7 @@ remove_conflicts()
 		SRcount++;
 		p->suppressed = 1;
 	    }
-	    else if (pref->action_code == SHIFT)
+	    else if (pref && pref->action_code == SHIFT)
 	    {
 		if (pref->prec > 0 && p->prec > 0)
 		{
@@ -283,7 +287,8 @@ remove_conflicts()
 }
 
 
-total_conflicts()
+static void
+total_conflicts(void)
 {
     fprintf(stderr, "%s: ", myname);
     if (SRtotal == 1)
@@ -303,23 +308,22 @@ total_conflicts()
 }
 
 
-int
-sole_reduction(stateno)
-int stateno;
+static int
+sole_reduction(int stateno)
 {
-    register int count, ruleno;
-    register action *p;
+    int count, ruleno;
+    action *p;
 
     count = 0;
     ruleno = 0; 
     for (p = parser[stateno]; p; p = p->next)
     {
 	if (p->action_code == SHIFT && p->suppressed == 0)
-	    return (0);
+	    return 0;
 	else if (p->action_code == REDUCE && p->suppressed == 0)
 	{
 	    if (ruleno > 0 && p->number != ruleno)
-		return (0);
+		return 0;
 	    if (p->symbol != 1)
 		++count;
 	    ruleno = p->number;
@@ -327,40 +331,42 @@ int stateno;
     }
 
     if (count == 0)
-	return (0);
-    return (ruleno);
+	return 0;
+    return ruleno;
 }
 
 
-defreds()
+static void
+defreds(void)
 {
-    register int i;
+    int i;
 
     defred = NEW2(nstates, short);
     for (i = 0; i < nstates; i++)
 	defred[i] = sole_reduction(i);
 }
- 
-free_action_row(p)
-register action *p;
-{
-  register action *q;
 
-  while (p)
+static void
+free_action_row(action *p)
+{
+    action *q;
+
+    while (p)
     {
-      q = p->next;
-      FREE(p);
-      p = q;
+        q = p->next;
+        FREE(p);
+        p = q;
     }
 }
 
-free_parser()
+void
+free_parser(void)
 {
-  register int i;
+    int i;
 
-  for (i = 0; i < nstates; i++)
-    free_action_row(parser[i]);
+    for (i = 0; i < nstates; i++)
+        free_action_row(parser[i]);
 
-  FREE(parser);
+    FREE(parser);
 }
 

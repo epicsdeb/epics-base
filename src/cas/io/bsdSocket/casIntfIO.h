@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// casIntfIO.h,v 1.1 2003/02/12 19:11:42 jhill Exp
+// casIntfIO.h,v 1.1.2.1 2009/07/25 01:04:14 jhill Exp
 //
 
 #ifndef casIntfIOh
@@ -53,7 +53,7 @@ public:
         clientBufMemoryManager & ) const;
 
     caNetAddr serverAddress () const;
-
+    
 private:
 	SOCKET sock;
 	struct sockaddr_in addr;

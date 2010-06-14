@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* iocLogServer.c */
-/* base/src/util iocLogServer.c,v 1.47.2.6 2005/11/18 23:49:06 jhill Exp */
+/* base/src/util iocLogServer.c,v 1.47.2.8 2009/07/09 17:06:45 anj Exp */
 
 /*
  *	archive logMsg() from several IOC's to a common rotating file	
@@ -30,6 +30,7 @@
 #include	<signal.h>
 #endif
 
+#include        "dbDefs.h"
 #include	"epicsAssert.h"
 #include 	"fdmgr.h"
 #include 	"envDefs.h"
@@ -41,13 +42,6 @@ static long ioc_log_file_limit;
 static char ioc_log_file_name[256];
 static char ioc_log_file_command[256];
 
-
-#ifndef TRUE
-#define	TRUE 1
-#endif
-#ifndef FALSE
-#define	FALSE 0
-#endif
 
 struct iocLogClient {
 	int insock;
@@ -95,7 +89,7 @@ static int sighupPipe[2];
  *	main()
  *
  */
-int main()
+int main(void)
 {
 	struct sockaddr_in serverAddr;	/* server's address */
 	struct timeval timeout;
@@ -953,7 +947,7 @@ static void serviceSighupRequest(void *pParam)
  *
  *
  */
-static int getDirectory()
+static int getDirectory(void)
 {
 	FILE		*pipe;
 	char		dir[256];

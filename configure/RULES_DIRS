@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  RULES_DIRS,v 1.14.2.5 2008/07/24 15:22:14 jba Exp
+#  RULES_DIRS,v 1.14.2.6 2009/04/24 08:59:42 lange Exp
 #
 
 
@@ -38,7 +38,7 @@ all : install
 rebuild : clean install
 
 # Create directory dependancies lines for GNU make -j option
-# Only works with GNU make 3.80 or later (uses eval function)
+# Only works with GNU make 3.81 or later (uses eval function)
 define DEP_template1
 $(1): $$($(1)_DEPEND_DIRS)
 endef

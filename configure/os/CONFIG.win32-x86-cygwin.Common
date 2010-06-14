@@ -1,6 +1,6 @@
 # CONFIG.win32-x86-cygwin.Common
 #
-# CONFIG.win32-x86-cygwin.Common,v 1.1.2.5 2008/08/05 17:46:30 jba Exp
+# CONFIG.win32-x86-cygwin.Common,v 1.1.2.6 2009/01/27 21:25:15 jba Exp
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86-cygwin host archs
@@ -18,5 +18,5 @@ WIND_HOST_TYPE = x86-win32
 OSITHREAD_USE_DEFAULT_STACK = NO
 
 # Needed to find dlls for base installed build tools (antelope,eflex,...)
-PATH := $(EPICS_BASE_TOOLS_BIN):$(PATH)
+PATH := $(EPICS_BASE_BIN):$(PATH)
 

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbNotify.c */
-/* base/src/db dbNotify.c,v 1.40.2.11 2008/08/15 18:58:17 anj Exp */
+/* base/src/db dbNotify.c,v 1.40.2.12 2009/01/16 20:50:40 anj Exp */
 /*
  *      Author: 	Marty Kraimer
  *      Date:           03-30-95
@@ -546,6 +546,9 @@ int epicsShareAPI dbNotifyDump(void)
         pdbRecordNode = (dbRecordNode *)ellNext(&pdbRecordNode->node)) {
             putNotifyPvt *pputNotifyPvt;
             precord = pdbRecordNode->precord;
+            if (!precord->name[0] ||
+                pdbRecordNode->flags & DBRN_FLAGS_ISALIAS)
+                continue;
             if(!precord->ppn) continue;
             if(!precord->ppnr) continue;
             if(precord->ppn->paddr->precord != precord) continue;

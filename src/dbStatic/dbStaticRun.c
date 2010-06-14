@@ -27,6 +27,7 @@
 #include "dbBase.h"
 #include "dbStaticLib.h"
 #include "dbStaticPvt.h"
+#include "devSup.h"
 #include "special.h"
 
 
@@ -57,83 +58,92 @@ static void ulongToHexString(epicsUInt32 source,char *pdest)
     return;
 }
 
-static double delta[2]={1e-6,1e-15};
-static int precision[2]={6,14};
-static void realToString(double value,char *preturn,int isdouble)
+static double delta[2] = {1e-6, 1e-15};
+static int precision[2] = {6, 14};
+static void realToString(double value, char *preturn, int isdouble)
 {
     double	absvalue;
     int		logval,prec,end;
     char	tstr[30];
-    char	*ptstr=&tstr[0];
+    char	*ptstr = &tstr[0];
     int		round;
-    int		ise=FALSE;
-    char	*loce=NULL;
+    int		ise = FALSE;
+    char	*loce = NULL;
 
-    if(value==0.0) {strcpy(preturn,"0"); return;};
-    absvalue = (value<0.0 ? -value: value);
-    if(absvalue<(double)INT_MAX) {
-        epicsInt32 intval;
-        double diff;
-
-        intval=value;
-        diff = value - intval;
-        if(diff<0.0) diff =-diff;
-        if(diff < absvalue*delta[isdouble]) {
-	    cvtLongToString(intval,preturn);
-	    return;
-        }
+    if (value == 0) {
+        strcpy(preturn, "0");
+        return;
     }
-    /*Now starts the hard cases*/
-    if(value<0.0) {*preturn++ = '-'; value = -value;}
-    logval = (int)log10(value);
-    if(logval>6 || logval<-2 ) {
-        int nout;
-	ise=TRUE;
-	prec = precision[isdouble];
-	nout = sprintf(ptstr,"%.*e",prec,value);
-	loce = strchr(ptstr,'e');
-        if(!loce) {
-            ptstr[nout] = 0;
-            strcpy(preturn,ptstr);
+
+    absvalue = value < 0 ? -value : value;
+    if (absvalue < (double)INT_MAX) {
+        epicsInt32 intval = (epicsInt32) value;
+        double diff = value - intval;
+
+        if (diff < 0) diff = -diff;
+        if (diff < absvalue * delta[isdouble]) {
+            cvtLongToString(intval, preturn);
             return;
         }
-	*loce++ = 0;
+    }
+
+    /*Now starts the hard cases*/
+    if (value < 0) {
+        *preturn++ = '-';
+        value = -value;
+    }
+
+    logval = (int)log10(value);
+    if (logval > 6 || logval < -2) {
+        int nout;
+
+        ise = TRUE;
+        prec = precision[isdouble];
+        nout = sprintf(ptstr, "%.*e", prec, value);
+        loce = strchr(ptstr, 'e');
+
+        if (!loce) {
+            ptstr[nout] = 0;
+            strcpy(preturn, ptstr);
+            return;
+        }
+
+        *loce++ = 0;
     } else {
-	prec = precision[isdouble]-logval;
-	if(prec<0)prec=0;
-	sprintf(ptstr,"%.*f",prec,value);
+        prec = precision[isdouble] - logval;
+        if ( prec < 0) prec = 0;
+        sprintf(ptstr, "%.*f", prec, value);
     }
-    if(prec>0) {
-	end = strlen(ptstr) -1;
-	round=FALSE;
-	while(TRUE) {
-	    if(end<=0)break;
-	    if(tstr[end]=='.'){end--; break;}
-	    if(tstr[end]=='0'){end--; continue;}
-	    if(!round && end<precision[isdouble]) break;
-	    if(!round && tstr[end]<'8') break;
-	    if(tstr[end-1]=='.') {
-		if(round)end = end-2;
-		break;
-	    }
-	    if(tstr[end-1]!='9') break;
-	    round=TRUE;
-	    end--;
-	}
-	tstr[end+1]=0;
-	while (round) {
-	    if(tstr[end]<'9') {tstr[end]++; break;}
-	    if(end==0) { *preturn++='1'; tstr[end]='0'; break;}
-	    tstr[end--]='0';
-	}
+
+    if (prec > 0) {
+        end = strlen(ptstr) - 1;
+        round = FALSE;
+        while (end > 0) {
+            if (tstr[end] == '.') {end--; break;}
+            if (tstr[end] == '0') {end--; continue;}
+            if (!round && end < precision[isdouble]) break;
+            if (!round && tstr[end] < '8') break;
+            if (tstr[end-1] == '.') {
+                if (round) end = end-2;
+                break;
+            }
+            if (tstr[end-1] != '9') break;
+            round = TRUE;
+            end--;
+        }
+        tstr[end+1] = 0;
+        while (round) {
+            if (tstr[end] < '9') {tstr[end]++; break;}
+            if (end == 0) { *preturn++ = '1'; tstr[end] = '0'; break;}
+            tstr[end--] = '0';
+        }
     }
-    strcpy(preturn,&tstr[0]);
-    if(ise) {
-	if(!(strchr(preturn,'.'))) strcat(preturn,".0");
-	strcat(preturn,"e");
-	strcat(preturn,loce);
+    strcpy(preturn, &tstr[0]);
+    if (ise) {
+        if (!(strchr(preturn, '.'))) strcat(preturn, ".0");
+        strcat(preturn, "e");
+        strcat(preturn, loce);
     }
-    return;
 }
 
 static void floatToString(float value,char *preturn)
@@ -149,6 +159,38 @@ static void doubleToString(double value,char *preturn)
 }
 
 
+static long do_nothing(struct dbCommon *precord) { return 0; }
+
+/* Dummy DSXT used for soft device supports */
+struct dsxt devSoft_DSXT = {
+    do_nothing,
+    do_nothing
+};
+
+static devSup *pthisDevSup = NULL;
+
+void dbInitDevSup(devSup *pdevSup, dset *pdset)
+{
+    pdevSup->pdset = pdset;
+    if (pdevSup->link_type == CONSTANT)
+        pdevSup->pdsxt = &devSoft_DSXT;
+
+    if (pdset->init) {
+        pthisDevSup = pdevSup;
+        pdset->init(0);
+        pthisDevSup = NULL;
+    }
+}
+
+void devExtend(dsxt *pdsxt)
+{
+    if (!pthisDevSup)
+        errlogPrintf("devExtend() called outside of dbInitDevSup()\n");
+    else {
+        pthisDevSup->pdsxt = pdsxt;
+    }
+}
+
 long dbAllocRecord(DBENTRY *pdbentry,const char *precordName)
 {
     dbRecordType	*pdbRecordType = pdbentry->precordType;
@@ -161,7 +203,7 @@ long dbAllocRecord(DBENTRY *pdbentry,const char *precordName)
     if(!pdbRecordType) return(S_dbLib_recordTypeNotFound);
     if(!precnode) return(S_dbLib_recNotFound);
     if(pdbRecordType->rec_size == 0) {
-	printf("\t*** Did you run x_RegisterDeviceDriver(pdbbase) yet? ***\n");
+	printf("\t*** Did you run x_RegisterRecordDeviceDriver(pdbbase) yet? ***\n");
 	epicsPrintf("dbAllocRecord(%s) with %s rec_size = 0\n",
 	    precordName, pdbRecordType->name);
 	return(S_dbLib_noRecSup);
@@ -573,8 +615,8 @@ long dbPutStringNum(DBENTRY *pdbentry,const char *pstring)
 
 	    value = epicsStrtod(pstring,&endp);
 	    if(*endp!=0) status = S_dbLib_badField;
-	    if(pflddes->field_type==DBF_FLOAT)
-	    	*(float *)pfield = value;
+	    if(pflddes->field_type == DBF_FLOAT)
+	        *(float *)pfield = (float)value;
 	    else
 		*(double *)pfield = value;
 	}

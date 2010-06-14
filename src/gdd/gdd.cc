@@ -10,7 +10,7 @@
 // Author: Jim Kowalkowski
 // Date: 2/96
 // 
-// gdd.cc,v 1.44.2.5 2004/02/09 17:13:58 jhill Exp
+// gdd.cc,v 1.44.2.6 2009/03/20 06:19:47 anj Exp
 // 
 
 #include <stdio.h>
@@ -973,7 +973,9 @@ gddStatus gdd::convertOffsetsToAddress(void)
 		else if(isScalar())
 		{
 			if(primitiveType()==aitEnumFixedString)
+			{
 				if(data.FString) setData(pdd+dp);
+			}
 			else if(primitiveType()==aitEnumString)
 			{
 				str=(aitString*)dataAddress();
@@ -1051,7 +1053,9 @@ gddStatus gdd::convertAddressToOffsets(void)
 		{
 			// handle the special string scalar cases
 			if(primitiveType()==aitEnumFixedString)
+			{
 				if(data.FString) setData((gdd*)(dp-pdd));
+			}
 			else if(primitiveType()==aitEnumString)
 			{
 				str=(aitString*)dataAddress();

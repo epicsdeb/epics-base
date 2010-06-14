@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* ecs - equivalence class routines */
@@ -37,7 +36,7 @@
 
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/ecs.c,v 1.2 2002/07/12 21:35:35 jba Exp (LBL)";
+    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/ecs.c,v 1.2.2.2 2009/04/30 20:45:30 anj Exp (LBL)";
 #endif
 
 #include "flexdef.h"
@@ -48,9 +47,8 @@ static char rcsid[] =
  *    ccl2ecl();
  */
 
-void ccl2ecl()
-
-    {
+void ccl2ecl(void)
+{
     int i, ich, newlen, cclp, ccls, cclmec;
 
     for ( i = 1; i <= lastccl; ++i )
@@ -119,10 +117,8 @@ void ccl2ecl()
  *  Returned is the number of classes.
  */
 
-int cre8ecs( fwd, bck, num )
-int fwd[], bck[], num;
-
-    {
+int cre8ecs(int fwd[], int bck[], int num)
+{
     int i, j, numcl;
 
     numcl = 0;
@@ -156,10 +152,8 @@ int fwd[], bck[], num;
  *  Returns the number of equivalence classes used.
  */
 
-int ecs_from_xlation( ecmap )
-int ecmap[];
-
-    {
+int ecs_from_xlation(int ecmap[])
+{
     int i;
     int nul_is_alone = false;
     int did_default_xlation_class = false;
@@ -240,11 +234,8 @@ int ecmap[];
  * NUL_mapping is the value which NUL (0) should be mapped to.
  */
 
-void mkeccl( ccls, lenccl, fwd, bck, llsiz, NUL_mapping )
-Char ccls[];
-int lenccl, fwd[], bck[], llsiz, NUL_mapping;
-
-    {
+void mkeccl(unsigned char ccls[], int lenccl, int fwd[], int bck[], int llsiz, int NUL_mapping)
+{
     int cclp, oldec, newec;
     int cclm, i, j;
     static unsigned char cclflags[CSIZE];	/* initialized to all '\0' */
@@ -271,7 +262,7 @@ int lenccl, fwd[], bck[], llsiz, NUL_mapping;
 	    { /* look for the symbol in the character class */
 	    for ( ; j < lenccl; ++j )
 		{
-		register int ccl_char;
+		int ccl_char;
 
 		if ( NUL_mapping && ccls[j] == 0 )
 		    ccl_char = NUL_mapping;
@@ -339,10 +330,8 @@ next_pt:
  *    mkechar( tch, fwd, bck );
  */
 
-void mkechar( tch, fwd, bck )
-int tch, fwd[], bck[];
-
-    {
+void mkechar(int tch, int fwd[], int bck[])
+{
     /* if until now the character has been a proper subset of
      * an equivalence class, break it away to create a new ec
      */

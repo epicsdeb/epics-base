@@ -141,17 +141,19 @@ static void scanShutdown(void *arg)
 {
     int i;
 
-    scanOnce((dbCommon *)&exitOnce);
-    epicsEventWait(startStopEvent);
+    interruptAccept = FALSE;
 
     for (i = 0; i < nPeriodic; i++) {
         papPeriodic[i]->scanCtl = ctlExit;
         epicsEventSignal(papPeriodic[i]->loopEvent);
         epicsEventWait(startStopEvent);
     }
+
+    scanOnce((dbCommon *)&exitOnce);
+    epicsEventWait(startStopEvent);
 }
 
-long scanInit()
+long scanInit(void)
 {
     int i;
 
@@ -173,7 +175,9 @@ void scanRun(void)
 {
     int i;
 
+    interruptAccept = TRUE;
     scanCtl = ctlRun;
+
     for (i = 0; i < nPeriodic; i++)
         papPeriodic[i]->scanCtl = ctlRun;
 }
@@ -182,9 +186,11 @@ void scanPause(void)
 {
     int i;
 
-    scanCtl = ctlPause;
-    for (i = 0; i < nPeriodic; i++)
+    for (i = nPeriodic - 1; i >= 0; --i)
         papPeriodic[i]->scanCtl = ctlPause;
+
+    scanCtl = ctlPause;
+    interruptAccept = FALSE;
 }
 
 void scanAdd(struct dbCommon *precord)
@@ -386,7 +392,7 @@ int scanpel(int event_number)   /* print event list */
     return 0;
 }
 
-int scanpiol()                  /* print io_event list */
+int scanpiol(void)                  /* print io_event list */
 {
     io_scan_list *piosl;
     int prio;
@@ -556,7 +562,7 @@ static void periodicTask(void *arg)
 }
 
 
-static void initPeriodic()
+static void initPeriodic(void)
 {
     dbMenu *pmenu;
     periodic_scan_list *ppsl;
@@ -699,7 +705,9 @@ static void buildScanLists(void)
              pdbRecordNode;
              pdbRecordNode = (dbRecordNode *)ellNext(&pdbRecordNode->node)) {
             dbCommon *precord = pdbRecordNode->precord;
-            if (precord->name[0] == 0) continue;
+            if (!precord->name[0] ||
+                pdbRecordNode->flags & DBRN_FLAGS_ISALIAS)
+                continue;
             scanAdd(precord);
         }
     }
@@ -711,12 +719,12 @@ static void addToList(struct dbCommon *precord, scan_list *psl)
 
     epicsMutexMustLock(psl->lock);
     pse = precord->spvt;
-    if (pse==NULL) {
+    if (pse == NULL) {
         pse = dbCalloc(1, sizeof(scan_element));
         precord->spvt = pse;
         pse->precord = precord;
     }
-    pse ->pscan_list = psl;
+    pse->pscan_list = psl;
     ptemp = (scan_element *)ellFirst(&psl->list);
     while (ptemp) {
         if (ptemp->precord->phas > precord->phas) {
@@ -735,14 +743,19 @@ static void deleteFromList(struct dbCommon *precord, scan_list *psl)
     scan_element *pse;
 
     epicsMutexMustLock(psl->lock);
-    if (precord->spvt==NULL) {
+    pse = precord->spvt;
+    if (pse == NULL) {
         epicsMutexUnlock(psl->lock);
+        errlogPrintf("dbScan: Tried to delete record from wrong scan list!\n"
+            "\t%s.SPVT = NULL, but psl = %p\n",
+            precord->name, (void *)psl);
         return;
     }
-    pse = precord->spvt;
-    if (pse == NULL || pse->pscan_list != psl) {
+    if (pse->pscan_list != psl) {
         epicsMutexUnlock(psl->lock);
-        errlogPrintf("deleteFromList failed");
+        errlogPrintf("dbScan: Tried to delete record from wrong scan list!\n"
+            "\t%s.SPVT->pscan_list = %p but psl = %p\n",
+            precord->name, (void *)pse, (void *)psl);
         return;
     }
     pse->pscan_list = NULL;

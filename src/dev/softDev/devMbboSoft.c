@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devMbboSoft.c */
-/* base/src/dev devMbboSoft.c,v 1.10 2003/04/01 21:02:25 mrk Exp */
+/* base/src/dev devMbboSoft.c,v 1.10.2.2 2009/04/03 17:46:22 lange Exp */
 /*
  *      Original Author: Bob Dalesio
  *      Current Author:  Marty Kraimer
@@ -28,8 +28,8 @@
 #include "epicsExport.h"
 
 /* Create the dset for devMbboSoft */
-static long init_record();
-static long write_mbbo();
+static long init_record(mbboRecord *prec);
+static long write_mbbo(mbboRecord *prec);
 struct {
 	long		number;
 	DEVSUPFUN	report;
@@ -47,7 +47,7 @@ struct {
 };
 epicsExportAddress(dset,devMbboSoft);
 
-static long init_record(mbboRecord *pmbbo)
+static long init_record(mbboRecord *prec)
 {
  
     long status=0;
@@ -58,10 +58,10 @@ static long init_record(mbboRecord *pmbbo)
  
 } /* end init_record() */
 
-static long write_mbbo(mbboRecord *pmbbo)
+static long write_mbbo(mbboRecord *prec)
 {
     long status;
 
-    status = dbPutLink(&pmbbo->out,DBR_USHORT, &pmbbo->val,1);
+    status = dbPutLink(&prec->out,DBR_USHORT, &prec->val,1);
     return(0);
 }

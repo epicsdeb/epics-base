@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devLoSoft.c */
-/* base/src/dev devLoSoft.c,v 1.10 2003/04/01 21:02:21 mrk Exp */
+/* base/src/dev devLoSoft.c,v 1.10.2.2 2009/04/03 17:46:22 lange Exp */
 /*
  *      Author:		Janet Anderson
  *      Date:   	09-23-91
@@ -27,8 +27,8 @@
 #include "epicsExport.h"
 
 /* Create the dset for devLoSoft */
-static long init_record();
-static long write_longout();
+static long init_record(longoutRecord *prec);
+static long write_longout(longoutRecord *prec);
 struct {
 	long		number;
 	DEVSUPFUN	report;
@@ -46,15 +46,15 @@ struct {
 };
 epicsExportAddress(dset,devLoSoft);
 
-static long init_record(longoutRecord *plongout)
+static long init_record(longoutRecord *prec)
 {
     return(0);
 } /* end init_record() */
 
-static long write_longout(longoutRecord	*plongout)
+static long write_longout(longoutRecord	*prec)
 {
     long status;
 
-    status = dbPutLink(&plongout->out,DBR_LONG, &plongout->val,1);
+    status = dbPutLink(&prec->out,DBR_LONG, &prec->val,1);
     return(0);
 }

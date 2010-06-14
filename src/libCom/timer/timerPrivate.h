@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      timerPrivate.h,v 1.30.2.2 2006/12/05 22:54:52 jhill Exp
+ *      timerPrivate.h,v 1.30.2.7 2009/05/11 22:50:06 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -17,6 +17,8 @@
 
 #ifndef epicsTimerPrivate_h
 #define epicsTimerPrivate_h
+
+#include <typeinfo>
 
 #include "tsFreeList.h"
 #include "epicsSingleton.h"
@@ -86,6 +88,8 @@ private:
     friend class timerQueue;
 };
 
+using std :: type_info;
+
 class timerQueue : public epicsTimerQueue {
 public:
     timerQueue ( epicsTimerQueueNotify &notify );
@@ -103,7 +107,11 @@ private:
     epicsTimerQueueNotify & notify;
     timer * pExpireTmr;
     epicsThreadId processThread;
+    epicsTime exceptMsgTimeStamp;
     bool cancelPending;
+    static const double exceptMsgMinPeriod;
+    void printExceptMsg ( const char * pName, 
+                const type_info & type );
 	timerQueue ( const timerQueue & );
     timerQueue & operator = ( const timerQueue & );
     friend class timer;
@@ -120,11 +128,14 @@ private:
     friend class timerQueueActiveMgr;
 };
 
+class timerQueueActiveMgr;
+
 class timerQueueActive : public epicsTimerQueueActive, 
     public epicsThreadRunable, public epicsTimerQueueNotify,
     public timerQueueActiveMgrPrivate {
 public:
-    timerQueueActive ( bool okToShare, unsigned priority );
+    typedef epicsSingleton < timerQueueActiveMgr > :: reference RefMgr;
+    timerQueueActive ( RefMgr &, bool okToShare, unsigned priority );
     epicsTimer & createTimer ();
     epicsTimerForC & createTimerForC ( epicsTimerCallback pCallback, void *pArg );
     void show ( unsigned int level ) const;
@@ -132,6 +143,7 @@ public:
     unsigned threadPriority () const;
 protected:
     ~timerQueueActive ();
+    RefMgr _refMgr;
 private:
     timerQueue queue;
     epicsEvent rescheduleEvent;
@@ -144,6 +156,9 @@ private:
     void run ();
     void reschedule ();
     double quantum ();
+    void _printLastChanceExceptionMessage ( 
+                const char * pExceptionTypeName,
+                const char * pExceptionContext );
     epicsTimerQueue & getEpicsTimerQueue ();
 	timerQueueActive ( const timerQueueActive & );
     timerQueueActive & operator = ( const timerQueueActive & );
@@ -151,9 +166,10 @@ private:
 
 class timerQueueActiveMgr {
 public:
+    typedef epicsSingleton < timerQueueActiveMgr > :: reference RefThis;
 	timerQueueActiveMgr ();
     ~timerQueueActiveMgr ();
-    epicsTimerQueueActiveForC & allocate ( bool okToShare, 
+    epicsTimerQueueActiveForC & allocate ( RefThis &, bool okToShare, 
         unsigned threadPriority = epicsThreadPriorityMin + 10 );
     void release ( epicsTimerQueueActiveForC & );
 private:
@@ -202,7 +218,7 @@ private:
 struct epicsTimerQueueActiveForC : public timerQueueActive, 
     public tsDLNode < epicsTimerQueueActiveForC > {
 public:
-    epicsTimerQueueActiveForC ( bool okToShare, unsigned priority );
+    epicsTimerQueueActiveForC ( RefMgr &, bool okToShare, unsigned priority );
     void release ();
     void * operator new ( size_t );
     void operator delete ( void * );

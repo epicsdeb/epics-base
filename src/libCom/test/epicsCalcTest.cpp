@@ -4,7 +4,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-// epicsCalcTest.cpp,v 1.1.2.6 2008/05/08 16:15:50 anj Exp
+// epicsCalcTest.cpp,v 1.1.2.8 2009/08/21 14:49:01 anj Exp
 //	Author: Andrew Johnson
 
 #include "epicsUnitTest.h"
@@ -89,6 +89,8 @@ void testBadExpr(const char *expr, short expected_err) {
 #ifndef PI
 #define PI 3.14159265358979
 #endif
+#define Inf epicsINF
+#define NaN epicsNAN
 #define D2R (PI/180.)
 #define R2D (180./PI)
 #define ABS(x) fabs(x)
@@ -195,10 +197,6 @@ MAIN(epicsCalcTest)
     int repeat;
     const double a=1.0, b=2.0, c=3.0, d=4.0, e=5.0, f=6.0,
 		 g=7.0, h=8.0, i=9.0, j=10.0, k=11.0, l=12.0;
-    double Inf = 1.0;
-    double NaN = 0.0;
-    Inf /= NaN;
-    NaN /= NaN;
     
     testPlan(533);
     
@@ -283,7 +281,7 @@ MAIN(epicsCalcTest)
     testCalc("finite(-Inf,1,2)", 0);
     testExpr(isinf(0));
     testExpr(isinf(Inf));
-    testExpr(isinf(-Inf));
+    testExpr(!!isinf(-Inf));    // Some GCCs return -1/0/+1 rather than 0/+1
     testExpr(isinf(NaN));
     testExpr(isnan(0));
     testExpr(isnan(Inf));

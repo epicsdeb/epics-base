@@ -19,6 +19,8 @@
 #include "generalTimeSup.h"
 #include "envDefs.h"
 
+#define NTP_REQUEST_TIMEOUT 4 /* seconds */
+
 static const char *pserverAddr = NULL;
 extern char* sysBootLine;
 
@@ -42,7 +44,8 @@ static int done = timeRegister();
 
 int osdNTPGet(struct timespec *ts)
 {
-    return sntpcTimeGet(const_cast<char *>(pserverAddr), sysClkRateGet(), ts);
+    return sntpcTimeGet(const_cast<char *>(pserverAddr),
+        NTP_REQUEST_TIMEOUT * sysClkRateGet(), ts);
 }
 
 void osdNTPInit(void)

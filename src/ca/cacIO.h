@@ -55,7 +55,7 @@
 #include "tsDLList.h"
 #include "epicsMutex.h"
 #include "epicsGuard.h"
-#include "epicsSingleton.h"
+#include "epicsThread.h"
 
 #ifdef cacIOh_restore_epicsExportSharedSymbols
 #   define epicsExportSharedSymbols

@@ -7,12 +7,10 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# RULES_ARCHS,v 1.23.2.13 2008/10/27 19:24:45 jba Exp
+# RULES_ARCHS,v 1.23.2.16 2009/06/24 19:33:57 anj Exp
 #
 
 all: install
-
-build install buildInstall: $(CHECK_RELEASE_$(CHECK_RELEASE))
 
 rebuild: clean install
 
@@ -36,13 +34,15 @@ buildDirs = $(addprefix O.,$(BUILD_ARCHS))
 
 #*************************************************************************
 # Create epics_host_arch dependancies for GNU make -j option
-# Only works with GNU make 3.80 or later (uses eval function)
+# Only works with GNU make 3.81 or later (uses eval function)
 # Needed in dirs where EPICS_HOST_ARCH build creates a tool used in 
 # cross arch builds
 
 CROSS_ARCHS += $(CROSS1) $(CROSS2)
 
-ifeq ($(findstring j,$(MAKEFLAGS)),j)
+# j is NOT found in MAKEFLAGS when using make 3.81
+# Hope to uncomment this for GNU make 3.82
+#ifeq ($(findstring j,$(MAKEFLAGS)),j)
 
 define DEP_template
 $(2): $$(EPICS_HOST_ARCH)
@@ -52,8 +52,7 @@ endef
 $(foreach action, $(ACTIONS), $(foreach arch,\
       $(CROSS_ARCHS),$(eval $(call DEP_template,$(action),$(arch)))))
 
-endif
-
+#endif
 #*************************************************************************
 
 $(actionArchTargets) : $(buildDirs) O.Common
@@ -69,26 +68,6 @@ $(buildDirs):
 
 O.Common:
 	$(MKDIR) O.Common
-
-#
-# RELEASE consistency checking
-
-# The RELEASE.$(EPICS_HOST_ARCH) files don't need to be included here:
-targetReleaseFiles = $(wildcard $(foreach arch, $(BUILD_ARCHS), \
-		$(TOP)/configure/RELEASE.Common.$(arch) \
-		$(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH).$(arch)))
-
-checkReleaseTargets = $(addprefix checkRelease, $(suffix $(targetReleaseFiles)))
-checkRelease: $(checkReleaseTargets)
-	$(CONVERTRELEASE) checkRelease
-$(checkReleaseTargets):checkRelease.%:
-	$(CONVERTRELEASE) -a $* checkRelease
-
-warnReleaseTargets = $(addprefix warnRelease, $(suffix $(targetReleaseFiles)))
-warnRelease: $(warnReleaseTargets)
-	-$(CONVERTRELEASE) checkRelease
-$(warnReleaseTargets):warnRelease.%:
-	-$(CONVERTRELEASE) -a $* checkRelease
 
 #
 # special clean rule
@@ -109,4 +88,3 @@ realclean ::
 .PHONY : $(cleanArchTargets)
 .PHONY : $(BUILD_ARCHS)
 .PHONY : $(ACTIONS) clean realclean archclean all
-.PHONY : checkRelease $(checkReleaseTargets)

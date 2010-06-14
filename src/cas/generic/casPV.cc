@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casPV.cc,v 1.17 2003/03/10 22:26:29 jhill Exp
+ *      casPV.cc,v 1.17.2.1 2009/08/03 22:09:51 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -109,6 +109,18 @@ caStatus casPV::read (const casCtx &, gdd &)
 caStatus casPV::write (const casCtx &, const gdd &)
 {
 	return S_casApp_noSupport;
+}
+
+//
+// casPV::writeNotify()
+//
+caStatus casPV :: writeNotify (
+    const casCtx & ctx, const gdd & val )
+{
+    // plumbed this way to preserve backwards 
+    // compatibility with the old interface which
+    // did not include a writeNotify interface
+	return this->write ( ctx, val );
 }
 
 //

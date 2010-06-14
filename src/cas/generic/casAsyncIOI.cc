@@ -3,12 +3,11 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casAsyncIOI.cc,v 1.22.2.1 2003/08/01 19:13:33 soliday Exp
+ *      casAsyncIOI.cc,v 1.22.2.3 2009/08/13 23:32:18 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -17,6 +16,8 @@
 
 #include <string>
 #include <stdexcept>
+
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "casAsyncIOI.h"
@@ -98,8 +99,6 @@ caStatus casAsyncIOI::cbFunc (
 
 	    this->ioComplete = true;
     }
-
-	this->client.getCAS().ioBlockedList::signal ();
 
 	// dont use "this" after destroying the object here
 	delete this;

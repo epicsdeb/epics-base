@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 #include "defs.h"
@@ -21,17 +20,16 @@ bucket *first_symbol;
 bucket *last_symbol;
 
 
-int
-hash(name)
-char *name;
+static int
+hash(char *name)
 {
-    register char *s;
-    register int c, k;
+    char *s;
+    int c, k;
 
     assert(name && *name);
     s = name;
     k = *s;
-    while (c = *++s)
+    while ((c = *++s))
 	k = (31*k + c) & (TABLE_SIZE - 1);
 
     return (k);
@@ -39,10 +37,9 @@ char *name;
 
 
 bucket *
-make_bucket(name)
-char *name;
+make_bucket(char *name)
 {
-    register bucket *bp;
+    bucket *bp;
 
     assert(name);
     bp = (bucket *) MALLOC(sizeof(bucket));
@@ -66,10 +63,9 @@ char *name;
 
 
 bucket *
-lookup(name)
-char *name;
+lookup(char *name)
 {
-    register bucket *bp, **bpp;
+    bucket *bp, **bpp;
 
     bpp = symbol_table + hash(name);
     bp = *bpp;
@@ -88,11 +84,11 @@ char *name;
     return (bp);
 }
 
-
-create_symbol_table()
+void
+create_symbol_table(void)
 {
-    register int i;
-    register bucket *bp;
+    int i;
+    bucket *bp;
 
     symbol_table = (bucket **) MALLOC(TABLE_SIZE*sizeof(bucket *));
     if (symbol_table == 0) no_space();
@@ -109,16 +105,18 @@ create_symbol_table()
 }
 
 
-free_symbol_table()
+void
+free_symbol_table(void)
 {
     FREE(symbol_table);
     symbol_table = 0;
 }
 
 
-free_symbols()
+void
+free_symbols(void)
 {
-    register bucket *p, *q;
+    bucket *p, *q;
 
     for (p = first_symbol; p; p = q)
     {

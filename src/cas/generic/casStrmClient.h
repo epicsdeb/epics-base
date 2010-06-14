@@ -49,9 +49,9 @@ public:
 protected:
 	caStatus processMsg ();
     bool inBufFull () const;
-    bufSizeT inBufBytesAvailable () const;
     inBufClient::fillCondition inBufFill ();
-    bufSizeT outBufBytesPresent () const;
+    bufSizeT inBufBytesPending () const;
+    bufSizeT outBufBytesPending () const;
 private:
     char hostNameStr [32];
     inBuf in;
@@ -62,9 +62,12 @@ private:
 	epicsTime lastRecvTS;
 	char * pUserName;
 	char * pHostName;
+    smartGDDPointer pValueRead;
     unsigned incommingBytesToDrain;
+    caStatus pendingResponseStatus;
 	ca_uint16_t minor_version_number;
-    bool payloadNeedsByteSwap;
+    bool reqPayloadNeedsByteSwap;
+    bool responseIsPending;
 
 	caStatus createChannel ( const char * pName );
 	caStatus verifyRequest ( casChannelI * & pChan );
@@ -101,9 +104,11 @@ private:
         const caHdrLargeArray & msg,  const caStatus ECA_XXXX );
 	caStatus writeNotifyResponseECA_XXX ( epicsGuard < casClientMutex > &,
         const caHdrLargeArray & msg, const caStatus status );
-    caStatus sendErrWithEpicsStatus (  epicsGuard < casClientMutex > &,
+    caStatus sendErrWithEpicsStatus ( epicsGuard < casClientMutex > &,
         const caHdrLargeArray * pMsg, ca_uint32_t cid, caStatus epicsStatus, 
         caStatus clientStatus );
+    caStatus writeActionSendFailureStatus ( epicsGuard < casClientMutex > &, 
+        const caHdrLargeArray &, ca_uint32_t cid, caStatus );
 
 	//
 	// one function for each CA request type that has
@@ -123,7 +128,7 @@ private:
             const caHdrLargeArray &, const caStatus status );
 	caStatus monitorResponse ( epicsGuard < casClientMutex > &,
         casChannelI & chan, const caHdrLargeArray & msg, 
-		const gdd & desc, const caStatus status );
+		const gdd &, const caStatus status );
     caStatus enumPostponedCreateChanResponse ( epicsGuard < casClientMutex > &,
         casChannelI & chan, const caHdrLargeArray & hdr );
     caStatus privateCreateChanResponse ( epicsGuard < casClientMutex > &,
@@ -138,15 +143,16 @@ private:
 	caStatus accessRightsResponse ( 
         epicsGuard < casClientMutex > &, casChannelI * pciu );
 
-	caStatus read ( const gdd * & pDesc );
-	caStatus write ();
 
-	caStatus writeArrayData();
-	caStatus writeScalarData();
-	caStatus writeString();
+    typedef caStatus ( casChannelI :: * PWriteMethod ) ( 
+        const casCtx &, const gdd & );
+	caStatus read ();
+	caStatus write ( PWriteMethod );
+	caStatus writeArrayData( PWriteMethod );
+	caStatus writeScalarData( PWriteMethod );
 
-    outBufClient::flushCondition xSend ( char * pBuf, bufSizeT nBytesAvailableToSend,
-			bufSizeT nBytesNeedToBeSent, bufSizeT & nBytesSent );
+    outBufClient::flushCondition xSend ( char * pBuf, bufSizeT nBytesToSend,
+			                                bufSizeT & nBytesSent );
     inBufClient::fillCondition xRecv ( char * pBuf, bufSizeT nBytesToRecv,
 			inBufClient::fillParameter parm, bufSizeT & nByesRecv );
 
@@ -165,6 +171,7 @@ private:
         const unsigned lineno, const unsigned idIn );
     void casChannelDestroyFromInterfaceNotify ( casChannelI & chan, 
         bool immediatedSestroyNeeded );
+    static void issuePosponeWhenNonePendingWarning ( const char * pReqTypeStr );
 
 	casStrmClient ( const casStrmClient & );
 	casStrmClient & operator = ( const casStrmClient & );

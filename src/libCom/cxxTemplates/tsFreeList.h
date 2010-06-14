@@ -11,7 +11,7 @@
 #ifndef tsFreeList_h
 #define tsFreeList_h
 
-/*  tsFreeList.h,v 1.36.2.1 2003/09/17 19:25:28 jhill Exp
+/*  tsFreeList.h,v 1.36.2.2 2009/02/10 22:58:43 jhill Exp
  *
  *                    L O S  A L A M O S
  *              Los Alamos National Laboratory
@@ -35,18 +35,18 @@
 // 1) add the following static, private free list data members 
 // to your class
 //
-// static epicsSingleton < tsFreeList < class classXYZ > > pFreeList;
+// static tsFreeList < class classXYZ > freeList;
 //
 // 2) add the following member functions to your class
 // 
 // inline void * classXYZ::operator new ( size_t size )
 // {
-//    return classXYZ::pFreeList->allocate ( size );
+//    return freeList.allocate ( size );
 // }
 //
 // inline void classXYZ::operator delete ( void *pCadaver, size_t size )
 // {
-//    classXYZ::pFreeList->release ( pCadaver, size );
+//    freeList.release ( pCadaver, size );
 // }
 //
 // NOTES:

@@ -34,10 +34,6 @@
 
 #include "caDiagnostics.h"
 
-#ifndef LOCAL
-#define LOCAL static
-#endif
-
 #ifndef NULL
 #define NULL 0
 #endif
@@ -46,15 +42,10 @@
 
 typedef struct testItem {
     chid                chix;
-    char                name[40];
+    char                name[128];
     int                 type;
     int                 count;
-    union {   
-        dbr_double_t    doubleval;	
-	    dbr_float_t     fltval;
-        dbr_short_t     intval;		
-        dbr_string_t    strval;		
-    } val;
+    void *              pValue;	
 } ti;
 
 typedef void tf ( ti *pItems, unsigned iterations, unsigned *pInlineIter );
@@ -62,7 +53,7 @@ typedef void tf ( ti *pItems, unsigned iterations, unsigned *pInlineIter );
 /*
  * test_pend()
  */
-LOCAL void test_pend(
+static void test_pend(
 ti          *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
@@ -99,7 +90,7 @@ unsigned    *pInlineIter
 /*
  * test_search ()
  */
-LOCAL void test_search (
+static void test_search (
 ti      *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
@@ -122,7 +113,7 @@ unsigned    *pInlineIter
  * test_sync_search()
  */
 #if 0
-LOCAL void test_sync_search(
+static void test_sync_search(
 ti      *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
@@ -145,7 +136,7 @@ unsigned    *pInlineIter
 /*
  * test_free ()
  */
-LOCAL void test_free(
+static void test_free(
 ti      *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
@@ -166,7 +157,7 @@ unsigned    *pInlineIter
 /*
  * test_put ()
  */
-LOCAL void test_put(
+static void test_put(
 ti      *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
@@ -176,66 +167,66 @@ unsigned    *pInlineIter
     int     status;
     dbr_int_t   val;
   
-    for (pi=pItems; pi<&pItems[iterations]; pi++) {
+    for (pi=pItems; pi < &pItems[iterations]; pi++) {
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
         status = ca_array_put(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
         SEVCHK (status, NULL);
     }
 #ifdef WAIT_FOR_ACK
@@ -247,7 +238,7 @@ unsigned    *pInlineIter
             pItems[0].type,
             pItems[0].count,
             pItems[0].chix,
-            &pItems[0].val);
+            pItems[0].pValue);
         SEVCHK (status, NULL);
     status = ca_flush_io();
         SEVCHK (status, NULL);
@@ -258,8 +249,8 @@ unsigned    *pInlineIter
 /*
  * test_get ()
  */
-LOCAL void test_get(
-ti      *pItems,
+static void test_get(
+ti          *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
 )
@@ -272,64 +263,64 @@ unsigned    *pInlineIter
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
+        SEVCHK (status, NULL);
+        status = ca_array_get(
+                pi->type,
+                pi->count,
+                pi->chix,
+                pi->pValue);
+        SEVCHK (status, NULL);
+        status = ca_array_get(
+                pi->type,
+                pi->count,
+                pi->chix,
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_array_get(
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
-            SEVCHK (status, NULL);
-        status = ca_array_get(
-                pi->type,
-                pi->count,
-                pi->chix,
-                &pi->val);
-            SEVCHK (status, NULL);
-        status = ca_array_get(
-                pi->type,
-                pi->count,
-                pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
     }
-    status = ca_pend_io(100.0);
+    status = ca_pend_io(1e20);
         SEVCHK (status, NULL);
 
     *pInlineIter = 10;
@@ -338,7 +329,7 @@ unsigned    *pInlineIter
 /*
  * test_wait ()
  */
-LOCAL void test_wait (
+static void test_wait (
 ti      *pItems,
 unsigned    iterations,
 unsigned    *pInlineIter
@@ -352,7 +343,7 @@ unsigned    *pInlineIter
                 pi->type,
                 pi->count,
                 pi->chix,
-                &pi->val);
+                pi->pValue);
             SEVCHK (status, NULL);
         status = ca_pend_io(100.0);
         SEVCHK (status, NULL);
@@ -364,7 +355,7 @@ unsigned    *pInlineIter
 /*
  * measure_get_latency
  */
-LOCAL void measure_get_latency (ti *pItems, unsigned iterations)
+static void measure_get_latency (ti *pItems, unsigned iterations)
 {
     epicsTimeStamp end_time;
     epicsTimeStamp start_time;
@@ -381,7 +372,7 @@ LOCAL void measure_get_latency (ti *pItems, unsigned iterations)
     for ( pi = pItems; pi < &pItems[iterations]; pi++ ) {
         epicsTimeGetCurrent ( &start_time );
         status = ca_array_get ( pi->type, pi->count, 
-                        pi->chix, &pi->val );
+                        pi->chix, pi->pValue );
         SEVCHK ( status, NULL );
         status = ca_pend_io ( 100.0 );
         SEVCHK ( status, NULL );
@@ -404,14 +395,20 @@ LOCAL void measure_get_latency (ti *pItems, unsigned iterations)
 
     mean = X/iterations;
     stdDev = sqrt ( XX/iterations - mean*mean );
-    printf ( "Round trip get delays - mean=%f sec, std dev=%f sec, min=%f sec max=%f sec\n",
-        mean, stdDev, min, max );
+    printf ( 
+        "Get Latency - "
+        "mean = %3.1f uS, "
+        "std dev = %3.1f uS, "
+        "min = %3.1f uS "
+        "max = %3.1f uS\n",
+        mean * 1e6, stdDev * 1e6, 
+        min * 1e6, max * 1e6 );
 }
 
 /*
  * printSearchStat()
  */
-LOCAL void printSearchStat ( const ti  *pi, unsigned iterations )
+static void printSearchStat ( const ti * pi, unsigned iterations )
 {
     unsigned i;
     double  X = 0u;
@@ -435,60 +432,97 @@ LOCAL void printSearchStat ( const ti  *pi, unsigned iterations )
 
     mean = X / iterations;
     stdDev = sqrt( XX / iterations - mean * mean );
-    printf ( "Search tries per chan - mean=%f std dev=%f min=%f max=%f\n",
+    printf ( 
+        "Search tries per chan - "
+        "mean = %3.1f "
+        "std dev = %3.1f "
+        "min = %3.1f "
+        "max = %3.1f\n",
         mean, stdDev, min, max);
 }
 
 /*
  * timeIt ()
  */
-void timeIt ( tf *pfunc, ti *pItems, unsigned iterations, unsigned nBytes )
+void timeIt ( tf *pfunc, ti *pItems, unsigned iterations,
+    unsigned nBytesSent, unsigned nBytesRecv )
 {
     epicsTimeStamp      end_time;
     epicsTimeStamp      start_time;
     double              delay;
     unsigned            inlineIter;
 
-    epicsTimeGetCurrent (&start_time);
-    (*pfunc) (pItems, iterations, &inlineIter);
-    epicsTimeGetCurrent (&end_time);
-    delay = epicsTimeDiffInSeconds (&end_time, &start_time);
-    if (delay>0.0) {
+    epicsTimeGetCurrent ( &start_time );
+    (*pfunc) ( pItems, iterations, &inlineIter );
+    epicsTimeGetCurrent ( &end_time );
+    delay = epicsTimeDiffInSeconds ( &end_time, &start_time );
+    if ( delay > 0.0 ) {
         double freq = ( iterations * inlineIter ) / delay;
-        printf ( "Elapsed Per Item = %12.8f sec, %10.1f Items per sec", 
-            1.0 / freq, freq );
+        printf ( "Per Op, %8.4f uS ( %8.4f MHz )", 
+            1e6 / freq, freq / 1e6 );
         if ( pItems != NULL ) {
-            printf(", %3.1f Mbps\n", 
-                (inlineIter*nBytes*CHAR_BIT)/(delay*1e6));
+            printf(", %8.4f snd Mbps, %8.4f rcv Mbps\n", 
+                (inlineIter*nBytesSent*CHAR_BIT)/(delay*1e6),
+                (inlineIter*nBytesRecv*CHAR_BIT)/(delay*1e6) );
         }
         else {
             printf ("\n");
         }
-    }
-    else {
-        printf ("Elapsed Per Item = %12.8f sec\n", 
-            delay/(iterations*inlineIter));
     }
 }
 
 /*
  * test ()
  */
-LOCAL void test ( ti *pItems, unsigned iterations )
+static void test ( ti *pItems, unsigned iterations )
 {
-    unsigned nBytes;
+    unsigned payloadSize, dblPayloadSize;
+    unsigned nBytesSent, nBytesRecv;
 
-    printf ( "\tasync put test\n");
-    nBytes = sizeof ( caHdr ) + OCT_ROUND( dbr_size[pItems[0].type] );
-    timeIt ( test_put, pItems, iterations, nBytes * iterations );
+    payloadSize =     
+        dbr_size_n ( pItems[0].type, pItems[0].count );
+    payloadSize = CA_MESSAGE_ALIGN ( payloadSize );
 
-    printf ( "\tasync get test\n");
-    nBytes = 2 * sizeof ( caHdr ) + OCT_ROUND ( dbr_size[pItems[0].type] );
-    timeIt ( test_get, pItems, iterations/2, nBytes * ( iterations / 2 ) );
+    dblPayloadSize = dbr_size [ DBR_DOUBLE ];
+    dblPayloadSize = CA_MESSAGE_ALIGN ( dblPayloadSize );
+    
+    if ( payloadSize > dblPayloadSize ) {
+        unsigned factor = payloadSize / dblPayloadSize;
+        while ( factor ) {
+            if ( iterations > 10 * factor ) {
+                iterations /= factor;
+                break;
+            }
+            factor /= 2;
+        }
+    }
 
-    printf ("\tsynch get test\n");
-    nBytes = 2 * sizeof ( caHdr ) + OCT_ROUND ( dbr_size[pItems[0].type] );
-    timeIt ( test_wait, pItems, iterations/100, nBytes * ( iterations / 100 ) );
+    printf ( "\t### async put test ###\n");
+    nBytesSent = sizeof ( caHdr ) + CA_MESSAGE_ALIGN( payloadSize );
+    nBytesRecv = 0u;
+    timeIt ( test_put, pItems, iterations, 
+        nBytesSent * iterations, 
+        nBytesRecv * iterations );
+
+    printf ( "\t### async get test ###\n");
+    nBytesSent = sizeof ( caHdr );
+    nBytesRecv = sizeof ( caHdr ) + CA_MESSAGE_ALIGN ( payloadSize );
+    timeIt ( test_get, pItems, iterations, 
+        nBytesSent * ( iterations ), 
+        nBytesRecv * ( iterations ) );
+
+    printf ("\t### synch get test ###\n");
+    nBytesSent = sizeof ( caHdr );
+    nBytesRecv = sizeof ( caHdr ) + CA_MESSAGE_ALIGN ( payloadSize );
+    if ( iterations > 100 ) {
+        iterations /= 100;
+    }
+    else if ( iterations > 10 ) {
+        iterations /= 10;
+    }
+    timeIt ( test_wait, pItems, iterations, 
+        nBytesSent * iterations,
+        nBytesRecv * iterations );
 }
 
 /*
@@ -497,11 +531,12 @@ LOCAL void test ( ti *pItems, unsigned iterations )
 int catime ( const char * channelName, 
     unsigned channelCount, enum appendNumberFlag appNF )
 {
-    unsigned    i;
-    unsigned    strsize;
-    unsigned    nBytes;
-    ti          *pItemList;
-
+    unsigned i;
+    int j;
+    unsigned strsize;
+    unsigned nBytesSent, nBytesRecv;
+    ti *pItemList;
+    
     if ( channelCount == 0 ) {
         printf ( "channel count was zero\n" );
         return 0;
@@ -525,7 +560,8 @@ int catime ( const char * channelName,
     }
 
     strsize = sizeof ( pItemList[0].name ) - 1;
-    nBytes = 0;
+    nBytesSent = 0;
+    nBytesRecv = 0;
     for ( i=0; i < channelCount; i++ ) {
         if ( appNF == appendNumber ) {
             sprintf ( pItemList[i].name,"%.*s%.6u",
@@ -535,70 +571,109 @@ int catime ( const char * channelName,
             strncpy ( pItemList[i].name, channelName, strsize);
         }
         pItemList[i].name[strsize]= '\0';
-        pItemList[i].count = 1;
-        nBytes += 2 * ( OCT_ROUND ( strlen ( pItemList[i].name ) ) + 2 * sizeof (caHdr) );
+        pItemList[i].count = 0;
+        pItemList[i].pValue = 0;
+        nBytesSent += 2 * ( CA_MESSAGE_ALIGN ( strlen ( pItemList[i].name ) ) 
+                            + sizeof (caHdr) );
+        nBytesRecv += 2 * sizeof (caHdr);
     }
 
-    printf ( "channel connect test\n" );
-    timeIt ( test_search, pItemList, channelCount, nBytes );
+    printf ( "Channel Connect Test\n" );
+    printf ( "--------------------\n" );
+    timeIt ( test_search, pItemList, channelCount, nBytesSent, nBytesRecv );
     printSearchStat ( pItemList, channelCount );
+    
+    for ( i = 0; i < channelCount; i++ ) {
+        size_t count = ca_element_count ( pItemList[i].chix );
+        size_t size = sizeof ( dbr_string_t ) * count;
+        pItemList[i].count = count;
+        pItemList[i].pValue = malloc ( size );
+        assert ( pItemList[i].pValue );
+    }
 
     printf (
-        "channel name=%s, native type=%d, native count=%lu\n",
+        "channel name=%s, native type=%d, native count=%u\n",
         ca_name (pItemList[0].chix),
         ca_field_type (pItemList[0].chix),
-        ca_element_count (pItemList[0].chix));
+        pItemList[0].count );
 
-    printf ("\tpend event test\n");
-    timeIt (test_pend, NULL, 100, 0);
+    printf ("Pend Event Test\n");
+    printf ( "----------------\n" );
+    timeIt ( test_pend, NULL, 100, 0, 0 );
 
     for ( i = 0; i < channelCount; i++ ) {
+        dbr_float_t * pFltVal = ( dbr_float_t * ) pItemList[i].pValue;
         double val = i;
         val /= channelCount;
-        pItemList[i].val.fltval = (dbr_float_t) val;
+        for ( j = 0; j < pItemList[i].count; j++ ) {
+            pFltVal[j] = (dbr_float_t) val;
+        }
         pItemList[i].type = DBR_FLOAT; 
     }
-    printf ( "float test\n" );
+    printf ( "DBR_FLOAT Test\n" );
+    printf ( "--------------\n" );
     test ( pItemList, channelCount );
 
     for ( i = 0; i < channelCount; i++ ) {
+        dbr_double_t * pDblVal = ( dbr_double_t * ) pItemList[i].pValue;
         double val = i;
         val /= channelCount;
-        pItemList[i].val.doubleval =  (dbr_double_t) val;
+        for ( j = 0; j < pItemList[i].count; j++ ) {
+            pDblVal[j] = (dbr_double_t) val;
+        }
         pItemList[i].type = DBR_DOUBLE; 
     }
-    printf ( "double test\n" );
+    printf ( "DBR_DOUBLE Test\n" );
+    printf ( "---------------\n" );
     test ( pItemList, channelCount );
 
+    
     for ( i = 0; i < channelCount; i++ ) {
+        dbr_string_t * pStrVal = ( dbr_string_t * ) pItemList[i].pValue;
         double val = i;
         val /= channelCount;
-        sprintf ( pItemList[i].val.strval, "%f", val );
+        for ( j = 0; j < pItemList[i].count; j++ ) {
+            sprintf ( pStrVal[j], "%f", val );
+        }
         pItemList[i].type = DBR_STRING; 
     }
-    printf ( "string test\n" );
+    printf ( "DBR_STRING Test\n" );
+    printf ( "---------------\n" );
     test ( pItemList, channelCount );
 
     for ( i = 0; i < channelCount; i++ ) {
+        dbr_int_t * pIntVal = ( dbr_int_t * ) pItemList[i].pValue;
         double val = i;
         val /= channelCount;
-        pItemList[i].val.intval = (dbr_int_t) val;
+        for ( j = 0; j < pItemList[i].count; j++ ) {
+            pIntVal[j] = (dbr_int_t) val;
+        }
         pItemList[i].type = DBR_INT; 
     }
-    printf ( "integer test\n" );
+    printf ( "DBR_INT Test\n" );
+    printf ( "------------\n" );
     test ( pItemList, channelCount );
 
-    printf ( "round trip jitter test\n" );
+    printf ( "Get Latency Test\n" );
+    printf ( "----------------\n" );
     for ( i = 0; i < channelCount; i++ ) {
-        pItemList[i].val.fltval = 0.0f;
+        dbr_double_t * pDblVal = ( dbr_double_t * ) pItemList[i].pValue;
+        for ( j = 0; j < pItemList[i].count; j++ ) {
+            pDblVal[j] = 0;
+        }
         pItemList[i].type = DBR_DOUBLE; 
     }   
     measure_get_latency ( pItemList, channelCount );
 
-    printf ("free test\n");
-    timeIt ( test_free, pItemList, channelCount, 0 );
+    printf ( "Free Channel Test\n" );
+    printf ( "-----------------\n" );
+    timeIt ( test_free, pItemList, channelCount, 0, 0 );
 
     SEVCHK ( ca_task_exit (), "Unable to free resources at exit" );
+    
+    for ( i = 0; i < channelCount; i++ ) {
+        free ( pItemList[i].pValue );
+    }   
 
     free ( pItemList );
 

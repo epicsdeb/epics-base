@@ -13,11 +13,11 @@ EXPANDED = $(EXPAND:%@=%)
 buildInstall: $(EXPANDED)
 
 $(EXPANDED): %: ../%@
-	@echo "Expanding $< to $@"
+	$(ECHO) "Expanding $< to $@"
 	@$(RM) $@
 	@$(EXPAND_TOOL) $(EXPANDFLAGS) $($@_EXPANDFLAGS) $< $@
 
 clean::
-	$(RM) $(EXPANDED)
+	@$(RM) $(EXPANDED)
 
 endif

@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS osdThread.c
- *      osdThread.c,v 1.45.2.24 2008/09/08 21:32:04 norume Exp
+ *      osdThread.c,v 1.45.2.26 2009/07/23 21:04:27 norume Exp
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
@@ -59,7 +59,7 @@ static struct taskVar *taskVarHead;
 /*
  * Support for `once-only' execution
  */
-static int initialized;
+static int initialized = 0;
 static epicsMutexId onceMutex;
 
 /*
@@ -126,11 +126,11 @@ epicsShareFunc epicsThreadBooleanStatus epicsShareAPI epicsThreadHighestPriority
 unsigned int
 epicsThreadGetStackSize (epicsThreadStackSizeClass size)
 {
-    unsigned int stackSize = 16000;
+    unsigned int stackSize = 11000;
     switch(size) {
-    case epicsThreadStackSmall:  stackSize =  8000; break;
-    case epicsThreadStackMedium: stackSize = 12000; break;
-    case epicsThreadStackBig:                       break;
+    case epicsThreadStackSmall:  stackSize = 5000; break;
+    case epicsThreadStackMedium: stackSize = 8000; break;
+    case epicsThreadStackBig:                      break;
     default:
         errlogPrintf("epicsThreadGetStackSize illegal argument");
         break;

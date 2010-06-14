@@ -27,19 +27,12 @@
 #define epicsAssertAuthor "Jeff Hill johill@lanl.gov"
 #include "epicsAssert.h"
 #include "epicsTime.h"
+#include "dbDefs.h"
 #include "envDefs.h"
 #include "caDiagnostics.h"
 #include "cadef.h"
 #include "fdmgr.h"
 #include "epicsExit.h"
-
-#ifndef min
-#define min(A,B) ((A)>(B)?(B):(A))
-#endif
-
-#ifndef NELEMENTS
-#define NELEMENTS(A) ( sizeof (A) / sizeof (A[0]) )
-#endif
 
 typedef struct appChan {
     char name[64];
@@ -61,6 +54,9 @@ unsigned getCallbackCount;
 static epicsTimeStamp showProgressBeginTime;
 
 static const double timeoutToPendIO = 1e20;
+
+#define verify(exp) ((exp) ? (void)0 : \
+    epicsAssert(__FILE__, __LINE__, #exp, epicsAssertAuthor))
 
 void showProgressBegin ( const char *pTestName, unsigned interestLevel )
 {
@@ -140,7 +136,7 @@ void monitorSubscriptionFirstUpdateTest ( const char *pName, chid chan, unsigned
         epicsThreadSleep ( 0.1 );
         ca_poll (); /* emulate typical GUI */
     }
-    assert ( eventCount > 0 );
+    verify ( eventCount > 0 );
 
     /* clear any knowledge of old gets */
     ca_pend_io ( 1e-5 );
@@ -174,7 +170,7 @@ void monitorSubscriptionFirstUpdateTest ( const char *pName, chid chan, unsigned
         epicsThreadSleep ( 0.1 );
         ca_poll (); /* emulate typical GUI */
     }
-    assert ( eventCount > 0 );
+    verify ( eventCount > 0 );
 
     status = ca_clear_event ( id );
     SEVCHK (status, 0);
@@ -200,7 +196,7 @@ void monitorSubscriptionFirstUpdateTest ( const char *pName, chid chan, unsigned
         epicsThreadSleep ( 0.1 );
         ca_poll (); /* emulate typical GUI */
     }
-    assert ( eventCount > 0 );
+    verify ( eventCount > 0 );
 
     /* verify that a ca_put() produces an update, but */
     /* this may fail if there is an unusual deadband */
@@ -231,7 +227,7 @@ void monitorSubscriptionFirstUpdateTest ( const char *pName, chid chan, unsigned
         epicsThreadSleep ( 0.1 );
         ca_poll (); /* emulate typical GUI */
     }
-    assert ( eventCount > 0 );
+    verify ( eventCount > 0 );
 
     /* clean up */
     status = ca_clear_channel ( chan2 );
@@ -289,7 +285,7 @@ void verifyMonitorSubscriptionFlushIO ( chid chan, unsigned interestLevel  )
         epicsThreadSleep ( 0.1 );
         ca_poll (); /* emulate typical GUI */
     }
-    assert ( eventCount > 0 );
+    verify ( eventCount > 0 );
     status = ca_clear_event ( id );
     SEVCHK (status, 0);
 
@@ -300,9 +296,9 @@ void accessRightsStateChange ( struct access_rights_handler_args args )
 {
     appChan *pChan = (appChan *) ca_puser ( args.chid );
 
-    assert ( pChan->channel == args.chid );
-    assert ( args.ar.read_access == ca_read_access ( args.chid ) );
-    assert ( args.ar.write_access == ca_write_access ( args.chid ) );
+    verify ( pChan->channel == args.chid );
+    verify ( args.ar.read_access == ca_read_access ( args.chid ) );
+    verify ( args.ar.write_access == ca_write_access ( args.chid ) );
     accessUpdateCount++;
     pChan->accessUpdateCount++;
 }
@@ -311,12 +307,12 @@ void getCallbackStateChange ( struct event_handler_args args )
 {
     appChan *pChan = (appChan *) args.usr;
 
-    assert ( pChan->channel == args.chid );
-    assert ( pChan->connected );
+    verify ( pChan->channel == args.chid );
+    verify ( pChan->connected );
     if ( args.status != ECA_NORMAL ) {
         printf ( "getCallbackStateChange abnormal status was \"%s\"\n", 
             ca_message ( args.status ) ); 
-        assert ( args.status == ECA_NORMAL );
+        verify ( args.status == ECA_NORMAL );
     }
 
     getCallbackCount++;
@@ -329,25 +325,25 @@ void connectionStateChange ( struct connection_handler_args args )
 
     appChan *pChan = (appChan *) ca_puser ( args.chid );
 
-    assert ( pChan->channel == args.chid );
+    verify ( pChan->channel == args.chid );
 
     if ( args.op == CA_OP_CONN_UP ) {
         if ( pChan->accessRightsHandlerInstalled ) {
-            assert ( pChan->accessUpdateCount > 0u );
+            verify ( pChan->accessUpdateCount > 0u );
         }
-        assert ( ! pChan->connected );
+        verify ( ! pChan->connected );
         pChan->connected = 1;
         status = ca_get_callback ( DBR_STS_STRING, args.chid, getCallbackStateChange, pChan );
         SEVCHK (status, 0);
     }
     else if ( args.op == CA_OP_CONN_DOWN ) {
-        assert ( pChan->connected );
+        verify ( pChan->connected );
         pChan->connected = 0u;
-        assert ( ! ca_read_access ( args.chid ) );
-        assert ( ! ca_write_access ( args.chid ) );
+        verify ( ! ca_read_access ( args.chid ) );
+        verify ( ! ca_write_access ( args.chid ) );
     }
     else {
-        assert ( 0 );
+        verify ( 0 );
     }
     pChan->connectionUpdateCount++;
     connectionUpdateCount++;
@@ -358,11 +354,11 @@ void subscriptionStateChange ( struct event_handler_args args )
     struct dbr_sts_string * pdbrgs = ( struct dbr_sts_string * ) args.dbr;
     appChan *pChan = (appChan *) args.usr;
 
-    assert ( args.status == ECA_NORMAL );
-    assert ( pChan->channel == args.chid );
-    assert ( pChan->connected );
-    assert ( args.type == DBR_STS_STRING );
-    assert ( strlen ( pdbrgs->value ) <= MAX_STRING_SIZE );
+    verify ( args.status == ECA_NORMAL );
+    verify ( pChan->channel == args.chid );
+    verify ( pChan->connected );
+    verify ( args.type == DBR_STS_STRING );
+    verify ( strlen ( pdbrgs->value ) <= MAX_STRING_SIZE );
     pChan->subscriptionUpdateCount++;
     subscriptionUpdateCount++;
 }
@@ -429,7 +425,7 @@ void verifyConnectionHandlerConnect ( appChan *pChans, unsigned chanCount,
                     subscriptionStateChange, &pChans[j], &pChans[j].subscription );
             SEVCHK ( status, NULL );
 
-            assert ( ca_test_io () == ECA_IODONE );
+            verify ( ca_test_io () == ECA_IODONE );
         }
 
         ca_flush_io ();
@@ -443,13 +439,13 @@ void verifyConnectionHandlerConnect ( appChan *pChans, unsigned chanCount,
         }
 
         for ( j = 0u; j < chanCount; j++ ) {
-            assert ( pChans[j].getCallbackCount == 1u);
-            assert ( pChans[j].connectionUpdateCount > 0 );
+            verify ( pChans[j].getCallbackCount == 1u);
+            verify ( pChans[j].connectionUpdateCount > 0 );
             if ( pChans[j].connectionUpdateCount > 1u ) {
                 printf ("Unusual connection activity count = %u on channel %s?\n",
                     pChans[j].connectionUpdateCount, pChans[j].name );
             }
-            assert ( pChans[j].accessUpdateCount > 0 );
+            verify ( pChans[j].accessUpdateCount > 0 );
             if ( pChans[j].accessUpdateCount > 1u ) {
                 printf ("Unusual access rights activity count = %u on channel %s?\n",
                     pChans[j].connectionUpdateCount, pChans[j].name );
@@ -522,7 +518,7 @@ void verifyBlockingConnect ( appChan *pChans, unsigned chanCount,
     i = 0;
     while ( backgroundConnCount > 1u ) {
         backgroundConnCount = ca_get_ioc_connection_count ();
-        assert ( i++ < 10 );
+        verify ( i++ < 10 );
         printf ( "Z" );
         fflush ( stdout );
         epicsThreadSleep ( 1.0 );
@@ -542,11 +538,11 @@ void verifyBlockingConnect ( appChan *pChans, unsigned chanCount,
             SEVCHK ( status, NULL );
 
             if ( ca_state ( pChans[j].channel ) == cs_conn ) {
-                assert ( VALID_DB_REQ ( ca_field_type ( pChans[j].channel ) ) );
+                verify ( VALID_DB_REQ ( ca_field_type ( pChans[j].channel ) ) );
             }
             else {
-                assert ( INVALID_DB_REQ ( ca_field_type ( pChans[j].channel ) ) );
-                assert ( ca_test_io () == ECA_IOINPROGRESS );
+                verify ( INVALID_DB_REQ ( ca_field_type ( pChans[j].channel ) ) );
+                verify ( ca_test_io () == ECA_IOINPROGRESS );
             }
             
             status = ca_replace_access_rights_event (
@@ -584,14 +580,14 @@ void verifyBlockingConnect ( appChan *pChans, unsigned chanCount,
 
         showProgress ( interestLevel );
 
-        assert ( ca_test_io () == ECA_IODONE );
+        verify ( ca_test_io () == ECA_IODONE );
 
         connections = ca_get_ioc_connection_count ();
-        assert ( connections == backgroundConnCount );
+        verify ( connections == backgroundConnCount );
 
         for ( j = 0u; j < chanCount; j++ ) {
-            assert ( VALID_DB_REQ ( ca_field_type ( pChans[j].channel ) ) );
-            assert ( ca_state ( pChans[j].channel ) == cs_conn );
+            verify ( VALID_DB_REQ ( ca_field_type ( pChans[j].channel ) ) );
+            verify ( ca_state ( pChans[j].channel ) == cs_conn );
             SEVCHK ( ca_clear_channel ( pChans[j].channel ), NULL );
         }
 
@@ -612,7 +608,7 @@ void verifyBlockingConnect ( appChan *pChans, unsigned chanCount,
             while ( ca_get_ioc_connection_count () != backgroundConnCount ) {
                 epicsThreadSleep ( 0.1 );
                 ca_poll (); /* emulate typical GUI */
-                assert ( ++j < 100 );
+                verify ( ++j < 100 );
             }
         }
         showProgress ( interestLevel );
@@ -628,7 +624,7 @@ void verifyBlockingConnect ( appChan *pChans, unsigned chanCount,
         SEVCHK ( status, NULL );
     }
 
-    assert ( ca_test_io () == ECA_IODONE );
+    verify ( ca_test_io () == ECA_IODONE );
 
     /*
      * verify ca_pend_io() does not see old search requests
@@ -657,13 +653,13 @@ void verifyBlockingConnect ( appChan *pChans, unsigned chanCount,
             SEVCHK ( status, NULL );
             status = ca_pend_io ( 1e-16 );
             if ( status != ECA_TIMEOUT ) {
-                assert ( ca_state ( pChans[1].channel ) == cs_conn );
+                verify ( ca_state ( pChans[1].channel ) == cs_conn );
             }
             status = ca_clear_channel ( pChans[1].channel );
             SEVCHK ( status, NULL );
         }
         else {
-            assert ( ca_state( pChans[0].channel ) == cs_conn );
+            verify ( ca_state( pChans[0].channel ) == cs_conn );
         }
     }
     status = ca_clear_channel( pChans[0].channel );
@@ -728,9 +724,9 @@ void grEnumTest ( chid chan, unsigned interestLevel )
     SEVCHK (status, "DBR_GR_ENUM ca_get()");
 
     status = ca_pend_io (timeoutToPendIO);
-    assert (status == ECA_NORMAL);
+    verify (status == ECA_NORMAL);
 
-    assert ( ge.no_str >= 0 && ge.no_str < NELEMENTS(ge.strs) );
+    verify ( ge.no_str >= 0 && ge.no_str < NELEMENTS(ge.strs) );
     if ( ge.no_str > 0 ) {
         printf ("Enum state str = {");
         count = (unsigned) ge.no_str;
@@ -770,7 +766,7 @@ void ctrlDoubleTest ( chid chan, unsigned interestLevel )
 
     size = sizeof (*pDbl)*ca_element_count(chan);
     pDbl = malloc (size);
-    assert (pDbl!=NULL);
+    verify (pDbl!=NULL);
 
     /*
      * initialize the array
@@ -789,7 +785,7 @@ void ctrlDoubleTest ( chid chan, unsigned interestLevel )
 
     size = dbr_size_n(DBR_CTRL_DOUBLE, ca_element_count(chan));
     pCtrlDbl = (struct dbr_ctrl_double *) malloc (size); 
-    assert (pCtrlDbl!=NULL);
+    verify (pCtrlDbl!=NULL);
 
     /*
      * read the array from the PV
@@ -799,14 +795,14 @@ void ctrlDoubleTest ( chid chan, unsigned interestLevel )
                     chan, pCtrlDbl);
     SEVCHK (status, "ctrlDoubleTest, ca_array_get");
     status = ca_pend_io ( timeoutToPendIO );
-    assert (status==ECA_NORMAL);
+    verify (status==ECA_NORMAL);
 
     /*
      * verify the result
      */
     for (i=0; i<nElem; i++) {
         double diff = pDbl[i] - sin (i*slice);
-        assert (fabs(diff) < DBL_EPSILON*4);
+        verify (fabs(diff) < DBL_EPSILON*4);
     }
 
     free (pCtrlDbl);
@@ -837,7 +833,7 @@ void verifyBlockInPendIO ( chid chan, unsigned interestLevel  )
     "get block test failed - val written %d\n", req );
                 printf (
     "get block test failed - val read %d\n", resp );
-                assert ( 0 );
+                verify ( 0 );
             }
         }
         else if ( resp != -100 ) {
@@ -854,7 +850,7 @@ void verifyBlockInPendIO ( chid chan, unsigned interestLevel  )
     "get block test failed - val written %d\n", req);
             printf (
     "get block test failed - val read %d\n", resp);
-            assert(0);
+            verify (0);
         }
         showProgressEnd ( interestLevel );
     }
@@ -886,7 +882,7 @@ void floatTest ( chid chan, dbr_float_t beginValue, dbr_float_t increment,
         if ( fabs ( fval - fretval ) > epsilon ) {
             printf ( "float test failed val written %f\n", fval );
             printf ( "float test failed val read %f\n", fretval );
-            assert (0);
+            verify (0);
         }
         fval += increment;
     }
@@ -916,7 +912,7 @@ void doubleTest ( chid chan, dbr_double_t beginValue,
         if ( fabs ( fval - fretval ) > epsilon ) {
             printf ( "double test failed val written %f\n", fval );
             printf ( "double test failed val read %f\n", fretval );
-            assert ( 0 );
+            verify ( 0 );
         }
         fval += increment;
     }
@@ -967,7 +963,7 @@ void verifyAnalogIO ( chid chan, int dataType, double min, double max,
                 (dbr_double_t) epsil, iter );
         }
         else {
-            assert ( 0 );
+            verify ( 0 );
         }
     }
     base = max;
@@ -988,7 +984,7 @@ void verifyAnalogIO ( chid chan, int dataType, double min, double max,
                 (dbr_double_t) epsil, iter );
          }
         else {
-            assert ( 0 );
+            verify ( 0 );
         }
     }
     base = - max;
@@ -1009,7 +1005,7 @@ void verifyAnalogIO ( chid chan, int dataType, double min, double max,
                 (dbr_double_t) epsil, iter );
          }
         else {
-            assert ( 0 );
+            verify ( 0 );
         }
     }
     showProgressEnd ( interestLevel );
@@ -1049,7 +1045,7 @@ void verifyLongIO ( chid chan, unsigned interestLevel  )
             ca_get ( DBR_LONG, chan, &rdbk );
             status = ca_pend_io ( timeoutToPendIO );
             SEVCHK ( status, "get pend failed\n" );
-            assert ( iter == rdbk );
+            verify ( iter == rdbk );
         }
         showProgressEnd ( interestLevel );
     }
@@ -1094,7 +1090,7 @@ void verifyShortIO ( chid chan, unsigned interestLevel  )
             ca_get ( DBR_SHORT, chan, &rdbk );
             status = ca_pend_io ( timeoutToPendIO );
             SEVCHK ( status, "get pend failed\n" );
-            assert ( iter == rdbk );
+            verify ( iter == rdbk );
         }
         showProgressEnd ( interestLevel );
     }
@@ -1188,19 +1184,24 @@ void verifyHighThroughputWriteCallback ( chid chan, unsigned interestLevel )
 
     if ( ca_write_access (chan) && ca_v42_ok (chan) ) {
         unsigned count = 0u;
+        dbr_double_t dval;
         showProgressBegin ( "verifyHighThroughputWriteCallback", interestLevel );
         for ( i=0; i<10000; i++ ) {
-            dbr_float_t fval = 3.3F;
+            dval = i + 1;
             status = ca_array_put_callback (
-                    DBR_FLOAT, 1, chan, &fval,
+                    DBR_DOUBLE, 1, chan, &dval,
                     nUpdatesTester, &count );
             SEVCHK ( status, NULL );
         }
         SEVCHK ( ca_flush_io (), NULL );
-        while ( count < 10000u ) {
-            epicsThreadSleep ( 0.1 );
-            ca_poll (); /* emulate typical GUI */
-        }
+        dval = 0.0;
+        status = ca_get ( DBR_DOUBLE, chan, &dval );
+        SEVCHK ( status, 
+            "verifyHighThroughputWriteCallback, verification get" );
+        status = ca_pend_io ( timeoutToPendIO );
+        SEVCHK ( status, 
+            "verifyHighThroughputWriteCallback, verification get pend" );
+        verify ( dval == i );
         showProgressEnd ( interestLevel );
     }
     else {
@@ -1221,14 +1222,14 @@ void verifyBadString ( chid chan, unsigned interestLevel  )
         showProgressBegin ( "verifyBadString", interestLevel );
         memset (stimStr, 'a', sizeof (stimStr) );
         status = ca_array_put ( DBR_STRING, 1u, chan, stimStr );
-        assert ( status != ECA_NORMAL );
+        verify ( status != ECA_NORMAL );
         sprintf ( stimStr, "%u", 8u );
         status = ca_array_put ( DBR_STRING, 1u, chan, stimStr );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
         status = ca_array_get ( DBR_STRING, 1u, chan, respStr );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
         status = ca_pend_io ( timeoutToPendIO );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
         if ( strcmp ( stimStr, respStr ) ) {
             printf (
     "Test fails if stim \"%s\" isnt roughly equiv to resp \"%s\"\n",
@@ -1441,7 +1442,8 @@ void singleSubscriptionDeleteTest ( chid chan, unsigned interestLevel  )
             unsigned j = 0;
             while ( j < i ) {
                 temp = (float) j++;
-                SEVCHK ( ca_put (DBR_FLOAT, chan, &temp), NULL);
+                SEVCHK ( ca_put (DBR_FLOAT, chan, &temp), 
+                    "singleSubscriptionDeleteTest - one of multiple puts" );
             }
             ca_flush_io ();
         }
@@ -1474,7 +1476,7 @@ void channelClearWithEventTrafficTest ( const char *pName, unsigned interestLeve
             CA_PRIORITY_DEFAULT, &chan );
         status = ca_pend_io ( timeoutToPendIO );
         SEVCHK ( status, "channelClearWithEventTrafficTest: channel connect failed" );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
 
         count = 0u;
         SEVCHK ( ca_add_event ( DBR_GR_FLOAT, chan, noopSubscriptionStateChange,
@@ -1517,7 +1519,7 @@ void selfDeleteEvent ( struct event_handler_args args )
 {
     int status;
     status = ca_clear_event ( globalEventID );
-    assert ( status == ECA_NORMAL ); 
+    verify ( status == ECA_NORMAL ); 
 }
 
 void eventClearTest ( chid chan )
@@ -1602,7 +1604,7 @@ void exceptionTest ( chid chan, unsigned interestLevel )
         SEVCHK ( status, "exception notify install failed" );
 
         pRS = malloc ( ca_element_count (chan) * sizeof (*pRS) );
-        assert ( pRS );
+        verify ( pRS );
         status = ca_array_get ( DBR_PUT_ACKT, 
             ca_element_count (chan), chan, pRS ); 
         SEVCHK  ( status, "array read request failed" );
@@ -1628,7 +1630,7 @@ void exceptionTest ( chid chan, unsigned interestLevel )
         status = ca_array_get_callback ( DBR_PUT_ACKT, 
             ca_element_count (chan), chan, arrayEventExceptionNotify, 0 ); 
         if ( status != ECA_NORMAL ) {
-            assert ( status == ECA_BADTYPE || status == ECA_GETFAIL );
+            verify ( status == ECA_BADTYPE || status == ECA_GETFAIL );
             arrayEventExceptionNotifyComplete = 1;
         }
         ca_flush_io ();
@@ -1652,7 +1654,7 @@ void exceptionTest ( chid chan, unsigned interestLevel )
         status = ca_add_array_event ( DBR_PUT_ACKT, ca_element_count ( chan ), 
                         chan, arrayEventExceptionNotify, 0, 0.0, 0.0, 0.0, &id ); 
         if ( status != ECA_NORMAL ) {
-            assert ( status == ECA_BADTYPE || status == ECA_GETFAIL );
+            verify ( status == ECA_BADTYPE || status == ECA_GETFAIL );
             arrayEventExceptionNotifyComplete = 1;
         }
         ca_flush_io ();
@@ -1680,14 +1682,14 @@ void exceptionTest ( chid chan, unsigned interestLevel )
         SEVCHK ( status, "exception notify install failed" );
 
         pWS = malloc ( ca_element_count (chan) * MAX_STRING_SIZE );
-        assert ( pWS );
+        verify ( pWS );
         for ( i = 0; i < ca_element_count (chan); i++ ) {
             strcpy ( pWS[i], "@#$%" );
         }
         status = ca_array_put ( DBR_STRING, 
             ca_element_count (chan), chan, pWS ); 
         if ( status != ECA_NORMAL ) {
-            assert ( status == ECA_BADTYPE || status == ECA_PUTFAIL );
+            verify ( status == ECA_BADTYPE || status == ECA_PUTFAIL );
             acctstExceptionCount++; /* local PV case */
         }
         ca_flush_io ();
@@ -1712,7 +1714,7 @@ void exceptionTest ( chid chan, unsigned interestLevel )
         unsigned i;
 
         pWS = malloc ( ca_element_count (chan) * MAX_STRING_SIZE );
-        assert ( pWS );
+        verify ( pWS );
         for ( i = 0; i < ca_element_count (chan); i++ ) {
             strcpy ( pWS[i], "@#$%" );
         }
@@ -1752,7 +1754,7 @@ void arrayReadNotify ( struct event_handler_args args )
     dbr_double_t *pRF = ( dbr_double_t * ) ( args.dbr );
     int i;
     for ( i = 0; i < args.count; i++ ) {
-        assert ( pWF[i] == pRF[i] );
+        verify ( pWF[i] == pRF[i] );
     }
     arrayReadNotifyComplete = 1;
 }
@@ -1782,10 +1784,10 @@ void arrayTest ( chid chan, unsigned maxArrayBytes, unsigned interestLevel )
     showProgressBegin ( "arrayTest", interestLevel );
 
     pRF = (dbr_double_t *) calloc ( ca_element_count (chan), sizeof (*pRF) );
-    assert ( pRF != NULL );
+    verify ( pRF != NULL );
 
     pWF = (dbr_double_t *) calloc ( ca_element_count (chan), sizeof (*pWF) );
-    assert ( pWF != NULL );
+    verify ( pWF != NULL );
 
     /*
      * write some random numbers into the array
@@ -1811,7 +1813,11 @@ void arrayTest ( chid chan, unsigned maxArrayBytes, unsigned interestLevel )
      * verify read response matches values written
      */
     for ( i = 0; i < ca_element_count ( chan ); i++ ) {
-        assert ( pWF[i] == pRF[i] );
+        if ( pWF[i] != pRF[i] ) {
+            printf ( "i=%u, pWF[i]=%f, pRF[i]=%f\n",
+                i, pWF[i], pRF[i]);
+        }
+        verify ( pWF[i] == pRF[i] );
     }
 
     /*
@@ -1824,7 +1830,7 @@ void arrayTest ( chid chan, unsigned maxArrayBytes, unsigned interestLevel )
         if ( size <= maxArrayBytes ) {
 
             pRS = malloc ( ca_element_count (chan) * MAX_STRING_SIZE );
-            assert ( pRS );
+            verify ( pRS );
             status = ca_array_get ( DBR_STRING, 
                 ca_element_count (chan), chan, pRS ); 
             SEVCHK  ( status, "array read request failed" );
@@ -1898,7 +1904,7 @@ void arrayTest ( chid chan, unsigned maxArrayBytes, unsigned interestLevel )
             }
         }
         else {
-            assert ( status == ECA_BADCOUNT );
+            verify ( status == ECA_BADCOUNT );
         }
         status = ca_add_exception_event ( 0, 0 );
         SEVCHK ( status, "exception notify install failed" );
@@ -1927,54 +1933,54 @@ void unequalServerBufferSizeTest ( const char * pName, unsigned interestLevel )
 
     /* this test must be run when no channels are connected */
     connections = ca_get_ioc_connection_count ();
-    assert ( connections == 0u );
+    verify ( connections == 0u );
 
     status = ca_create_channel ( pName, 0, 0, 0, & newChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_pend_io ( timeoutToPendIO );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     showProgress ( interestLevel );
 
     if ( ! ca_write_access ( newChan ) ) {
         printf ( "skipping unequal buffer size test - no write access\n" );
         status = ca_clear_channel ( newChan );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
         return;
     }
 
     pRF = (dbr_double_t *) calloc ( ca_element_count (newChan), sizeof (*pRF) );
-    assert ( pRF != NULL );
+    verify ( pRF != NULL );
 
     pWF = (dbr_double_t *) calloc ( ca_element_count (newChan), sizeof (*pWF) );
-    assert ( pWF != NULL );
+    verify ( pWF != NULL );
 
     status = ca_array_get ( DBR_DOUBLE, ca_element_count ( newChan ), 
                 newChan, pRF ); 
     status = ca_pend_io ( timeoutToPendIO );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_clear_channel ( newChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     showProgress ( interestLevel );
 
     status = ca_create_channel ( pName, 0, 0, 0, &newChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_pend_io ( timeoutToPendIO );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     showProgress ( interestLevel );
 
     status = ca_array_put ( DBR_DOUBLE, ca_element_count ( newChan ), 
                 newChan, pWF ); 
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_array_get ( DBR_DOUBLE, 1, 
                 newChan, pRF ); 
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_pend_io ( timeoutToPendIO );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_clear_channel ( newChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     free ( pRF );
     free ( pWF );
@@ -2003,7 +2009,7 @@ void pend_event_delay_test ( dbr_double_t request )
     accuracy = 100.0*(delay-request)/request;
     printf ( "CA pend event delay = %f sec results in error = %f %%\n",
         request, accuracy );
-    assert ( fabs(accuracy) < 10.0 );
+    verify ( fabs(accuracy) < 10.0 );
 }
 
 void caTaskExitTest ( unsigned interestLevel )
@@ -2018,31 +2024,31 @@ void caTaskExitTest ( unsigned interestLevel )
     showProgressEnd ( interestLevel );
 }
 
-void verifyDataTypeMacros ()
+void verifyDataTypeMacros (void)
 {
     int type;
 
     type = dbf_type_to_DBR ( DBF_SHORT );
-    assert ( type == DBR_SHORT );
+    verify ( type == DBR_SHORT );
     type = dbf_type_to_DBR_STS ( DBF_SHORT );
-    assert ( type == DBR_STS_SHORT );
+    verify ( type == DBR_STS_SHORT );
     type = dbf_type_to_DBR_GR ( DBF_SHORT );
-    assert ( type == DBR_GR_SHORT );
+    verify ( type == DBR_GR_SHORT );
     type = dbf_type_to_DBR_CTRL ( DBF_SHORT );
-    assert ( type == DBR_CTRL_SHORT );
+    verify ( type == DBR_CTRL_SHORT );
     type = dbf_type_to_DBR_TIME ( DBF_SHORT );
-    assert ( type == DBR_TIME_SHORT );
-    assert ( strcmp ( dbr_type_to_text( DBR_SHORT ), "DBR_SHORT" )  == 0 );
-    assert ( strcmp ( dbf_type_to_text( DBF_SHORT ), "DBF_SHORT" )  == 0 );
-    assert ( dbr_type_is_SHORT ( DBR_SHORT ) );
-    assert ( dbr_type_is_valid ( DBR_SHORT ) );
-    assert ( dbf_type_is_valid ( DBF_SHORT ) );
+    verify ( type == DBR_TIME_SHORT );
+    verify ( strcmp ( dbr_type_to_text( DBR_SHORT ), "DBR_SHORT" )  == 0 );
+    verify ( strcmp ( dbf_type_to_text( DBF_SHORT ), "DBF_SHORT" )  == 0 );
+    verify ( dbr_type_is_SHORT ( DBR_SHORT ) );
+    verify ( dbr_type_is_valid ( DBR_SHORT ) );
+    verify ( dbf_type_is_valid ( DBF_SHORT ) );
     {
         int dataType = -1;
         dbf_text_to_type ( "DBF_SHORT", dataType ); 
-        assert ( dataType == DBF_SHORT );
+        verify ( dataType == DBF_SHORT );
         dbr_text_to_type ( "DBR_CLASS_NAME", dataType ); 
-        assert ( dataType == DBR_CLASS_NAME );
+        verify ( dataType == DBR_CLASS_NAME );
     }
 }
 
@@ -2068,41 +2074,120 @@ dbr_float_t monitorUpdateTestPattern ( unsigned iter )
     return ( (float) iter ) * 10.12345f + 10.7f;
 }
 
-void getCallbackClearsChannel ( struct event_handler_args args )
+void callbackClearsChannel ( struct event_handler_args args )
 {
     int status;
     status = ca_clear_channel ( args.chid );
-    SEVCHK ( status, "clearChannelInGetCallbackTest clear channel" );
+    SEVCHK ( status, "clearChannelInXxxxCallbackTest clear channel" );
 }
 
 void clearChannelInGetCallbackTest ( const char *pName, unsigned level )
 {
+    unsigned i;
     chid chan;
     int status;
     
     showProgressBegin ( "clearChannelInGetCallbackTest", level );
 
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
+
     status = ca_create_channel ( pName, 0, 0, 0, & chan );
     SEVCHK ( status, "clearChannelInGetCallbackTest create channel" );
 
-    status = ca_pend_io ( 10.0 );
+    status = ca_pend_io ( timeoutToPendIO );
     SEVCHK ( status, "clearChannelInGetCallbackTest connect channel" );
     
-    status = ca_get_callback ( DBR_DOUBLE, chan, getCallbackClearsChannel, 0 );
+    status = ca_get_callback ( DBR_DOUBLE, chan, callbackClearsChannel, 0 );
     SEVCHK ( status, "clearChannelInGetCallbackTest get callback" );
     
-    status = ca_flush_io ();
-    SEVCHK ( status, "clearChannelInGetCallbackTest flush" );
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
+    
+    showProgressEnd ( level );
+}
+
+void clearChannelInPutCallbackTest ( const char *pName, unsigned level )
+{
+    unsigned i;
+    const dbr_double_t value = 1.1;
+    chid chan;
+    int status;
+    
+    showProgressBegin ( "clearChannelInPutCallbackTest", level );
+
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
+
+    status = ca_create_channel ( pName, 0, 0, 0, & chan );
+    SEVCHK ( status, "clearChannelInPutCallbackTest create channel" );
+
+    status = ca_pend_io ( timeoutToPendIO );
+    SEVCHK ( status, "clearChannelInPutCallbackTest connect channel" );
+
+    status = ca_put_callback ( DBR_DOUBLE, chan, & value, 
+                        callbackClearsChannel, 0 );
+    SEVCHK ( status, "clearChannelInPutCallbackTest get callback" );
+    
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
+    
+    showProgressEnd ( level );
+}
+
+void clearChannelInSubscrCallbackTest ( const char *pName, unsigned level )
+{
+    unsigned i;
+    chid chan;
+    int status;
+    
+    showProgressBegin ( "clearChannelInSubscrCallbackTest", level );
+
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
+
+    status = ca_create_channel ( pName, 0, 0, 0, & chan );
+    SEVCHK ( status, "clearChannelInSubscrCallbackTest create channel" );
+
+    status = ca_pend_io ( timeoutToPendIO );
+    SEVCHK ( status, "clearChannelInSubscrCallbackTest connect channel" );
+                        
+    status = ca_create_subscription ( DBR_DOUBLE, 1, chan, 
+        DBE_VALUE, callbackClearsChannel, 0, 0 );
+    SEVCHK ( status, "clearChannelInSubscrCallbackTest subscribe" );
+
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
     
     showProgressEnd ( level );
 }
 
 void monitorAddConnectionCallback ( struct connection_handler_args args ) 
 {
-    int status;
-    status = ca_create_subscription ( DBR_DOUBLE, 1, 
-        args.chid, DBE_VALUE, nUpdatesTester, ca_puser ( args.chid ), 0 );
-    SEVCHK ( status, "monitorAddConnectionCallback create subscription" );
+    if ( args.op == CA_OP_CONN_UP ) {
+        unsigned * pEventCount = ( unsigned * ) ca_puser ( args.chid );
+        int status;
+        verify ( *pEventCount == 0u );
+        (*pEventCount)++;
+        status = ca_create_subscription ( DBR_DOUBLE, 1, 
+            args.chid, DBE_VALUE, nUpdatesTester, ca_puser ( args.chid ), 0 );
+        SEVCHK ( status, "monitorAddConnectionCallback create subscription" );
+    }
+    else {
+        fprintf ( stderr, "disconnect during monitorAddConnectionCallbackTest?\n" );
+    }
 }
 
 /*
@@ -2113,6 +2198,7 @@ void monitorAddConnectionCallback ( struct connection_handler_args args )
  */
 void monitorAddConnectionCallbackTest ( const char *pName, unsigned interestLevel )
 {
+    unsigned i;
     chid chan;
     int status;
     unsigned eventCount = 0u;
@@ -2120,26 +2206,34 @@ void monitorAddConnectionCallbackTest ( const char *pName, unsigned interestLeve
     
     showProgressBegin ( "monitorAddConnectionCallbackTest", interestLevel );
 
+    for ( i = 0; ca_get_ioc_connection_count () > 0 ; i++ ) {
+        ca_pend_event ( 0.1 );
+        verify ( i < 100 );
+    }
+
     status = ca_create_channel ( pName, 
         monitorAddConnectionCallback, &eventCount, 0, & chan );
     SEVCHK ( status, "monitorAddConnectionCallbackTest create channel" );
 
-    while ( eventCount == 0 ) {
+    while ( eventCount < 2 ) {
         ca_pend_event ( 0.1 );
     }
-    assert ( eventCount == 1u );
+    verify ( eventCount == 2u );
     
     status = ca_get_callback ( DBR_DOUBLE, chan, nUpdatesTester, &getCallbackCount );
     SEVCHK ( status, "monitorAddConnectionCallback get callback" );
     while ( getCallbackCount == 0 ) {
         ca_pend_event ( 0.1 );
     }
-    assert ( eventCount == 1u );
-    assert ( getCallbackCount == 1u );
+    verify ( eventCount == 2u );
+    verify ( getCallbackCount == 1u );
 
     status = ca_clear_channel ( chan );
     SEVCHK ( status, "monitorAddConnectionCallbackTest clear channel" );
     
+    status = ca_flush_io ();
+    SEVCHK ( status, "monitorAddConnectionCallbackTest flush" );
+
     showProgressEnd ( interestLevel );
 }
 
@@ -2180,7 +2274,7 @@ void monitorUpdateTest ( chid chan, unsigned interestLevel )
 
     for ( i = 0; i < NELEMENTS(test); i++ ) {
         test[i].count = 0;
-        test[i].lastValue = -1.0;
+        test[i].lastValue = -1.0f;
         SEVCHK(ca_add_event(DBR_GR_FLOAT, chan, updateTestEvent,
             &test[i], &test[i].id),NULL);
     }
@@ -2221,7 +2315,7 @@ void monitorUpdateTest ( chid chan, unsigned interestLevel )
         }
         printf ( "-" );
         fflush ( stdout );
-        assert ( tries++ < 50 );
+        verify ( tries++ < 50 );
     }
 
     showProgress ( interestLevel );
@@ -2235,7 +2329,7 @@ void monitorUpdateTest ( chid chan, unsigned interestLevel )
         for ( j = 0; j < NELEMENTS(test); j++ ) {
             SEVCHK ( ca_clear_event ( test[j].id ), NULL );
             test[j].count = 0;
-            test[j].lastValue = -1.0;
+            test[j].lastValue = -1.0f;
             SEVCHK ( ca_add_event ( DBR_GR_FLOAT, chan, updateTestEvent,
                 &test[j], &test[j].id ) , NULL );
         } 
@@ -2252,7 +2346,10 @@ void monitorUpdateTest ( chid chan, unsigned interestLevel )
         SEVCHK ( ca_get ( DBR_FLOAT, chan, &getResp ), NULL );
         SEVCHK ( ca_pend_io ( timeoutToPendIO ), NULL );
 
-        assert ( getResp == temp );
+        if ( getResp != temp ) {
+            printf ( "getResp=%f, temp=%f\n", getResp, temp );
+            verify ( getResp == temp );
+        }
 
         /*
          * wait for all of the monitors to have correct values
@@ -2268,7 +2365,7 @@ void monitorUpdateTest ( chid chan, unsigned interestLevel )
                  * we shouldnt see old monitors because 
                  * we resubscribed
                  */
-                assert ( test[j].count <= i + 2 );
+                verify ( test[j].count <= i + 2 );
                 if ( test[j].lastValue == temp ) {
                     if ( test[j].count < i + 1 ) {
                         tmpFlowCtrlCount++;
@@ -2281,7 +2378,7 @@ void monitorUpdateTest ( chid chan, unsigned interestLevel )
                 break;
             }
             if ( passCount == prevPassCount ) {
-                assert ( tries++ < 500 );
+                verify ( tries++ < 500 );
                 if ( tries % 50 == 0 ) {
                     for ( j = 0; j <= i; j++ ) {
                         dbr_float_t pat = monitorUpdateTestPattern ( j );
@@ -2341,7 +2438,7 @@ void verifyReasonableBeaconPeriod ( chid chan, unsigned interestLevel )
             ca_name ( chan ), beaconPeriod );
 
         watchDogDelay = ca_receive_watchdog_delay ( chan );
-        assert ( watchDogDelay >= 0.0 );
+        verify ( watchDogDelay >= 0.0 );
 
         printf ( "busy: receive watchdog for \"%s\" expires in %g sec.\n",
             ca_name ( chan ), watchDogDelay );
@@ -2359,7 +2456,7 @@ void verifyReasonableBeaconPeriod ( chid chan, unsigned interestLevel )
         }
 
         watchDogDelay = ca_receive_watchdog_delay ( chan );
-        assert ( watchDogDelay >= 0.0 );
+        verify ( watchDogDelay >= 0.0 );
 
         printf ( "inactive: receive watchdog for \"%s\" expires in %g sec.\n",
             ca_name ( chan ), watchDogDelay );
@@ -2378,9 +2475,9 @@ void verifyOldPend ( unsigned interestLevel )
      * verify that the old ca_pend() is in the symbol table
      */
     status = ca_pend ( 100000.0, 1 );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
     status = ca_pend ( 1e-12, 0 );
-    assert ( status == ECA_TIMEOUT );
+    verify ( status == ECA_TIMEOUT );
 
     showProgressEnd ( interestLevel );
 }
@@ -2398,21 +2495,21 @@ void verifyTimeStamps ( chid chan, unsigned interestLevel )
     showProgressBegin ( "verifyTimeStamps", interestLevel );
 
     status = epicsTimeGetCurrent ( & localTime );
-    assert ( status >= 0 );
+    verify ( status >= 0 );
 
     status = ca_get ( DBR_TIME_DOUBLE, chan, & first );
     SEVCHK ( status, "fetch of dbr time double failed\n" );
     status = ca_pend_io ( timeoutToPendIO );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     status = ca_get ( DBR_TIME_DOUBLE, chan, & last );
     SEVCHK ( status, "fetch of dbr time double failed\n" );
     status = ca_pend_io ( timeoutToPendIO );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     length = epicsTimeToStrftime ( buf, sizeof ( buf ), 
         "%a %b %d %Y %H:%M:%S.%f", & first.stamp );
-    assert ( length );
+    verify ( length );
     printf ("Processing time of channel \"%s\" was \"%s\"\n", 
         ca_name ( chan ), buf );
 
@@ -2466,7 +2563,7 @@ void verifyChannelPriorities ( const char *pName, unsigned interestLevel )
 
         status = ca_pend_io ( timeoutToPendIO );
         SEVCHK ( status, "prioritized channel connect failed" );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
 
         value = i;
         status = ca_put ( DBR_DOUBLE, chan0, &value );
@@ -2505,7 +2602,7 @@ void verifyTearDownWhenChannelConnected ( const char * pName,
     double * const pValues = (double * const) calloc ( chanCount, sizeof ( *pValues ) );
     unsigned i, j;
     
-    assert ( pChans && pValues );
+    verify ( pChans && pValues );
     
     showProgressBegin ( "verifyTearDownWhenChannelConnected", interestLevel );
 
@@ -2519,7 +2616,7 @@ void verifyTearDownWhenChannelConnected ( const char * pName,
         }
         status = ca_pend_io ( timeoutToPendIO );
         SEVCHK ( status, "immediate tear down channel connect failed" );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
 
         for ( j = 0; j < chanCount; j++ ) {
             status = ca_get ( DBR_DOUBLE, pChans[j], &pValues[j] );
@@ -2529,7 +2626,7 @@ void verifyTearDownWhenChannelConnected ( const char * pName,
         status = ca_pend_io ( timeoutToPendIO );
         SEVCHK ( status, "immediate tear down get pend io failed" );
 
-        ca_context_destroy ();        
+        ca_context_destroy ();    
     }
 
     ca_context_create ( select );
@@ -2549,17 +2646,17 @@ void verifyImmediateTearDown ( const char * pName,
 
     showProgressBegin ( "verifyImmediateTearDown", interestLevel );
 
-    for ( i = 0u; i < 1000; i++ ) {
+    for ( i = 0u; i < 100; i++ ) {
         chid chan;
         int status;
-        dbr_long_t value = i % 2;
+        dbr_long_t value = i % 8;
         ca_context_create ( select );
         ca_task_initialize ();
         status = ca_create_channel ( pName, 0, 0, 0, & chan );
         SEVCHK ( status, "immediate tear down channel create failed" );
         status = ca_pend_io ( timeoutToPendIO );
         SEVCHK ( status, "immediate tear down channel connect failed" );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
         /* 
          * verify that puts pending when we call ca_task_exit() 
          * get flushed out
@@ -2570,7 +2667,10 @@ void verifyImmediateTearDown ( const char * pName,
             SEVCHK ( status, "immediate tear down channel get failed" );
             status = ca_pend_io ( timeoutToPendIO );
             SEVCHK ( status, "immediate tear down channel get failed" );
-            assert ( currentValue == ( (i + 1) % 2 ) );
+            if ( currentValue != ( (i - 1) % 8 ) ) {
+                printf ( "currentValue = %i, i = %i\n", currentValue, i );
+                verify ( currentValue == ( (i - 1) % 8 ) );
+            }
         }
         status = ca_put ( DBR_LONG, chan, & value );
         SEVCHK ( status, "immediate tear down channel put failed" );
@@ -2578,7 +2678,7 @@ void verifyImmediateTearDown ( const char * pName,
         SEVCHK ( status, "immediate tear down channel clear failed" );
         ca_context_destroy ();
         /* epicsThreadSleep ( 1e-15 ); */
-        if ( i % 100 == 0 ) {
+        if ( i % 10 == 0 ) {
             showProgress ( interestLevel );
         }
     }
@@ -2610,12 +2710,12 @@ void fdRegCB ( void * parg, int fd, int opened )
     if ( opened ) {
         status = fdmgr_add_callback ( 
             mgrCtx, fd, fdi_read, fdcb, 0 );
-        assert ( status >= 0 );
+        verify ( status >= 0 );
     }
     else {
         status = fdmgr_clear_callback ( 
             mgrCtx, fd, fdi_read );
-        assert ( status >= 0 );
+        verify ( status >= 0 );
     }
 }
 
@@ -2630,42 +2730,46 @@ void fdManagerVerify ( const char * pName, unsigned interestLevel )
     epicsTimeStamp begin, end;
     
     mgrCtx = fdmgr_init ();
-    assert ( mgrCtx );
+    verify ( mgrCtx );
 
     showProgressBegin ( "fdManagerVerify", interestLevel );
 
     status = ca_add_fd_registration ( fdRegCB, mgrCtx );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     status = ca_create_channel ( pName, 0, 0, 0, & newChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     while ( ca_state ( newChan ) != cs_conn ) {
         tmo.tv_sec = 6000;
         tmo.tv_usec = 0;
         status = fdmgr_pend_event ( mgrCtx, & tmo );
-        assert ( status >= 0 );
+        verify ( status >= 0 );
     }
+
+    showProgress ( interestLevel );
 
     status = ca_add_event ( DBR_FLOAT, newChan, 
         nUpdatesTester, & eventCount,  & subscription );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     status = ca_flush_io ();
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     while ( eventCount < 1 ) {
         tmo.tv_sec = 6000;
         tmo.tv_usec = 0;
         status = fdmgr_pend_event ( mgrCtx, & tmo );
-        assert ( status >= 0 );
+        verify ( status >= 0 );
     }
 
+    showProgress ( interestLevel );
+
     status = ca_clear_event ( subscription );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     status = ca_flush_io ();
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     /* look for infinite loop in fd manager schedualing */
     epicsTimeGetCurrent ( & begin );
@@ -2675,23 +2779,25 @@ void fdManagerVerify ( const char * pName, unsigned interestLevel )
         tmo.tv_sec = 1;
         tmo.tv_usec = 0;
         status = fdmgr_pend_event ( mgrCtx, & tmo );
-        assert ( status >= 0 );
+        verify ( status >= 0 );
         epicsTimeGetCurrent ( & end );
         delay = epicsTimeDiffInSeconds ( & end, & begin );
         if ( delay >= 1.0 ) {
             break;
         }
-        assert ( eventCount++ < 100 );
+        verify ( eventCount++ < 100 );
     }
 
+    showProgress ( interestLevel );
+
     status = ca_clear_channel ( newChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     status = ca_add_fd_registration ( 0, 0 );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     status = fdmgr_delete ( mgrCtx );
-    assert ( status >= 0 );
+    verify ( status >= 0 );
 
     showProgressEnd ( interestLevel );
 }
@@ -2708,13 +2814,13 @@ void verifyConnectWithDisconnectedChannels (
 
     for ( i= 0u; i < NELEMENTS ( bogusChan ); i++ ) {
         char buf[256];
-        sprintf ( buf, "aChannelThatShouldNeverNeverNeverExit%u", i );
+        sprintf ( buf, "aChannelThatShouldNeverNeverNeverExist%u", i );
         status = ca_create_channel ( buf, 0, 0, 0, & bogusChan[i] );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
     }
 
-    status = ca_pend_io ( 1.0 );
-    assert ( status == ECA_TIMEOUT );
+    status = ca_pend_io ( 0.001 );
+    verify ( status == ECA_TIMEOUT );
 
     /* wait a long time for the search interval to increase */
     for ( i= 0u; i < 10; i++ ) {
@@ -2723,7 +2829,7 @@ void verifyConnectWithDisconnectedChannels (
     }
 
     status = ca_create_channel ( pName, 0, 0, 0, & validChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     /* 
      * we should be able to connect to a valid 
@@ -2731,15 +2837,15 @@ void verifyConnectWithDisconnectedChannels (
      * though there is one permanently 
      * diasconnected channel 
      */
-    status = ca_pend_io ( 1.0 );
-    assert ( status == ECA_NORMAL );
+    status = ca_pend_io ( timeoutToPendIO );
+    verify ( status == ECA_NORMAL );
 
     status = ca_clear_channel ( validChan );
-    assert ( status == ECA_NORMAL );
+    verify ( status == ECA_NORMAL );
 
     for ( i= 0u; i < NELEMENTS ( bogusChan ); i++ ) {
         status = ca_clear_channel ( bogusChan[i] );
-        assert ( status == ECA_NORMAL );
+        verify ( status == ECA_NORMAL );
     }
 
     showProgressEnd ( interestLevel );
@@ -2764,12 +2870,13 @@ void verifyDisconnect (
 {
     int disconnectFlag = 0;
     unsigned count = 0;
-    chid chan;
+    chid chan0;
+    chid chan1;
     int status;
 
     status = ca_create_channel  ( 
         pName, verifyClearChannelOnDisconnectCallback, 
-        & disconnectFlag, 0, & chan );
+        & disconnectFlag, 0, & chan0 );
     SEVCHK ( status, NULL );
 
     fprintf ( stdout, "Waiting for test channel to connect." );
@@ -2780,7 +2887,7 @@ void verifyDisconnect (
             fprintf ( stdout, "." );
             fflush ( stdout );
         }
-    } while ( ca_state ( chan ) != cs_conn );
+    } while ( ca_state ( chan0 ) != cs_conn );
     fprintf ( stdout, "confirmed.\n" );
 
     /*
@@ -2789,7 +2896,7 @@ void verifyDisconnect (
      * completed.
      */
     if ( ca_get_ioc_connection_count () == 0 ) {
-        status = ca_clear_channel ( chan );
+        status = ca_clear_channel ( chan0 );
         SEVCHK ( status, NULL );
         return;
     }
@@ -2810,17 +2917,17 @@ void verifyDisconnect (
     /* channel cleared by disconnect handler */
 
     status = ca_create_channel  ( 
-        pName, 0, 0, 0, & chan );
+        pName, 0, 0, 0, & chan1 );
     SEVCHK ( status, NULL );
 
     fprintf ( stdout, "Waiting for test channel to connect." );
     fflush ( stdout );
-    while ( ca_state ( chan ) != cs_conn ) {
+    while ( ca_state ( chan1 ) != cs_conn ) {
         ca_pend_event ( 5.0 );
         fprintf ( stdout, "." );
         fflush ( stdout );
     }
-    status = ca_clear_channel ( chan );
+    status = ca_clear_channel ( chan1 );
     SEVCHK ( status, NULL );
     fprintf ( stdout, "confirmed.\n" );
 
@@ -2840,6 +2947,96 @@ void verifyName (
     }
     status = ca_clear_channel ( chan );
     SEVCHK ( status, NULL );
+}
+
+void verifyContextRundownFlush ( const char * pName, unsigned interestLevel )
+{
+    unsigned i;
+
+    showProgressBegin ( "verifyContextRundownFlush", interestLevel );
+
+    for ( i=0u; i < 1000; i++ ) {
+        const dbr_double_t stim = i;
+        
+        {  
+            chid chan;
+            int status;
+            status = ca_context_create ( ca_disable_preemptive_callback );
+            SEVCHK ( status, "context create failed" );
+            
+            status = ca_create_channel  ( pName, 0, 0, 0, & chan );
+            SEVCHK ( status, NULL );
+            
+            status = ca_pend_io( timeoutToPendIO );
+            SEVCHK ( status, "channel connect failed" );
+            
+            status = ca_put ( DBR_DOUBLE, chan, & stim );
+            SEVCHK ( status, "channel put failed" );
+    
+            status = ca_clear_channel ( chan );
+            SEVCHK ( status, NULL );
+    
+            ca_context_destroy ();
+        }
+        
+        {
+            chid chan;
+            int status;
+            dbr_double_t resp;
+            status = ca_context_create ( ca_disable_preemptive_callback );
+            SEVCHK ( status, "context create failed" );
+            
+            status = ca_create_channel  ( pName, 0, 0, 0, & chan );
+            SEVCHK ( status, NULL );
+            
+            status = ca_pend_io( timeoutToPendIO );
+            SEVCHK ( status, "channel connect failed" );
+    
+            status = ca_get ( DBR_DOUBLE, chan, & resp );
+            SEVCHK ( status, "channel get failed" );
+    
+            status = ca_pend_io ( timeoutToPendIO );
+            SEVCHK ( status, "get, pend io failed" );
+            
+            verify ( stim == resp );
+    
+            status = ca_clear_channel ( chan );
+            SEVCHK ( status, NULL );
+    
+            ca_context_destroy ();
+        }
+
+        if ( i % 100 == 0 ) {
+            showProgress ( interestLevel );
+        }
+    }
+    
+    showProgressEnd ( interestLevel );
+}
+
+void verifyContextRundownChanStillExist ( 
+    const char * pName, unsigned interestLevel )
+{
+    chid chan[10000];
+    int status;
+    unsigned i;
+
+    showProgressBegin ( "verifyContextRundownChanStillExist", interestLevel );
+
+    status = ca_context_create ( ca_disable_preemptive_callback );
+    SEVCHK ( status, "context create failed" );
+    
+    for ( i = 0; i < NELEMENTS ( chan ); i++ ) {
+        status = ca_create_channel  ( pName, 0, 0, 0, & chan[i] );
+        SEVCHK ( status, NULL );
+    }
+    
+    status = ca_pend_io( timeoutToPendIO );
+    SEVCHK ( status, "channel connect failed" );
+
+    ca_context_destroy ();
+    
+    showProgressEnd ( interestLevel );
 }
 
 int acctst ( const char * pName, unsigned interestLevel, unsigned channelCount, 
@@ -2874,9 +3071,12 @@ int acctst ( const char * pName, unsigned interestLevel, unsigned channelCount,
     verifyDataTypeMacros ();
 
     connections = ca_get_ioc_connection_count ();
-    assert ( connections == 0u );
-
+    verify ( connections == 0u );
     unequalServerBufferSizeTest ( pName, interestLevel );
+    clearChannelInGetCallbackTest ( pName, interestLevel );
+    clearChannelInPutCallbackTest ( pName, interestLevel );
+    clearChannelInSubscrCallbackTest ( pName, interestLevel );
+    monitorAddConnectionCallbackTest ( pName, interestLevel );
 
     showProgressBegin ( "connecting to test channel", interestLevel );
     status = ca_search ( pName, & chan );
@@ -2890,14 +3090,12 @@ int acctst ( const char * pName, unsigned interestLevel, unsigned channelCount,
         ca_element_count ( chan ) );
 
     connections = ca_get_ioc_connection_count ();
-    assert ( connections == 1u || connections == 0u );
+    verify ( connections == 1u || connections == 0u );
     if ( connections == 0u ) {
         printf ( "testing with a local channel\n" );
     }
 
     verifyName ( pName, interestLevel );
-    clearChannelInGetCallbackTest ( pName, interestLevel );
-    monitorAddConnectionCallbackTest ( pName, interestLevel );
     verifyConnectWithDisconnectedChannels ( pName, interestLevel );
     grEnumTest ( chan, interestLevel );
     test_sync_groups ( chan, interestLevel );
@@ -2944,7 +3142,7 @@ int acctst ( const char * pName, unsigned interestLevel, unsigned channelCount,
     /* ca_client_status ( 6u ); info about each channel */
 
     pChans = calloc ( channelCount, sizeof ( *pChans ) );
-    assert ( pChans );
+    verify ( pChans );
 
     for ( i = 0; i < channelCount; i++ ) {
         strncpy ( pChans[ i ].name, pName, sizeof ( pChans[ i ].name ) );
@@ -2979,6 +3177,9 @@ int acctst ( const char * pName, unsigned interestLevel, unsigned channelCount,
     /* SEVCHK ( status, NULL ); */
 
     caTaskExitTest ( interestLevel );
+    
+    verifyContextRundownFlush ( pName, interestLevel );
+    verifyContextRundownChanStillExist ( pName, interestLevel );
     
     free ( pChans );
 

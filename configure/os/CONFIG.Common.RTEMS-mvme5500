@@ -1,5 +1,5 @@
 #
-# CONFIG.Common.RTEMS-mvme5500,v 1.1.2.2 2004/10/28 18:23:41 norume Exp
+# CONFIG.Common.RTEMS-mvme5500,v 1.1.2.4 2009/04/09 18:56:06 jba Exp
 # Author: W. Eric Norum
 #         Advanced Photon Source
 #         norume@aps.anl.gov
@@ -9,11 +9,12 @@
 RTEMS_TARGET_CPU = powerpc
 ARCH_DEP_CFLAGS += -DMY_DO_BOOTP=NULL
 ARCH_DEP_CFLAGS += -DHAVE_MOTLOAD
+ARCH_DEP_CFLAGS += -DBSP_NVRAM_BASE_ADDR=0xf1110000
 
 MUNCH_SUFFIX = .boot
 MUNCHNAME = $(PRODNAME:%$(EXE)=%$(MUNCH_SUFFIX))
 define MUNCH_CMD
-	$(RTEMS_BASE)/bin/$(OBJCOPY_FOR_TARGET) -O binary $< $@
+	$(RTEMS_TOOLS)/bin/$(OBJCOPY_FOR_TARGET) -O binary $< $@
 endef
 
 include $(CONFIG)/os/CONFIG.Common.RTEMS

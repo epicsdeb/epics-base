@@ -1,13 +1,12 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* dbBase.h,v 1.12.2.5 2006/10/26 16:05:23 anj Exp
+/* dbBase.h,v 1.12.2.9 2009/07/09 15:27:42 anj Exp
  *
  *      Current Author:         Marty Kraimer
  *      Date:                   03-19-92
@@ -16,6 +15,7 @@
 #ifndef INCdbBaseh
 #define INCdbBaseh 1
 
+#include "epicsTypes.h"
 #include "dbFldTypes.h"
 #include "ellLib.h"
 #include "dbDefs.h"
@@ -97,12 +97,16 @@ typedef struct dbInfoNode {	/*non-field per-record information*/
 	void		*pointer;
 }dbInfoNode;
 
+#define DBRN_FLAGS_VISIBLE 1
+#define DBRN_FLAGS_ISALIAS 2
+#define DBRN_FLAGS_HASALIAS 4
+
 typedef struct dbRecordNode {
 	ELLNODE		node;
 	void		*precord;
 	char		*recordname;
 	ELLLIST		infoList;	/*LIST head of info nodes*/
-	int		visible;
+	int		flags;
 }dbRecordNode;
 
 /*dbRecordAttribute is for "psuedo" fields */
@@ -137,6 +141,7 @@ typedef struct dbRecordType {
 	short		no_fields;	/* number of fields defined	*/
 	short		no_prompt;	/* number of fields to configure*/
 	short		no_links;	/* number of links		*/
+	short		no_aliases;	/* number of aliases in recList */
 	short		*link_ind;	/* addr of array of ind in papFldDes*/
 	char		**papsortFldName;/* ptr to array of ptr to fld names*/
 	short		*sortFldInd;	/* addr of array of ind in papFldDes*/
@@ -148,6 +153,9 @@ typedef struct dbRecordType {
 	int		rec_size;	/*record size in bytes          */
 }dbRecordType;
 
+struct dbPvd;           /* Contents private to dbPvdLib code */
+struct gphPvt;          /* Contents private to gpHashLib code */
+
 typedef struct dbBase {
 	ELLLIST		menuList;
 	ELLLIST		recordTypeList;
@@ -155,10 +163,10 @@ typedef struct dbBase {
 	ELLLIST		registrarList;
 	ELLLIST		functionList;
 	ELLLIST		variableList;
-	ELLLIST		bptList;	/*Break Point Table Head*/
+	ELLLIST		bptList;
 	void		*pathPvt;
-	void		*ppvd;      /* pointer to process variable directory*/
-	void		*pgpHash;	/*General purpose Hash Table*/
+	struct dbPvd	*ppvd;
+	struct gphPvt	*pgpHash;
 	short		ignoreMissingMenus;
 	short		loadCdefs;
 }dbBase;

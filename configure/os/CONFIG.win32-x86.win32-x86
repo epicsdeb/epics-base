@@ -1,6 +1,6 @@
 # CONFIG.win32-x86.win32-x86
 #
-# CONFIG.win32-x86.win32-x86,v 1.32.2.15 2008/07/03 15:16:04 jba Exp
+# CONFIG.win32-x86.win32-x86,v 1.32.2.20 2009/07/16 14:33:52 jba Exp
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86 target archs when host arch is win32-x86
@@ -31,17 +31,7 @@ BAFCMD = bscmake /nologo /o $@
 # Configure OS vendor C compiler
 CC = cl
 
-#
-# __STDC__=0 is a real great idea of Jeff that gives us both:
-# 1) define STDC for build code (pretend ANSI conformance)
-# 2) set it to 0 to use MS C "extensions" (open for _open etc.)
-# because MS uses:   if __STDC__ ... disable many nice things
-#
-# Use of /Za would dissable DLL import/export keywords which
-# include/excludes using architecture neutral macros
-CONFORM_CFLAGS_ANSI = /nologo /D__STDC__=0
-CONFORM_CFLAGS_STRICT = /nologo /D__STDC__=0
-CONFORM_CFLAGS_TRAD = /nologo
+GNU = NO
 
 #
 # /W<N> use warning level N
@@ -107,8 +97,7 @@ CPP = cl /C /E
 # /GR - generate code for run time type identification
 #
 CCC = cl /nologo /EHsc /GR
-CONFORM_CXXFLAGS_NORMAL =
-CONFORM_CXXFLAGS_STRICT = /D__STDC__=0
+CODE_CPPFLAGS += /nologo /D__STDC__=0
 CODE_CPPFLAGS += /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE
 
 #
@@ -164,10 +153,6 @@ OPT_LDFLAGS = $(LINK_OPT_FLAGS_$(HOST_OPT))
 ARCH_DEP_CFLAGS=
 SHRLIB_CFLAGS=
 
-#	to identify the general architecture class:
-#	should be BSD, SYSV, WIN32, ...
-#	is: WIN32, sun4, hpux, linux, ...
-#
 OS_CLASS=WIN32
 POSIX=NO
 
@@ -260,7 +245,7 @@ PROD_LDLIBS += $(addsuffix .lib, \
 
 LDLIBS_STATIC_YES = LDLIBS
 LDLIBS_SHARED_NO = LDLIBS
-PROD_LDLIBS += $($(firstword $(LDLIBS_STATIC_$(STATIC_BUILD)) \
+PROD_LDLIBS += $(STATIC_LDLIBS) $($(firstword $(LDLIBS_STATIC_$(STATIC_BUILD)) \
                $(LDLIBS_SHARED_$(SHARED_LIBRARIES))))
 
 #--------------------------------------------------

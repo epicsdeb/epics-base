@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbEvent.c */
-/* dbEvent.c,v 1.96.2.2 2006/11/28 18:54:03 jhill Exp */
+/* dbEvent.c,v 1.96.2.4 2009/07/09 16:37:22 anj Exp */
 /* routines for scheduling events to lower priority tasks via the RT kernel */
 /*
  *  Author:     Jeffrey O. Hill 
@@ -126,9 +126,9 @@ epicsMutexMustLock((RECPTR)->mlok);
 #define UNLOCKREC(RECPTR)\
 epicsMutexUnlock((RECPTR)->mlok);
 
-LOCAL void *dbevEventUserFreeList;
-LOCAL void *dbevEventQueueFreeList;
-LOCAL void *dbevEventBlockFreeList;
+static void *dbevEventUserFreeList;
+static void *dbevEventQueueFreeList;
+static void *dbevEventBlockFreeList;
 
 static char *EVENT_PEND_NAME = "eventTask";
 
@@ -195,6 +195,7 @@ int epicsShareAPI dbel ( const char *pname, unsigned level )
 	        if ( pevent->select & DBE_VALUE ) printf( "VALUE " );
 	        if ( pevent->select & DBE_LOG ) printf( "LOG " );
 	        if ( pevent->select & DBE_ALARM ) printf( "ALARM " );
+	        if ( pevent->select & DBE_PROPERTY ) printf( "PROPERTY " );
 	        printf ( "}" );
 
             if ( pevent->npend ) {
@@ -468,7 +469,7 @@ void epicsShareAPI db_event_disable (dbEventSubscription es)
  * event_remove()
  * event queue lock _must_ be applied
  */
-LOCAL void event_remove ( struct event_que *ev_que, 
+static void event_remove ( struct event_que *ev_que, 
     unsigned short index, struct evSubscrip *placeHolder )
 {
     struct evSubscrip *pEvent = ev_que->evque[index];
@@ -624,7 +625,7 @@ int epicsShareAPI db_post_extra_labor (dbEventCtx ctx)
  *
  *  NOTE: This assumes that the db scan lock is already applied
  */
-LOCAL void db_post_single_event_private (struct evSubscrip *event)
+static void db_post_single_event_private (struct evSubscrip *event)
 {  
     struct event_que    *ev_que;
     db_field_log        *pLog;
@@ -788,7 +789,7 @@ void epicsShareAPI db_post_single_event (dbEventSubscription es)
 /*
  * EVENT_READ()
  */
-LOCAL int event_read ( struct event_que *ev_que )
+static int event_read ( struct event_que *ev_que )
 {
     db_field_log *pfl;
     void ( *user_sub ) ( void *user_arg, struct dbAddr *paddr, 
@@ -895,7 +896,7 @@ LOCAL int event_read ( struct event_que *ev_que )
 /*
  * EVENT_TASK()
  */
-LOCAL void event_task (void *pParm)
+static void event_task (void *pParm)
 {
     struct event_user   *evUser = (struct event_user *) pParm;
     struct event_que    *ev_que;

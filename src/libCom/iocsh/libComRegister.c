@@ -21,6 +21,7 @@
 #include "logClient.h"
 #include "errlog.h"
 #include "taskwd.h"
+#include "registry.h"
 #include "epicsGeneralTime.h"
 #include "libComRegister.h"
 
@@ -118,6 +119,13 @@ static void epicsEnvShowCallFunc(const iocshArgBuf *args)
     epicsEnvShow (args[0].sval);
 }
 
+/* registryDump */
+static const iocshFuncDef registryDumpFuncDef = {"registryDump",0,NULL};
+static void registryDumpCallFunc(const iocshArgBuf *args)
+{
+    registryDump ();
+}
+
 /* iocLogInit */
 static const iocshFuncDef iocLogInitFuncDef = {"iocLogInit",0};
 static void iocLogInitCallFunc(const iocshArgBuf *args)
@@ -172,6 +180,15 @@ static const iocshFuncDef errlogInit2FuncDef =
 static void errlogInit2CallFunc(const iocshArgBuf *args)
 {
     errlogInit2(args[0].ival, args[1].ival);
+}
+
+/* errlog */
+static const iocshArg errlogArg0 = { "message",iocshArgString};
+static const iocshArg * const errlogArgs[1] = {&errlogArg0};
+static const iocshFuncDef errlogFuncDef = {"errlog",1,errlogArgs};
+static void errlogCallFunc(const iocshArgBuf *args)
+{
+    errlogPrintfNoConsole("%s\n", args[0].sval);
 }
 
 /* epicsThreadShowAll */
@@ -329,6 +346,7 @@ void epicsShareAPI libComRegister(void)
     iocshRegister(&epicsParamShowFuncDef, epicsParamShowCallFunc);
     iocshRegister(&epicsPrtEnvParamsFuncDef, epicsPrtEnvParamsCallFunc);
     iocshRegister(&epicsEnvShowFuncDef, epicsEnvShowCallFunc);
+    iocshRegister(&registryDumpFuncDef, registryDumpCallFunc);
 
     iocshRegister(&iocLogInitFuncDef, iocLogInitCallFunc);
     iocshRegister(&iocLogDisableFuncDef, iocLogDisableCallFunc);
@@ -336,6 +354,7 @@ void epicsShareAPI libComRegister(void)
     iocshRegister(&eltcFuncDef, eltcCallFunc);
     iocshRegister(&errlogInitFuncDef,errlogInitCallFunc);
     iocshRegister(&errlogInit2FuncDef,errlogInit2CallFunc);
+    iocshRegister(&errlogFuncDef, errlogCallFunc);
 
     iocshRegister(&epicsThreadShowAllFuncDef,epicsThreadShowAllCallFunc);
     iocshRegister(&threadFuncDef, threadCallFunc);

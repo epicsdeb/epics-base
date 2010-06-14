@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* epicsUnitTest.c,v 1.1.2.9 2008/09/15 18:49:31 anj Exp
+/* epicsUnitTest.c,v 1.1.2.12 2009/04/23 22:19:46 anj Exp
  * Author: Andrew Johnson
  *
  * Unit test module which generates output in the Test Anything Protocol
@@ -23,6 +23,7 @@
 #include "epicsExit.h"
 #include "epicsTime.h"
 #include "ellLib.h"
+#include "cantProceed.h"
 
 typedef struct {
     ELLNODE node;
@@ -87,6 +88,7 @@ int testOkV(int pass, const char *fmt, va_list pvar) {
     if (todo)
 	printf(" # TODO %s", todo);
     putchar('\n');
+    fflush(stdout);
     epicsMutexUnlock(testLock);
     return pass;
 }
@@ -121,6 +123,7 @@ void testSkip(int skip, const char *why) {
 	skipped++;
 	printf("ok %2d # SKIP %s\n", tested, why);
     }
+    fflush(stdout);
     epicsMutexUnlock(testLock);
 }
 
@@ -130,7 +133,7 @@ void testTodoBegin(const char *why) {
     epicsMutexUnlock(testLock);
 }
 
-void testTodoEnd() {
+void testTodoEnd(void) {
     todo = NULL;
 }
 
@@ -141,6 +144,7 @@ int testDiag(const char *fmt, ...) {
     printf("# ");
     vprintf(fmt, pvar);
     putchar('\n');
+    fflush(stdout);
     epicsMutexUnlock(testLock);
     va_end(pvar);
     return 0;
@@ -152,6 +156,7 @@ void testAbort(const char *fmt, ...) {
     printf("Bail out! ");
     vprintf(fmt, pvar);
     putchar('\n');
+    fflush(stdout);
     va_end(pvar);
     abort();
 }
@@ -187,7 +192,8 @@ int testDone(void) {
     }
     if (Harness) {
         if (failed) {
-            testFailure *fault = calloc(1, sizeof(testFailure));
+            testFailure *fault = callocMustSucceed(1, sizeof(testFailure),
+                "testDone calloc");
             fault->name     = testing;
             fault->tests    = tested;
             fault->failures = failed;

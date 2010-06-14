@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* tblcmp - table compression routines */
@@ -37,7 +36,7 @@
 
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/tblcmp.c,v 1.2 2002/07/12 21:35:38 jba Exp (LBL)";
+    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/tblcmp.c,v 1.2.2.3 2009/06/03 15:00:08 anj Exp (LBL)";
 #endif
 
 #include "flexdef.h"
@@ -45,11 +44,11 @@ static char rcsid[] =
 
 /* declarations for functions that have forward references */
 
-void mkentry PROTO((register int*, int, int, int, int));
-void mkprot PROTO((int[], int, int));
-void mktemplate PROTO((int[], int, int));
-void mv2front PROTO((int));
-int tbldiff PROTO((int[], int, int[]));
+void mkentry (int*, int, int, int, int);
+void mkprot (int[], int, int);
+void mktemplate (int[], int, int);
+void mv2front (int);
+int tbldiff (int[], int, int[]);
 
 
 /* bldtbl - build table entries for dfa state
@@ -87,10 +86,8 @@ int tbldiff PROTO((int[], int, int[]));
  * cost only one difference.
  */
 
-void bldtbl( state, statenum, totaltrans, comstate, comfreq )
-int state[], statenum, totaltrans, comstate, comfreq;
-
-    {
+void bldtbl(int *state, int statenum, int totaltrans, int comstate, int comfreq)
+{
     int extptr, extrct[2][CSIZE + 1];
     int mindiff, minprot, i, d;
     int checkcom;
@@ -233,11 +230,10 @@ int state[], statenum, totaltrans, comstate, comfreq;
  *  table entries made for them.
  */
 
-void cmptmps()
-
-    {
+void cmptmps(void)
+{
     int tmpstorage[CSIZE + 1];
-    register int *tmp = tmpstorage, i, j;
+    int *tmp = tmpstorage, i, j;
     int totaltrans, trans;
 
     peakpairs = numtemps * numecs + tblend;
@@ -305,10 +301,9 @@ void cmptmps()
 
 /* expand_nxt_chk - expand the next check arrays */
 
-void expand_nxt_chk()
-
-    {
-    register int old_max = current_max_xpairs;
+void expand_nxt_chk(void)
+{
+    int old_max = current_max_xpairs;
 
     current_max_xpairs += MAX_XPAIRS_INCREMENT;
 
@@ -317,7 +312,7 @@ void expand_nxt_chk()
     nxt = reallocate_integer_array( nxt, current_max_xpairs );
     chk = reallocate_integer_array( chk, current_max_xpairs );
 
-    bzero( (char *) (chk + old_max),
+    memset( (char *) (chk + old_max), 0,
 	   MAX_XPAIRS_INCREMENT * sizeof( int ) / sizeof( char ) );
     }
 
@@ -341,16 +336,14 @@ void expand_nxt_chk()
  * and an action number will be added in [-1].
  */
 
-int find_table_space( state, numtrans )
-int *state, numtrans;
-    
-    {
+int find_table_space(int *state, int numtrans)
+{
     /* firstfree is the position of the first possible occurrence of two
      * consecutive unused records in the chk and nxt arrays
      */
-    register int i;
-    register int *state_ptr, *chk_ptr;
-    register int *ptr_to_last_entry_in_state;
+    int i;
+    int *state_ptr, *chk_ptr;
+    int *ptr_to_last_entry_in_state;
 
     /* if there are too many out-transitions, put the state at the end of
      * nxt and chk
@@ -439,12 +432,12 @@ int *state, numtrans;
  * own tbase/tdef tables.  They are shifted down to be contiguous
  * with the non-template entries during table generation.
  */
-void inittbl()
+void inittbl(void)
+{
+    int i;
 
-    {
-    register int i;
-
-    bzero( (char *) chk, current_max_xpairs * sizeof( int ) / sizeof( char ) );
+    memset( (char *) chk, 0,
+           current_max_xpairs * sizeof( int ) / sizeof( char ) );
 
     tblend = 0;
     firstfree = tblend + 1;
@@ -476,9 +469,8 @@ void inittbl()
  *   mkdeftbl();
  */
 
-void mkdeftbl()
-
-    {
+void mkdeftbl(void)
+{
     int i;
 
     jamstate = lastdfa + 1;
@@ -527,12 +519,9 @@ void mkdeftbl()
  * state array.
  */
 
-void mkentry( state, numchars, statenum, deflink, totaltrans )
-register int *state;
-int numchars, statenum, deflink, totaltrans;
-
-    {
-    register int minec, maxec, i, baseaddr;
+void mkentry(int *state, int numchars, int statenum, int deflink, int totaltrans)
+{
+    int minec, maxec, i, baseaddr;
     int tblbase, tbllast;
 
     if ( totaltrans == 0 )
@@ -660,10 +649,8 @@ int numchars, statenum, deflink, totaltrans;
  *   mk1tbl( state, sym, onenxt, onedef );
  */
 
-void mk1tbl( state, sym, onenxt, onedef )
-int state, sym, onenxt, onedef;
-
-    {
+void mk1tbl(int state, int sym, int onenxt, int onedef)
+{
     if ( firstfree < sym )
 	firstfree = sym;
 
@@ -693,10 +680,8 @@ int state, sym, onenxt, onedef;
  *   mkprot( state, statenum, comstate );
  */
 
-void mkprot( state, statenum, comstate )
-int state[], statenum, comstate;
-
-    {
+void mkprot(int *state, int statenum, int comstate)
+{
     int i, slot, tblbase;
 
     if ( ++numprots >= MSP || numecs * numprots >= PROT_SAVE_SIZE )
@@ -737,10 +722,8 @@ int state[], statenum, comstate;
  *   mktemplate( state, statenum, comstate, totaltrans );
  */
 
-void mktemplate( state, statenum, comstate )
-int state[], statenum, comstate;
-
-    {
+void mktemplate(int *state, int statenum, int comstate)
+{
     int i, numdiff, tmpbase, tmp[CSIZE + 1];
     Char transset[CSIZE + 1];
     int tsptr;
@@ -795,10 +778,8 @@ int state[], statenum, comstate;
  *   mv2front( qelm );
  */
 
-void mv2front( qelm )
-int qelm;
-
-    {
+void mv2front(int qelm)
+{
     if ( firstprot != qelm )
 	{
 	if ( qelm == lastprot )
@@ -828,12 +809,10 @@ int qelm;
  * Transnum is the number of out-transitions for the state.
  */
 
-void place_state( state, statenum, transnum )
-int *state, statenum, transnum;
-
-    {
-    register int i;
-    register int *state_ptr;
+void place_state(int *state, int statenum, int transnum)
+{
+    int i;
+    int *state_ptr;
     int position = find_table_space( state, transnum );
 
     /* base is the table of start positions */
@@ -874,10 +853,8 @@ int *state, statenum, transnum;
  * no room, we process the sucker right now.
  */
 
-void stack1( statenum, sym, nextstate, deflink )
-int statenum, sym, nextstate, deflink;
-
-    {
+void stack1(int statenum, int sym, int nextstate, int deflink)
+{
     if ( onesp >= ONE_STACK_SIZE - 1 )
 	mk1tbl( statenum, sym, nextstate, deflink );
 
@@ -910,12 +887,10 @@ int statenum, sym, nextstate, deflink;
  * number is "numecs" minus the number of "SAME_TRANS" entries in "ext".
  */
 
-int tbldiff( state, pr, ext )
-int state[], pr, ext[];
-
-    {
-    register int i, *sp = state, *ep = ext, *protp;
-    register int numdiff = 0;
+int tbldiff(int *state, int pr, int *ext)
+{
+    int i, *sp = state, *ep = ext, *protp;
+    int numdiff = 0;
 
     protp = &protsave[numecs * (pr - 1)];
 

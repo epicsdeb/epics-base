@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution.
 #*************************************************************************
 #
-#  CONFIG_SITE,v 1.42.2.18 2008/10/02 21:33:23 anj Exp
+#  CONFIG_SITE,v 1.42.2.20 2009/04/24 20:01:35 anj Exp
 #
 #  CONFIG_SITE  - Global site configuration file
 #
@@ -24,8 +24,6 @@
 #	darwin-ppcx86          (Universal binaries for both CPUs)
 #	freebsd-x86            (GNU compiler used for host builds)
 #	freebsd-x86_64         (GNU compiler used for host builds)
-#	hpux-parisc            (HP compiler used for host builds)
-#	hpux-parisc-gnu        (GNU compiler used for host builds)
 #	linux-ppc              (GNU compiler used for host builds)
 #	linux-x86              (GNU compiler used for host builds)
 #	linux-x86_64           (GNU compiler used for host builds)
@@ -103,19 +101,6 @@ CROSS_COMPILER_TARGET_ARCHS=
 #  uncomment the following line and specify them.
 #
 CROSS_COMPILER_HOST_ARCHS=
-
-# Default ANSI level, individual Makefiles will override
-#  if they cannot support ANSI compilation.
-#   STRICT -  ANSI C - force warning flags
-#   ANSI   -  ANSI C
-#   TRAD   -  Standard C - Not appropriate here.
-CMPLR=STRICT
-
-# Default C++ compiler ANSI level
-#   STRICT -  ANSI C++ force strict warning flags
-#   NORMAL -  ANSI C++ optional warning flags
-#   Individual Makefiles may override
-CXXCMPLR=STRICT
 
 #  Build shared libraries?
 #        must be either YES or NO

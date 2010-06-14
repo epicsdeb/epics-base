@@ -29,7 +29,8 @@ pvInfo exServer::pvList[] = {
     pvInfo (20.0, "albert", 10.0f, -10.0f, aitEnumFloat64, excasIoSync, 1000u),
     pvInfo (-1.0, "boot", 10.0f, -10.0f, aitEnumEnum16, excasIoSync, 1u),
     pvInfo (1.0, "booty", 10.0f, -10.0f, aitEnumEnum16, excasIoAsync, 1u),
-    pvInfo (-1.0, "bill", 10.0f, -10.0f, aitEnumFloat64, excasIoSync, 1u)
+    pvInfo (-1.0, "bill", 10.0f, -10.0f, aitEnumFloat64, excasIoSync, 1u),
+    pvInfo (-1.0, "billy", 10.0f, -10.0f, aitEnumFloat64, excasIoAsync, 1u)
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);
@@ -37,17 +38,21 @@ const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);
 //
 // static on-the-fly PVs
 //
-pvInfo exServer::billy (-1.0, "billy", 10.0f, -10.0f, aitEnumFloat64, excasIoAsync, 1u);
-pvInfo exServer::bloaty (-1.0, "bloaty", 10.0f, -10.0f, aitEnumFloat64, excasIoSync, 100000u);
+pvInfo exServer::billy (-1.0, "billybob", 10.0f, -10.0f, aitEnumFloat64, excasIoAsync, 1u);
+pvInfo exServer::bloater (.010, "bloater", 10.0f, -10.0f, aitEnumFloat64, excasIoSync, 10000u);
+pvInfo exServer::bloaty (.010, "bloaty", 10.0f, -10.0f, aitEnumFloat64, excasIoSync, 100000u);
+
 
 //
 // exServer::exServer()
 //
 exServer::exServer ( const char * const pvPrefix, 
         unsigned aliasCount, bool scanOnIn, 
-        bool asyncScan ) : 
-    pTimerQueue ( 0 ), simultAsychIOCount ( 0u ), 
-        scanOn ( scanOnIn )
+        bool asyncScan, double asyncDelayIn,
+        unsigned maxSimultAsyncIOIn ) : 
+        pTimerQueue ( 0 ), simultAsychIOCount ( 0u ), 
+        _maxSimultAsyncIO ( maxSimultAsyncIOIn ),
+        asyncDelay ( asyncDelayIn ), scanOn ( scanOnIn )
 {
     unsigned i;
     exPV *pPV;
@@ -73,7 +78,7 @@ exServer::exServer ( const char * const pvPrefix,
     // pre-create all of the simple PVs that this server will export
     //
     for (pPVI = exServer::pvList; pPVI < pPVAfter; pPVI++) {
-        pPV = pPVI->createPV (*this, true, scanOnIn);
+        pPV = pPVI->createPV (*this, true, scanOnIn,  this->asyncDelay );
         if (!pPV) {
             fprintf(stderr, "Unable to create new PV \"%s\"\n",
                 pPVI->getName());
@@ -102,6 +107,8 @@ exServer::exServer ( const char * const pvPrefix,
     //
     sprintf ( pvAlias, pNameFmtStr, pvPrefix, billy.getName() );
     this->installAliasName ( billy, pvAlias );
+    sprintf ( pvAlias, pNameFmtStr, pvPrefix, bloater.getName() );
+    this->installAliasName ( bloater, pvAlias );
     sprintf ( pvAlias, pNameFmtStr, pvPrefix, bloaty.getName() );
     this->installAliasName ( bloaty, pvAlias );
 }
@@ -186,18 +193,19 @@ pvExistReturn exServer::pvExistTest // X aCC 361
         return pverExistsHere;
     }
     else {
-        if ( this->simultAsychIOCount >= maxSimultAsyncIO ) {
+        if ( this->simultAsychIOCount >= this->_maxSimultAsyncIO ) {
             return pverDoesNotExistHere;
         }
 
         this->simultAsychIOCount++;
 
-        exAsyncExistIO  *pIO;
-        pIO = new exAsyncExistIO ( pvi, ctxIn, *this );
-        if (pIO) {
+        exAsyncExistIO * pIO = 
+            new exAsyncExistIO ( pvi, ctxIn, *this );
+        if ( pIO ) {
             return pverAsyncCompletion;
         }
         else {
+            this->simultAsychIOCount--;
             return pverDoesNotExistHere;
         }
     }
@@ -227,7 +235,7 @@ pvAttachReturn exServer::pvAttach // X aCC 361
     // If this is a synchronous PV create the PV now 
     //
     if (pvi.getIOType() == excasIoSync) {
-        pPV = pvi.createPV(*this, false, this->scanOn);
+        pPV = pvi.createPV(*this, false, this->scanOn, this->asyncDelay );
         if (pPV) {
             return *pPV;
         }
@@ -239,18 +247,20 @@ pvAttachReturn exServer::pvAttach // X aCC 361
     // Initiate async IO if this is an async PV
     //
     else {
-        if (this->simultAsychIOCount>=maxSimultAsyncIO) {
+        if (this->simultAsychIOCount>=this->_maxSimultAsyncIO) {
             return S_casApp_postponeAsyncIO;
         }
 
         this->simultAsychIOCount++;
 
         exAsyncCreateIO *pIO = 
-            new exAsyncCreateIO(pvi, *this, ctx, this->scanOn);
+            new exAsyncCreateIO ( pvi, *this, ctx, 
+                this->scanOn, this->asyncDelay );
         if (pIO) {
             return S_casApp_asyncCompletion;
         }
         else {
+            this->simultAsychIOCount--;
             return S_casApp_noMemory;
         }
     }
@@ -280,8 +290,8 @@ class epicsTimer & exServer::createTimer ()
 //
 // pvInfo::createPV()
 //
-exPV *pvInfo::createPV ( exServer & cas,
-                         bool preCreateFlag, bool scanOn )
+exPV *pvInfo::createPV ( exServer & cas, bool preCreateFlag, 
+                    bool scanOn, double asyncDelay )
 {
     if (this->pPV) {
         return this->pPV;
@@ -300,7 +310,8 @@ exPV *pvInfo::createPV ( exServer & cas,
             pNewPV = new exScalarPV ( cas, *this, preCreateFlag, scanOn );
             break;
         case excasIoAsync:
-            pNewPV = new exAsyncPV ( cas, *this, preCreateFlag, scanOn );
+            pNewPV = new exAsyncPV ( cas, *this, 
+                preCreateFlag, scanOn, asyncDelay );
             break;
         default:
             pNewPV = NULL;
@@ -387,11 +398,12 @@ epicsTimerNotify::expireStatus exAsyncExistIO::expire ( const epicsTime & /*curr
 //
 // exAsyncCreateIO::exAsyncCreateIO()
 //
-exAsyncCreateIO::exAsyncCreateIO ( pvInfo &pviIn, exServer &casIn, 
-    const casCtx &ctxIn, bool scanOnIn ) :
+exAsyncCreateIO :: 
+    exAsyncCreateIO ( pvInfo &pviIn, exServer &casIn, 
+    const casCtx &ctxIn, bool scanOnIn, double asyncDelayIn ) :
     casAsyncPVAttachIO ( ctxIn ), pvi ( pviIn ), 
         timer ( casIn.createTimer () ), 
-        cas ( casIn ), scanOn ( scanOnIn ) 
+        cas ( casIn ), asyncDelay ( asyncDelayIn ), scanOn ( scanOnIn )
 {
     this->timer.start ( *this, 0.00001 );
 }
@@ -411,9 +423,8 @@ exAsyncCreateIO::~exAsyncCreateIO()
 //
 epicsTimerNotify::expireStatus exAsyncCreateIO::expire ( const epicsTime & /*currentTime*/ )
 {
-    exPV *pPV;
-
-    pPV = this->pvi.createPV ( this->cas, false, this->scanOn );
+    exPV * pPV = this->pvi.createPV ( this->cas, false, 
+                            this->scanOn, this->asyncDelay );
     if ( pPV ) {
         this->postIOCompletion ( pvAttachReturn ( *pPV ) );
     }

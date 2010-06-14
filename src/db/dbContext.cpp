@@ -1,14 +1,13 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*  
- *  dbContext.cpp,v 1.1.2.7 2004/04/28 22:15:06 jhill Exp
+ *  dbContext.cpp,v 1.1.2.9 2009/07/09 15:27:42 anj Exp
  *
  *                              
  *                    L O S  A L A M O S
@@ -33,7 +32,7 @@
 #include "caerr.h" // should be eliminated here in the future
 #include "epicsEvent.h"
 #include "epicsThread.h"
-#include "epicsSingleton.h"
+#include "errlog.h"
 
 #define epicsExportSharedSymbols
 #include "db_access_routines.h"

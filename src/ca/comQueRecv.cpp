@@ -178,7 +178,7 @@ epicsUInt8 comQueRecv::popUInt8 ()
     if ( ! pComBuf ) {
         comBuf::throwInsufficentBytesException ();
     }
-    epicsUInt8 tmp;
+    epicsUInt8 tmp = '\0';
     comBuf::popStatus status = pComBuf->pop ( tmp );
     if ( ! status.success ) {
         comBuf::throwInsufficentBytesException ();
@@ -197,7 +197,7 @@ epicsUInt16 comQueRecv::popUInt16 ()
         comBuf::throwInsufficentBytesException ();
     }
     // try first for all in one buffer efficent version
-    epicsUInt16 tmp;
+    epicsUInt16 tmp = 0;
     comBuf::popStatus status = pComBuf->pop ( tmp );
     if ( status.success ) {
         this->nBytesPending -= sizeof ( epicsUInt16 );
@@ -216,7 +216,7 @@ epicsUInt32 comQueRecv::popUInt32 ()
         comBuf::throwInsufficentBytesException ();
     }
     // try first for all in one buffer efficent version
-    epicsUInt32 tmp;
+    epicsUInt32 tmp = 0;
     comBuf::popStatus status = pComBuf->pop ( tmp );
     if ( status.success ) {
         this->nBytesPending -= sizeof ( epicsUInt32 );
@@ -238,11 +238,11 @@ bool comQueRecv::popOldMsgHeader ( caHdrLargeArray & msg )
     unsigned avail = pComBuf->occupiedBytes ();
     if ( avail >= sizeof ( caHdr ) ) {
         pComBuf->pop ( msg.m_cmmd );
-        ca_uint16_t smallPostsize;
+        ca_uint16_t smallPostsize = 0;
         pComBuf->pop ( smallPostsize );
         msg.m_postsize = smallPostsize;
         pComBuf->pop ( msg.m_dataType );
-        ca_uint16_t smallCount;
+        ca_uint16_t smallCount = 0;
         pComBuf->pop ( smallCount );
         msg.m_count = smallCount;
         pComBuf->pop ( msg.m_cid );

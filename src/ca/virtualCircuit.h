@@ -51,7 +51,6 @@ struct caHdrLargeArray {
     ca_uint16_t m_cmmd;         // operation to be performed 
 };
 
-class hostNameCache;
 class ipAddrToAsciiEngine;
 
 class tcpRecvThread : private epicsThreadRunable {
@@ -174,7 +173,7 @@ public:
         unsigned sidIn, ca_uint16_t typeIn, arrayElementCount countIn );
     void uninstallChan ( 
         epicsGuard < epicsMutex > & guard, nciu & chan );
-    void connectNotify ( 
+    bool connectNotify ( 
         epicsGuard < epicsMutex > &, nciu & chan );
     void nameResolutionMsgEndNotify ();
 

@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* permissiveRecord.c,v 1.11.2.1 2008/07/01 16:49:05 anj Exp */
+/* permissiveRecord.c,v 1.11.2.2 2009/04/02 21:40:37 lange Exp */
 
 /* recPermissive.c - Record Support Routines for Permissive records */
 /*
@@ -77,38 +77,38 @@ epicsExportAddress(rset,permissiveRSET);
 
 static void monitor(permissiveRecord *);
 
-static long process(permissiveRecord *ppermissive)
+static long process(permissiveRecord *prec)
 {
 
-    ppermissive->pact=TRUE;
-    ppermissive->udf=FALSE;
-    recGblGetTimeStamp(ppermissive);
-    monitor(ppermissive);
-    recGblFwdLink(ppermissive);
-    ppermissive->pact=FALSE;
+    prec->pact=TRUE;
+    prec->udf=FALSE;
+    recGblGetTimeStamp(prec);
+    monitor(prec);
+    recGblFwdLink(prec);
+    prec->pact=FALSE;
     return(0);
 }
 
-static void monitor(permissiveRecord *ppermissive)
+static void monitor(permissiveRecord *prec)
 {
     unsigned short  monitor_mask;
     unsigned short  val,oval,wflg,oflg;
 
-    monitor_mask = recGblResetAlarms(ppermissive);
+    monitor_mask = recGblResetAlarms(prec);
     /* get val,oval,wflg,oflg*/
-    val=ppermissive->val;
-    oval=ppermissive->oval;
-    wflg=ppermissive->wflg;
-    oflg=ppermissive->oflg;
+    val=prec->val;
+    oval=prec->oval;
+    wflg=prec->wflg;
+    oflg=prec->oflg;
     /*set  oval and oflg*/
-    ppermissive->oval = val;
-    ppermissive->oflg = wflg;
+    prec->oval = val;
+    prec->oflg = wflg;
     if(oval != val) {
-	db_post_events(ppermissive,&ppermissive->val,
+	db_post_events(prec,&prec->val,
 	    monitor_mask|DBE_VALUE|DBE_LOG);
     }
     if(oflg != wflg) {
-        db_post_events(ppermissive,&ppermissive->wflg,
+        db_post_events(prec,&prec->wflg,
 	    monitor_mask|DBE_VALUE|DBE_LOG);
     }
     return;

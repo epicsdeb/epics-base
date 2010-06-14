@@ -1,6 +1,6 @@
 # CONFIG.solaris-sparc64.solaris-sparc64-debug
 #
-# CONFIG.solaris-sparc64.solaris-sparc64-debug,v 1.1.2.1 2008/09/22 15:12:57 jba Exp
+# CONFIG.solaris-sparc64.solaris-sparc64-debug,v 1.1.2.2 2009/07/13 21:00:44 jba Exp
 # This file is maintained by the build community.
 #
 # Definitions for solaris-sparc64 host - solaris-sparc64-debug target build with debug compiler flags
@@ -10,10 +10,7 @@
 include $(CONFIG)/os/CONFIG.Common.solaris-sparc64
 include $(CONFIG)/os/CONFIG.solaris-sparc64.solaris-sparc64
 
-#BUILD_CLASS = HOST
-#HOST_OPT = NO
-
-GNU = NO
+BUILD_CLASS=HOST
 
 # Removes -O optimization and adds -g compile option
-CROSS_OPT=NO
+HOST_OPT=NO

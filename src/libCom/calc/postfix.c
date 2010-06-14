@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* postfix.c,v 1.39.2.9 2008/04/10 18:06:47 anj Exp
+/* postfix.c,v 1.39.2.11 2009/04/23 18:49:39 anj Exp
  *
  * Subroutines used to convert an infix expression to a postfix expression
  *
@@ -186,7 +186,8 @@ static int
     }
 
     while (pel >= ptable) {
-	int len = strlen(pel->name);
+	size_t len = strlen(pel->name);
+
 	if (epicsStrnCaseCmp(*ppsrc, pel->name, len) == 0) {
 	    *ppel = pel;
 	    *ppsrc += len;
@@ -337,7 +338,8 @@ epicsShareFunc long
 	    pstacktop--;	/* remove ( from stack */
 	    /* if there is a vararg operator before the opening paren,
 	       it inherits the (opening) paren's stack effect */
-	    if (pstacktop->type == VARARG_OPERATOR) {
+	    if ((pstacktop > stack) &&
+		pstacktop->type == VARARG_OPERATOR) {
 		pstacktop->runtime_effect = (pstacktop+1)->runtime_effect;
 		/* check for no arguments */
 		if (pstacktop->runtime_effect > 0) {

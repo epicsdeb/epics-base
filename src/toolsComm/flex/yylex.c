@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* yylex - scanner front-end for flex */
@@ -36,15 +35,12 @@
  */
 
 /*
-#ifndef lint
-static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/yylex.c,v 1.3 2002/07/12 21:35:38 jba Exp (LBL)";
-#endif
+ * yylex.c,v 1.3.2.1 2009/04/30 20:45:31 anj Exp
+ */
 
 #include <ctype.h>
 #include "flexdef.h"
 #include "parse.h"
-*/
 
 /* ANSI C does not guarantee that isascii() is defined */
 #ifndef isascii
@@ -61,9 +57,8 @@ static char rcsid[] =
  *     token - return token found
  */
 
-int yylex()
-
-    {
+int yylex(void)
+{
     int toktype;
     static int beglin = false;
 
@@ -221,7 +216,7 @@ int yylex()
 		break;
 	    }
 	}
-	    
+
     return ( toktype );
-    }
+}
 

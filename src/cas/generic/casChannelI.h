@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casChannelI.h,v 1.6.2.1 2003/07/18 15:48:08 jhill Exp
+ *      casChannelI.h,v 1.6.2.2 2009/08/03 22:09:51 jhill Exp
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -54,6 +54,7 @@ public:
 	bool confirmationRequested () const;
     caStatus read ( const casCtx & ctx, gdd & prototype );
     caStatus write ( const casCtx & ctx, const gdd & value );
+    caStatus writeNotify ( const casCtx & ctx, const gdd & value );
 	void show ( unsigned level ) const;
 private:
     chanIntfForPV privateForPV;
