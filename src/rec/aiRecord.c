@@ -145,10 +145,10 @@ static long init_record(void *precord,int pass)
 	}
 	return (status);
     }
-    pai->mlst = pai->val;
-    pai->alst = pai->val;
-    pai->lalm = pai->val;
-    pai->oraw = pai->rval;
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
     return(0);
 }
 

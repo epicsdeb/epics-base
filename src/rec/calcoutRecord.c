@@ -197,12 +197,12 @@ static long init_record(calcoutRecord *prec, int pass)
     callbackSetUser(prec, &prpvt->checkLinkCb);
     prpvt->cbScheduled = 0;
 
+    prec->pval = prec->val;
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
+    prec->povl = prec->oval;
     if (pcalcoutDSET->init_record) pcalcoutDSET->init_record(prec);
-    pcalc->pval = pcalc->val;
-    pcalc->mlst = pcalc->val;
-    pcalc->alst = pcalc->val;
-    pcalc->lalm = pcalc->val;
-    pcalc->povl = pcalc->oval;
     return 0;
 }
 

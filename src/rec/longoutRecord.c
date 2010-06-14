@@ -117,9 +117,9 @@ static long init_record(longoutRecord *prec, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(prec))) return(status);
     }
-    plongout->mlst = plongout->val;
-    plongout->alst = plongout->val;
-    plongout->lalm = plongout->val;
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
     return(0);
 }
 

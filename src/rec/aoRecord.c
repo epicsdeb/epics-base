@@ -166,11 +166,11 @@ static long init_record(aoRecord *prec, int pass)
         }
     }
     prec->oval = prec->pval = prec->val;
-    pao->mlst = pao->val;
-    pao->alst = pao->val;
-    pao->lalm = pao->val;
-    pao->oraw = pao->rval;
-    pao->orbv = pao->rbv;
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
+    prec->orbv = prec->rbv;
     return(0);
 }
 

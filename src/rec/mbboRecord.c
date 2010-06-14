@@ -184,10 +184,10 @@ static long init_record(mbboRecord *prec, int pass)
     init_common(prec);
     /* convert val to rval */
     convert(prec);
-    pmbbo->mlst = pmbbo->val;
-    pmbbo->lalm = pmbbo->val;
-    pmbbo->oraw = pmbbo->rval;
-    pmbbo->orbv = pmbbo->rbv;
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
+    prec->orbv = prec->rbv;
     return(0);
 }
 
