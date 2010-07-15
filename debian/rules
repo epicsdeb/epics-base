@@ -21,8 +21,7 @@ RTEMS_TARGETS += RTEMS-mvme2307
 RTEMS_TARGETS += RTEMS-mvme3100
 RTEMS_TARGETS += RTEMS-mvme5500
 RTEMS_TARGETS += RTEMS-pc386
-DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
-TARGETS+=$(DEBUG_TAGETS) $(RTEMS_TARGETS)
+TARGETS+=$(RTEMS_TARGETS)
 
 # Since we are disabling RPATH this is needed to ensure that
 # we don't accidentally pick up things from other versions
@@ -58,29 +57,13 @@ clean:
 
 	dh clean --after auto_clean
 
-# All the libraries which are part of Base
-epics_libs+= asHost asIoc ca cas Com
-epics_libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
-epics_libs+= gdd miscIoc recIoc registryIoc
-epics_libs+= rsrvIoc softDevIoc testDevIoc
-
 prefix=debian/tmp/usr
 epicsbase=$(prefix)/epics/base
 
 epicsbin=$(epicsbase)/bin/$(EPICS_HOST_ARCH)
 epicslib=$(epicsbase)/lib/$(EPICS_HOST_ARCH)
 
-## Shared libraries
-
-# lib*.so.3.14.11
-epics_libfiles = $(patsubst %,$(epicslib)/lib%.so.$(SOV),$(epics_libs))
-# lib*.so
-epics_linklib  = $(patsubst %,$(epicslib)/lib%.so,$(epics_libs))
-
 ## Utilities
-
-epics_utils+= caget cainfo camonitor caput casw caRepeater
-#epics_utils+= iocLogServer softIoc
 
 epics_bins = $(patsubst %,debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
 
@@ -90,44 +73,16 @@ install: build
 
 	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
 
-	# Copy host sonamed libraries to /usr/lib
-	# Leave a symlink in /usr/epics/base/lib/$(EPICS_HOST_ARCH)
-	
-	install -d $(prefix)/lib
-	mv -t $(prefix)/lib $(epics_libfiles)
-	for ff in $(epics_libs); do \
-		rm -f $(epicslib)/lib$$ff.so; \
-		ln -s ../../../../lib/lib$$ff.so.$(SOV) $(epicslib)/lib$$ff.so; \
-	done
-
-	install -d $(prefix)/bin
-	install -d $(epicsbase)/startup
-
-	install -m 755 -t $(epicsbase)/startup \
-startup/EpicsHostArch startup/EpicsHostArch.pl \
-startup/Site.profile
-
-	# User can override this with a command line option
-	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" \
-        $(epicsbin)/makeBaseApp.pl
-
-	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl $(prefix)/bin/makeBaseApp
-	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl $(prefix)/bin/makeBaseExt
-	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/softIoc $(prefix)/bin/softIoc
-
-	install -d $(prefix)/share
-	mv $(epicsbase)/lib/perl $(prefix)/share/perl5
-	# This path is used by CA.pm
-	ln -s ${EPICS_HOST_ARCH} $(epicsbase)/lib/host
-
-	# Move some utilities to /usr/bin
-	# Leave a symlink in /usr/epics/base/bin/$(EPICS_HOST_ARCH)
-	install -d $(prefix)/bin
-	mv -t $(prefix)/bin $(epics_bins)
-	for ff in $(epics_bins); do rm -f $$ff; ln -s ../../../../bin/`basename $$ff` $$ff; done
-
-	install -d $(CURDIR)/debian/tmp/usr/epics/base
-	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/epics/base/
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/lib/perl
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/configure
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/db*
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/html
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/startup
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/templates
+	rm -f $(CURDIR)/debian/tmp/usr/epics/base/include/*.*
+	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/include/os/Linux
 
 	dh install --after auto_install --before dh_install --with rtems
 
@@ -140,25 +95,7 @@ startup/Site.profile
 	dh install --after dh_installdocs --with rtems
 
 binary-arch: install
-	dh binary-arch --before dh_strip_rtems --with rtems
-
-	# prevent debug and cross targets from being stripped
-	dh_strip_rtems -a --dbg-package=libepics$(SOV)-dbg
-
-	dh binary-arch --after dh_strip_rtems --before makeshlibs --with rtems
-
-	dh_makeshlibs -Nepics-dev -a
-	# prevent the .so symlinks under usr/epics/base/lib from being detected.
-	dh_makeshlibs -pepics-dev -Xusr/epics/base
-
-	dh binary-arch --after makeshlibs --before shlibdeps --with rtems
-
-	dh_shlibdeps -Nlibepics$(SOV) -a
-	# Prevent self dependency
-	#  This would happen because the package provides several dependent libraries
-	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
-
-	dh binary-arch --after shlibdeps --with rtems
+	dh binary-arch --with rtems
 
 binary-indep: install
 	dh binary-indep

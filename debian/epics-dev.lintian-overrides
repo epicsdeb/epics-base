@@ -1,5 +1,0 @@
-epics-dev: file-in-unusual-dir
-epics-dev: non-standard-dir-in-usr
-# EPICS lives in usr/epics
-epics-dev: unstripped-binary-or-object
-# The dev package also holds the debug build
