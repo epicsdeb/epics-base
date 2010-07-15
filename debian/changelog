@@ -1,6 +1,7 @@
 epics-base (3.14.11-1) unstable; urgency=low
 
   * New upstream version
+  * Split RTEMS packages to seperate source package rtems-epics
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 14 Jun 2010 16:06:49 -0400
 

@@ -16,11 +16,6 @@ DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
 DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
 SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
 
-RTEMS_TARGETS += RTEMS-mvme2100
-RTEMS_TARGETS += RTEMS-mvme2307
-RTEMS_TARGETS += RTEMS-mvme3100
-RTEMS_TARGETS += RTEMS-mvme5500
-RTEMS_TARGETS += RTEMS-pc386
 DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
 TARGETS+=$(DEBUG_TAGETS) $(RTEMS_TARGETS)
 
@@ -86,7 +81,7 @@ epics_bins = $(patsubst %,debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)/%,$(e
 
 install: build
 	# Why is install trying to re-run build???
-	dh install --before auto_install --with rtems
+	dh install --before auto_install
 
 	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
 
@@ -129,36 +124,36 @@ startup/Site.profile
 	install -d $(CURDIR)/debian/tmp/usr/epics/base
 	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/epics/base/
 
-	dh install --after auto_install --before dh_install --with rtems
+	dh install --after auto_install --before dh_install
 
 	dh_install --fail-missing
 
-	dh install --after dh_install --before dh_installdocs --with rtems
+	dh install --after dh_install --before dh_installdocs
 
 	dh_installdocs -A README
 
-	dh install --after dh_installdocs --with rtems
+	dh install --after dh_installdocs
 
 binary-arch: install
-	dh binary-arch --before dh_strip_rtems --with rtems
+	dh binary-arch --before dh_strip
 
 	# prevent debug and cross targets from being stripped
-	dh_strip_rtems -a --dbg-package=libepics$(SOV)-dbg
+	dh_strip -a --dbg-package=libepics$(SOV)-dbg
 
-	dh binary-arch --after dh_strip_rtems --before makeshlibs --with rtems
+	dh binary-arch --after dh_strip --before makeshlibs
 
 	dh_makeshlibs -Nepics-dev -a
 	# prevent the .so symlinks under usr/epics/base/lib from being detected.
 	dh_makeshlibs -pepics-dev -Xusr/epics/base
 
-	dh binary-arch --after makeshlibs --before shlibdeps --with rtems
+	dh binary-arch --after makeshlibs --before shlibdeps
 
 	dh_shlibdeps -Nlibepics$(SOV) -a
 	# Prevent self dependency
 	#  This would happen because the package provides several dependent libraries
 	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
 
-	dh binary-arch --after shlibdeps --with rtems
+	dh binary-arch --after shlibdeps
 
 binary-indep: install
 	dh binary-indep

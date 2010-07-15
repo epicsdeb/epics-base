@@ -1,9 +1,0 @@
-rtems-epics-mvme5500: non-standard-dir-in-usr
-rtems-epics-mvme5500: file-in-unusual-dir
-# EPICS lives in usr/epics
-rtems-epics-mvme5500: executable-not-elf-or-script
-# .boot files
-rtems-epics-mvme5500: statically-linked-binary
-# Everything RTEMS is statically linked
-rtems-epics-mvme5500: unstripped-binary-or-object
-# The user must decide whether to strip

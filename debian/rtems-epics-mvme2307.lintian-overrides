@@ -1,9 +1,0 @@
-rtems-epics-mvme2307: non-standard-dir-in-usr
-rtems-epics-mvme2307: file-in-unusual-dir
-# EPICS lives in usr/epics
-rtems-epics-mvme2307: executable-not-elf-or-script
-# .boot files
-rtems-epics-mvme2307: statically-linked-binary
-# Everything RTEMS is statically linked
-rtems-epics-mvme2307: unstripped-binary-or-object
-# The user must decide whether to strip

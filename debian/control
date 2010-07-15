@@ -2,20 +2,8 @@ Source: epics-base
 Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), rtems-debhelper (>= 3),
+Build-Depends: debhelper (>= 7),
                libreadline5-dev, perl,
-               rtems-libbspext-mvme2100,
-               rtems-cexp-mvme2100,
-               rtems-libbspext-mvme2307,
-               rtems-cexp-mvme2307,
-               rtems-libbspext-mvme3100,
-               rtems-cexp-mvme3100,
-               rtems-mvme5500 (>= 4.9.3),
-               rtems-libbspext-mvme5500,
-               rtems-cexp-mvme5500,
-               rtems-pc386,
-               rtems-cexp-pc386,
-Rtems-Depends: rtems, rtems-libbspext, rtems-cexp
 Standards-Version: 3.8.0
 Homepage: http://www.aps.anl.gov/epics/
 
@@ -110,68 +98,3 @@ Description: EPICS documentation
  control systems.
  .
  Documentation for EPICS Base
-
-Package: rtems-epics-mvme2100
-Architecture: any
-Depends: ${rtems:Depends}, epics-dev (= ${binary:Version}), ${misc:Depends}
-Conflicts: epics-rtems-mvme2100
-Provides: epics-rtems-mvme2100
-Replaces: epics-rtems-mvme2100
-Description: EPICS targeted to the MVME2100
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS for the MVME2100 powerpc based vme bus processor card
-
-Package: rtems-epics-mvme2307
-Architecture: any
-Depends: ${rtems:Depends}, epics-dev (= ${binary:Version}), ${misc:Depends}
-Conflicts: epics-rtems-mvme2307
-Provides: epics-rtems-mvme2307
-Replaces: epics-rtems-mvme2307
-Description: EPICS targeted to the MVME2307
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS for the MVME2307 powerpc based vme bus processor card
-
-Package: rtems-epics-mvme3100
-Architecture: any
-Depends: ${rtems:Depends}, epics-dev (= ${binary:Version}), ${misc:Depends}
-Conflicts: epics-rtems-mvme3100
-Provides: epics-rtems-mvme3100
-Replaces: epics-rtems-mvme3100
-Description: EPICS targeted to the MVME3100
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS for the MVME3100 powerpc based vme bus processor card
-
-Package: rtems-epics-mvme5500
-Architecture: any
-Depends: ${rtems:Depends}, epics-dev (= ${binary:Version}), ${misc:Depends}
-Conflicts: epics-rtems-mvme5500
-Provides: epics-rtems-mvme5500
-Replaces: epics-rtems-mvme5500
-Description: EPICS targeted to the MVME5500
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS for the MVME5500 powerpc based vme bus processor card
-
-Package: rtems-epics-pc386
-Architecture: any
-Depends: ${rtems:Depends}, epics-dev (= ${binary:Version}), ${misc:Depends}
-Conflicts: epics-rtems-pc386
-Provides: epics-rtems-pc386
-Replaces: epics-rtems-pc386
-Description: EPICS targeted to the PC system with >= 386 cpus
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS for the standard 386 compatible cpu and PC hardware.
