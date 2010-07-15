@@ -1,6 +1,16 @@
-epics-base (3.14.11-1) unstable; urgency=low
+rtems-epics (3.14.11-1) unstable; urgency=low
 
+  * Create new source package for RTEMS
   * New upstream version
+  * Applied Known Problems patches: softIoc, long_string, and macCore
+  * Backported from bazaar repository
+      fix for mantis 366
+      ESHUTDOWN is not in FreeBSD and hence not in RTEMS.
+      J field should not be PP, to match others.
+      Fix UDF processing so we respect IVOA.
+      Fixed crash when ALG (algorithm) was changed 
+        to Average at runtime. (Fixes #552803)
+      Fix NULL handle issue in macParseDefns()
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 14 Jun 2010 16:06:49 -0400
 
