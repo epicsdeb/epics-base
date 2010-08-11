@@ -29,7 +29,7 @@ DEB_MAKE_MAKEVARS += EPICS_HOST_ARCH=$(EPICS_HOST_ARCH)
 DEB_MAKE_MAKEVARS += USE_RPATH=NO
 DEB_MAKE_MAKEVARS += CROSS_COMPILER_TARGET_ARCHS="$(TARGETS)"
 # ABS_INSTALL_DIR is used in the 'softIoc' executable
-DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/epics/base
+DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/lib/epics
 
 # Prevent CFLAGS and similar from being passed to EPICS since
 # this will break cross-builds of things.
@@ -60,7 +60,7 @@ epics_libs+= gdd miscIoc recIoc registryIoc
 epics_libs+= rsrvIoc softDevIoc testDevIoc
 
 prefix=debian/tmp/usr
-epicsbase=$(prefix)/epics/base
+epicsbase=$(prefix)/lib/epics
 
 epicsbin=$(epicsbase)/bin/$(EPICS_HOST_ARCH)
 epicslib=$(epicsbase)/lib/$(EPICS_HOST_ARCH)
@@ -77,16 +77,16 @@ epics_linklib  = $(patsubst %,$(epicslib)/lib%.so,$(epics_libs))
 epics_utils+= caget cainfo camonitor caput casw caRepeater
 #epics_utils+= iocLogServer softIoc
 
-epics_bins = $(patsubst %,debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
+epics_bins = $(patsubst %,debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
 
 install: build
 	# Why is install trying to re-run build???
 	dh install --before auto_install
 
-	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
+	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/lib/epics
 
 	# Copy host sonamed libraries to /usr/lib
-	# Leave a symlink in /usr/epics/base/lib/$(EPICS_HOST_ARCH)
+	# Leave a symlink in /usr/lib/epics/lib/$(EPICS_HOST_ARCH)
 	
 	install -d $(prefix)/lib
 	mv -t $(prefix)/lib $(epics_libfiles)
@@ -106,9 +106,9 @@ startup/Site.profile
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" \
         $(epicsbin)/makeBaseApp.pl
 
-	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl $(prefix)/bin/makeBaseApp
-	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl $(prefix)/bin/makeBaseExt
-	ln -s ../epics/base/bin/$(EPICS_HOST_ARCH)/softIoc $(prefix)/bin/softIoc
+	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl $(prefix)/bin/makeBaseApp
+	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl $(prefix)/bin/makeBaseExt
+	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/softIoc $(prefix)/bin/softIoc
 
 	install -d $(prefix)/share
 	mv $(epicsbase)/lib/perl $(prefix)/share/perl5
@@ -116,13 +116,13 @@ startup/Site.profile
 	ln -s ${EPICS_HOST_ARCH} $(epicsbase)/lib/host
 
 	# Move some utilities to /usr/bin
-	# Leave a symlink in /usr/epics/base/bin/$(EPICS_HOST_ARCH)
+	# Leave a symlink in /usr/lib/epics/bin/$(EPICS_HOST_ARCH)
 	install -d $(prefix)/bin
 	mv -t $(prefix)/bin $(epics_bins)
 	for ff in $(epics_bins); do rm -f $$ff; ln -s ../../../../bin/`basename $$ff` $$ff; done
 
-	install -d $(CURDIR)/debian/tmp/usr/epics/base
-	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/epics/base/
+	install -d $(CURDIR)/debian/tmp/usr/lib/epics
+	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/lib/epics/
 
 	dh install --after auto_install --before dh_install
 
@@ -143,8 +143,8 @@ binary-arch: install
 	dh binary-arch --after dh_strip --before makeshlibs
 
 	dh_makeshlibs -Nepics-dev -a
-	# prevent the .so symlinks under usr/epics/base/lib from being detected.
-	dh_makeshlibs -pepics-dev -Xusr/epics/base
+	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
+	dh_makeshlibs -pepics-dev -Xusr/lib/epics
 
 	dh binary-arch --after makeshlibs --before shlibdeps
 
