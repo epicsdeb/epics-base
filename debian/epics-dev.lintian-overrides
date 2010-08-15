@@ -1,5 +1,6 @@
-epics-dev: file-in-unusual-dir
-epics-dev: non-standard-dir-in-usr
-# EPICS lives in usr/epics
+epics-dev: executable-not-elf-or-script ./usr/lib/epics/bin/linux-x86-debug/makeInstallDir.pl
+epics-dev: executable-not-elf-or-script ./usr/lib/epics/bin/linux-x86/makeInstallDir.pl
+# Dependent modules are hardcoded expect to find this script with the .pl extensions
 epics-dev: unstripped-binary-or-object
-# The dev package also holds the debug build
+# dh_strip doesn't seem to want to touch usr/lib/epics/lib/*-debug/*.so
+# not sure why?
