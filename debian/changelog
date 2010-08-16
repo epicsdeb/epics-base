@@ -1,3 +1,10 @@
+rtems-epics (3.14.11-2) unstable; urgency=low
+
+  * change install location to usr/lib/epics
+  * fix dependency to epics-dev
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 16 Aug 2010 13:53:54 -0400
+
 rtems-epics (3.14.11-1) unstable; urgency=low
 
   * Create new source package for RTEMS
