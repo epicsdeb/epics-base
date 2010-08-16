@@ -1,7 +1,16 @@
+epics-base (3.14.11-2) unstable; urgency=low
+
+  * change install location to /usr/lib/epics/
+  * add manpages for makeBaseApp/Ext and softIoc
+  * update manpages for caget, camonitor, and caput
+  * update lintian overrides
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 16 Aug 2010 13:54:32 -0400
+
 epics-base (3.14.11-1) unstable; urgency=low
 
   * New upstream version
-  * Split RTEMS packages to seperate source package rtems-epics
+  * Split RTEMS packages to separate source package rtems-epics
   * Applied Known Problems patches: softIoc, long_string, and macCore
   * Backported from bazaar repository
       fix for mantis 366
