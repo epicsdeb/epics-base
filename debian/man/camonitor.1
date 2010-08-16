@@ -1,10 +1,9 @@
-.\"                                      Hey, EMACS: -*- nroff -*-
+.\" Hey, EMACS: -*- nroff -*-
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH CAMONITOR 1 "April 17, 2006"
 .\" Please adjust this date whenever revising the manpage.
-.\"
+.\" 
 .\" Some roff macros, for reference:
 .\" .nh        disable hyphenation
 .\" .hy        enable hyphenation
@@ -15,70 +14,78 @@
 .\" .br        insert line break
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
-.SH NAME
+.TH "CAMONITOR" "1" "April 17, 2006" "" ""
+.SH "NAME"
 camonitor \- monitor channel access process variables
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 .B camonitor
-.RI [ options ] " PV" ...
-.SH DESCRIPTION
+.RI [ options ]
+<PV name>
+<PV name> ...
+.SH "DESCRIPTION"
 .B camonitor
 subscribes to one or more Channel Access (CA) Process Variables (PVs), printing
 their values as they change.
-.SH OPTIONS
+.SH "OPTIONS"
+.TP 
+Format
+.TP 
+.BI \-# " N"
+output only the first N elements of the PV's array
+.TP 
+.B \-n
+Print DBF_ENUM value as number (default is enum string)
+.TP 
+.B \-s
+output PV values as strings (may honour the server\-side precision)
+.TP 
+Floating point style
+.TP 
 .BI \-e " N"
 output floating point numbers in exponential format, with N digits after the
 decimal point
-.TP
+.TP 
 .BI \-f " N"
-output floating point numbers in fixed-width format, with N digits after the
+output floating point numbers in fixed\-width format, with N digits after the
 decimal point
-.TP
+.TP 
 .BI \-g " N"
-output floating point numbers in either exponential or fixed-width format, with
-N digits after the decimal point
-.TP
-.B \-h
-display usage information and exit
-.TP
+output floating point numbers in either exponential or fixed\-width format, with N digits after the decimal point
+.LP 
+Integer style
+.TP 
+.B \-0x
+output integers in hexadecimal
+.TP 
+.B \-0o
+output integers in octal
+.TP 
+.B \-0b
+output integers in binary
+.TP 
+Timestamp format
+.TP 
 .B \-i
 timestamp events incrementally, using the time elapsed since the last event
-.TP
+.TP 
 .B \-I
 timestamp events incrementally, using the time elapsed since the last event for
 this PV
-.TP
+.TP 
+.B \-r
+timestamp events relatively, using the time elapsed since the program started
+.TP 
+Channel Access options
+.TP 
 .BI \-m " MASK"
 subscribe to PVs using this CA event mask, which is any combination of the
 characters 'v' (value), 'a' (alarm), and 'l' (log); the default mask is 'va'
-.TP
-.B \-n
-output
-.B DBF_ENUM
-PVs as numbers, not strings
-.TP
-.B \-r
-timestamp events relatively, using the time elapsed since the program started
-.TP
-.B \-s
-output PV values as strings (may honour the server-side precision)
-.TP
+.TP 
 .BI \-w " N"
 use a CA timeout of N seconds
-.TP
-.B \-0x
-output integers in hexadecimal
-.TP
-.B \-0o
-output integers in octal
-.TP
-.B \-0b
-output integers in binary
-.TP
-.BI \-# " N"
-output only the first N elements of the PV's array
-.SH AUTHOR
+.SH "AUTHOR"
 EPICS was collaboratively developed by Los Alamos National Laboratory, Argonne
 National Laboratory, and numerous other inividuals and organizations.
-.PP
+.PP 
 This manual page was written by Ken McIvor <mcivor@iit.edu>,
 for the Debian project (but may be used by others).
