@@ -1,2 +1,2 @@
-usr/epics/base/bin/RTEMS-mvme2307
-usr/epics/base/lib/RTEMS-mvme2307
+usr/lib/epics/bin/RTEMS-mvme2307
+usr/lib/epics/lib/RTEMS-mvme2307

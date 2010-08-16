@@ -33,7 +33,7 @@ DEB_MAKE_MAKEVARS += EPICS_HOST_ARCH=$(EPICS_HOST_ARCH)
 DEB_MAKE_MAKEVARS += USE_RPATH=NO
 DEB_MAKE_MAKEVARS += CROSS_COMPILER_TARGET_ARCHS="$(TARGETS)"
 # ABS_INSTALL_DIR is used in the 'softIoc' executable
-DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/epics/base
+DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/lib/epics
 
 # Prevent CFLAGS and similar from being passed to EPICS since
 # this will break cross-builds of things.
@@ -58,31 +58,31 @@ clean:
 	dh clean --after auto_clean
 
 prefix=debian/tmp/usr
-epicsbase=$(prefix)/epics/base
+epicsbase=$(prefix)/lib/epics
 
 epicsbin=$(epicsbase)/bin/$(EPICS_HOST_ARCH)
 epicslib=$(epicsbase)/lib/$(EPICS_HOST_ARCH)
 
 ## Utilities
 
-epics_bins = $(patsubst %,debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
+epics_bins = $(patsubst %,debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
 
 install: build
 	# Why is install trying to re-run build???
 	dh install --before auto_install --with rtems
 
-	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/epics/base
+	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/lib/epics
 
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/bin/$(EPICS_HOST_ARCH)
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/lib/$(EPICS_HOST_ARCH)
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/lib/perl
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/configure
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/db*
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/html
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/startup
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/templates
-	rm -f $(CURDIR)/debian/tmp/usr/epics/base/include/*.*
-	rm -rf $(CURDIR)/debian/tmp/usr/epics/base/include/os/Linux
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/lib/$(EPICS_HOST_ARCH)
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/lib/perl
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/configure
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/db*
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/html
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/startup
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/templates
+	rm -f $(CURDIR)/debian/tmp/usr/lib/epics/include/*.*
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/include/os/Linux
 
 	dh install --after auto_install --before dh_install --with rtems
 
