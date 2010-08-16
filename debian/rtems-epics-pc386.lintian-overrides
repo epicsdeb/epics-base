@@ -1,6 +1,3 @@
-rtems-epics-pc386: non-standard-dir-in-usr
-rtems-epics-pc386: file-in-unusual-dir
-# EPICS lives in usr/epics
 rtems-epics-pc386: executable-not-elf-or-script
 # .boot files
 rtems-epics-pc386: statically-linked-binary

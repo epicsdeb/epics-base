@@ -1,6 +1,3 @@
-rtems-epics-mvme3100: non-standard-dir-in-usr
-rtems-epics-mvme3100: file-in-unusual-dir
-# EPICS lives in usr/epics
 rtems-epics-mvme3100: executable-not-elf-or-script
 # .boot files
 rtems-epics-mvme3100: statically-linked-binary
