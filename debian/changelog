@@ -1,3 +1,10 @@
+epics-base (3.14.11-3) unstable; urgency=low
+
+  * wrong paths in perl scripts
+  * correct dbd path for softIoc
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 08 Sep 2010 15:02:53 -0400
+
 epics-base (3.14.11-2) unstable; urgency=low
 
   * change install location to /usr/lib/epics/
