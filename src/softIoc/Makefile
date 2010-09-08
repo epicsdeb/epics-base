@@ -28,9 +28,11 @@ softIoc_LIBS = $(EPICS_BASE_IOC_LIBS)
 
 DB += softIocExit.db
 
+ABS_INSTALL_DIR = $(INSTALL_LOCATION)
+
 include $(TOP)/configure/RULES
 
 softMain$(OBJ) : $(COMMON_DIR)/epicsInstallDir.h
 
 $(COMMON_DIR)/epicsInstallDir.h: $(INSTALL_BIN)/makeInstallDir.pl
-	$(PERL) $(INSTALL_BIN)/makeInstallDir.pl $(INSTALL_LOCATION) > $@
+	$(PERL) $(INSTALL_BIN)/makeInstallDir.pl $(ABS_INSTALL_DIR) > $@
