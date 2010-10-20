@@ -1,3 +1,13 @@
+epics-base (3.14.11-4) unstable; urgency=low
+
+  * fix use of temp files during builds
+      Fixes problem with parallel builds expanding MSI templates
+  * rtems: Bind NTP client to a random port
+      Fixes time sync bug on networks with NTP broadcasts
+      Launchpad bug #663875
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 20 Oct 2010 13:06:50 -0400
+
 epics-base (3.14.11-3) unstable; urgency=low
 
   * wrong paths in perl scripts
