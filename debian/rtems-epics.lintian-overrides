@@ -1,2 +1,0 @@
-rtems-epics: non-standard-dir-in-usr usr/epics/
-rtems-epics: file-in-unusual-dir

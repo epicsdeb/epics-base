@@ -31,7 +31,7 @@ Description: EPICS headers for RTEMS
  Contains the OS specific headers needed to build IOCs for RTEMS
 
 Package: rtems-epics-mvme2100
-Architecture: any
+Architecture: all
 Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
 Conflicts: epics-rtems-mvme2100
 Provides: epics-rtems-mvme2100
@@ -44,7 +44,7 @@ Description: EPICS targeted to the MVME2100
  EPICS for the MVME2100 powerpc based vme bus processor card
 
 Package: rtems-epics-mvme2307
-Architecture: any
+Architecture: all
 Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
 Conflicts: epics-rtems-mvme2307
 Provides: epics-rtems-mvme2307
@@ -57,7 +57,7 @@ Description: EPICS targeted to the MVME2307
  EPICS for the MVME2307 powerpc based vme bus processor card
 
 Package: rtems-epics-mvme3100
-Architecture: any
+Architecture: all
 Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
 Conflicts: epics-rtems-mvme3100
 Provides: epics-rtems-mvme3100
@@ -70,7 +70,7 @@ Description: EPICS targeted to the MVME3100
  EPICS for the MVME3100 powerpc based vme bus processor card
 
 Package: rtems-epics-mvme5500
-Architecture: any
+Architecture: all
 Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
 Conflicts: epics-rtems-mvme5500
 Provides: epics-rtems-mvme5500
@@ -83,7 +83,7 @@ Description: EPICS targeted to the MVME5500
  EPICS for the MVME5500 powerpc based vme bus processor card
 
 Package: rtems-epics-pc386
-Architecture: any
+Architecture: all
 Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
 Conflicts: epics-rtems-pc386
 Provides: epics-rtems-pc386

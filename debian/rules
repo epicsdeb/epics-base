@@ -98,6 +98,6 @@ binary-arch: install
 	dh binary-arch --with rtems
 
 binary-indep: install
-	dh binary-indep
+	dh binary-indep --with rtems
 
 binary: binary-arch binary-indep
