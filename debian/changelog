@@ -1,3 +1,13 @@
+rtems-epics (3.14.11-4) unstable; urgency=low
+
+  * Packages without host binaries can be marked all
+  * rtems: Bind NTP client to a random port
+      Fixes time sync bug on networks with NTP broadcasts
+      Launchpad bug #663875
+  * Skip 3.14.11-3 to keep up with epics host package
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 21 Oct 2010 16:56:58 -0400
+
 rtems-epics (3.14.11-2) unstable; urgency=low
 
   * change install location to usr/lib/epics
