@@ -1,3 +1,10 @@
+epics-base (3.14.11-5) unstable; urgency=low
+
+  * incorrect path in S99caRepeater and S99logServer init scripts
+      Reported by Martin Konrad
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 10 Nov 2010 11:01:06 -0500
+
 epics-base (3.14.11-4) unstable; urgency=low
 
   * fix use of temp files during builds
