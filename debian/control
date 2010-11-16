@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7),
-               libreadline5-dev, perl,
+               libreadline6-dev, perl,
 Standards-Version: 3.8.0
 Homepage: http://www.aps.anl.gov/epics/
 
@@ -38,7 +38,7 @@ Package: epics-dev
 Architecture: any
 Depends: libepics3.14.11 (= ${binary:Version}), epics-catools (= ${binary:Version}),
          epics-perl (= ${binary:Version}),
-         libreadline5-dev,
+         libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-msi
 Suggests: epics-doc
