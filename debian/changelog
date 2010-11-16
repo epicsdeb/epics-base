@@ -1,3 +1,9 @@
+epics-base (3.14.11-6) unstable; urgency=low
+
+  * change readline to 6
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 16 Nov 2010 10:45:47 -0500
+
 epics-base (3.14.11-5) unstable; urgency=low
 
   * incorrect path in S99caRepeater and S99logServer init scripts
