@@ -1,3 +1,10 @@
+rtems-epics (3.14.11-6) unstable; urgency=low
+
+  * Sync with epics-base
+  * change readline dependency to 6
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 20 Jan 2011 11:59:57 -0500
+
 rtems-epics (3.14.11-4) unstable; urgency=low
 
   * Packages without host binaries can be marked all
