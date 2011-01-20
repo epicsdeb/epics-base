@@ -175,7 +175,7 @@ sub get_commandline_opts { #no args
     } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
         $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
     } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
-	$epics_base = "/usr/epics/base";
+	$epics_base = "/usr/lib/epics";
     }
     $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
     $app_epics_base = LocalPath($epics_base);

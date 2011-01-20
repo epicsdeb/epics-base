@@ -33,6 +33,6 @@ SCRIPTS_Linux := S99logServer S99caRepeater
 include $(TOP)/configure/RULES
  
 S99%: ../rc2.%
-	sed -e s%:INSTALL_BIN:%`cd $(INSTALL_BIN); pwd`% $< >$@
+	sed -e s%:INSTALL_BIN:%$(ABS_INSTALL_DIR)/bin/$(T_A)% $< >$@
 
 #	EOF Makefile.Host for base/src/util

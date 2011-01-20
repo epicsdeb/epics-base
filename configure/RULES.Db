@@ -274,8 +274,8 @@ $(COMMON_DIR)/%.db$(RAW): $(COMMON_DIR)/%.edf
 #	@$(MAKEDBDEPENDS) $@ $^  >> $@$(DEP)
 #	$(ECHO) "Inflating database from $^"
 #	@$(RM) $@
-#	$(MSI) $(DBFLAGS) -S$< $(firstword $(patsubst %.substitutions,,$^)) > msi.tmp
-#	$(MV) msi.tmp $@
+#	$(MSI) $(DBFLAGS) -S$< $(firstword $(patsubst %.substitutions,,$^)) > $@.tmp
+#	$(MV) $@.tmp $@
 
 $(COMMON_DIR)/%.db$(RAW): %.substitutions
 	@$(RM) $@$(DEP)
@@ -283,16 +283,16 @@ $(COMMON_DIR)/%.db$(RAW): %.substitutions
 	@echo "$@:$(TEMPLATE_FILENAME)" >> $@$(DEP)
 	$(ECHO) "Inflating database from $< $(TEMPLATE_FILENAME)"
 	@$(RM) $@
-	$(MSI) $(DBFLAGS) -S$< $(TEMPLATE_FILENAME) > msi.tmp
-	$(MV) msi.tmp $@
+	$(MSI) $(DBFLAGS) -S$< $(TEMPLATE_FILENAME) > $@.tmp
+	$(MV) $@.tmp $@
 
 $(COMMON_DIR)/%.db$(RAW): %.template
 	@$(RM) $@$(DEP)
 	@$(MAKEDBDEPENDS) $@ $^  >> $@$(DEP)
 	$(ECHO) "Inflating database from $<"
 	@$(RM) $@
-	$(MSI) $(DBFLAGS)  $< > msi.tmp
-	$(MV) msi.tmp $@
+	$(MSI) $(DBFLAGS)  $< > $@.tmp
+	$(MV) $@.tmp $@
 
 $(COMMON_DIR)/%.acf: %.acs
 	@$(RM) $@$(DEP)
@@ -342,13 +342,13 @@ $(foreach file, $(DB_INSTALLS), $(eval $(call DB_INSTALLS_template, $(file))))
 
 %_registerRecordDeviceDriver.cpp: $(COMMON_DIR)/%.dbd 
 	@$(RM) $@ temp.cpp
-	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) > temp.cpp
-	$(MV) temp.cpp $@
+	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) > $@.tmp
+	$(MV) $@.tmp $@
 
 %_registerRecordDeviceDriver.cpp: %.dbd 
 	@$(RM) $@ temp.cpp
-	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) > temp.cpp
-	$(MV) temp.cpp $@
+	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) > $@.tmp
+	$(MV) $@.tmp $@
 
 .PRECIOUS: %_registerRecordDeviceDriver.cpp
 
