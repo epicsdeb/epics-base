@@ -22,21 +22,24 @@ See below for an example of how to run it.
 .SH "OPTIONS"
 .TP 
 .B 
-\fB\-D\fP dbd
-Override the default the database description
+\fB\-D\fP .../base.dbd\fP
+Override the default location of base.dbd
 .TP 
 .B 
-\fB\-a\fP \fIascf\fP
+\fB\-a\fP my.acf\fP
 Access Security configuration file
-\fB\-m\fP key=val,\.\.\. Macros to use when expanding .db files
 .TP 
 .B 
-\fB\-d\fP db
+\fB\-m\fP key=val,\.\.\.\fP
+Macros to use when expanding .db files
+.TP 
+.B 
+\fB\-d\fP my.db\fP
 The database file to load
 .TP 
 .B 
-\fB\-x\fP \fIprefix\fP
-Sets the IOC macro.  (\fB\-m\fP "IOC=\fIprefix\fP")
+\fB\-x\fP "prefix"\fP
+Load softIocExit.db with the IOC macro set to 'prefix'.  (\fB\-m\fP "IOC=\fIprefix\fP")
 .TP 
 .B 
 \fB\-S\fP
@@ -49,7 +52,7 @@ $ cat << EOF > test.db
    field(SCAN, "1 second")
  }
  EOF
-$ softioc \fB\-x\fP `hostname` \fB\-d\fP test.db
+$ softioc \fB\-x\fP \`hostname\` \fB\-d\fP test.db
 .PP 
 In another console
 .PP 
