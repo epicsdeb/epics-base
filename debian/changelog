@@ -1,4 +1,4 @@
-epics-base (3.14.11-7~test1) UNRELEASED; urgency=low
+epics-base (3.14.11-7~atest1) UNRELEASED; urgency=low
 
   * libCom: Fix errlogPrintf() assert fail at shutdown
   * fix description of -x in softIoc manpage
