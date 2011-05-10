@@ -17,7 +17,7 @@ DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
 SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
 
 DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
-TARGETS+=$(DEBUG_TAGETS) $(RTEMS_TARGETS)
+TARGETS+=$(DEBUG_TAGETS)
 
 # Since we are disabling RPATH this is needed to ensure that
 # we don't accidentally pick up things from other versions
@@ -138,6 +138,9 @@ startup/Site.profile
 
 	cd $(CURDIR)/debian/tmp/etc/epics/configure && for ff in * ; do \
 		ln -s /etc/epics/configure/$$ff $(CURDIR)/$(prefix)/lib/epics/configure/$$ff; done
+
+	install -d debian/tmp/etc/epics/configure/conf.d
+	echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $(TARGETS)" > debian/tmp/etc/epics/configure/conf.d/01debug.make
 	dh install --after auto_install --before dh_install
 
 	dh_install --fail-missing
