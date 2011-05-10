@@ -65,6 +65,17 @@ Description: Files needed to develop new EPICS applications
  This package contains additional files needed for compatibility with
  EPICS 3.13.x series.
 
+Package: epics-pcas-dev
+Architecture: all
+Depends: epics-dev (= ${binary:Version}),
+        ${shlibs:Depends}, ${misc:Depends}
+Description: Files needed to develop new EPICS applications
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Private headers for the portable CA server needed by some special applications
+
 Package: epics-catools
 Section: admin
 Architecture: any
