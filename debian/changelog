@@ -1,3 +1,15 @@
+epics-base (3.14.11-7~test1) UNRELEASED; urgency=low
+
+  * libCom: Fix errlogPrintf() assert fail at shutdown
+  * fix description of -x in softIoc manpage
+  * detect EPICS_HOST_ARCH if unset
+  * use auto host detection
+  * manpage for softIoc in wrong package
+  * relocate configure/ as /etc/epics/configure
+  * populate ALL_CROSS_COMPILER_TARGET_ARCHS with debug target
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 10 May 2011 12:28:35 -0400
+
 epics-base (3.14.11-6) unstable; urgency=low
 
   * change readline to 6
