@@ -14,3 +14,5 @@ usr/lib/epics/lib/linux-*/libcas*
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
+usr/share/epics-dev/configure
+etc/epics/configure

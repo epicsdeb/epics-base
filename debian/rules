@@ -123,6 +123,21 @@ startup/Site.profile
 	install -d $(CURDIR)/debian/tmp/usr/lib/epics
 	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/lib/epics/
 
+	# relocate configure/
+	# copy to /etc/epics/configure and /usr/share/epics-dev/configure
+	# populated /usr/lib/epics/configure with symlinks to /etc/epics/configure
+	# except for conf.d and rules.d
+
+	install -d $(CURDIR)/debian/tmp/etc/epics
+	install -d $(CURDIR)/debian/tmp/usr/share/epics-dev
+
+	cp -dR $(prefix)/lib/epics/configure $(CURDIR)/debian/tmp/etc/epics/
+	mv $(prefix)/lib/epics/configure $(CURDIR)/debian/tmp/usr/share/epics-dev/configure
+
+	install -d $(prefix)/lib/epics/configure
+
+	cd $(CURDIR)/debian/tmp/etc/epics/configure && for ff in * ; do \
+		ln -s /etc/epics/configure/$$ff $(CURDIR)/$(prefix)/lib/epics/configure/$$ff; done
 	dh install --after auto_install --before dh_install
 
 	dh_install --fail-missing
