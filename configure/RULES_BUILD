@@ -67,6 +67,8 @@ endif
 # Allow installed 3rd party modules to add/modify make variables
 
 -include $(wildcard $(CONFIG)/conf.d/*.make)
+# old location
+-include $(wildcard /usr/lib/epics/configure/conf.d/*.make)
 
 #---------------------------------------------------------------
 #	First target
@@ -458,6 +460,8 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
 
 # Allow 3rd party modules to inject additional rules
 -include $(wildcard $(CONFIG)/rules.d/*.make)
+# old location
+-include $(wildcard /usr/lib/epics/configure/rules.d/*.make)
 
 .PRECIOUS: %.i %.o %.c %.nm %.cpp %.cc
 .PRECIOUS: $(COMMON_INC)
