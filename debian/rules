@@ -84,6 +84,12 @@ install: build
 	rm -f $(CURDIR)/debian/tmp/usr/lib/epics/include/*.*
 	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/include/os/Linux
 
+	install -d debian/tmp/etc/epics/configure/conf.d
+
+	for tt in $(TARGETS) ; do \
+		echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $${tt}" > debian/tmp/etc/epics/configure/conf.d/05$${tt}.make; \
+	done
+
 	dh install --after auto_install --before dh_install --with rtems
 
 	dh_install --fail-missing

@@ -1,2 +1,3 @@
 usr/lib/epics/bin/RTEMS-mvme2100
 usr/lib/epics/lib/RTEMS-mvme2100
+etc/epics/configure/conf.d/05RTEMS-mvme2100.make

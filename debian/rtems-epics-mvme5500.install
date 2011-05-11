@@ -1,2 +1,3 @@
 usr/lib/epics/bin/RTEMS-mvme5500
 usr/lib/epics/lib/RTEMS-mvme5500
+etc/epics/configure/conf.d/05RTEMS-mvme5500.make

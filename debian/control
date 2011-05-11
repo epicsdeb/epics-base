@@ -21,7 +21,7 @@ Homepage: http://www.aps.anl.gov/epics/
 
 Package: rtems-epics
 Architecture: all
-Depends: epics-dev (>= 3.14.11-2), ${misc:Depends}
+Depends: epics-dev (>= 3.14.11-7~), ${misc:Depends}
 Conflicts: epics-dev (<< 3.14.11)
 Description: EPICS headers for RTEMS
  The Experimental Physics and Industrial Control System is a collection of
