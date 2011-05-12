@@ -1,7 +1,5 @@
 rtems-epics-mvme3100: arch-independent-package-contains-binary-or-object
 # Target binaries are independent of the host
-rtems-epics-mvme3100: executable-not-elf-or-script
-# .boot files
 rtems-epics-mvme3100: statically-linked-binary
 # Everything RTEMS is statically linked
 rtems-epics-mvme3100: unstripped-binary-or-object

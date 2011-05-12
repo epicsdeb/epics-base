@@ -84,6 +84,9 @@ install: build
 	rm -f $(CURDIR)/debian/tmp/usr/lib/epics/include/*.*
 	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/include/os/Linux
 
+	chmod a-x $(CURDIR)/debian/tmp/usr/lib/epics/bin/RTEMS-*/rtemsTestHarness*
+	chmod a-x $(CURDIR)/debian/tmp/usr/lib/epics/bin/RTEMS-*/softIoc*
+
 	install -d debian/tmp/etc/epics/configure/conf.d
 
 	for tt in $(TARGETS) ; do \
