@@ -5,6 +5,7 @@ Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7),
                libreadline6-dev, perl,
 Standards-Version: 3.8.0
+Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
 Homepage: http://www.aps.anl.gov/epics/
 
 Package: libepics3.14.11

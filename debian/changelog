@@ -1,4 +1,4 @@
-epics-base (3.14.11-7~atest1) UNRELEASED; urgency=low
+epics-base (3.14.11-7) unstable; urgency=low
 
   * libCom: Fix errlogPrintf() assert fail at shutdown
   * fix description of -x in softIoc manpage
@@ -8,7 +8,7 @@ epics-base (3.14.11-7~atest1) UNRELEASED; urgency=low
   * relocate configure/ as /etc/epics/configure
   * populate ALL_CROSS_COMPILER_TARGET_ARCHS with debug target
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 10 May 2011 12:28:35 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 12 May 2011 17:38:15 -0400
 
 epics-base (3.14.11-6) unstable; urgency=low
 
