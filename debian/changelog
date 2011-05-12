@@ -1,3 +1,14 @@
+rtems-epics (3.14.11-7) unstable; urgency=low
+
+  * populate ALL_CROSS_COMPILER_TARGET_ARCHS with
+    RTEMS targets
+  * Merge with epics-base 3.14.11-7
+  *   libCom: Fix errlogPrintf() assert fail at shutdown
+  *   detect EPICS_HOST_ARCH if unset
+  *   relocate configure/ as /etc/epics/configure
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 11 May 2011 17:13:40 -0400
+
 rtems-epics (3.14.11-6) unstable; urgency=low
 
   * Sync with epics-base
