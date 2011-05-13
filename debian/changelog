@@ -1,3 +1,10 @@
+rtems-epics (3.14.11-7~lenny1) unstable; urgency=low
+
+  * Rebuild for Lenny
+  * Depend on readline 5
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 13 May 2011 13:45:57 -0400
+
 rtems-epics (3.14.11-7) unstable; urgency=low
 
   * populate ALL_CROSS_COMPILER_TARGET_ARCHS with
