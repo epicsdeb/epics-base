@@ -1,3 +1,10 @@
+epics-base (3.14.11-7~lenny1) squeeze-backports; urgency=low
+
+  * Rebuild for lenny-backports.
+  * switch to readline 5
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 13 May 2011 11:00:47 -0400
+
 epics-base (3.14.11-7) unstable; urgency=low
 
   * libCom: Fix errlogPrintf() assert fail at shutdown
