@@ -1,3 +1,10 @@
+epics-base (3.14.11-7.1~lenny1) unstable; urgency=low
+
+  * Fix postinst
+  * Change default max array size to 1M
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 16 May 2011 14:59:33 -0400
+
 epics-base (3.14.11-7~lenny1) squeeze-backports; urgency=low
 
   * Rebuild for lenny-backports.
