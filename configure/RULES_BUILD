@@ -64,13 +64,6 @@ INSTALL_TEMPLATES_SUBDIR = $(INSTALL_TEMPLATES)
 endif
 
 #---------------------------------------------------------------
-# Allow installed 3rd party modules to add/modify make variables
-
--include $(wildcard $(CONFIG)/conf.d/*.make)
-# old location
--include $(wildcard /usr/lib/epics/configure/conf.d/*.make)
-
-#---------------------------------------------------------------
 #	First target
 
 all:	install
