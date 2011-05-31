@@ -29,6 +29,13 @@ CONFIG ?= /etc/epics/configure
 endif
 endif
 
+# Provide a default if the user hasn't set EPICS_HOST_ARCH
+ifeq ($(origin EPICS_HOST_ARCH), undefined)
+# NB: Must use a simply expanded variable here for performance:
+EPICS_HOST_ARCH := $(shell $(EPICS_BASE)/startup/EpicsHostArch.pl)
+endif
+#
+
 -include $(CONFIG)/os/CONFIG_COMPAT
 
 -include $(CONFIG)/RELEASE
