@@ -22,7 +22,11 @@ EPICS_BASE = $(INSTALL_LOCATION)
 CONFIG = $(TOP)/configure
 BASE_TOP=YES
 else
+ifeq ($(CONFIG),/usr/lib/epics/configure)
+CONFIG = /etc/epics/configure
+else
 CONFIG ?= /etc/epics/configure
+endif
 endif
 
 -include $(CONFIG)/os/CONFIG_COMPAT
