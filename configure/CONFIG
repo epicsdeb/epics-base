@@ -20,6 +20,7 @@
 ifneq ($(wildcard $(TOP)/configure/CONFIG_BASE_VERSION),)
 EPICS_BASE = $(INSTALL_LOCATION)
 CONFIG = $(TOP)/configure
+STARTUP = $(TOP)/startup
 BASE_TOP=YES
 else
 ifeq ($(CONFIG),/usr/lib/epics/configure)
@@ -27,12 +28,13 @@ CONFIG = /etc/epics/configure
 else
 CONFIG ?= /etc/epics/configure
 endif
+STARTUP = $(EPICS_BASE)/startup
 endif
 
 # Provide a default if the user hasn't set EPICS_HOST_ARCH
 ifeq ($(origin EPICS_HOST_ARCH), undefined)
 # NB: Must use a simply expanded variable here for performance:
-EPICS_HOST_ARCH := $(shell $(EPICS_BASE)/startup/EpicsHostArch.pl)
+EPICS_HOST_ARCH := $(shell $(STARTUP)/EpicsHostArch.pl)
 endif
 #
 
