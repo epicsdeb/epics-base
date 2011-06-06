@@ -2,7 +2,7 @@ Source: rtems-epics
 Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), rtems-debhelper (>= 4),
+Build-Depends: debhelper (>= 7), epics-debhelper,
                libreadline6-dev, perl,
                rtems-libbspext-mvme2100,
                rtems-cexp-mvme2100,
