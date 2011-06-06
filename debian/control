@@ -17,6 +17,7 @@ Build-Depends: debhelper (>= 7), rtems-debhelper (>= 4),
                rtems-cexp-pc386,
 Rtems-Depends: rtems, rtems-libbspext, rtems-cexp
 Standards-Version: 3.8.0
+Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
 Homepage: http://www.aps.anl.gov/epics/
 
 Package: rtems-epics
