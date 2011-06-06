@@ -109,9 +109,6 @@ startup/Site.profile
 	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl $(prefix)/bin/makeBaseExt
 	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/softIoc $(prefix)/bin/softIoc
 
-	install -m 644 -d debian/epics-pcas-dev/usr/lib/epics/include
-	install -m 644 -t debian/epics-pcas-dev/usr/lib/epics/include src/cas/generic/casCtx.h src/cas/generic/caHdrLargeArray.h
-
 	install -d $(prefix)/share
 	mv $(epicsbase)/lib/perl $(prefix)/share/perl5
 	# This path is used by CA.pm
