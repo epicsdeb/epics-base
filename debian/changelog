@@ -1,16 +1,33 @@
-epics-base (3.14.11-7.1~lenny1) unstable; urgency=low
+epics-base (3.14.11-8~lenny1) unstable; urgency=low
 
+  [ Michael Davidsaver ]
   * Fix postinst
   * Change default max array size to 1M
+  * move conf.d to CONFIG
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 16 May 2011 14:59:33 -0400
+  [ Nick Hastings ]
+  * g++-4.6 fix: "#include <cstddef>"
 
-epics-base (3.14.11-7~lenny1) squeeze-backports; urgency=low
+  [ Michael Davidsaver ]
+  * override CONFIG
+  * Use 3.14.12 method to detect EPICS_HOST_ARCH if unset
+  * test of timerQ ref counting
 
+  [ Jeff Hill ]
+  * only delete a timer queue when the ref count is 0
+     Fixes LP 786979
+
+  [ Michael Davidsaver ]
+  * Drop "mutable" references
+     Fixes LP 736273
+  * Missing bspExt for mvme5500
+  * Install sample Makefile
+  * correct location for EpicsHostArch.pl
+  * pcas headers use install list
   * Rebuild for lenny-backports.
   * switch to readline 5
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 13 May 2011 11:00:47 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 06 Jun 2011 10:29:06 -0400
 
 epics-base (3.14.11-7) unstable; urgency=low
 
