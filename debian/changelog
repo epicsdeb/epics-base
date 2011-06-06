@@ -1,9 +1,25 @@
-rtems-epics (3.14.11-7~lenny1) unstable; urgency=low
+rtems-epics (3.14.11-8~lenny1) unstable; urgency=low
 
+  [ Michael Davidsaver ]
+  * change default max array bytes to 1M
+
+  [ Nick Hastings ]
+  * g++-4.6 fix: "#include <cstddef>"
+
+  [ Michael Davidsaver ]
+  * test of timerQ ref counting
+
+  [ Jeff Hill ]
+  * only delete a timer queue when the ref count is 0
+
+  [ Michael Davidsaver ]
+  * Drop "mutable" references
+  * Missing bspExt for mvme5500
+  * merge with epics-base 3.14.11-8
   * Rebuild for Lenny
   * Depend on readline 5
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 13 May 2011 13:45:57 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 06 Jun 2011 11:55:31 -0400
 
 rtems-epics (3.14.11-7) unstable; urgency=low
 
