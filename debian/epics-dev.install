@@ -16,3 +16,4 @@ usr/bin/makeBaseExt
 usr/bin/softIoc
 usr/share/epics-dev/configure
 etc/epics/configure
+configure/Sample.Makefile usr/lib/epics/configure

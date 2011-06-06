@@ -148,6 +148,8 @@ startup/Site.profile
 
 	dh_install --fail-missing
 
+	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
+
 	dh install --after dh_install --before dh_installdocs
 
 	dh_installdocs -A README
