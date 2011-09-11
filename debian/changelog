@@ -1,4 +1,22 @@
-epics-base (3.14.11-8~lenny1) unstable; urgency=low
+epics-base (3.14.11-9) unstable; urgency=low
+
+  [ Till Straumann ]
+  * RTEMS: Time registration when dynamically loading
+     Fixes lp:831648
+  * libCom: Fix OS priority mapping on Posix
+     Fixes lp:835138
+
+  [ Andrew Johnson ]
+  * shutdown: Lock records during dbCa link cleanup
+
+  [ Michael Davidsaver ]
+  * libCom: Avoid race in errlog shutdown.
+  * linux: Use RT thread priorities if available
+  * Set EPICS_SITE_VERSION to debian package revision
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Sun, 11 Sep 2011 14:21:22 -0400
+
+epics-base (3.14.11-8) unstable; urgency=low
 
   [ Michael Davidsaver ]
   * Fix postinst
@@ -24,8 +42,6 @@ epics-base (3.14.11-8~lenny1) unstable; urgency=low
   * Install sample Makefile
   * correct location for EpicsHostArch.pl
   * pcas headers use install list
-  * Rebuild for lenny-backports.
-  * switch to readline 5
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 06 Jun 2011 10:29:06 -0400
 
