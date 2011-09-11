@@ -15,6 +15,7 @@ EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
 DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
 SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
+DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 2- -d '-')
 
 DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
 TARGETS+=$(DEBUG_TAGETS)
@@ -29,6 +30,7 @@ DEB_MAKE_MAKEVARS += USE_RPATH=NO
 DEB_MAKE_MAKEVARS += CROSS_COMPILER_TARGET_ARCHS="$(TARGETS)"
 # ABS_INSTALL_DIR is used in the 'softIoc' executable
 DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/lib/epics
+DEB_MAKE_MAKEVARS += EPICS_SITE_VERSION="$(DEBV)"
 
 # Prevent CFLAGS and similar from being passed to EPICS since
 # this will break cross-builds of things.
