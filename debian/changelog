@@ -1,3 +1,10 @@
+epics-base (3.14.11-10) unstable; urgency=low
+
+  * update RT prio patch
+     LP# 835138
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 25 Oct 2011 16:46:03 -0400
+
 epics-base (3.14.11-9) unstable; urgency=low
 
   [ Till Straumann ]
