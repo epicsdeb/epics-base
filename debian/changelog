@@ -1,3 +1,9 @@
+epics-base (3.14.11-10~bpo50+1) lenny-backports; urgency=low
+
+  * Rebuild for lenny-backports.
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 25 Oct 2011 17:03:25 -0400
+
 epics-base (3.14.11-10) unstable; urgency=low
 
   * update RT prio patch
