@@ -1,3 +1,11 @@
+epics-base (3.14.11-11) unstable; urgency=low
+
+  * explicit ncurses dep
+  * On linux don't attempt RT if not supported/permitted.
+      Fixes issue with GDB preventing IOCs from being debugged.
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 07 Aug 2012 17:14:33 -0400
+
 epics-base (3.14.11-10) unstable; urgency=low
 
   * update RT prio patch
