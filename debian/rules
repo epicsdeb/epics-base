@@ -14,7 +14,7 @@ EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
 DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
-SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
+SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '-3' -d '.')
 DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 2- -d '-')
 
 DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
