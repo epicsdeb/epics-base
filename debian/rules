@@ -10,7 +10,7 @@ endif
 
 EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
-# chop out the source version from Changelog (ie 3.14.11)
+# chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
 DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
@@ -68,7 +68,7 @@ epicslib=$(epicsbase)/lib/$(EPICS_HOST_ARCH)
 
 ## Shared libraries
 
-# lib*.so.3.14.11
+# lib*.so.3.14.12
 epics_libfiles = $(patsubst %,$(epicslib)/lib%.so.$(SOV),$(epics_libs))
 # lib*.so
 epics_linklib  = $(patsubst %,$(epicslib)/lib%.so,$(epics_libs))
