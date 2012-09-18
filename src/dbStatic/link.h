@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* link.h */
-/* base/include link.h,v 1.10.2.2 2009/04/03 20:54:00 lange Exp */
+/* base/include Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /*
  *      Original Author: Bob Dalesio
@@ -183,6 +183,7 @@ union value{
 struct link{
 	union value	value;
 	short		type;
+        char		*text;		/* original INP/OUT link text */
 };
 
 typedef struct link DBLINK;

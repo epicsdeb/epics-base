@@ -5,7 +5,7 @@
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# Copy.pm,v 1.1.2.1 2008/04/03 21:57:12 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 # Copy directories and files from a template
 

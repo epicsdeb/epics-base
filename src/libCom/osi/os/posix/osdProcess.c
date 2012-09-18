@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /* 
- * osdProcess.c,v 1.9.2.4 2007/06/11 20:03:03 anj Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  * 
  * Operating System Dependent Implementation of osiProcess.h
  *
@@ -97,7 +97,7 @@ epicsShareFunc osiSpawnDetachedProcessReturn epicsShareAPI osiSpawnDetachedProce
     /*
      * overlay the specified executable
      */
-    status = execlp (pBaseExecutableName, pBaseExecutableName, NULL);
+    status = execlp (pBaseExecutableName, pBaseExecutableName, (char *)NULL);
     if ( status < 0 ) { 
         fprintf ( stderr, "**** The executable \"%s\" couldn't be located\n", pBaseExecutableName );
         fprintf ( stderr, "**** because of errno = \"%s\".\n", strerror (errno) );

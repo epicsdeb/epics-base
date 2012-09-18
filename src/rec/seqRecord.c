@@ -8,7 +8,7 @@
 \*************************************************************************/
 
 /*
- * seqRecord.c,v 1.17.2.3 2009/04/02 21:40:38 lange Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author:	John Winans
  *      Date:	09-21-92

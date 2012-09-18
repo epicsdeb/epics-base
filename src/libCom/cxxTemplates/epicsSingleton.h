@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *  epicsSingleton.h,v 1.15.2.10 2009/02/23 21:40:52 jhill Exp
+ *  Revision-Id: ralph.lange@gmx.de-20110808163119-szktwmb8pwbw5cec
  *
  *  Author: Jeffrey O. Hill
  *
@@ -34,7 +34,7 @@ public:
     void * pInstance () const;
 private:
     void * _pInstance;
-    size_t _refCount;
+    std :: size_t _refCount;
     SingletonUntyped ( const SingletonUntyped & );
     SingletonUntyped & operator = ( const SingletonUntyped & );
 };

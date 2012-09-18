@@ -1,6 +1,6 @@
 # CONFIG.darwin-ppcx86.Common
 #
-# CONFIG.darwin-ppcx86.Common,v 1.1.2.2 2009/05/06 17:24:58 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for Darwin universal PowerPC + x86 host builds

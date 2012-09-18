@@ -6,7 +6,7 @@
 \*************************************************************************/
 /* osdEnv.c */
 /*
- * osdEnv.c,v 1.7.2.1 2004/08/27 16:04:26 mrk Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  * Author: Eric Norum
  *   Date: May 7, 2001

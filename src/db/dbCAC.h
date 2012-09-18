@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *  dbCAC.h,v 1.39.2.7 2008/07/28 22:23:35 anj Exp
+ *  Revision-Id: anj@aps.anl.gov-20110601222212-z1p7qoplm5mw0eho
  *
  *
  *                    L O S  A L A M O S
@@ -196,8 +196,8 @@ private:
     dbContextReadNotifyCache readNotifyCache;
     dbEventCtx ctx;
     unsigned long stateNotifyCacheSize;
-    mutable epicsMutex & mutex;
-    mutable epicsMutex & cbMutex;
+    epicsMutex & mutex;
+    epicsMutex & cbMutex;
     cacContextNotify & notify;
     epics_auto_ptr < cacContext > pNetContext;
     char * pStateNotifyCache;

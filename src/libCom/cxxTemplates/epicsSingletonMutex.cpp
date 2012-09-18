@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *  epicsSingletonMutex.cpp,v 1.3.2.1 2008/11/19 17:20:15 jhill Exp
+ *  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *  Author: Jeff O. Hill
  *

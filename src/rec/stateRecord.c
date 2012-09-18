@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* stateRecord.c,v 1.11.2.2 2009/04/02 21:40:38 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recState.c - Record Support Routines for State records */
 /*

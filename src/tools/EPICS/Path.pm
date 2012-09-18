@@ -5,7 +5,7 @@
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# Path.pm,v 1.1.2.2 2008/10/20 18:32:47 anj Exp
+# Revision-Id: anj@aps.anl.gov-20110523213458-3lhktmvu73otws64
 
 use Carp;
 use Cwd qw(getcwd abs_path);
@@ -64,7 +64,6 @@ put into a file.  It converts paths from the Unix form that Perl understands to
 any necessary external representation, and also removes automounter prefixes to
 put the path into its canonical form.
 
-On cygwin we convert cygdrive paths to their equivalent Windows drive specs. 
 Before Leopard, the Mac OS X automounter inserted a verbose prefix, and in case
 anyone is still using SunOS it adds its own prefix as well.
 
@@ -72,9 +71,7 @@ anyone is still using SunOS it adds its own prefix as well.
 
 sub LocalPath {
     my ($newpath) = @_;
-    if ($^O eq 'cygwin') {
-        $newpath =~ s{^/cygdrive/([a-zA-Z])/}{$1:/};
-    } elsif ($^O eq 'darwin') {
+    if ($^O eq 'darwin') {
         # Darwin automounter
         $newpath =~ s{^/private/var/auto\.}{/};
     } elsif ($^O eq 'sunos') {

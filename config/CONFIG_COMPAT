@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# CONFIG_COMPAT,v 1.6.2.5 2006/11/17 22:31:54 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101014190140-s9gxgtnoyhbck6id
 #
 # Convert old HOST_ARCH environment variable 
 
@@ -24,7 +24,6 @@ ARCH_Linux = linux-x86
 ARCH_freebsd = freebsd-x86_64
 ARCH_WIN32 = win32-x86
 ARCH_hp700 = hpux-parisc
-ARCH_alpha = osf-alpha
 ARCH_Borland = win32-x86-borland
 ARCH_cygwin32 = cygwin-x86
 

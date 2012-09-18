@@ -1,10 +1,9 @@
 #*************************************************************************
-# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+# Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
-# EPICS BASE Versions 3.13.7
-# and higher are distributed subject to a Software License Agreement found
+# EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #RULES.Db
@@ -23,17 +22,32 @@ vpath %.acs $(USR_VPATH) $(GENERIC_SRC_DIRS) $(COMMON_DIR)
 ##################################################### dbdflags
 
 # dbExpand
-INSTALL_DBDFLAGS += -I $(INSTALL_LOCATION)/dbd
-INSTALL_DBFLAGS += -I $(INSTALL_LOCATION)/db
+INSTALL_DBDFLAGS += -I $(INSTALL_DBD)
+INSTALL_DBFLAGS += -I $(INSTALL_DB)
 DBDFLAGS = $(USR_DBDFLAGS) -I . -I .. $(INSTALL_DBDFLAGS) $(RELEASE_DBDFLAGS)
 DBFLAGS = $($*_DBFLAGS) $(USR_DBFLAGS) -I. -I.. $(INSTALL_DBFLAGS) $(RELEASE_DBFLAGS)
 
+#####################################################
+# To allow os specific dbd files AND have the -j option work properly,
+# add the following lines to your ioc application Makefile
+#
+# # These lines may be committed to RULES.Db for a future base release.
+# CROSS_TARGET_OS_TYPES = $(sort $(foreach target,  \
+#     $(CROSS_COMPILER_TARGET_ARCHS),$(firstword $(subst -, ,$(target)))))
+# DBD += $(foreach type, $(CROSS_TARGET_OS_TYPES), $(DBD_$(type)))
+#
+# and then add something like the following os specific lines
+#
+# DBD_vxWorks += abcVx.dbd
+# DBD_RTEMS += abcRTEMS.dbd
+# DBD_solaris += abcSolaris.dbd
+#
 #####################################################  Targets
 
 # Following line added for backward compatibilty
 DBD += $(DBDNAME)
 
-DBDINC_NAME = $(patsubst %.h,%,$(patsubst %.db,%,$(DBDINC)))
+DBDINC_NAME = $(patsubst %.h,%,$(patsubst %.dbd,%,$(DBDINC)))
 DBD += $(addsuffix .dbd,$(DBDINC_NAME))
 INC += $(addsuffix .h,$(DBDINC_NAME))
 
@@ -69,8 +83,8 @@ TEMPLATE_FILENAME=$(firstword $(wildcard $($*_TEMPLATE) $(addprefix ../,$($*_TEM
 # dbst based database optimization
 ifeq '$(DB_OPT)' 'YES'
 RAW=.raw
-COMMON_DBS = $(addprefix $(COMMON_DIR)/,$(filter %.db,$(DB)))
-COMMON_DBS += $(addsuffix $(RAW),$(addprefix $(COMMON_DIR)/,$(filter %.db,$(DB))))
+DBS = $(filter %.db,$(DB)) $(addsuffix $(RAW),$(filter %.db,$(DB)))
+COMMON_DBS = $(addprefix $(COMMON_DIR)/,$(DBS))
 endif
 
 INSTALL_DB_INSTALLS = $(addprefix $(INSTALL_DB)/,$(notdir $(DB_INSTALLS)))
@@ -86,7 +100,7 @@ ACF_CPPFLAGS = $(ACF_CPPFLAGS_$(GNU))
 
 ACF_INCLUDES = -I. $(TARGET_INCLUDES) $(USR_INCLUDES)\
                 $(SRC_INCLUDES) -I$(INSTALL_DB)
-ACFDEPENDS_CMD = -$(MKMF) -m $@$(DEP) $(subst -I,,$(ACF_INCLUDES)) $@ $<
+ACFDEPENDS_CMD = -$(MKMF) -m $(notdir $@)$(DEP) $(subst -I,,$(ACF_INCLUDES)) $@ $<
 ACF_CMD = $(CPP) $(ACF_CPPFLAGS) $(ACF_INCLUDES) $< > $@
 
 #####################################################  dependancies
@@ -94,11 +108,12 @@ ACF_CMD = $(CPP) $(ACF_CPPFLAGS) $(ACF_INCLUDES) $< > $@
 HINC += $(addsuffix .h,$(DBDINC_NAME))
 COMMON_DBDINC += $(addprefix $(COMMON_DIR)/,$(HINC))
 
-DBDDEPENDS_FILES += $(addsuffix $(DEP),$(COMMON_DBDS) \
-                    $(COMMON_DBDINC) $(COMMON_DBS))
+DBDDEPENDS_FILES += $(addsuffix $(DEP),$(HINC) \
+                    $(patsubst $(COMMON_DIR)/%,%,$(COMMON_DBS)) \
+                    $(patsubst $(COMMON_DIR)/%,%,$(COMMON_DBDS)))
 
 DBDDEPENDS_FLAGS = $(subst -I,,$(filter-out -S%,$(DBDFLAGS)))
-DBDDEPENDS_CMD = -$(MKMF) -m $@$(DEP) $(DBDDEPENDS_FLAGS) $@ $<
+DBDDEPENDS_CMD = -$(MKMF) -m $(notdir $@)$(DEP) $(DBDDEPENDS_FLAGS) $@ $<
 
 MAKEDBDEPENDS = $(PERL) $(TOOLS)/makeDbDepends.pl
 
@@ -106,7 +121,7 @@ MAKEDBDEPENDS = $(PERL) $(TOOLS)/makeDbDepends.pl
 
 ifndef T_A
 
-ECHO := $(if $(findstring s,$(MAKEFLAGS)),\#,@echo)
+ECHO := $(if $(findstring s,$(MAKEFLAGS)),$(COMMENT),@echo)
 COMMON_DIR = .
 INSTALL_DBDS =
 INSTALL_DBS =
@@ -114,9 +129,19 @@ COMMON_DBDS = $(DBD)
 COMMON_DBS = $(DB)
 COMMONS = $(DBD) $(DB)
 
+ACTIONS = inc
+ACTIONS += build
+ACTIONS += install
+ACTIONS += buildInstall
+ACTIONS += browse
+ACTIONS += runtests
+
+actionArchTargets = $(foreach x, $(ACTIONS),\ $(foreach arch,$(BUILD_ARCHS), $(x)$(DIVIDER)$(arch)))
+
+cleanArchTargets = $(foreach arch,$(BUILD_ARCHS), clean$(DIVIDER)$(arch))
 -include $(TOP)/configure/CONFIG_APP_INCLUDE
 
-all:    install
+all: install
 
 install: buildInstall
 
@@ -125,6 +150,11 @@ buildInstall : build
 rebuild: clean install
 
 .PHONY: all inc build install clean rebuild buildInstall
+
+$(actionArchTargets) $(BUILD_ARCHS):install
+$(cleanArchTargets):clean
+
+.PHONY: $(BUILD_ARCHS) $(actionArchTargets) $(cleanArchTargets)
 
 endif # T_A defined
 
@@ -148,7 +178,7 @@ clean::
 	@$(RM) *_registerRecordDeviceDriver.cpp
 	@$(RM) $(TARGETS)
 
-realclean: clean
+realclean:: clean
 
 ##################################################### CapFast filter
 
@@ -191,59 +221,67 @@ $(INSTALL_DB)/%.template: %.template
 ##################################################### INC files
 
 $(COMMON_DIR)/%Record.h: $(COMMON_DIR)/%Record.dbd
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(DBDDEPENDS_CMD)
-	@echo "$<:../Makefile" >> $@$(DEP)
-	@$(RM) $@
-	$(DBTORECORDTYPEH) $(DBDFLAGS)  $< $@
+	echo "$< : ../Makefile" >> $(notdir $@)$(DEP)
+	@$(RM) $(notdir $@)
+	$(DBTORECORDTYPEH) $(DBDFLAGS) $< $(notdir $@)
+	@$(MV) $(notdir $@) $@
 
 $(COMMON_DIR)/%Record.h: %Record.dbd
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(DBDDEPENDS_CMD)
-	@echo "$<:../Makefile" >> $@$(DEP)
-	@$(RM) $@
-	$(DBTORECORDTYPEH) $(DBDFLAGS)  $< $@
+	echo "$< : ../Makefile" >> $(notdir $@)$(DEP)
+	@$(RM) $(notdir $@)
+	$(DBTORECORDTYPEH) $(DBDFLAGS) $< $(notdir $@)
+	@$(MV) $(notdir $@) $@
 
 $(COMMON_DIR)/menu%.h: $(COMMON_DIR)/menu%.dbd
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(DBDDEPENDS_CMD)
-	@echo "$<:../Makefile" >> $@$(DEP)
-	@$(RM) $@
-	$(DBTOMENUH) $(DBDFLAGS) $< $@
+	echo "$< : ../Makefile" >> $(notdir $@)$(DEP)
+	@$(RM) $(notdir $@)
+	$(DBTOMENUH) $(DBDFLAGS) $< $(notdir $@)
+	@$(MV) $(notdir $@) $@
 
 $(COMMON_DIR)/menu%.h: menu%.dbd
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(DBDDEPENDS_CMD)
-	@echo "$<:../Makefile" >> $@$(DEP)
-	@$(RM) $@
-	$(DBTOMENUH) $(DBDFLAGS) $< $@
+	echo "$< : ../Makefile" >> $(notdir $@)$(DEP)
+	@$(RM) $(notdir $@)
+	$(DBTOMENUH) $(DBDFLAGS) $< $(notdir $@)
+	@$(MV) $(notdir $@) $@
 
 .PRECIOUS: $(COMMON_DIR)/%.h
 
 ##################################################### DBD files
 
 $(COMMON_DIR)/bpt%.dbd: bpt%.data 
-	@$(RM) $@
-	$(MAKEBPT) $< $@
+	$(MAKEBPT) $< $(notdir $@)
+	@$(MV) $(notdir $@) $@
 
 $(COMMON_DIR)/%.dbd: $(COMMON_DIR)/%Include.dbd 
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(DBDDEPENDS_CMD)
-	@echo "$<:../Makefile" >> $@$(DEP)
+	echo "$< : ../Makefile" >> $(notdir $@)$(DEP)
 	$(ECHO) "Expanding dbd"
-	@$(RM) $@
-	$(DBEXPAND) $(DBDFLAGS) -o $@ $<
+	@$(RM) $(notdir $@)
+	@$(DBEXPAND) $(DBDFLAGS) -o $(notdir $@) $<
+	@$(MV) $(notdir $@) $@
 
 $(COMMON_DIR)/%.dbd: %Include.dbd 
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(DBDDEPENDS_CMD)
+	echo "$< : ../Makefile" >> $(notdir $@)$(DEP)
 	$(ECHO) "Expanding dbd"
-	@$(RM) $@
-	$(DBEXPAND) $(DBDFLAGS) -o $@ $<
+	@$(RM) $(notdir $@)
+	$(DBEXPAND) $(DBDFLAGS) -o $(notdir $@) $<
+	@$(MV) $(notdir $@) $@
 
 $(COMMON_DIR)/%Include.dbd:
-	@$(RM) $@
-	$(PERL) $(TOOLS)/makeIncludeDbd.pl $($*_DBD) $@
+	@$(RM) $(notdir $@)
+	$(PERL) $(TOOLS)/makeIncludeDbd.pl $($*_DBD) $(notdir $@)
+	@$(MV) $(notdir $@) $@
 
 $(INSTALL_DBD)/%: $(COMMON_DIR)/%
 	$(ECHO) "Installing created dbd file $@"
@@ -265,37 +303,29 @@ $(foreach file, $(DBD_INSTALLS), $(eval $(call DBD_INSTALLS_template, $(file))))
 ##################################################### DB files
 
 $(COMMON_DIR)/%.db$(RAW): $(COMMON_DIR)/%.edf 
-	$(E2DB) $(E2DB_SYSFLAGS) $(E2DB_FLAGS) -n $@.VAR $<
-	@$(REPLACEVAR) < $@.VAR > $@
-	@$(RM) $@.VAR
-
-#$(COMMON_DIR)/%.db$(RAW): %.substitutions %.template
-#	@$(RM) $@$(DEP)
-#	@$(MAKEDBDEPENDS) $@ $^  >> $@$(DEP)
-#	$(ECHO) "Inflating database from $^"
-#	@$(RM) $@
-#	$(MSI) $(DBFLAGS) -S$< $(firstword $(patsubst %.substitutions,,$^)) > msi.tmp
-#	$(MV) msi.tmp $@
+	$(E2DB) $(E2DB_SYSFLAGS) $(E2DB_FLAGS) -n $*.VAR $<
+	@$(REPLACEVAR) < $*.VAR > $@
+	@$(RM) $*.VAR
 
 $(COMMON_DIR)/%.db$(RAW): %.substitutions
-	@$(RM) $@$(DEP)
-	$(MAKEDBDEPENDS) $@ $< $(TEMPLATE_FILENAME) >> $@$(DEP)
-	@echo "$@:$(TEMPLATE_FILENAME)" >> $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
+	@$(MAKEDBDEPENDS) $@ $< $(TEMPLATE_FILENAME) >> $(notdir $@)$(DEP)
+	echo "$@ : $(TEMPLATE_FILENAME)" >> $(notdir $@)$(DEP)
 	$(ECHO) "Inflating database from $< $(TEMPLATE_FILENAME)"
-	@$(RM) $@
-	$(MSI) $(DBFLAGS) -S$< $(TEMPLATE_FILENAME) > msi.tmp
-	$(MV) msi.tmp $@
+	@$(RM) $@ $*.tmp
+	$(MSI) $(DBFLAGS) -S$< $(TEMPLATE_FILENAME) > $*.tmp
+	$(MV) $*.tmp $@
 
 $(COMMON_DIR)/%.db$(RAW): %.template
-	@$(RM) $@$(DEP)
-	@$(MAKEDBDEPENDS) $@ $^  >> $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
+	@$(MAKEDBDEPENDS) $@ $^  >> $(notdir $@)$(DEP)
 	$(ECHO) "Inflating database from $<"
-	@$(RM) $@
-	$(MSI) $(DBFLAGS)  $< > msi.tmp
-	$(MV) msi.tmp $@
+	@$(RM) $@ $*.tmp
+	$(MSI) $(DBFLAGS) $< > $*.tmp
+	$(MV) $*.tmp $@
 
 $(COMMON_DIR)/%.acf: %.acs
-	@$(RM) $@$(DEP)
+	@$(RM) $(notdir $@)$(DEP)
 	@$(ACFDEPENDS_CMD)
 	$(ECHO) "Creating acf file $@"
 	@$(RM) $@
@@ -340,17 +370,20 @@ $(foreach file, $(DB_INSTALLS), $(eval $(call DB_INSTALLS_template, $(file))))
 
 ##################################################### register record,device,driver support
 
+IOC_INST_TOP := $(firstword $(IOCS_APPL_TOP) \
+        $(shell $(PERL) $(TOOLS)/fullPathName.pl $(INSTALL_LOCATION) ) )
+
 %_registerRecordDeviceDriver.cpp: $(COMMON_DIR)/%.dbd 
-	@$(RM) $@ temp.cpp
-	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) > temp.cpp
-	$(MV) temp.cpp $@
+	@$(RM) $@ $*.tmp
+	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) $(IOC_INST_TOP) > $*.tmp
+	$(MV) $*.tmp $@
 
 %_registerRecordDeviceDriver.cpp: %.dbd 
-	@$(RM) $@ temp.cpp
-	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) > temp.cpp
-	$(MV) temp.cpp $@
+	@$(RM) $@ $*.tmp
+	$(REGISTERRECORDDEVICEDRIVER) $< $(basename $@) $(IOC_INST_TOP) > $*.tmp
+	$(MV) $*.tmp $@
 
 .PRECIOUS: %_registerRecordDeviceDriver.cpp
+.PRECIOUS: %$(DEP)
 
 ##################################################### END OF FILE
-

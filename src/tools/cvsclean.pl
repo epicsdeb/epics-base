@@ -9,13 +9,13 @@ eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 
-# cvsclean.pl,v 1.1.2.1 2008/03/24 22:14:22 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
-# Find and delete cvs .#* files in all dirs of directory tree
+# Find and delete cvs .#* and editor backup *~
+# files from all dirs of the directory tree.
 
 use File::Find;
 
 @ARGV = ('.') unless @ARGV;
 
-find sub { unlink if -f && m/^\.\#/ }, @ARGV;
-
+find sub { unlink if -f && m/(^\.\#)|(~$)/ }, @ARGV;

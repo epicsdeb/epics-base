@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* dbTest.c,v 1.88.2.23 2009/07/08 19:08:22 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*	database access test subroutines */
 
 #include <stddef.h>
@@ -155,6 +155,7 @@ long epicsShareAPI dbl(const char *precordTypename, const char *fields)
                     if (!strcmp(papfields[ifield], "recordType")) {
                         pvalue = dbGetRecordTypeName(pdbentry);
                     } else {
+			printf(", ");
                         continue;
                     }
                 } else {

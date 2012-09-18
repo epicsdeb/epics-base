@@ -3,17 +3,15 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
+
 /*
- * caservertask.c,v 1.105.2.18 2009/07/09 16:37:23 anj Exp
+ * Revision-Id: johill@lanl.gov-20101101211551-n0j6oacp2jbcihjj
  *
  *  Author: Jeffrey O. Hill
- *      hill@luke.lanl.gov
- *      (505) 665 1831
- *  Date:   5-88
+ *
  */
 
 #include <stddef.h>
@@ -418,8 +416,8 @@ static void log_one_client (struct client *client, unsigned level)
             send_delay, recv_delay);
         printf( 
         "\tUnprocessed request bytes=%u, Undelivered response bytes=%u\n", 
-            client->send.stk,
-            client->recv.cnt - client->recv.stk ); 
+            client->recv.cnt - client->recv.stk,
+            client->send.stk ); 
         printf( 
         "\tState=%s%s%s\n", 
             state[client->disconnect?1:0],
@@ -937,6 +935,11 @@ struct client *create_tcp_client ( SOCKET sock )
         destroy_tcp_client ( client );
         return NULL;
     }
+
+    /*
+     * add first version message should it be needed
+     */
+    rsrv_version_reply ( client );
 
     if ( CASDEBUG > 0 ) {
         char buf[64];

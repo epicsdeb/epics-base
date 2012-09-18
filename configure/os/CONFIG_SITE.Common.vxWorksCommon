@@ -18,6 +18,8 @@ VXWORKS_VERSION = 5.5
 #VXWORKS_VERSION = 6.4
 #VXWORKS_VERSION = 6.5
 #VXWORKS_VERSION = 6.6
+#VXWORKS_VERSION = 6.7
+#VXWORKS_VERSION = 6.8
 
 
 # Sites may override the following path for a particular host
@@ -33,6 +35,13 @@ WIND_BASE = /usr/local/vw/tornado22-$(ARCH_CLASS)
 #WIND_BASE = /ade/vxWorks/$(VXWORKS_VERSION)
 
 
-# WorkBench Version number, used with vxWorks 6.6 and later
+# WorkBench Version number, required for vxWorks 6.x
 
+#WORKBENCH_VERSION = 2.6
 #WORKBENCH_VERSION = 3.0
+#WORKBENCH_VERSION = 3.2
+
+
+# Utilities Version number, required from vxWorks 6.8 and later
+
+#UTILITIES_VERSION = 1.0

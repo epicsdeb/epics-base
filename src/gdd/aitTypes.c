@@ -11,7 +11,7 @@
  * Author: Jim Kowalkowski
  * Date: 2/96
  *
- * aitTypes.c,v 1.10 2002/07/15 20:34:09 jba Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  */
 

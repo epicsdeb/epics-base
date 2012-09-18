@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS osdMutex.c
- *	osdMutex.c,v 1.10.2.3 2004/09/16 19:28:57 norume Exp
+ *	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055

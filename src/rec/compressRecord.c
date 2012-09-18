@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* compressRecord.c,v 1.19.2.3 2009/04/02 21:40:37 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20110608161626-57vf3rfrk73ppemb */
 /*
  *      Original Author: Bob Dalesio
  *      Date:            7-14-89 
@@ -80,20 +80,26 @@ epicsExportAddress(rset,compressRSET);
 static void reset(compressRecord *prec)
 {
     prec->nuse = 0;
-    prec->off= 0;
+    prec->off = 0;
     prec->inx = 0;
     prec->cvb = 0.0;
     prec->res = 0;
+    /* allocate memory for the summing buffer for conversions requiring it */
+    if (prec->alg == compressALG_Average && prec->sptr == 0){
+        prec->sptr = (double *)calloc(prec->nsam,sizeof(double));
+    }
 }
 
 static void monitor(compressRecord *prec)
 {
-	unsigned short	monitor_mask;
+    unsigned short alarm_mask = recGblResetAlarms(prec);
+    unsigned short monitor_mask = alarm_mask | DBE_LOG | DBE_VALUE;
 
-        monitor_mask = recGblResetAlarms(prec);
-	monitor_mask |= (DBE_LOG|DBE_VALUE);
-	if(monitor_mask) db_post_events(prec,prec->bptr,monitor_mask);
-	return;
+    if (alarm_mask || prec->nuse != prec->ouse) {
+        db_post_events(prec, &prec->nuse, monitor_mask);
+        prec->ouse = prec->nuse;
+    }
+    db_post_events(prec, prec->bptr, monitor_mask);
 }
 
 static void put_value(compressRecord *prec,double *psource, epicsInt32 n)
@@ -292,10 +298,6 @@ static long init_record(compressRecord *prec, int pass)
     if (pass==0){
 	if(prec->nsam<1) prec->nsam = 1;
 	prec->bptr = (double *)calloc(prec->nsam,sizeof(double));
-	/* allocate memory for the summing buffer for conversions requiring it */
-	if (prec->alg == compressALG_Average){
-                prec->sptr = (double *)calloc(prec->nsam,sizeof(double));
-	}
         reset(prec);
     }
     return(0);

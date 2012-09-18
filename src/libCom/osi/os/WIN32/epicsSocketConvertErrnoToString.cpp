@@ -10,7 +10,7 @@
 \*************************************************************************/
 
 /*
- * epicsSocketConvertErrnoToString.cpp,v 1.2 2003/04/24 22:36:54 jhill Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  */
 
 #include <stdio.h>

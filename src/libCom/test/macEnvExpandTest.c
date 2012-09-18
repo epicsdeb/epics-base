@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /*
- * macEnvExpandTest.c,v 1.1.2.8 2008/03/31 19:30:15 anj Exp
+ * Revision-Id: anj@aps.anl.gov-20111107175809-hd3rsaaa6xts2ano
  */
 
 #include <stddef.h>
@@ -42,7 +42,7 @@ static void check(const char *str, const char *expect)
         testDiag("Got \"%s\", expected \"%s\".\n", got, expect);
         pass = 0;
     }
-    testOk(pass, str);
+    testOk(pass, "%s", str);
 }
 
 MAIN(macEnvExpandTest)

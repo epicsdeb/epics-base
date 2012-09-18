@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *  online_notify.c,v 1.57.2.15 2008/09/19 23:27:52 jhill Exp
+ *  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *  tell CA clients this a server has joined the network
  *

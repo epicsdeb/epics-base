@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* dbLexRoutines.c,v 1.27.2.24 2009/07/22 22:58:09 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* Author:  Marty Kraimer Date:    13JUL95*/
 
@@ -113,6 +113,8 @@ static void yyerrorAbort(char *str)
 {
     yyerror(str);
     yyAbort = TRUE;
+    while (ellCount(&tempList))
+        popFirstTemp();
 }
 
 static void allocTemp(void *pvoid)
@@ -312,7 +314,7 @@ static int db_yyinput(char *buf, int max_size)
 			pinputFileNow->fp);
 		if(fgetsRtn) {
 		    n = macExpandString(macHandle,mac_input_buffer,
-			my_buffer,MY_BUFFER_SIZE-1);
+			my_buffer,MY_BUFFER_SIZE);
 		    if(n<0) {
 			errPrintf(0,__FILE__, __LINE__,
 			"macExpandString failed for file %s",

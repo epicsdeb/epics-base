@@ -253,6 +253,7 @@ int cas_copy_in_header (
 {
     unsigned    msgSize;
     ca_uint32_t alignedPayloadSize;
+    caHdr *pMsg;
 
     if ( payloadSize > UINT_MAX - sizeof ( caHdr ) - 8u ) {
         return ECA_TOLARGE;
@@ -292,32 +293,25 @@ int cas_copy_in_header (
         }
     }
 
-    if ( alignedPayloadSize < 0xffff && nElem < 0xffff ) {
-        caHdr *pMsg = ( caHdr * ) &pclient->send.buf[pclient->send.stk];        
-        pMsg->m_cmmd = htons ( response );   
-        pMsg->m_postsize = htons ( ( ( ca_uint16_t ) alignedPayloadSize ) ); 
-        pMsg->m_dataType = htons ( dataType );  
-        pMsg->m_count = htons ( ( ( ca_uint16_t ) nElem ) );      
-        pMsg->m_cid = htonl ( cid );          
-        pMsg->m_available = htonl ( responseSpecific );  
-        if ( ppPayload ) {
-            *ppPayload = ( void * ) ( pMsg + 1 );
-        }
+    pMsg = (caHdr *) &pclient->send.buf[pclient->send.stk];
+    pMsg->m_cmmd = htons(response);
+    pMsg->m_dataType = htons(dataType);
+    pMsg->m_cid = htonl(cid);
+    pMsg->m_available = htonl(responseSpecific);
+    if (alignedPayloadSize < 0xffff && nElem < 0xffff) {
+        pMsg->m_postsize = htons(((ca_uint16_t) alignedPayloadSize));
+        pMsg->m_count = htons(((ca_uint16_t) nElem));
+        if (ppPayload)
+            *ppPayload = (void *) (pMsg + 1);
     }
     else {
-        caHdr *pMsg = ( caHdr * ) &pclient->send.buf[pclient->send.stk];
-        ca_uint32_t *pW32 = ( ca_uint32_t * ) ( pMsg + 1 );
-        pMsg->m_cmmd = htons ( response );   
-        pMsg->m_postsize = htons ( 0xffff ); 
-        pMsg->m_dataType = htons ( dataType );  
-        pMsg->m_count = htons ( 0u );      
-        pMsg->m_cid = htonl ( cid );          
-        pMsg->m_available = htonl ( responseSpecific ); 
-        pW32[0] = htonl ( alignedPayloadSize );
-        pW32[1] = htonl ( nElem );
-        if ( ppPayload ) {
-            *ppPayload = ( void * ) ( pW32 + 2 );
-        }
+        ca_uint32_t *pW32 = (ca_uint32_t *) (pMsg + 1);
+        pMsg->m_postsize = htons(0xffff);
+        pMsg->m_count = htons(0u);
+        pW32[0] = htonl(alignedPayloadSize);
+        pW32[1] = htonl(nElem);
+        if (ppPayload)
+            *ppPayload = (void *) (pW32 + 2);
     }
 
     /* zero out pad bytes */
@@ -334,6 +328,22 @@ void cas_set_header_cid ( struct client *pClient, ca_uint32_t cid )
 {
     caHdr *pMsg = ( caHdr * ) &pClient->send.buf[pClient->send.stk];
     pMsg->m_cid = htonl ( cid );
+}
+
+void cas_set_header_count (struct client *pClient, ca_uint32_t count)
+{
+    caHdr *pMsg = (caHdr *) &pClient->send.buf[pClient->send.stk];
+    if (pMsg->m_postsize == htons(0xffff)) {
+        ca_uint32_t *pLW;
+
+        assert(pMsg->m_count == 0);
+        pLW = (ca_uint32_t *) (pMsg + 1);
+        pLW[1] = htonl(count);
+    }
+    else {
+        assert(count < 65536);
+        pMsg->m_count = htons((ca_uint16_t) count);
+    }
 }
 
 void cas_commit_msg ( struct client *pClient, ca_uint32_t size )

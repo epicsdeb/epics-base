@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* osdNetIntf.c,v 1.18.2.3 2006/11/18 00:12:12 jhill Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  *      Author:		Jeff Hill 
  *      Date:       04-05-94 

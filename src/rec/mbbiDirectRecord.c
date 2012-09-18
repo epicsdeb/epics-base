@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* mbbiDirectRecord.c,v 1.16.2.5 2009/07/08 18:14:10 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recMbbiDirect.c - Record Support routines for mbboDirect records */
 /*
@@ -158,6 +158,9 @@ static long init_record(mbbiDirectRecord *prec, int pass)
 	if((status=(*pdset->init_record)(prec))) return(status);
         refresh_bits(prec, 0);
     }
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
     return(0);
 }
 

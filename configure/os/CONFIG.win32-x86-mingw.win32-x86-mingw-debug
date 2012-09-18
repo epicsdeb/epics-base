@@ -1,14 +1,16 @@
 # CONFIG.win32-x86-mingw.win32-x86-mingw-debug
 #
-# CONFIG.win32-x86-mingw.win32-x86-mingw-debug,v 1.1.2.2 2009/07/14 19:30:51 jba Exp
+# Revision-Id: jba@aps.anl.gov-20101108141858-3elofx068sjvihtp
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86-mingw compiler host - win32-x86-mingw debug compiler target builds
 # Sites may override these definitions in CONFIG_SITE.win32-x86-mingw.win32-x86-mingw-debug
 #-------------------------------------------------------
 
-include $(CONFIG)/os/CONFIG.Common.win32-x86-mingw
-include $(CONFIG)/os/CONFIG.win32-x86-mingw.win32-x86-mingw
+-include $(CONFIG)/os/CONFIG.Common.win32-x86-mingw
+-include $(CONFIG)/os/CONFIG.win32-x86-mingw.win32-x86-mingw
+-include $(CONFIG)/os/CONFIG_SITE.Common.win32-x86-mingw
+-include $(CONFIG)/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw
 
 BUILD_CLASS = HOST
 

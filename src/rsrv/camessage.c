@@ -3,15 +3,13 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*  
+
+/*
  *  Author: Jeffrey O. Hill
- *      hill@luke.lanl.gov
- *      (505) 665 1831
- *  Date:   5-88
+ *
  */
 
 #include <stddef.h>
@@ -509,6 +507,9 @@ static void read_reply ( void *pArg, struct dbAddr *paddr,
     const int readAccess = asCheckGet ( pciu->asClientPVT );
     int status;
     int v41;
+    int autosize;
+    long item_count;
+    ca_uint32_t payload_size;
 
     SEND_LOCK ( pClient );
 
@@ -530,12 +531,21 @@ static void read_reply ( void *pArg, struct dbAddr *paddr,
         cid = pciu->cid;
     }
 
-    status = cas_copy_in_header ( pClient, pevext->msg.m_cmmd, pevext->size, 
-        pevext->msg.m_dataType, pevext->msg.m_count, cid, pevext->msg.m_available,
+    /* If the client has requested a zero element count we interpret this as a
+     * request for all avaiable elements.  In this case we initialise the
+     * header with the maximum element size specified by the database. */
+    autosize = pevext->msg.m_count == 0;
+    item_count =
+        autosize ? paddr->no_elements : pevext->msg.m_count;
+    payload_size = dbr_size_n(pevext->msg.m_dataType, item_count);
+    status = cas_copy_in_header(
+        pClient, pevext->msg.m_cmmd, payload_size,
+        pevext->msg.m_dataType, item_count, cid, pevext->msg.m_available,
         &pPayload );
     if ( status != ECA_NORMAL ) {
         send_err ( &pevext->msg, status, pClient, 
-            "server unable to load read (or subscription update) response into protocol buffer PV=\"%s\" max bytes=%u",
+            "server unable to load read (or subscription update) response "
+            "into protocol buffer PV=\"%s\" max bytes=%u",
             RECORD_NAME ( paddr ), rsrvSizeofLargeBufTCP );
         if ( ! eventsRemaining )
             cas_send_bs_msg ( pClient, FALSE );
@@ -554,8 +564,8 @@ static void read_reply ( void *pArg, struct dbAddr *paddr,
         return;
     }
 
-    status = db_get_field ( paddr, pevext->msg.m_dataType,
-                  pPayload, pevext->msg.m_count, pfl);
+    status = db_get_field_and_count(
+        paddr, pevext->msg.m_dataType, pPayload, &item_count, pfl);
     if ( status < 0 ) {
         /*
          * I cant wait to redesign this protocol from scratch!
@@ -569,58 +579,52 @@ static void read_reply ( void *pArg, struct dbAddr *paddr,
             send_err ( &pevext->msg, ECA_GETFAIL, pClient, RECORD_NAME ( paddr ) );
         }
         else {
-            /*
-             * New clients recv the status of the
-             * operation directly to the
+            /* New clients recv the status of the operation directly to the
              * event/put/get callback.
              *
-             * Fetched value is set to zero in case they
-             * use it even when the status indicates 
-             * failure.
+             * Fetched value is set to zero in case they use it even when the
+             * status indicates failure -- unless the client selected autosizing
+             * data, in which case they'd better know what they're doing!
              *
-             * The m_cid field in the protocol
-             * header is abused to carry the status
-             */
-            memset ( pPayload, 0, pevext->size );
+             * The m_cid field in the protocol header is abused to carry the
+             * status */
+            if (autosize) {
+                payload_size = dbr_size_n(pevext->msg.m_dataType, 0);
+                cas_set_header_count(pClient, 0);
+            }
+            memset ( pPayload, 0, payload_size );
             cas_set_header_cid ( pClient, ECA_GETFAIL );
-            cas_commit_msg ( pClient, pevext->size );
+            cas_commit_msg ( pClient, payload_size );
         }
     }
     else {
-        ca_uint32_t payloadSize = pevext->size;
         int cacStatus = caNetConvert ( 
             pevext->msg.m_dataType, pPayload, pPayload, 
-            TRUE /* host -> net format */, pevext->msg.m_count );
-	    if ( cacStatus == ECA_NORMAL ) {
-            /*
-            * force string message size to be the true size rounded to even
-            * boundary
-            */
-            if ( pevext->msg.m_dataType == DBR_STRING 
-                && pevext->msg.m_count == 1 ) {
-                char * pStr = (char *) pPayload;
-                size_t strcnt = strlen ( pStr );
-                if ( strcnt < payloadSize ) {
-                    payloadSize = ( ca_uint32_t ) ( strcnt + 1u );
-                }
-                else {
-                    pStr[payloadSize-1] = '\0';
-                    errlogPrintf ( 
-                        "caserver: read_reply: detected DBR_STRING w/o nill termination "
-                        "in response from db_get_field, pPayload = \"%s\"\n",
-                        pStr );
-                }
+            TRUE /* host -> net format */, item_count );
+        if ( cacStatus == ECA_NORMAL ) {
+            ca_uint32_t data_size =
+                dbr_size_n(pevext->msg.m_dataType, item_count);
+            if (autosize) {
+                payload_size = data_size;
+                cas_set_header_count(pClient, item_count);
             }
+            else if (payload_size > data_size)
+                memset(
+                    (char *) pPayload + data_size, 0, payload_size - data_size);
         }
         else {
-            memset ( pPayload, 0, payloadSize );
+            if (autosize) {
+                payload_size = dbr_size_n(pevext->msg.m_dataType, 0);
+                cas_set_header_count(pClient, 0);
+            }
+            memset ( pPayload, 0, payload_size );
             cas_set_header_cid ( pClient, cacStatus );
-	    }
-        cas_commit_msg ( pClient, payloadSize );
+        }
+        cas_commit_msg ( pClient, payload_size );
     }
 
     /*
-     * Ensures timely response for events, but does que 
+     * Ensures timely response for events, but does queue 
      * them up like db requests when the OPI does not keep up.
      */
     if ( ! eventsRemaining )
@@ -1562,6 +1566,7 @@ static void putNotifyErrorReply ( struct client *client, caHdrLargeArray *mp, in
         0u, mp->m_dataType, mp->m_count, statusCA, 
         mp->m_available, 0 );
     if ( status != ECA_NORMAL ) {
+        SEND_UNLOCK ( client );
         errlogPrintf ("%s at %d: should always get sufficent space for put notify error reply\n",
             __FILE__, __LINE__);
         return;
@@ -2140,6 +2145,7 @@ static void search_fail_reply ( caHdrLargeArray *mp, void *pPayload, struct clie
     status = cas_copy_in_header ( client, CA_PROTO_NOT_FOUND, 
         0u, mp->m_dataType, mp->m_count, mp->m_cid, mp->m_available, NULL );
     if ( status != ECA_NORMAL ) {
+        SEND_UNLOCK ( client );
         errlogPrintf ( "%s at %d: should always get sufficent space for search fail reply?\n",
             __FILE__, __LINE__ );
         return;
@@ -2190,9 +2196,9 @@ int rsrv_version_reply ( struct client *client )
 }
 
 /*
- *  search_reply()
+ *  search_reply_udp ()
  */
-static int search_reply ( caHdrLargeArray *mp, void *pPayload, struct client *client )
+static int search_reply_udp ( caHdrLargeArray *mp, void *pPayload, struct client *client )
 {
     struct dbAddr   tmp_addr;
     ca_uint16_t     *pMinorVersion;
@@ -2299,6 +2305,66 @@ static int search_reply ( caHdrLargeArray *mp, void *pPayload, struct client *cl
     return RSRV_OK;
 }
 
+/*
+ *  search_reply_tcp ()
+ */
+static int search_reply_tcp ( 
+    caHdrLargeArray *mp, void *pPayload, struct client *client )
+{
+    struct dbAddr   tmp_addr;
+    char            *pName = (char *) pPayload;
+    int             status;
+    int             spaceAvailOnFreeList;
+    size_t          spaceNeeded;
+    size_t          reasonableMonitorSpace = 10;
+
+    /*
+     * check the sanity of the message
+     */
+    if (mp->m_postsize<=1) {
+        log_header ("empty PV name in UDP search request?", 
+            client, mp, pPayload, 0);
+        return RSRV_OK;
+    }
+    pName[mp->m_postsize-1] = '\0';
+
+    /* Exit quickly if channel not on this node */
+    status = db_name_to_addr (pName, &tmp_addr);
+    if (status) {
+        DLOG ( 2, ( "CAS: Lookup for channel \"%s\" failed\n", pPayLoad ) );
+        if (mp->m_dataType == DOREPLY)
+            search_fail_reply ( mp, pPayload, client );
+        return RSRV_OK;
+    }
+
+    /*
+     * stop further use of server if memory becomes scarse
+     */
+    spaceAvailOnFreeList =     freeListItemsAvail ( rsrvChanFreeList ) > 0
+                            && freeListItemsAvail ( rsrvEventFreeList ) > reasonableMonitorSpace;
+    spaceNeeded = sizeof (struct channel_in_use) + 
+        reasonableMonitorSpace * sizeof (struct event_ext);
+    if ( ! ( osiSufficentSpaceInPool(spaceNeeded) || spaceAvailOnFreeList ) ) { 
+        SEND_LOCK(client);
+        send_err ( mp, ECA_ALLOCMEM, client, "Server memory exhausted" );
+        SEND_UNLOCK(client);
+        return RSRV_OK;
+    }
+
+    SEND_LOCK ( client );
+    status = cas_copy_in_header ( client, CA_PROTO_SEARCH, 
+        0, ca_server_port, 0, ~0U, mp->m_available, 0 );
+    if ( status != ECA_NORMAL ) {
+        SEND_UNLOCK ( client );
+        return RSRV_ERROR;
+    }
+
+    cas_commit_msg ( client, 0 );
+    SEND_UNLOCK ( client );
+
+    return RSRV_OK;
+}
+
 typedef int (*pProtoStubTCP) (caHdrLargeArray *mp, void *pPayload, struct client *client);
 
 /*
@@ -2312,7 +2378,7 @@ static const pProtoStubTCP tcpJumpTable[] =
     read_action,
     write_action,
     bad_tcp_cmd_action,
-    bad_tcp_cmd_action,
+    search_reply_tcp,
     bad_tcp_cmd_action,
     events_off_action,
     events_on_action,
@@ -2348,7 +2414,7 @@ static const pProtoStubUDP udpJumpTable[] =
     bad_udp_cmd_action,
     bad_udp_cmd_action,
     bad_udp_cmd_action,
-    search_reply,
+    search_reply_udp,
     bad_udp_cmd_action,
     bad_udp_cmd_action,
     bad_udp_cmd_action,

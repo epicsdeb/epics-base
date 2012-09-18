@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbAccess.c */
-/* dbAccess.c,v 1.116.2.33 2009/06/15 22:30:27 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  *      Original Author: Bob Dalesio
  *      Current Author:  Marty Kraimer
@@ -665,7 +665,7 @@ long epicsShareAPI dbNameToAddr(const char *pname, DBADDR *paddr)
     struct rset *prset;
     long status = 0;
     long no_elements = 1;
-    short dbfType, dbrType;
+    short dbfType, dbrType, field_size;
 
     if (!pname || !*pname || !pdbbase)
         return S_db_notFound;
@@ -686,17 +686,20 @@ long epicsShareAPI dbNameToAddr(const char *pname, DBADDR *paddr)
 
     dbfType = pflddes->field_type;
     dbrType = mapDBFToDBR[dbfType];
+    field_size = pflddes->size;
 
     if (*pname++ == '$') {
         /* Some field types can be accessed as char arrays */
         if (dbfType == DBF_STRING) {
             dbfType     = DBF_CHAR;
             dbrType     = DBR_CHAR;
-            no_elements = pflddes->size;
+            no_elements = field_size;
+            field_size  = 1;
         } else if (dbfType >= DBF_INLINK && dbfType <= DBF_FWDLINK) {
             /* Clients see a char array, but keep original dbfType */
             dbrType     = DBR_CHAR;
             no_elements = PVNAME_STRINGSZ + 12;
+            field_size = 1;
         } else {
             status = S_dbLib_fieldNotFound;
             goto finish;
@@ -706,7 +709,7 @@ long epicsShareAPI dbNameToAddr(const char *pname, DBADDR *paddr)
     paddr->pfldDes     = pflddes;
     paddr->field_type  = dbfType;
     paddr->dbr_field_type = dbrType;
-    paddr->field_size  = pflddes->size;
+    paddr->field_size  = field_size;
     paddr->special     = pflddes->special;
     paddr->no_elements = no_elements;
 

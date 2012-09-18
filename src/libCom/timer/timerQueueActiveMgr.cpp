@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      timerQueueActiveMgr.cpp,v 1.10.2.1 2009/02/10 22:24:20 jhill Exp
+ *      Revision-Id: anj@aps.anl.gov-20110601212718-lfoydufupy1vmabj
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -58,20 +58,21 @@ epicsTimerQueueActiveForC & timerQueueActiveMgr ::
 void timerQueueActiveMgr ::
     release ( epicsTimerQueueActiveForC & queue )
 {
-    timerQueueActiveMgrPrivate * pPriv = & queue;
     {
         epicsGuard < epicsMutex > locker ( this->mutex );
         assert ( queue.timerQueueActiveMgrPrivate::referenceCount > 0u );
         queue.timerQueueActiveMgrPrivate::referenceCount--;
-        if ( queue.timerQueueActiveMgrPrivate::referenceCount == 0u ) {
-            if ( queue.sharingOK () ) {
-                this->sharedQueueList.remove ( queue );
-            }
+        if ( queue.timerQueueActiveMgrPrivate::referenceCount > 0u ) {
+            return;
+        }
+        else if ( queue.sharingOK () ) {
+            this->sharedQueueList.remove ( queue );
         }
     }
     // delete only after we release the guard in case the embedded 
     // reference is the last one and this object is destroyed
     // as a side effect
+    timerQueueActiveMgrPrivate * pPriv = & queue;
     delete pPriv;
 }
 

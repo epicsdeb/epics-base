@@ -10,7 +10,7 @@
 \*************************************************************************/
 
 //
-//	pvAttachReturn.cc,v 1.1 2002/08/21 16:33:49 jhill Exp
+//	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 //
 //      Author: Jeffrey O. Hill
 //              johill@lanl.gov

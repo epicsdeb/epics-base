@@ -1,0 +1,101 @@
+# CONFIG.Common.iosCommon
+#
+# Revision-Id: anj@aps.anl.gov-20111202164243-clxybuefflizbyvr
+# This file is maintained by the build community.
+#
+# Definitions for all Apple iOS builds
+# Sites may override these definitions in CONFIG_SITE.Common.iosCommon
+# or CONFIG_SITE.<host>.iosCommon
+#-------------------------------------------------------
+
+# Include definitions common to all Unix targets
+include $(CONFIG)/os/CONFIG.Common.UnixCommon
+
+# Include common gnu compiler definitions
+include $(CONFIG)/CONFIG.gnuCommon
+
+#-------------------------------------------------------
+# Valid build types
+VALID_BUILDS = Ioc
+
+#-------------------------------------------------------
+# operating system class (include/os/<os_class>)
+OS_CLASS = iOS
+
+#--------------------------------------------------
+# GNU and SDK directories
+GNU_DIR = $(PLATFORM_DIR)/Developer/usr
+SDK_DIR = $(PLATFORM_DIR)/Developer/SDKs/$(IOS_PLATFORM)$(IOS_VERSION).sdk
+
+#-------------------------------------------------------
+# Build architecture flags
+#   ARCH_CLASS must contain a list of CPU architectures which must be
+#   valid arguments to the -arch options for the cc and ld commands.
+#   ARCH_CLASS is defined in a CONFIG_SITE file which is not loaded
+#   until after this file.
+#
+ARCH_DEP_FLAGS = $(addprefix -arch ,$(ARCH_CLASS))
+ARCH_DEP_CFLAGS += $(ARCH_DEP_FLAGS)
+ARCH_DEP_LDFLAGS += $(ARCH_DEP_FLAGS)
+
+#--------------------------------------------------
+# Operating system flags
+OP_SYS_CFLAGS += -isysroot $(SDK_DIR) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200
+
+#--------------------------------------------------
+# Don't try to use precompiled headers when converting sequencer files
+CPPSNCFLAGS += -no-cpp-precomp
+
+#--------------------------------------------------
+# Always compile in debugging symbol table information
+#
+OPT_CFLAGS_YES += -g
+OPT_CXXFLAGS_YES += -g
+
+#-------------------------------------------------------
+# Compiler definitions:
+#   Use clang instead of gcc
+CC = $(GNU_BIN)/clang
+CCC = $(GNU_BIN)/clang++
+GNU_LDLIBS_YES =
+
+#-------------------------------------------------------
+# Linker flags
+OP_SYS_LDFLAGS += -dynamic -Z -L$(SDK_DIR)/usr/lib -L$(SDK_DIR)/usr/lib/system
+
+#-------------------------------------------------------
+# Shared libraries
+SHRLIB_VERSION = $(EPICS_VERSION).$(EPICS_REVISION).$(EPICS_MODIFICATION)
+SHRLIB_LDFLAGS = -dynamiclib -flat_namespace -undefined suppress \
+       -install_name $(shell perl $(TOOLS)/fullPathName.pl $(INSTALL_LIB))/$@ \
+       -compatibility_version $(EPICS_VERSION).$(EPICS_REVISION) \
+       -current_version $(SHRLIB_VERSION)
+SHRLIB_SUFFIX = .$(SHRLIB_VERSION).dylib
+
+LOADABLE_SHRLIB_LDFLAGS = -bundle -flat_namespace -undefined suppress
+
+#--------------------------------------------------
+# code flags
+CODE_CFLAGS = -fno-common -Wno-unused-value
+CODE_CXXFLAGS = -fno-common
+
+#
+# Add support for Objective-C source
+#
+vpath %.m $(USR_VPATH) $(ALL_SRC_DIRS)
+%.o: %.m
+	$(COMPILE.c) -c $<
+
+#--------------------------------------------------
+# Header dependency file generation
+#
+# Use compiler when ARCH_CLASS is a single arch value
+# otherwise use perl script command
+SINGLE_ARCH=$(filter 1,$(words $(ARCH_CLASS)))
+HDEPENDS_CFLAGS = $(if $(SINGLE_ARCH),$(HDEPENDS_CFLAGS_$(HDEPENDS)))
+HDEPENDS_METHOD = $(if $(SINGLE_ARCH),CFLAGS,CMD)
+
+#--------------------------------------------------
+# Allow site overrides
+-include $(CONFIG)/os/CONFIG_SITE.Common.iosCommon
+-include $(CONFIG)/os/CONFIG_SITE.$(EPICS_HOST_ARCH).iosCommon

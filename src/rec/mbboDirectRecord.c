@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* mbboDirectRecord.c,v 1.17.2.4 2009/07/08 18:14:10 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recMbboDirect.c - Record Support for mbboDirect records */
 /*
@@ -141,6 +141,10 @@ static long init_record(mbboDirectRecord *prec, int pass)
 		prec->udf = FALSE;
 	} else if (status == 2) status = 0;
     }
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
+    prec->orbv = prec->rbv;
     return(status);
 }
 

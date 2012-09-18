@@ -192,6 +192,8 @@ INC += epicsStdioRedirect.h
 INC += epicsGetopt.h
 
 INC += devLib.h
+INC += devLibVME.h
+INC += devLibVMEImpl.h
 INC += osdVME.h
 
 SRCS += epicsThread.cpp
@@ -220,8 +222,6 @@ SRCS += epicsTempFile.cpp
 SRCS += epicsStdio.c
 SRCS += osdStdio.c
 
-osdEnv_CFLAGS_WIN32= -U__STDC__
-
 SRCS += osdThread.c
 SRCS += osdMutex.c
 SRCS += osdEvent.c
@@ -230,8 +230,8 @@ SRCS += osdProcess.c
 SRCS += osdNetIntf.c
 SRCS += osdMessageQueue.c
 
-SRCS += devLib.c
-SRCS += devLibOSD.c
+SRCS += devLibVME.c
+SRCS += devLibVMEOSD.c
 
 SRC_DIRS += $(LIBCOM)/taskwd
 INC += taskwd.h

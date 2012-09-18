@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*	@(#)ca_test.c	ca_test.c,v 1.38.2.2 2009/07/09 16:37:24 anj Exp
+/*	@(#)ca_test.c	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *	Author:	Jeff Hill
  *	Date:	07-01-91
  *

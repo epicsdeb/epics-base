@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  CONFIG,v 1.17.2.11 2009/03/03 19:54:05 jba Exp
+#  Revision-Id: anj@aps.anl.gov-20101026195642-3p5qxsy19a8skgud
 #
 #  The developer may edit this file.
 # assume T_A is the host arch if not specified
@@ -24,6 +24,13 @@ BASE_TOP=YES
 else
 CONFIG ?= $(EPICS_BASE)/configure
 endif
+
+# Provide a default if the user hasn't set EPICS_HOST_ARCH
+ifeq ($(origin EPICS_HOST_ARCH), undefined)
+# NB: Must use a simply expanded variable here for performance:
+EPICS_HOST_ARCH := $(shell $(CONFIG)/../startup/EpicsHostArch.pl)
+endif
+#
 
 -include $(CONFIG)/os/CONFIG_COMPAT
 
@@ -87,7 +94,7 @@ endif
 # Include <top>/cfg/CONFIG* definitions from tops defined in RELEASE* files
 #
 ifneq ($(CONFIG),$(TOP)/configure)
-RELEASE_TOPS ?= $(shell $(PERL) $(TOOLS)/convertRelease.pl -T $(TOP) releaseTops )
+RELEASE_TOPS := $(shell $(CONVERTRELEASE) -T $(TOP) releaseTops)
 RELEASE_CFG_CONFIGS = $(foreach top, $(RELEASE_TOPS), $(wildcard $($(top))/cfg/CONFIG*))
 ifneq ($(RELEASE_CFG_CONFIGS),)
 include $(RELEASE_CFG_CONFIGS)

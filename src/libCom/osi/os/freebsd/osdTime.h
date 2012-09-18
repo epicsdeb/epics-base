@@ -5,7 +5,7 @@
 \*************************************************************************/
 
 /*
- * osdTime.h,v 1.1.2.1 2006/11/14 19:40:36 anj Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  * Author: Eric Norum
  */

@@ -1,6 +1,6 @@
 # CONFIG.Common.linux-x86_64-debug
 #
-# CONFIG.Common.linux-x86_64-debug,v 1.1.2.4 2009/07/13 20:51:44 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for linux-x86_64 with debug compiler flags

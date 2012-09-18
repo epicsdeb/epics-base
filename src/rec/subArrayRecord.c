@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* subArrayRecord.c,v 1.13.2.5 2009/04/23 22:19:46 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101112220909-zd1pn4qnqsafag0l */
 
 /* recSubArray.c - Record Support Routines for SubArray records 
  *
@@ -194,9 +194,8 @@ static long put_array_info(DBADDR *paddr, long nNew)
     subArrayRecord *prec = (subArrayRecord *) paddr->precord;
 
     if (nNew > prec->malm)
-       prec->nord = prec->malm;
-    else
-       prec->nord = nNew;
+        nNew = prec->malm;
+    prec->nord = nNew;
 
     return 0;
 }

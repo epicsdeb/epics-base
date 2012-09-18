@@ -3,13 +3,15 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* osi/os/vxWorks/epicsThread.c */
 
 /* Author:  Marty Kraimer Date:    25AUG99 */
+
+/* This is needed for vxWorks 6.8 to prevent an obnoxious compiler warning */
+#define _VSB_CONFIG_FILE <../lib/h/config/vsbConfig.h>
 
 #include <stddef.h>
 #include <string.h>
@@ -110,21 +112,41 @@ unsigned int epicsThreadGetStackSize (epicsThreadStackSizeClass stackSizeClass)
     return stackSizeTable[stackSizeClass];
 }
 
-void epicsThreadOnceOsd(epicsThreadOnceId *id, void (*func)(void *), void *arg)
+struct epicsThreadOSD {};
+    /* Strictly speaking this should be a WIND_TCB, but we only need it to
+     * be able to create an epicsThreadId that is guaranteed never to be
+     * the same as any current TID, and since TIDs are pointers this works.
+     */
+
+void epicsThreadOnce(epicsThreadOnceId *id, void (*func)(void *), void *arg)
 {
+    static struct epicsThreadOSD threadOnceComplete;
+    #define EPICS_THREAD_ONCE_DONE &threadOnceComplete
     int result;
+
     epicsThreadInit();
     result = semTake(epicsThreadOnceMutex, WAIT_FOREVER);
     assert(result == OK);
-    if (*id == 0) { /*  0 => first call */
-        *id = -1;   /* -1 => func() active */
-        semGive(epicsThreadOnceMutex);
-        func(arg);
-        result = semTake(epicsThreadOnceMutex, WAIT_FOREVER);
-        assert(result == OK);
-        *id = +1;   /* +1 => func() done */
-    } else
-        assert(*id > 0 /* func() called epicsThreadOnce() with same id */);
+    if (*id != EPICS_THREAD_ONCE_DONE) {
+        if (*id == EPICS_THREAD_ONCE_INIT) { /* first call */
+            *id = epicsThreadGetIdSelf();    /* mark active */
+            semGive(epicsThreadOnceMutex);
+            func(arg);
+            result = semTake(epicsThreadOnceMutex, WAIT_FOREVER);
+            assert(result == OK);
+            *id = EPICS_THREAD_ONCE_DONE;    /* mark done */
+        } else if (*id == epicsThreadGetIdSelf()) {
+            semGive(epicsThreadOnceMutex);
+            cantProceed("Recursive epicsThreadOnce() initialization\n");
+        } else
+            while (*id != EPICS_THREAD_ONCE_DONE) {
+                /* Another thread is in the above func(arg) call. */
+                semGive(epicsThreadOnceMutex);
+                epicsThreadSleep(epicsThreadSleepQuantum());
+                result = semTake(epicsThreadOnceMutex, WAIT_FOREVER);
+                assert(result == OK);
+            }
+    }
     semGive(epicsThreadOnceMutex);
 }
 
@@ -132,13 +154,13 @@ static void createFunction(EPICSTHREADFUNC func, void *parm)
 {
     int tid = taskIdSelf();
 
-    taskVarAdd(tid,(int *)&papTSD);
+    taskVarAdd(tid,(int *)(char *)&papTSD);
     /*Make sure that papTSD is still 0 after that call to taskVarAdd*/
     papTSD = 0;
     (*func)(parm);
     epicsExitCallAtThreadExits ();
     free(papTSD);
-    taskVarDelete(tid,(int *)&papTSD);
+    taskVarDelete(tid,(int *)(char *)&papTSD);
 }
 
 #ifdef ALTIVEC
@@ -295,10 +317,13 @@ void epicsThreadShowAll(unsigned int level)
     taskShow(0,2);
 }
 
-void epicsThreadShow(epicsThreadId id,unsigned int level)
+void epicsThreadShow(epicsThreadId id, unsigned int level)
 {
     int tid = (int)id;
-    taskShow(tid,level);
+
+    if (level > 1) level = 1;
+    if (tid)
+        taskShow(tid, level);
 }
 
 /* The following algorithm was thought of by Andrew Johnson APS/ASD .

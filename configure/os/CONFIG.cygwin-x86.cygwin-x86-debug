@@ -1,14 +1,16 @@
 # CONFIG.cygwin-x86.cygwin-x86-debug
 #
-# CONFIG.cygwin-x86.cygwin-x86-debug,v 1.1.2.2 2009/07/14 19:30:51 jba Exp
+# Revision-Id: jba@aps.anl.gov-20101101193549-7279bslv1hpwa7xr
 # This file is maintained by the build community.
 #
 # Definitions for cygwin-x86 host - cygwin-x86-debug target build
 # Sites may override these definitions in CONFIG_SITE.cygwin-x86.cygwin-x86-debug
 #-------------------------------------------------------
 
-include $(CONFIG)/os/CONFIG.Common.cygwin-x86
-include $(CONFIG)/os/CONFIG.cygwin-x86.cygwin-x86
+-include $(CONFIG)/os/CONFIG.Common.cygwin-x86
+-include $(CONFIG)/os/CONFIG.cygwin-x86.cygwin-x86
+-include $(CONFIG)/os/CONFIG_SITE.Common.cygwin-x86
+-include $(CONFIG)/os/CONFIG_SITE.cygwin-x86.cygwin-x86
 
 BUILD_CLASS = HOST
 

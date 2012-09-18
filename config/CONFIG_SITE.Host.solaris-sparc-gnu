@@ -1,4 +1,4 @@
-# CONFIG_SITE.Host.solaris-sparc-gnu,v 1.1 2001/04/09 14:13:28 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 # solaris-sparc is the new name for solaris
 -include $(EPICS_BASE)/config/CONFIG_SITE.Host.solaris

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devLoSoft.c */
-/* base/src/dev devLoSoft.c,v 1.10.2.2 2009/04/03 17:46:22 lange Exp */
+/* base/src/dev Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  *      Author:		Janet Anderson
  *      Date:   	09-23-91

@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*  makeBpt.c,v 1.11.2.5 2009/04/24 16:53:20 anj Exp
+/*  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *	Author: Marty Kraimer
  *	Date:	9/28/95
  *	Replacement for old bldCvtTable
@@ -144,12 +144,13 @@ int main(int argc, char **argv)
 	if(*pend!='"') errExit("Illegal Header");
 	len = pend - pbeg;
 	if(len<=1) errExit("Illegal Header");
-	pname = calloc(len,sizeof(char));
+	pname = calloc(len+1,sizeof(char));
 	if(!pname) {
 	    fprintf(stderr,"calloc failed while processing line %d\n",linenum);
 	    exit(-1);
 	}
 	strncpy(pname,pbeg,len);
+	pname[len]='\0';
 	pbeg = pend + 1;
 	if(getNumber(&pbeg,&value)) errExit("Illegal Header");
 	brkCreateInfo.engLow = value;

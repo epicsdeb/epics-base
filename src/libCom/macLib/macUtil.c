@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* macUtil.c,v 1.10.2.4 2008/03/31 19:30:17 anj Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  * Implementation of utility macro substitution library (macLib)
  *
@@ -231,7 +231,7 @@ epicsShareAPI macParseDefns(
     free( ( char * ) del );
 
     /* debug output */
-    if ( handle->debug & 1 )
+    if ( handle != NULL && handle->debug & 1 )
 	printf( "macParseDefns() -> %d\n", num / 2 );
 
     /* success exit; return number of definitions */

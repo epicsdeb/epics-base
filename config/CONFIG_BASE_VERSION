@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  CONFIG_BASE_VERSION,v 1.22.2.7 2005/12/16 16:47:51 anj Exp
+#  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 #  EPICS Version information now comes from configure...
 

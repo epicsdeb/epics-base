@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* mbboRecord.c,v 1.16.2.6 2009/07/08 18:14:11 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recMbbo.c - Record Support Routines for multi bit binary Output records */
 /*
@@ -184,6 +184,10 @@ static long init_record(mbboRecord *prec, int pass)
     init_common(prec);
     /* convert val to rval */
     convert(prec);
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
+    prec->orbv = prec->rbv;
     return(0);
 }
 

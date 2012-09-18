@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*	envSubr.c,v 1.33.2.6 2009/07/09 15:27:43 anj Exp
+/*	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *	Author:	Roger A. Cole
  *	Date:	07-20-91
  */

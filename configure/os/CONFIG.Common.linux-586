@@ -1,6 +1,6 @@
 # CONFIG.Common.linux-586
 #
-# CONFIG.Common.linux-586,v 1.1.2.5 2007/12/11 21:15:27 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for linux-586 target builds

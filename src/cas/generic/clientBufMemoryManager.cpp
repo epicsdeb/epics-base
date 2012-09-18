@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      clientBufMemoryManager.cpp,v 1.2 2003/02/12 19:06:07 jhill Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov

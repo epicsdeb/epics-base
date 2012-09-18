@@ -11,7 +11,7 @@
 // Author: Jim Kowalkowski
 // Date: 2/96
 // 
-// aitConvert.cc,v 1.18.2.7 2009/07/23 00:23:17 jhill Exp
+// Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 //
 
 #define AIT_CONVERT_SOURCE 1
@@ -100,7 +100,7 @@ bool putDoubleToString (
     if ( nChar < 1 ) {
         return false;
     }
-    assert ( nChar < strSize );
+    assert ( size_t(nChar) < strSize );
 #else
 	int nChar = epicsSnprintf ( 
         pString, strSize-1, "%g", in );

@@ -14,7 +14,7 @@
  *
  */
 
-static char ht2992_h_RCSID[] = "/usr/local/epicsmgr/cvsroot/epics/base/src/libCom/osi/os/vxWorks/Attic/camacLib.h,v 1.1.2.1 2003/08/05 18:47:07 mrk Exp";
+static char ht2992_h_RCSID[] = "Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd";
 
 /********************************/
 /* GLOBAL DATA			*/

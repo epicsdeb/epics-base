@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* longoutRecord.c,v 1.21.2.4 2009/07/08 18:14:10 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  * Author: 	Janet Anderson
  * Date:	9/23/91
@@ -117,6 +117,9 @@ static long init_record(longoutRecord *prec, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(prec))) return(status);
     }
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
     return(0);
 }
 

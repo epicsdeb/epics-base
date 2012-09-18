@@ -1,6 +1,6 @@
 #  CONFIG.win32-x86-cygwin.win32-x86-cygwin
 #
-# CONFIG.win32-x86-cygwin.win32-x86-cygwin,v 1.4.2.9 2009/03/03 19:54:15 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 # Definitions for win32-x86-cygwin host - win32-x86-cygwin target builds
 # Sites may override these definitions in CONFIG_SITE.win32-x86-cygwin.win32-x86-cygwin

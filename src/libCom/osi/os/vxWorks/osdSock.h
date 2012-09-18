@@ -3,8 +3,7 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
@@ -14,8 +13,9 @@
 #ifndef osdSockH
 #define osdSockH
 
-#ifdef __cplusplus
-extern "C" {
+/* This is needed for vxWorks 6.8 to prevent an obnoxious compiler warning */
+#ifndef _VSB_CONFIG_FILE
+#define _VSB_CONFIG_FILE <../lib/h/config/vsbConfig.h>
 #endif
 
 #include <errno.h>
@@ -33,6 +33,11 @@ extern "C" {
 #include <ioLib.h>
 #include <hostLib.h>
 #include <selectLib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*This following is not defined in any vxWorks header files*/
 int sysClkRateGet(void);
 
@@ -89,7 +94,9 @@ typedef int osiSocklen_t;
 #   define INADDR_NONE (0xffffffff)
 #endif 
 
-#if ( defined (BSD) && ( BSD >= 44 ) )
+#if defined(_SIZEOF_ADDR_IFREQ)
+#   define ifreq_size(pifreq) _SIZEOF_ADDR_IFREQ(*pifreq)
+#elif ( defined (BSD) && ( BSD >= 44 ) )
 #   define ifreq_size(pifreq) (pifreq->ifr_addr.sa_len + sizeof(pifreq->ifr_name))
 #else
 #   define ifreq_size(pifreq) sizeof(*pifreq)

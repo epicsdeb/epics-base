@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* guigroup.h,v 1.2 2002/07/12 21:33:54 jba Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 	these are used in the pmt (prompt) field of the record support
 	ascii files.  They represent field groupings for dct tools
 */

@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* boRecord.c,v 1.17.2.3 2009/07/08 18:14:10 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recBo.c - Record Support Routines for Binary Output records */
 /*
@@ -171,11 +171,17 @@ static long init_record(boRecord *prec,int pass)
 		prec->udf = FALSE;
 	} else if (status==2) status=0;
     }
+    prec->mlst = prec->val;
     /* convert val to rval */
     if ( prec->mask != 0 ) {
 	if(prec->val==0) prec->rval = 0;
 	else prec->rval = prec->mask;
     } else prec->rval = (epicsUInt32)prec->val;
+
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
+    prec->orbv = prec->rbv;
     return(status);
 }
 

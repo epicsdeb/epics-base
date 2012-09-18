@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *	    osdNetIntf.c,v 1.11.2.1 2006/11/18 00:13:53 jhill Exp
+ *	    Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *	    WIN32 specific initialisation for bsd sockets,
  *	    based on Chris Timossi's base/src/ca/windows_depend.c,

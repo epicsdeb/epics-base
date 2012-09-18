@@ -1,20 +1,25 @@
-# CONFIG.win-x86_64.win-x86_64
+# CONFIG.windows-x64.windows-x64
 #
-# CONFIG.windows-x64.windows-x64,v 1.1.2.1 2009/02/26 20:56:53 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
-# Definitions for win-x86_64 target archs when host arch is win-x86_64
-# Sites may override these definitions in CONFIG_SITE.win-x86_64.win-x86_64
+# Definitions for windows-x64 target archs when host arch is windows-x64
+# Sites may override these definitions in CONFIG_SITE.windows-x64.windows-x64
 #-------------------------------------------------------
 
 -include $(CONFIG)/os/CONFIG.win32-x86.win32-x86
 
-#-------------------------------------------------------
+ARCH_DEP_CPPFLAGS += /favor:blend
+#ARCH_DEP_CPPFLAGS += /Wp64
 
+#	/favor:blend	both AMD64 and INTEL64
+#	/favor:AMD64
+#	/favor:INTEL64 (new value)
+#	/favor:EN64T   (old value)
 
-STATIC_LDLIBS_YES=ws2_64.lib advapi64.lib user64.lib kernel64.lib winmm.lib
+OPT_LDFLAGS += /MACHINE:X64
 
-WIN_DLLFLAGS = /subsystem:windows /dll $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(LIB_LDFLAGS)
-
-LINK.shrlib = $(WINLINK) /nologo $(WIN_DLLFLAGS) /implib:$*.lib /out:$*.dll $(DLL_DEF_FLAG)
+#	/MACHINE:X64
+#	/MACHINE:IA64  (Itanium)
+#	/MACHINE:X86
 

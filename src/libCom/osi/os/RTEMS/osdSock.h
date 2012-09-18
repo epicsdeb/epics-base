@@ -1,22 +1,17 @@
 /*************************************************************************\
 * Copyright (c) 2002 The University of Saskatchewan
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
  * RTEMS osdSock.h
- *	osdSock.h,v 1.14.2.3 2005/11/14 17:05:27 jhill Exp
+ *	Revision-Id: anj@aps.anl.gov-20110909221435-fdjubbxunee9gs44
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
  */
 #ifndef osdSockH
 #define osdSockH
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <errno.h>
 
@@ -31,6 +26,10 @@ extern "C" {
 #include <net/if.h>
 #include <netdb.h>
 #include <unistd.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int select(int  n,  fd_set  *readfds,  fd_set  *writefds, fd_set *exceptfds, struct timeval *timeout);
 
@@ -61,7 +60,7 @@ typedef socklen_t osiSocklen_t;
 #define SOCK_EINTR EINTR
 #define SOCK_EPIPE EPIPE
 #define SOCK_EMFILE EMFILE
-#define SOCK_SHUTDOWN ESHUTDOWN
+#define SOCK_SHUTDOWN EPIPE
 #define SOCK_ENOTSOCK ENOTSOCK
 #define SOCK_EBADF EBADF
 

@@ -8,7 +8,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  CONFIG_COMMON,v 1.37.2.4 2006/11/28 16:55:29 jba Exp
+#  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 #  CONFIG_COMMON - Another EPICS BASE config file
 #	by Matthew Needes and Mike Bordua

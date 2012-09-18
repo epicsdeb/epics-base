@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* subRecord.c,v 1.25.2.9 2009/07/28 21:11:02 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* Record Support Routines for Subroutine records */
 /*
@@ -127,6 +127,9 @@ static long init_record(subRecord *prec, int pass)
         recGblRecordError(S_db_BadSub, (void *)prec, "recSub(init_record)");
         return S_db_BadSub;
     }
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
     return 0;
 }
 

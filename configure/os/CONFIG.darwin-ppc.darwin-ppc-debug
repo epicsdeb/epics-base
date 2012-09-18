@@ -1,6 +1,6 @@
 # CONFIG.darwin-ppc.darwin-ppc-debug
 #
-# CONFIG.darwin-ppc.darwin-ppc-debug,v 1.1.2.3 2009/07/13 20:31:45 jba Exp
+# Revision-Id: jba@aps.anl.gov-20101115014917-mbxh37863qdzkm5t
 # This file is maintained by the build community.
 #
 # Definitions for darwin-ppc host - darwin-ppc-debug target build with debug compiler flags
@@ -9,6 +9,8 @@
 
 -include $(CONFIG)/os/CONFIG.Common.darwin-ppc
 -include $(CONFIG)/os/CONFIG.darwin-ppc.darwin-ppc
+-include $(CONFIG)/os/CONFIG_SITE.Common.darwin-ppc
+-include $(CONFIG)/os/CONFIG_SITE.darwin-ppc.darwin-ppc
 
 BUILD_CLASS=HOST
 HOST_OPT = NO

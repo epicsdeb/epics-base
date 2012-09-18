@@ -10,10 +10,6 @@
 #ifndef osdSockH
 #define osdSockH
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <errno.h>
 
 #include <sys/types.h>
@@ -28,10 +24,6 @@ extern "C" {
 #include <netdb.h>
 #include <unistd.h> /* close() and others */
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #ifndef IPPORT_USERRESERVED
 #define IPPORT_USERRESERVED 5000
@@ -77,7 +69,11 @@ typedef socklen_t osiSocklen_t;
 #   define SHUT_RDWR 2
 #endif
 
-#define ifreq_size(pifreq) (sizeof(pifreq->ifr_name))
+#if BSD4_4
+#   define ifreq_size(pifreq) (pifreq->ifr_addr.sa_len + sizeof(pifreq->ifr_name))
+#else
+#   define ifreq_size(pifreq) sizeof(*pifreq)
+#endif
 
 #endif /*osdSockH*/
 

@@ -8,28 +8,8 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// vxEntry.cc,v 1.3 2002/07/12 21:33:16 jba Exp
+// Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 // Author: Jeff HIll (LANL)
-//
-// vxEntry.cc,v
-// Revision 1.3  2002/07/12 21:33:16  jba
-// Updated license comments.
-//
-// Revision 1.2  2001/01/31 13:33:29  mrk
-// osiTime=>epicsTime
-//
-// Revision 1.1  1997/06/13 09:20:26  jhill
-// installed
-//
-// Revision 1.2  1997/04/10 19:39:26  jhill
-// API changes
-//
-// Revision 1.1  1996/12/06 22:20:22  jhill
-// moved down one level
-//
-// Revision 1.2  1996/09/16 18:22:09  jhill
-// added cvs log entries
-//
 //
 
 #include <vxWorks.h>

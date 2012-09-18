@@ -8,7 +8,7 @@
 \*************************************************************************/
 
 /*  
- *  resourceLib.cpp,v 1.3.2.1 2009/03/24 17:04:02 anj Exp
+ *  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *                    L O S  A L A M O S
  *              Los Alamos National Laboratory

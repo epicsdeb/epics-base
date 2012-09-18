@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*	envDefs.h,v 1.21.2.4 2009/06/05 19:56:33 anj Exp
+/*	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *	Author:	Roger A. Cole
  *	Date:	07-20-91
  *
@@ -49,6 +49,7 @@ epicsShareExtern const ENV_PARAM EPICS_CA_REPEATER_PORT;
 epicsShareExtern const ENV_PARAM EPICS_CA_SERVER_PORT;
 epicsShareExtern const ENV_PARAM EPICS_CA_MAX_ARRAY_BYTES;
 epicsShareExtern const ENV_PARAM EPICS_CA_MAX_SEARCH_PERIOD;
+epicsShareExtern const ENV_PARAM EPICS_CA_NAME_SERVERS;
 epicsShareExtern const ENV_PARAM EPICS_CAS_INTF_ADDR_LIST;
 epicsShareExtern const ENV_PARAM EPICS_CAS_IGNORE_ADDR_LIST;
 epicsShareExtern const ENV_PARAM EPICS_CAS_AUTO_BEACON_ADDR_LIST;

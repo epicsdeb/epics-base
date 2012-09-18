@@ -6,7 +6,7 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
-# CONFIG_FILE_TYPE,v 1.1.2.2 2008/10/07 20:33:29 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 # Macros and rules to create a new installation file type 
 #

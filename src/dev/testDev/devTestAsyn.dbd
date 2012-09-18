@@ -1,7 +1,9 @@
-# devTestAsyn.dbd,v 1.1.2.3 2009/01/06 17:31:55 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 device(ai,CONSTANT,devTestAsyn,"Test Asyn")
+device(aai,CONSTANT,devTestAsyn,"Test Asyn")
 device(ao,CONSTANT,devTestAsyn,"Test Asyn")
+device(aao,CONSTANT,devTestAsyn,"Test Asyn")
 device(bi,CONSTANT,devTestAsyn,"Test Asyn")
 device(bo,CONSTANT,devTestAsyn,"Test Asyn")
 device(calcout,CONSTANT,devTestAsyn,"Test Asyn")

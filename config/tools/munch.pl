@@ -11,7 +11,7 @@ eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
 #*************************************************************************
 
 # Creates a ctdt.c file of c++ static constructors and destructors.
-#  munch.pl,v 1.3 2002/07/12 21:32:34 jba Exp
+#  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 @ctorlist = ();
 @dtorlist = ();

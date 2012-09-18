@@ -1,12 +1,12 @@
 #*************************************************************************
-# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+# Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
-# CONFIG_ADDONS,v 1.26.2.6 2009/04/24 19:31:56 anj Exp
+# Revision-Id: anj@aps.anl.gov-20111114183307-7ziopjkjj2k97la3
 #
 #	check for add-on CFLAGS and CXXFLAGS
 #
@@ -34,6 +34,7 @@
 #    LIBSRCS       source files for building libraries (deprecated)
 #    PROD_OBJS     object files for building prods
 #    LIB_OBJS      object files for building libraries
+#    USR_OBJS      object files for building libraries and prods
 #    USR_LIBS      libs needed by PROD and TESTPROD and LIBRARY
 #    PROD_LIBS     libs needed by PROD and TESTPROD
 #    LIB_LIBS      libs needed by shared LIBRARY

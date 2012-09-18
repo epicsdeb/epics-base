@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- * osdThread.c,v 1.52.2.19 2008/09/30 16:28:37 jhill Exp
+ * Revision-Id: anj@aps.anl.gov-20111108215715-d8j6l4lycpi3gvvb
  *
  * Author: Jeff Hill
  * 
@@ -34,7 +34,6 @@
 #include "shareLib.h"
 #include "epicsThread.h"
 #include "cantProceed.h"
-#include "errlog.h"
 #include "epicsAssert.h"
 #include "ellLib.h"
 #include "epicsExit.h"
@@ -48,7 +47,7 @@ typedef struct win32ThreadGlobal {
     DWORD tlsIndexThreadLibraryEPICS;
 } win32ThreadGlobal;
 
-typedef struct win32ThreadParam {
+typedef struct epicsThreadOSD {
     ELLNODE node;
     HANDLE handle;
     EPICSTHREADFUNC funptr;
@@ -125,7 +124,7 @@ BOOL WINAPI DllMain (
 #if _WIN32_WINNT >= 0x0501 
         /* 
          * Only in WXP 
-         * Thats a shame becaus ethis is probably much faster
+         * Thats a shame because this is probably much faster
          */
         success = GetModuleHandleEx (
             GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
@@ -269,13 +268,10 @@ static void threadCleanupWIN32 ( void )
         return;
     }
 
-    while ( ( pParm = ( win32ThreadParam * ) ellFirst ( & pGbl->threadList ) ) ) {
+    while ( ( pParm = ( win32ThreadParam * ) 
+        ellFirst ( & pGbl->threadList ) ) ) {
         epicsParmCleanupWIN32 ( pParm );
     }
-
-    TlsFree ( pGbl->tlsIndexThreadLibraryEPICS );
-
-    DeleteCriticalSection ( & pGbl->mutex );
 }
 
 /*
@@ -373,10 +369,10 @@ static unsigned epicsThreadGetOsiPriorityValue ( int osdPriority )
     }
 
     if ( magnitude >= stateCount ) {
-        errlogPrintf ( 
+        fprintf ( stderr,
             "Unrecognized WIN32 thread priority level %d.\n", 
             osdPriority );
-        errlogPrintf ( 
+        fprintf ( stderr,
             "Mapping to EPICS thread priority level epicsThreadPriorityMin.\n" );
         return epicsThreadPriorityMin;
     }
@@ -434,7 +430,7 @@ epicsShareFunc epicsThreadBooleanStatus epicsShareAPI epicsThreadHighestPriority
 
     magnitude = osdPriorityMagFromPriorityOSI ( priority, stateCount );
 
-    if ( magnitude > 1u ) {
+    if ( magnitude > 0u ) {
         *pPriorityJustBelow = osiPriorityMagFromMagnitueOSD ( magnitude - 1u, stateCount );
         status = epicsThreadBooleanStatusSuccess;
     }
@@ -447,17 +443,20 @@ epicsShareFunc epicsThreadBooleanStatus epicsShareAPI epicsThreadHighestPriority
 /*
  * epicsThreadGetStackSize ()
  */
-epicsShareFunc unsigned int epicsShareAPI epicsThreadGetStackSize ( epicsThreadStackSizeClass stackSizeClass ) 
+epicsShareFunc unsigned int epicsShareAPI 
+    epicsThreadGetStackSize ( epicsThreadStackSizeClass stackSizeClass ) 
 {
     static const unsigned stackSizeTable[epicsThreadStackBig+1] = {4000, 6000, 11000};
 
     if (stackSizeClass<epicsThreadStackSmall) {
-        errlogPrintf("epicsThreadGetStackSize illegal argument (too small)");
+        fprintf ( stderr,
+            "epicsThreadGetStackSize illegal argument (too small)");
         return stackSizeTable[epicsThreadStackBig];
     }
 
     if (stackSizeClass>epicsThreadStackBig) {
-        errlogPrintf("epicsThreadGetStackSize illegal argument (too large)");
+        fprintf ( stderr,
+            "epicsThreadGetStackSize illegal argument (too large)");
         return stackSizeTable[epicsThreadStackBig];
     }
 
@@ -627,17 +626,20 @@ epicsShareFunc epicsThreadId epicsShareAPI epicsThreadCreate (const char *pName,
         free ( pParmWIN32 );
         return NULL;
     }
+    
+    EnterCriticalSection ( & pGbl->mutex );
+    ellAdd ( & pGbl->threadList, & pParmWIN32->node );
+    LeaveCriticalSection ( & pGbl->mutex );
 
     wstat =  ResumeThread ( pParmWIN32->handle );
     if (wstat==0xFFFFFFFF) {
+		    EnterCriticalSection ( & pGbl->mutex );
+		    ellDelete ( & pGbl->threadList, & pParmWIN32->node );
+		    LeaveCriticalSection ( & pGbl->mutex );
         CloseHandle ( pParmWIN32->handle ); 
         free ( pParmWIN32 );
         return NULL;
     }
-
-    EnterCriticalSection ( & pGbl->mutex );
-    ellAdd ( & pGbl->threadList, & pParmWIN32->node );
-    LeaveCriticalSection ( & pGbl->mutex );
 
     return ( epicsThreadId ) pParmWIN32;
 }
@@ -954,10 +956,17 @@ static void epicsThreadShowPrivate ( epicsThreadId id, unsigned level )
             (void *) pParm, idForFormat, pParm->epicsPriority,
             epics_GetThreadPriorityAsString ( pParm->handle ),
             epicsThreadIsSuspended ( id ) ? "suspend" : "ok" );
+        if ( level ) {
+            fprintf (epicsGetStdout(), " %-8p %-8p ",
+                (void *) pParm->handle, (void *) pParm->parm );
+        }
     }
     else {
         fprintf (epicsGetStdout(), 
             "NAME            EPICS-ID WIN32-ID EPICS-PRI WIN32-PRI STATE  " );
+        if ( level ) {
+            fprintf (epicsGetStdout(), " HANDLE   FUNCTION PARAMETER" );
+        }
     }
     fprintf (epicsGetStdout(),"\n" );
 }
@@ -997,24 +1006,35 @@ epicsShareFunc void epicsShareAPI epicsThreadShow ( epicsThreadId id, unsigned l
 /*
  * epicsThreadOnce ()
  */
-epicsShareFunc void epicsShareAPI epicsThreadOnceOsd (
+epicsShareFunc void epicsShareAPI epicsThreadOnce (
     epicsThreadOnceId *id, void (*func)(void *), void *arg )
 {
+    static struct epicsThreadOSD threadOnceComplete;
+    #define EPICS_THREAD_ONCE_DONE & threadOnceComplete
     win32ThreadGlobal * pGbl = fetchWin32ThreadGlobal ();
 
     assert ( pGbl );
     
     EnterCriticalSection ( & pGbl->mutex );
 
-    if ( *id == 0 ) {
-        *id = -1;
-        LeaveCriticalSection ( & pGbl->mutex );
-        ( *func ) ( arg );
-        EnterCriticalSection ( & pGbl->mutex );
-        *id = 1;
-    } else
-        assert(*id > 0 /* func() called epicsThreadOnce() with same id */);
-
+    if ( *id != EPICS_THREAD_ONCE_DONE ) {
+        if ( *id == EPICS_THREAD_ONCE_INIT ) { /* first call */
+            *id = epicsThreadGetIdSelf();      /* mark active */
+            LeaveCriticalSection ( & pGbl->mutex );
+            func ( arg );
+            EnterCriticalSection ( & pGbl->mutex );
+            *id = EPICS_THREAD_ONCE_DONE;      /* mark done */
+        } else if ( *id == epicsThreadGetIdSelf() ) {
+            LeaveCriticalSection ( & pGbl->mutex );
+            cantProceed( "Recursive epicsThreadOnce() initialization\n" );
+        } else
+            while ( *id != EPICS_THREAD_ONCE_DONE ) {
+                /* Another thread is in the above func(arg) call. */
+                LeaveCriticalSection ( & pGbl->mutex );
+                epicsThreadSleep ( epicsThreadSleepQuantum() );
+                EnterCriticalSection ( & pGbl->mutex );
+            }
+    }
     LeaveCriticalSection ( & pGbl->mutex );
 }
 

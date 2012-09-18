@@ -1,4 +1,4 @@
-# CONFIG_SITE.Host.hpux-parisc,v 1.1 2002/10/15 14:12:46 lange Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 # hpux-parisc is the new name for hp700
 -include $(EPICS_BASE)/config/CONFIG_SITE.Host.hp700

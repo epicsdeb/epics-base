@@ -1,4 +1,4 @@
-# RULES_PYTHON,v 1.5.2.2 2006/03/29 21:59:14 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 ifdef T_A
 ifeq ($(findstring Host,$(VALID_BUILDS)),Host)

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      epicsMessageQueue.cpp,v 1.1.2.2 2004/08/27 16:04:26 mrk Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  W. Eric Norum
  *              norume@aps.anl.gov

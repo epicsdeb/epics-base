@@ -1,16 +1,9 @@
 
-README,v 1.2 1996/11/22 19:37:51 jhill Exp
+Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 
 README file for the EPICS Channel Access Server
 
 Author Jeff Hill johill@lanl.gov 
-
-README,v
-Revision 1.2  1996/11/22 19:37:51  jhill
-doc
-
-Revision 1.1.1.1  1996/06/20 00:28:06  jhill
-ca server installation
 
 
 Directory Structure

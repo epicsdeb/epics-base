@@ -9,7 +9,7 @@ eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# convertRelease.pl,v 1.1.2.4 2009/06/24 19:27:33 anj Exp
+# Revision-Id: anj@aps.anl.gov-20110713153813-utpd5swcmji6ce4l
 #
 # Convert configure/RELEASE file(s) into something else.
 #
@@ -17,9 +17,9 @@ eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
 use strict;
 
 use FindBin qw($Bin);
-use lib "$Bin/../../lib/perl";
+use lib ("$Bin/../../lib/perl", $Bin);
 
-use Cwd qw(cwd abs_path);
+use Cwd qw(cwd);
 use Getopt::Std;
 use EPICS::Path;
 use EPICS::Release;
@@ -132,7 +132,8 @@ sub binDirs {
 }
 
 #
-# Generate cdCommands file with cd path strings for vxWorks IOCs
+# Generate cdCommands file with cd path strings for vxWorks IOCs and
+# RTEMS IOCs using CEXP (need parentheses around command arguments).
 #
 sub cdCommands {
     die "Architecture not set (use -a option)" unless ($arch);
@@ -143,28 +144,34 @@ sub cdCommands {
     
     my $startup = $cwd;
     $startup =~ s/^$root/$iocroot/o if ($opt_t);
+    $startup =~ s/([\\"])/\\\1/g; # escape back-slashes and double-quotes
     
     print OUT "startup = \"$startup\"\n";
     
     my $ioc = $cwd;
     $ioc =~ s/^.*\///;  # iocname is last component of directory name
     
-    print OUT "putenv \"ARCH=$arch\"\n";
-    print OUT "putenv \"IOC=$ioc\"\n";
+    print OUT "putenv(\"ARCH=$arch\")\n";
+    print OUT "putenv(\"IOC=$ioc\")\n";
     
     foreach my $app (@includes) {
         my $iocpath = my $path = $macros{$app};
         $iocpath =~ s/^$root/$iocroot/o if ($opt_t);
+        $iocpath =~ s/([\\"])/\\\1/g; # escape back-slashes and double-quotes
         my $app_lc = lc($app);
-        print OUT "$app_lc = \"$iocpath\"\n" if (-d $path);
-        print OUT "putenv \"$app=$iocpath\"\n" if (-d $path);
-        print OUT "${app_lc}bin = \"$iocpath/bin/$arch\"\n" if (-d "$path/bin/$arch");
+        print OUT "$app_lc = \"$iocpath\"\n"
+            if (-d $path);
+        print OUT "putenv(\"$app=$iocpath\")\n"
+            if (-d $path);
+        print OUT "${app_lc}bin = \"$iocpath/bin/$arch\"\n"
+            if (-d "$path/bin/$arch");
     }
     close OUT;
 }
 
 #
-# Generate envPaths file with epicsEnvSet commands for other IOCs
+# Generate envPaths file with epicsEnvSet commands for iocsh IOCs.
+# Include parentheses anyway in case CEXP users want to use this.
 #
 sub envPaths {
     die "Architecture not set (use -a option)" unless ($arch);
@@ -182,6 +189,7 @@ sub envPaths {
     foreach my $app (@includes) {
         my $iocpath = my $path = $macros{$app};
         $iocpath =~ s/^$root/$iocroot/o if ($opt_t);
+        $iocpath =~ s/([\\"])/\\\1/g; # escape back-slashes and double-quotes
         print OUT "epicsEnvSet(\"$app\",\"$iocpath\")\n" if (-d $path);
     }
     close OUT;
@@ -203,10 +211,11 @@ sub checkRelease {
         readReleaseFiles($relfile, \%check, \@order, $arch);
         expandRelease(\%check, \@order);
         delete $check{TOP};
+        delete $check{EPICS_HOST_ARCH};
         
         while (my ($parent, $ppath) = each %check) {
             if (exists $macros{$parent} &&
-                abs_path($macros{$parent}) ne abs_path($ppath)) {
+                AbsPath($macros{$parent}) ne AbsPath($ppath)) {
                 print "\n" unless ($status);
                 print "Definition of $parent conflicts with $app support.\n";
                 print "In this application a RELEASE file defines\n";

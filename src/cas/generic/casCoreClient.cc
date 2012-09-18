@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casCoreClient.cc,v 1.37.2.4 2009/07/09 15:27:39 anj Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov

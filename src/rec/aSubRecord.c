@@ -4,7 +4,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/* aSubRecord.c,v 1.1.2.5 2009/07/09 15:27:43 anj Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  * 
  * Record Support Routines for the Array Subroutine Record type,
  * derived from Andy Foster's genSub record, with some features
@@ -109,6 +109,7 @@ static const char *Ofldnames[] = {
 
 static long init_record(aSubRecord *prec, int pass)
 {
+    STATIC_ASSERT(sizeof(prec->onam)==sizeof(prec->snam));
     GENFUNCPTR     pfunc;
     long           status;
     int            i;
@@ -210,6 +211,8 @@ static long init_record(aSubRecord *prec, int pass)
             return S_db_BadSub;
         }
     }
+    strcpy(prec->onam, prec->snam);
+    prec->oval = prec->val;
     return 0;
 }
 

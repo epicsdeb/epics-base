@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *	    osiSock.c,v 1.10.2.3 2004/10/19 18:21:02 jhill Exp
+ *	    Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      socket support library generic code
  *

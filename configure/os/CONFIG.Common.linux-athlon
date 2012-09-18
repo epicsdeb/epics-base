@@ -1,6 +1,6 @@
 # CONFIG.Common.linux-athlon
 #
-# CONFIG.Common.linux-athlon,v 1.1.2.4 2007/12/11 20:58:26 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for linux-athlon target builds

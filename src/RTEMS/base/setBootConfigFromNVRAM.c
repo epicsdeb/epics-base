@@ -1,8 +1,16 @@
+/*************************************************************************\
+* Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
+*     National Laboratory.
+* EPICS BASE is distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution.
+\*************************************************************************/
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <fcntl.h> /* for open() */
+#include <fcntl.h>
+#include <unistd.h>
 #include <rtems/rtems_bsdnet.h>
 #include <bsp.h>
 #include <string.h>
@@ -125,12 +133,13 @@ motScriptParm(const char *mot_script_boot, char parm)
     int l;
 
     while (*mot_script_boot != '\0') {
-        if (isspace(*mot_script_boot)
+        if (isspace(*(unsigned char *)mot_script_boot)
          && (*(mot_script_boot+1) == '-')
          && (*(mot_script_boot+2) == parm)) {
             mot_script_boot += 3;
             cp = mot_script_boot;
-            while ((*mot_script_boot != '\0') && !isspace(*mot_script_boot))
+            while ((*mot_script_boot != '\0') &&
+                   !isspace(*(unsigned char *)mot_script_boot))
                 mot_script_boot++;
             l = mot_script_boot - cp;
             ret = malloc(l+1);

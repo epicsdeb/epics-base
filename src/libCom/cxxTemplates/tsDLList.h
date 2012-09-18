@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      tsDLList.h,v 1.51.2.2 2004/01/09 09:38:05 lange Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      type safe doubly linked list templates
  *

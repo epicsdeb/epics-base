@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS osdEvent.h
- *	osdEvent.h,v 1.2 2002/07/12 21:34:45 jba Exp
+ *	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055

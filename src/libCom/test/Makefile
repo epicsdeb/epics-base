@@ -37,6 +37,11 @@ epicsEllTest_SRCS += epicsEllTest.c
 testHarness_SRCS += epicsEllTest.c
 TESTS += epicsEllTest
 
+TESTPROD_HOST += epicsErrlogTest
+epicsErrlogTest_SRCS += epicsErrlogTest.c
+testHarness_SRCS += epicsErrlogTest.c
+TESTS += epicsErrlogTest
+
 TESTPROD_HOST += epicsStdioTest
 epicsStdioTest_SRCS += epicsStdioTest.c
 testHarness_SRCS += epicsStdioTest.c
@@ -56,6 +61,11 @@ TESTPROD_HOST += epicsThreadTest
 epicsThreadTest_SRCS += epicsThreadTest.cpp
 testHarness_SRCS += epicsThreadTest.cpp
 TESTS += epicsThreadTest
+
+TESTPROD_HOST += epicsThreadOnceTest
+epicsThreadOnceTest_SRCS += epicsThreadOnceTest.c
+testHarness_SRCS += epicsThreadOnceTest.c
+TESTS += epicsThreadOnceTest
 
 TESTPROD_HOST += epicsThreadPriorityTest
 epicsThreadPriorityTest_SRCS += epicsThreadPriorityTest.cpp
@@ -102,11 +112,6 @@ epicsExceptionTest_SRCS += epicsExceptionTest.cpp
 testHarness_SRCS += epicsExceptionTest.cpp
 TESTS += epicsExceptionTest
 
-TESTPROD_HOST += epicsMessageQueueTest
-epicsMessageQueueTest_SRCS += epicsMessageQueueTest.cpp
-testHarness_SRCS += epicsMessageQueueTest.cpp
-TESTS += epicsMessageQueueTest
-
 TESTPROD_HOST += macEnvExpandTest
 macEnvExpandTest_SRCS += macEnvExpandTest.c
 testHarness_SRCS += macEnvExpandTest.c
@@ -130,6 +135,11 @@ blockingSockTest_SYS_LIBS_WIN32 = ws2_32 advapi32 user32
 blockingSockTest_SYS_LIBS_solaris = socket
 TESTS += blockingSockTest
 
+TESTPROD_HOST += epicsMessageQueueTest
+epicsMessageQueueTest_SRCS += epicsMessageQueueTest.cpp
+testHarness_SRCS += epicsMessageQueueTest.cpp
+TESTS += epicsMessageQueueTest
+
 
 # The testHarness runs all the test programs in a known working order.
 testHarness_SRCS += epicsRunLibComTests.c
@@ -137,16 +147,18 @@ testHarness_SRCS += epicsRunLibComTests.c
 PROD_vxWorks = vxTestHarness
 vxTestHarness_SRCS += $(testHarness_SRCS)
 vxTestHarness_OBJS += $(INSTALL_BIN)/vxComLibrary
+TESTSPEC_vxWorks = vxTestHarness.munch; epicsRunLibComTests
 
 PROD_RTEMS += rtemsTestHarness
 rtemsTestHarness_SRCS += rtemsTestHarness.c
 rtemsTestHarness_SRCS += $(testHarness_SRCS)
-
+TESTSPEC_RTEMS = rtemsTestHarness.boot; epicsRunLibComTests
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
 
-# The following are not test programs, they measure performance
+# The following are not test programs, they measure performance.
+# They should not be added to TESTS or to epicsRunLibComTests.c
 
 TESTPROD_HOST += epicsThreadPerform
 epicsThreadPerform_SRCS += epicsThreadPerform.cpp

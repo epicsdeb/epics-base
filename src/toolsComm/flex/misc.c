@@ -36,7 +36,7 @@
 
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/misc.c,v 1.3.2.3 2009/06/03 15:11:30 anj Exp (LBL)";
+    "@(#) Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd (LBL)";
 #endif
 
 #include <ctype.h>
@@ -375,11 +375,7 @@ void flexfatal(char *msg)
 /* include sys/types.h to use time_t and make lint happy */
 
 #ifndef MS_DOS
-#ifndef VMS
 #include <sys/types.h>
-#else
-#include <types.h>
-#endif
 #endif
 
 #ifdef MS_DOS

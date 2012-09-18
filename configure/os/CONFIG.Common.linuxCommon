@@ -1,6 +1,6 @@
 # CONFIG.Common.linuxCommon
 #
-# CONFIG.Common.linuxCommon,v 1.1.2.8 2009/05/07 16:00:16 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for linux target builds
@@ -28,13 +28,19 @@ STATIC_LDFLAGS_NO=
 STATIC_LDLIBS_YES= -Wl,-Bdynamic
 
 # Set runtime path for shared libraries
-SHRLIBDIR_LDFLAGS += $(SHRLIB_DEPLIB_DIRS:%=-Wl,-rpath,%)
+SHRLIBDIR_RPATH_LDFLAGS_YES += $(SHRLIB_DEPLIB_DIRS:%=-Wl,-rpath,%)
+SHRLIBDIR_LDFLAGS += $(SHRLIBDIR_RPATH_LDFLAGS_$(LINKER_USE_RPATH))
 
 # Set runtime path for products
-PRODDIR_LDFLAGS += $(PROD_DEPLIB_DIRS:%=-Wl,-rpath,%)
+PRODDIR_RPATH_LDFLAGS_YES += $(PROD_DEPLIB_DIRS:%=-Wl,-rpath,%)
+PRODDIR_LDFLAGS += $(PRODDIR_RPATH_LDFLAGS_$(LINKER_USE_RPATH))
 
-#  Definitions used when COMMANDLINE_LIBRARY is READLINE
-LDLIBS_READLINE = -lreadline -lncurses
+# Link libraries controlled by COMMANDLINE_LIBRARY
+# The newest Linux versions only need readline, older ones need both
+# readline and ncurses, and the oldest need readline and curses
+LDLIBS_READLINE = -lreadline
+LDLIBS_READLINE_NCURSES = -lreadline -lncurses
+LDLIBS_READLINE_CURSES = -lreadline -lcurses
 
 #--------------------------------------------------
 # Allow site overrides

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      casChannel.cc,v 1.16.2.1 2009/08/03 22:09:50 jhill Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov

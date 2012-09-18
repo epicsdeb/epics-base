@@ -9,7 +9,7 @@
 \*************************************************************************/
 /* fdmgr.h
  *
- *      share/epicsH/fdmgr.h,v 1.13.2.1 2009/04/27 18:31:50 anj Exp
+ *      share/epicsH/Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Header file associated with a file descriptor manager 
  *	for use with the UNIX system call select

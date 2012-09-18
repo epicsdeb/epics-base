@@ -1,5 +1,5 @@
 #*************************************************************************
-# Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
+# Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  CONFIG_BASE_VERSION,v 1.10.2.32 2009/08/28 18:47:36 jba Exp
+#  Revision-Id: jba@aps.anl.gov-20111212200932-ms3d0pzp9t1uojxe
 #
 #  EPICS Version information
 #
@@ -19,28 +19,30 @@
 
 BASE_3_14=YES
 
-# EPICS_VERSION must be a number >0 and <256 
+# EPICS_VERSION must be a number >0 and <256
 EPICS_VERSION = 3
 
-# EPICS_REVISION must be a number >=0 and <256 
+# EPICS_REVISION must be a number >=0 and <256
 EPICS_REVISION = 14
 
-# EPICS_MODIFICATION must be a number >=0 and <256 
-EPICS_MODIFICATION = 11
+# EPICS_MODIFICATION must be a number >=0 and <256
+EPICS_MODIFICATION = 12
 
 # EPICS_PATCH_LEVEL must be a number  (win32 resource file requirement)
 # Not included if zero
-EPICS_PATCH_LEVEL = 0
+EPICS_PATCH_LEVEL = 2
 
-# This will end in -CVS between official releases
-#EPICS_CVS_SNAPSHOT=-CVS
-#EPICS_CVS_SNAPSHOT=-pre1
-#EPICS_CVS_SNAPSHOT=-pre1-CVS
-#EPICS_CVS_SNAPSHOT=-RC1
-#EPICS_CVS_SNAPSHOT=-RC1-CVS
-#EPICS_CVS_SNAPSHOT=-RC2
-#EPICS_CVS_SNAPSHOT=-RC2-CVS
-EPICS_CVS_SNAPSHOT=
+# This will end in -DEV between official releases
+#EPICS_DEV_SNAPSHOT=-DEV
+#EPICS_DEV_SNAPSHOT=-pre1
+#EPICS_DEV_SNAPSHOT=-pre1-DEV
+#EPICS_DEV_SNAPSHOT=-pre2
+#EPICS_DEV_SNAPSHOT=-pre2-DEV
+#EPICS_DEV_SNAPSHOT=-rc1
+#EPICS_DEV_SNAPSHOT=-rc1-DEV
+#EPICS_DEV_SNAPSHOT=-rc2
+#EPICS_DEV_SNAPSHOT=-rc2-DEV
+EPICS_DEV_SNAPSHOT=
 
 # No changes should be needed below here
 
@@ -53,8 +55,12 @@ ifneq ($(strip $(EPICS_SITE_VERSION)),)
 endif
 
 EPICS_SHORT_VERSION=$(EPICS_VERSION).$(EPICS_REVISION).$(EPICS_MODIFICATION)$(EPICS_PATCH_VSTRING)
-EPICS_VERSION_NUMBER=$(EPICS_SHORT_VERSION)$(EPICS_CVS_SNAPSHOT)$(EPICS_SITE_VSTRING)
+EPICS_VERSION_NUMBER=$(EPICS_SHORT_VERSION)$(EPICS_DEV_SNAPSHOT)$(EPICS_SITE_VSTRING)
 EPICS_VERSION_STRING="EPICS Version $(EPICS_VERSION_NUMBER)"
 
-CVS_DATE="\$2009/08/28 18:47:36$"
-CVS_TAG="\$R3-14-11$"
+COMMIT_DATE="\$Date: Mon 2011-12-12 14:09:32 -0600$"
+
+# Provide these in case anyone is still using the old names
+EPICS_CVS_SNAPSHOT=$(EPICS_DEV_SNAPSHOT)
+CVS_DATE=$(COMMIT_DATE)
+CVS_TAG="-no-tags-"

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      channelDestroyEvent.cpp,v 1.3 2003/03/19 18:00:33 jhill Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov

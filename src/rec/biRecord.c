@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* biRecord.c,v 1.16.2.4 2009/04/02 21:40:36 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recBi.c - Record Support Routines for Binary Input records */
 /*
@@ -110,6 +110,9 @@ static long init_record(biRecord *prec, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(prec))) return(status);
     }
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
     return(0);
 }
 

@@ -1,6 +1,6 @@
 # CONFIG.Common.vxWorks-68040-debug
 #
-# CONFIG.Common.vxWorks-68040-debug,v 1.1.2.1 2007/03/09 21:34:51 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for vxWorks-68040-debug target archs

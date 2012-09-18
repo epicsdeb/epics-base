@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      caHdrLargeArray.h,v 1.1 2003/02/12 19:09:29 jhill Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -32,7 +32,7 @@
 #   include "shareLib.h"
 #endif
 
-static const unsigned char CA_MINOR_PROTOCOL_REVISION = 11;
+static const unsigned char CA_MINOR_PROTOCOL_REVISION = 12;
 
 typedef ca_uint32_t caResId;
 

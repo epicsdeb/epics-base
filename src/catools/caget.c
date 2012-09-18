@@ -87,7 +87,10 @@ static void usage (void)
     "  -e <nr>: Use %%e format, with a precision of <nr> digits\n"
     "  -f <nr>: Use %%f format, with a precision of <nr> digits\n"
     "  -g <nr>: Use %%g format, with a precision of <nr> digits\n"
-    "  -s:      Get value as string (may honour server-side precision)\n"
+    "  -s:      Get value as string (honors server-side precision)\n"
+    "  -lx:     Round to long integer and print as hex number\n"
+    "  -lo:     Round to long integer and print as octal number\n"
+    "  -lb:     Round to long integer and print as binary number\n"
     "Integer number format:\n"
     "  Default: Print as decimal number\n"
     "  -0x: Print as hex number\n"
@@ -123,7 +126,7 @@ static void event_handler (evargs args)
         ppv->dbrType = args.type;
         ppv->value   = calloc(1, dbr_size_n(args.type, args.count));
         memcpy(ppv->value, args.dbr, dbr_size_n(args.type, args.count));
-        ppv->onceConnected = 1;
+        ppv->nElems = args.count;
         nRead++;
     }
 }
@@ -155,12 +158,13 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
     int n, result;
 
     for (n = 0; n < nPvs; n++) {
+        unsigned long nElems;
 
                                 /* Set up pvs structure */
                                 /* -------------------- */
 
                                 /* Get natural type and array count */
-        pvs[n].nElems  = ca_element_count(pvs[n].chid);
+        nElems         = ca_element_count(pvs[n].chid);
         pvs[n].dbfType = ca_field_type(pvs[n].chid);
         pvs[n].dbrType = dbrType;
 
@@ -179,12 +183,6 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
                 pvs[n].dbrType = DBR_TIME_STRING;
             }
         }
-                                /* Adjust array count */
-        if (reqElems == 0 || pvs[n].nElems < reqElems){
-            pvs[n].reqElems = pvs[n].nElems; /* Use full number of points */
-        } else {
-            pvs[n].reqElems = reqElems;      /* Limit to specified number */
-        }
 
                                 /* Issue CA request */
                                 /* ---------------- */
@@ -194,21 +192,24 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
             nConn++;
             pvs[n].onceConnected = 1;
             if (request == callback)
-            {                          /* Event handler will allocate value */
+            {
+                /* Event handler will allocate value and set nElems */
+                pvs[n].reqElems = reqElems > nElems ? nElems : reqElems;
                 result = ca_array_get_callback(pvs[n].dbrType,
                                                pvs[n].reqElems,
                                                pvs[n].chid,
                                                event_handler,
                                                (void*)&pvs[n]);
             } else {
-                                       /* Allocate value structure */
-                pvs[n].value = calloc(1, dbr_size_n(pvs[n].dbrType, pvs[n].reqElems));
-                if(!pvs[n].value) {
-                    fprintf(stderr,"Allocation failed\n");
+                /* We allocate value structure and set nElems */
+                pvs[n].nElems = reqElems && reqElems < nElems ? reqElems : nElems;
+                pvs[n].value = calloc(1, dbr_size_n(pvs[n].dbrType, pvs[n].nElems));
+                if (!pvs[n].value) {
+                    fprintf(stderr,"Memory allocation failed\n");
                     return 1;
                 }
                 result = ca_array_get(pvs[n].dbrType,
-                                      pvs[n].reqElems,
+                                      pvs[n].nElems,
                                       pvs[n].chid,
                                       pvs[n].value);
             }
@@ -253,7 +254,7 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
 
         switch (format) {
         case plain:             /* Emulate old caget behaviour */
-            if (pvs[n].reqElems <= 1 && fieldSeparator == ' ') printf("%-30s", pvs[n].name);
+            if (pvs[n].nElems <= 1 && fieldSeparator == ' ') printf("%-30s", pvs[n].name);
             else                                               printf("%s", pvs[n].name);
             printf("%c", fieldSeparator);
         case terse:
@@ -267,7 +268,7 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
                 printf("*** no data available (timeout)\n");
             else
             {
-                if (charArrAsStr && dbr_type_is_CHAR(pvs[n].dbrType) && (reqElems || pvs[n].reqElems > 1)) {
+                if (charArrAsStr && dbr_type_is_CHAR(pvs[n].dbrType) && (reqElems || pvs[n].nElems > 1)) {
                     dbr_char_t *s = (dbr_char_t*) dbr_value_ptr(pvs[n].value, pvs[n].dbrType);
                     int dlen = epicsStrnEscapedFromRawSize((char*)s, strlen((char*)s));
                     char *d = calloc(dlen+1, sizeof(char));
@@ -279,8 +280,8 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
                         fprintf(stderr,"Failed to allocate space for escaped string\n");
                     }
                 } else {
-                    if (reqElems || pvs[n].nElems > 1) printf("%lu%c", pvs[n].reqElems, fieldSeparator);
-                    for (i=0; i<pvs[n].reqElems; ++i) {
+                    if (reqElems || pvs[n].nElems > 1) printf("%lu%c", pvs[n].nElems, fieldSeparator);
+                    for (i=0; i<pvs[n].nElems; ++i) {
                         if (i) printf ("%c", fieldSeparator);
                         printf("%s", val2str(pvs[n].value, pvs[n].dbrType, i));
                     }
@@ -312,8 +313,8 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
                 else {
                     printf("    Element count:    %lu\n"
                            "    Value:            ",
-                           pvs[n].reqElems);
-                    if (charArrAsStr && dbr_type_is_CHAR(pvs[n].dbrType) && (reqElems || pvs[n].reqElems > 1)) {
+                           pvs[n].nElems);
+                    if (charArrAsStr && dbr_type_is_CHAR(pvs[n].dbrType) && (reqElems || pvs[n].nElems > 1)) {
                         dbr_char_t *s = (dbr_char_t*) dbr_value_ptr(pvs[n].value, pvs[n].dbrType);
                         int dlen = epicsStrnEscapedFromRawSize((char*)s, strlen((char*)s));
                         char *d = calloc(dlen+1, sizeof(char));
@@ -325,7 +326,7 @@ static int caget (pv *pvs, int nPvs, RequestT request, OutputT format,
                             fprintf(stderr,"Failed to allocate space for escaped string\n");
                         }
                     } else {
-                        for (i=0; i<pvs[n].reqElems; ++i) {
+                        for (i=0; i<pvs[n].nElems; ++i) {
                             if (i) printf ("%c", fieldSeparator);
                             printf("%s", val2str(pvs[n].value, pvs[n].dbrType, i));
                         }
@@ -372,10 +373,11 @@ static void complainIfNotPlainAndSet (OutputT *current, const OutputT requested)
 
 int main (int argc, char *argv[])
 {
-    int n = 0;
+    int n;
     int result;                 /* CA result */
     OutputT format = plain;     /* User specified format */
     RequestT request = get;     /* User specified request type */
+    IntFormatT outType;         /* Output type */
 
     int count = 0;              /* 0 = not specified by -# option */
     int opt;                    /* getopt() current option */
@@ -383,11 +385,11 @@ int main (int argc, char *argv[])
     int digits = 0;             /* getopt() no. of float digits */
 
     int nPvs;                   /* Number of PVs */
-    pv* pvs = 0;                /* Array of PV structures */
+    pv* pvs;                    /* Array of PV structures */
 
-    setvbuf(stdout,NULL,_IOLBF,BUFSIZ);    /* Set stdout to line buffering */
+    LINE_BUFFER(stdout);        /* Configure stdout buffering */
 
-    while ((opt = getopt(argc, argv, ":taicnhsSe:f:g:#:d:0:w:p:F:")) != -1) {
+    while ((opt = getopt(argc, argv, ":taicnhsSe:f:g:l:#:d:0:w:p:F:")) != -1) {
         switch (opt) {
         case 'h':               /* Print usage */
             usage();
@@ -472,15 +474,24 @@ int main (int argc, char *argv[])
                             "out of range - ignored.\n", digits, opt);
             }
             break;
+        case 'l':               /* Convert to long and use integer format */
         case '0':               /* Select integer format */
-            type = DBR_LONG;
             switch ((char) *optarg) {
-            case 'x': outType = hex; break;    /* 0x print Hex */
-            case 'b': outType = bin; break;    /* 0b print Binary */
-            case 'o': outType = oct; break;    /* 0o print Octal */
+            case 'x': outType = hex; break;    /* x print Hex */
+            case 'b': outType = bin; break;    /* b print Binary */
+            case 'o': outType = oct; break;    /* o print Octal */
             default :
+                outType = dec;
                 fprintf(stderr, "Invalid argument '%s' "
-                        "for option '-0' - ignored.\n", optarg);
+                        "for option '-%c' - ignored.\n", optarg, opt);
+            }
+            if (outType != dec) {
+              if (opt == '0') {
+                type = DBR_LONG;
+                outTypeI = outType;
+              } else {
+                outTypeF = outType;
+              }
             }
             break;
         case 'F':               /* Store this for output and tool_lib formatting */
@@ -514,7 +525,7 @@ int main (int argc, char *argv[])
     result = ca_context_create(ca_disable_preemptive_callback);
     if (result != ECA_NORMAL) {
         fprintf(stderr, "CA error %s occurred while trying "
-                "to start channel access '%s'.\n", ca_message(result), pvs[n].name);
+                "to start channel access.\n", ca_message(result));
         return 1;
     }
                                 /* Allocate PV structure array */

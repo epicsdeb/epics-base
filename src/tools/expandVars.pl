@@ -6,13 +6,13 @@
 # Author: Andrew Johnson <anj@aps.anl.gov>
 # Date: 10 February 2005
 #
-# expandVars.pl,v 1.1.2.1 2008/09/23 22:13:50 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101026142747-yfjkhakzmp4rnj0g
 #
 
 use strict;
 
 use FindBin qw($Bin);
-use lib "$Bin/../../lib/perl";
+use lib ("$Bin/../../lib/perl", $Bin);
 
 use EPICS::Getopts;
 use EPICS::Path;

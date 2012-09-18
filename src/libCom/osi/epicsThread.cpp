@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// epicsThread.cpp,v 1.16.2.31 2009/08/24 17:08:41 jhill Exp
+// Revision-Id: johill@lanl.gov-20110115010153-9kqbkxz263lpqcf0
 //
 // Author: Jeff Hill
 //
@@ -169,6 +169,8 @@ bool epicsThread::exitWait ( const double delay ) throw ()
             "epicsThread::exitWait()\n" );
         epicsThreadSleep ( epicsMin ( delay, 5.0 ) );
     }
+    // the event mechanism is used for other purposes
+    this->event.signal ();
     return this->terminated;
 }
 

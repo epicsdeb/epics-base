@@ -11,7 +11,7 @@
 // Author:	Jim Kowalkowski
 // Date:	3/97
 //
-// gddErrorCodes.cc,v 1.4 2002/07/15 20:34:12 jba Exp
+// Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 //
 
 // -------------------------- Error messages -------------------------

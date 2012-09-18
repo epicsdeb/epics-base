@@ -45,7 +45,7 @@ char copyright[] =
 /*
 #ifndef lint
 static char rcsid[] =
-    "@(#) /usr/local/epicsmgr/cvsroot/epics/base/src/toolsComm/flex/main.c,v 1.3.2.4 2009/07/22 20:37:32 jba Exp (LBL)";
+    "@(#) Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd (LBL)";
 #endif
 
 #include "flexdef.h"
@@ -380,11 +380,7 @@ void flexend(int status)
 	fprintf( stderr, "  %d total table entries needed\n", tblsiz );
 	}
 
-#ifndef VMS
     exit( status );
-#else
-    exit( status + 1 );
-#endif
 }
 
 

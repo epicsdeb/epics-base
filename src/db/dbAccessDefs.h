@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbAccessDefs.h	*/
-/* dbAccessDefs.h,v 1.12.2.9 2009/04/03 20:53:59 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 #ifndef INCdbAccessDefsh
 #define INCdbAccessDefsh
@@ -216,7 +216,7 @@ struct dbr_alDouble     {DBRalDouble};
       ? 0 \
       : ( ( (struct dbAddr *)( (PLNK)->value.pv_link.pvt) ) ) )
 #define dbGetSevr(PLINK,PSEVERITY) \
-    dbGetAlarm((PLINK),NULL,(PSEVERITY));
+    dbGetAlarm((PLINK),NULL,(PSEVERITY))
 
 epicsShareFunc long epicsShareAPI dbPutSpecial(struct dbAddr *paddr,int pass);
 epicsShareFunc struct rset * epicsShareAPI dbGetRset(const struct dbAddr *paddr);

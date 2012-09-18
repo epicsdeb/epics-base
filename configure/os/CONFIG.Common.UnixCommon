@@ -1,6 +1,6 @@
 # CONFIG.Common.UnixCommon
 #
-# CONFIG.Common.UnixCommon,v 1.18.2.15 2009/08/10 21:50:11 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 #  Contains definitions common to all Unix target archs
 #

@@ -5,8 +5,7 @@
 *     Operator of Los Alamos National Laboratory.
 * Copyright (c) 2002 Berliner Elektronenspeicherringgesellschaft fuer
 *     Synchrotronstrahlung.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
@@ -50,6 +49,13 @@
 #define DEFAULT_CA_PRIORITY 0  /* Default CA priority */
 #define DEFAULT_TIMEOUT 1.0     /* Default CA timeout */
 
+#ifndef _WIN32
+#  define LINE_BUFFER(stream) setvbuf(stream, NULL, _IOLBF, BUFSIZ)
+#else
+/* Windows doesn't support line mode, turn buffering off completely */
+#  define LINE_BUFFER(stream) setvbuf(stream, NULL, _IONBF, 0)
+#endif
+
 
 /* Type of timestamp */
 typedef enum { absolute, relative, incremental, incrementalByChan } TimeT;
@@ -64,8 +70,8 @@ typedef struct
     chid  chid;
     long  dbfType;
     long  dbrType;
-    unsigned long nElems;
-    unsigned long reqElems;
+    unsigned long nElems;       // True length of data in value
+    unsigned long reqElems;     // Requested length of data
     int status;
     void* value;
     epicsTimeStamp tsPreviousC;
@@ -78,7 +84,8 @@ typedef struct
 extern TimeT tsType;        /* Timestamp type flag (-t option) */
 extern int tsSrcServer;     /* Timestamp source flag (-t option) */
 extern int tsSrcClient;     /* Timestamp source flag (-t option) */
-extern IntFormatT outType;  /* Flag used for -0.. output format option */
+extern IntFormatT outTypeI; /* Flag used for -0.. output format option */
+extern IntFormatT outTypeF; /* Flag used for -l.. output format option */
 extern int enumAsNr;        /* Used for -n option (get DBF_ENUM as number) */
 extern int charArrAsStr;    /* used for -S option - treat char array as (long) string */
 extern double caTimeout;    /* Wait time default (see -w option) */

@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* dbStaticLib.c,v 1.60.2.29 2009/08/03 22:22:45 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20111129221419-re5dzg24xgranr6t */
 
 #include <stdio.h>
 #include <errno.h>
@@ -277,6 +277,19 @@ static long setLinkType(DBENTRY *pdbentry)
     plink = (DBLINK *)pdbentry->pfield;
     if (plink->type == link_type) goto done;
 
+    if (plink->text)
+    {
+        /* re-parse link text when DTYP has changed */
+        char * link_text;
+        link_text = plink->text;
+        plink->text = NULL;
+        dbFreeLinkContents(plink);
+        plink->type = link_type;
+        dbPutString(pdbentry, link_text);
+        free(link_text);
+        goto done;
+    }
+
     type = plink->type;
     if ((type == CONSTANT || type == PV_LINK || type == DB_LINK || type == CA_LINK) &&
 	(link_type == CONSTANT || link_type == PV_LINK)) goto done;
@@ -331,6 +344,7 @@ void dbFreeLinkContents(struct link *plink)
 	     epicsPrintf("dbFreeLink called but link type unknown\n");
     }
     if(parm && (parm != pNullString)) free((void *)parm);
+    if(plink->text) free(plink->text);
     memset((char *)plink,0,sizeof(struct link));
 }
 
@@ -516,14 +530,14 @@ dbDeviceMenu *dbGetDeviceMenu(DBENTRY *pdbentry)
 /* Beginning of Public Routines */
 
 #define INC_SIZE	256
-void epicsShareAPI dbCatString(char **string,int *stringLength,char *new,char *separator)
+void epicsShareAPI dbCatString(char **string,int *stringLength,char *src,char *separator)
 {
     if((*string==NULL)
-    || ((strlen(*string)+strlen(new)+2) > (size_t)*stringLength)) {
+    || ((strlen(*string)+strlen(src)+2) > (size_t)*stringLength)) {
 	char	*newString;
 	size_t	size;
 
-	size = strlen(new);
+        size = strlen(src);
 	if(*string) size += strlen(*string);
 	/*Make size multiple of INC_SIZE*/
 	size = ((size + 2 + INC_SIZE)/INC_SIZE) * INC_SIZE;
@@ -538,8 +552,8 @@ void epicsShareAPI dbCatString(char **string,int *stringLength,char *new,char *s
 	strcat(*string,separator);
 	*stringLength += strlen(separator);
     }
-    strcat(*string,new);
-    *stringLength += strlen(new);
+    strcat(*string,src);
+    *stringLength += strlen(src);
 }
 
 dbBase * epicsShareAPI dbAllocBase(void)
@@ -2224,6 +2238,8 @@ long epicsShareAPI dbPutString(DBENTRY *pdbentry,const char *pstring)
 		    errMessage(status,"in dbPutString from setLinkType");
 		    return status;
 		}
+                /* store link text in case DTYP changes later */
+                plink->text = epicsStrDup(pstring);
 	    }
 	    if (strlen(pstring) >= sizeof(string)) {
 	        status = S_dbLib_badField;
@@ -3900,7 +3916,7 @@ void  epicsShareAPI dbDumpField(
 	    else
 		printf("\t     field_type: %s\n", pamapdbfType[j].strvalue);
 	    printf("\tprocess_passive: %hd\n",pdbFldDes->process_passive);
-	    printf("\t           base: %hd\n",pdbFldDes->base);
+	    printf("\t           base: %d\n",pdbFldDes->base);
 	    if(!pdbFldDes->promptgroup) {
 		printf("\t    promptgroup: %d\n",pdbFldDes->promptgroup);
 	    } else {
@@ -3913,7 +3929,7 @@ void  epicsShareAPI dbDumpField(
 		}
 	    }
 	    printf("\t       interest: %hd\n", pdbFldDes->interest);
-	    printf("\t       as_level: %hd\n",pdbFldDes->as_level);
+	    printf("\t       as_level: %d\n",pdbFldDes->as_level);
             printf("\t        initial: %s\n",
                 (pdbFldDes->initial ? pdbFldDes->initial : ""));
 	    if(pdbFldDes->field_type==DBF_MENU) {

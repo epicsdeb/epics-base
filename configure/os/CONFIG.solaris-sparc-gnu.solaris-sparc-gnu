@@ -1,6 +1,6 @@
 # CONFIG.solaris-sparc-gnu.solaris-sparc-gnu
 #
-# CONFIG.solaris-sparc-gnu.solaris-sparc-gnu,v 1.10.2.12 2009/07/09 21:53:27 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for solaris-sparc gnu compiler host - solaris-sparc gnu compiler target builds

@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS startup task for EPICS
- *  rtems_init.c,v 1.15.2.43 2008/10/11 16:40:45 norume Exp
+ *  Revision-Id: anj@aps.anl.gov-20110405222154-yxqbrt7rvbn21o5z
  *      Author: W. Eric Norum
  *              eric.norum@usask.ca
  *              (306) 966-5394
@@ -169,12 +169,57 @@ initialize_local_filesystem(char **argv)
     return 0;
 }
 
+#ifndef OMIT_NFS_SUPPORT
+#if __RTEMS_MAJOR__>4 || \
+   (__RTEMS_MAJOR__==4 && __RTEMS_MINOR__>9) || \
+   (__RTEMS_MAJOR__==4 && __RTEMS_MINOR__==9 && __RTEMS_REVISION__==99)
+static int
+nfsMount(char *uidhost, char *path, char *mntpoint)
+{
+    int   devl = strlen(uidhost) + strlen(path) + 2;
+    char *dev;
+    int   rval = -1;
+
+    if ((dev = malloc(devl)) == NULL) {
+        fprintf(stderr,"nfsMount: out of memory\n");
+        return -1;
+    }
+    sprintf(dev, "%s:%s", uidhost, path);
+    printf("Mount %s on %s\n", dev, mntpoint);
+    if (rtems_mkdir(mntpoint, S_IRWXU | S_IRWXG | S_IRWXO))
+        printf("Warning -- unable to make directory \"%s\"\n", mntpoint);
+    if (mount(dev, mntpoint, RTEMS_FILESYSTEM_TYPE_NFS,
+                             RTEMS_FILESYSTEM_READ_WRITE, NULL)) {
+        perror("mount failed");
+    }
+    else {
+        rval = 0;
+    }
+    free(dev);
+    return rval;
+}
+#define NFS_INIT
+#else
+#define NFS_INIT    rpcUdpInit(); nfsInit(0,0);
+#endif
+#endif
+
 static void
 initialize_remote_filesystem(char **argv, int hasLocalFilesystem)
 {
 #ifdef OMIT_NFS_SUPPORT
     printf ("***** Initializing TFTP *****\n");
+#if __RTEMS_MAJOR__>4 || \
+   (__RTEMS_MAJOR__==4 && __RTEMS_MINOR__>9) || \
+   (__RTEMS_MAJOR__==4 && __RTEMS_MINOR__==9 && __RTEMS_REVISION__==99)
+    mount_and_make_target_path(NULL,
+                               "/TFTP",
+                               RTEMS_FILESYSTEM_TYPE_TFTPFS,
+                               RTEMS_FILESYSTEM_READ_WRITE,
+                               NULL);
+#else
     rtems_bsdnet_initialize_tftp_filesystem ();
+#endif
     if (!hasLocalFilesystem) {
         char *path;
         int pathsize = 200;
@@ -198,8 +243,7 @@ initialize_remote_filesystem(char **argv, int hasLocalFilesystem)
     int l = 0;
 
     printf ("***** Initializing NFS *****\n");
-    rpcUdpInit();
-    nfsInit(0,0);
+    NFS_INIT
     if (env_nfsServer && env_nfsPath && env_nfsMountPoint) {
         server_name = env_nfsServer;
         server_path = env_nfsPath;

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* mbbiRecord.c,v 1.16.2.5 2009/04/02 21:40:37 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  *      Original Author: Bob Dalesio
  *      Date:            5-9-88
@@ -135,6 +135,9 @@ static long init_record(mbbiRecord *prec, int pass)
 	if((status=(*pdset->init_record)(prec))) return(status);
     }
     init_common(prec);
+    prec->mlst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
     return(0);
 }
 

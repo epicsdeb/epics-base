@@ -1,6 +1,6 @@
 #  CONFIG.linux-x86-borland.linux-x86-borland
 #
-# CONFIG.linux-x86-borland.linux-x86-borland,v 1.1.2.7 2009/04/24 19:31:57 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 # Definitions for linux-x86-borland host - linux-x86-borland target builds
 # Sites may override these definitions in CONFIG_SITE.linux-x86-borland.linux-x86-borland
@@ -118,7 +118,7 @@ OBJ=.o
 
 #       Problem: BorlandC does not recognize  *.cc as C++ source,
 #       we have to compile xx.cc  using the flag -P xx.cc,
-SOURCE_CXXFLAG = -P
+COMPILER_CXXFLAGS = -P
 
 #	Operating system flags 
 OP_SYS_CFLAGS =

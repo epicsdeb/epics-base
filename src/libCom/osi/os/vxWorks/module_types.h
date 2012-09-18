@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* module_types.h */
-/* base/include module_types.h,v 1.1.2.1 2003/08/05 18:47:08 mrk Exp */
+/* base/include Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  * 	Author:      Bob Dalesio
  * 	Date:        12-07-88

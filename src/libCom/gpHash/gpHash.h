@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* gpHash.h,v 1.6.2.2 2009/03/19 23:00:44 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /* Author:  Marty Kraimer Date:    04-07-94 */
 
 /* gph provides a general purpose directory accessed via a hash table*/

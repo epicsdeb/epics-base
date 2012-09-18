@@ -6,10 +6,12 @@ use FindBin qw($Bin);
 use lib "$Bin/../../lib/perl";
 
 use Getopt::Std;
+use Scalar::Util qw(looks_like_number);
 use CA;
 
-our ($opt_0, $opt_a, $opt_c, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_n);
+our ($opt_0, $opt_a, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_n);
 our ($opt_s, $opt_S, $opt_t);
+our $opt_c = 0;
 our $opt_F = ' ';
 our $opt_w = 1;
 
@@ -17,6 +19,9 @@ $Getopt::Std::OUTPUT_HELP_VERSION = 1;
 
 HELP_MESSAGE() unless getopts('0:ac:d:e:f:F:g:hnsStw:');
 HELP_MESSAGE() if $opt_h;
+
+die "caget: -c option takes a positive number\n"
+    unless looks_like_number($opt_c) && $opt_c >= 0;
 
 die "No pv name specified. ('caget -h' gives help.)\n"
     unless @ARGV;
@@ -51,9 +56,7 @@ map {
             if $opt_a;
     }
     $rtype{$_} = $type;
-    my $count = $_->element_count;
-    $count = +$opt_c if $opt_c && $opt_c <= $count;
-    $_->get_callback(\&get_callback, $type, $count);
+    $_->get_callback(\&get_callback, $type, 0+$opt_c);
 } @chans;
 
 my $incomplete = @chans;
@@ -121,18 +124,18 @@ sub display {
             printf "    Precision:        %d\n", $data->{precision};
         }
         if (exists $data->{upper_disp_limit}) {
-            printf "    Lo disp limit:    %d\n", $data->{lower_disp_limit};
-            printf "    Hi disp limit:    %d\n", $data->{upper_disp_limit};
+            printf "    Lo disp limit:    %g\n", $data->{lower_disp_limit};
+            printf "    Hi disp limit:    %g\n", $data->{upper_disp_limit};
         }
         if (exists $data->{upper_alarm_limit}) {
-            printf "    Lo alarm limit:   %d\n", $data->{lower_alarm_limit};
-            printf "    Lo warn limit:    %d\n", $data->{lower_warning_limit};
-            printf "    Hi warn limit:    %d\n", $data->{upper_warning_limit};
-            printf "    Hi alarm limit:   %d\n", $data->{upper_alarm_limit};
+            printf "    Lo alarm limit:   %g\n", $data->{lower_alarm_limit};
+            printf "    Lo warn limit:    %g\n", $data->{lower_warning_limit};
+            printf "    Hi warn limit:    %g\n", $data->{upper_warning_limit};
+            printf "    Hi alarm limit:   %g\n", $data->{upper_alarm_limit};
         }
         if (exists $data->{upper_ctrl_limit}) {
-            printf "    Lo ctrl limit:    %d\n", $data->{lower_ctrl_limit};
-            printf "    Hi ctrl limit:    %d\n", $data->{upper_ctrl_limit};
+            printf "    Lo ctrl limit:    %g\n", $data->{lower_ctrl_limit};
+            printf "    Hi ctrl limit:    %g\n", $data->{upper_ctrl_limit};
         }
     } else {
         my $value = format_number($data, $type);

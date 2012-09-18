@@ -10,7 +10,7 @@
 
 /* osdMutex.h */
 /*
- *      osdMutex.h,v 1.2 2002/07/12 21:34:52 jba Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *      WIN32 version
  *
  *      Author  Jeffrey O. Hill

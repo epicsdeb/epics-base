@@ -1,0 +1,20 @@
+# CONFIG.Common.ios-arm
+#
+# Revision-Id: anj@aps.anl.gov-20111202164243-clxybuefflizbyvr
+# This file is maintained by the build community.
+#
+# Definitions for ios-arm target builds
+# Sites may override these definitions in CONFIG_SITE.Common.ios-arm
+# or CONFIG_SITE.<host>.ios-arm
+#-------------------------------------------------------
+
+IOS_PLATFORM = iPhoneOS
+
+OP_SYS_CFLAGS += -fno-inline-functions
+
+# iOS optimization flags for arm architecture
+OPT_CFLAGS_YES = -O2
+OPT_CXXFLAGS_YES = -O2
+
+# Include definitions common to all iphone targets
+include $(CONFIG)/os/CONFIG.Common.iosCommon

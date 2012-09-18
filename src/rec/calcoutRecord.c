@@ -198,6 +198,11 @@ static long init_record(calcoutRecord *prec, int pass)
     prpvt->cbScheduled = 0;
 
     if (pcalcoutDSET->init_record) pcalcoutDSET->init_record(prec);
+    prec->pval = prec->val;
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
+    prec->povl = prec->oval;
     return 0;
 }
 
@@ -369,12 +374,13 @@ static long get_units(DBADDR *paddr, char *units)
 static long get_precision(DBADDR *paddr, long *pprecision)
 {
     calcoutRecord *prec = (calcoutRecord *)paddr->precord;
+    int fieldIndex = dbGetFieldIndex(paddr);
 
-    if (paddr->pfield == (void *)&prec->val) {
-        *pprecision = prec->prec;
-    } else {
+    *pprecision = prec->prec;
+
+    if (fieldIndex != calcoutRecordVAL)
         recGblGetPrec(paddr, pprecision);
-    }
+ 
     return 0;
 }
 

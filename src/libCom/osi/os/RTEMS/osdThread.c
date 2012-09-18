@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS osdThread.c
- *      osdThread.c,v 1.45.2.26 2009/07/23 21:04:27 norume Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
@@ -473,18 +473,30 @@ epicsThreadId epicsThreadGetId (const char *name)
 /*
  * Ensure func() is run only once.
  */
-void epicsThreadOnceOsd(epicsThreadOnceId *id, void(*func)(void *), void *arg)
+void epicsThreadOnce(epicsThreadOnceId *id, void(*func)(void *), void *arg)
 {
+    #define EPICS_THREAD_ONCE_DONE (epicsThreadId) 1
+
     if (!initialized) epicsThreadInit();
     epicsMutexMustLock(onceMutex);
-    if (*id == 0) {
-        *id = -1;
-        epicsMutexUnlock(onceMutex);
-        func(arg);
-        epicsMutexMustLock(onceMutex);
-        *id = 1;
-    } else
-        assert(*id > 0 /* func() called epicsThreadOnce() with same id */);
+    if (*id != EPICS_THREAD_ONCE_DONE) {
+        if (*id == EPICS_THREAD_ONCE_INIT) { /* first call */
+            *id = epicsThreadGetIdSelf();    /* mark active */
+            epicsMutexUnlock(onceMutex);
+            func(arg);
+            epicsMutexMustLock(onceMutex);
+            *id = EPICS_THREAD_ONCE_DONE;    /* mark done */
+        } else if (*id == epicsThreadGetIdSelf()) {
+            epicsMutexUnlock(onceMutex);
+            cantProceed("Recursive epicsThreadOnce() initialization\n");
+        } else
+            while (*id != EPICS_THREAD_ONCE_DONE) {
+                /* Another thread is in the above func(arg) call. */
+                epicsMutexUnlock(onceMutex);
+                epicsThreadSleep(epicsThreadSleepQuantum());
+                epicsMutexMustLock(onceMutex);
+            }
+    }
     epicsMutexUnlock(onceMutex);
 }
 

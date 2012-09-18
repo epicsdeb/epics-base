@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* devSASoft.c,v 1.10.2.1 2008/08/06 22:11:51 anj Exp
+/* Revision-Id: anj@aps.anl.gov-20101112220909-zd1pn4qnqsafag0l
  *
  *      Author: Carl Lionberger
  *      Date: 9-2-93
@@ -72,15 +72,24 @@ static long read_sa(subArrayRecord *prec)
 
     if (nRequest > prec->malm)
         nRequest = prec->malm;
-    dbGetLink(&prec->inp, prec->ftvl, prec->bptr, 0, &nRequest);
-    prec->nord = ecount = nRequest - prec->indx;
+
+    if (prec->inp.type == CONSTANT)
+        nRequest = prec->nord;
+    else
+        dbGetLink(&prec->inp, prec->ftvl, prec->bptr, 0, &nRequest);
+
+    ecount = nRequest - prec->indx;
     if (ecount > 0) {
         int esize = dbValueSize(prec->ftvl);
+
         if (ecount > prec->nelm)
             ecount = prec->nelm;
         memmove(prec->bptr, (char *)prec->bptr + prec->indx * esize,
                 ecount * esize);
-    }
+    } else
+        ecount = 0;
+
+    prec->nord = ecount;
 
     if (nRequest > 0 &&
         prec->tsel.type == CONSTANT &&

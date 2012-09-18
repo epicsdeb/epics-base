@@ -8,7 +8,7 @@
 \*************************************************************************/
 
 //
-// osdTime.cpp,v 1.38.2.10 2008/12/09 21:46:40 anj Exp
+// Revision-Id: anj@aps.anl.gov-20111129200729-1bx6zsmjnog13sf0
 //
 // Author: Jeff Hill
 //
@@ -61,6 +61,9 @@ static int osdTimeGetCurrent ( epicsTimeStamp *pDest );
 #if !defined ( MAXLONGLONG )
 #define MAXLONGLONG LL_CONSTANT(0x7fffffffffffffff)
 #endif
+#if !defined ( MINLONGLONG )
+#define MINLONGLONG LL_CONSTANT(~0x7fffffffffffffff)
+#endif
 
 static const LONGLONG epicsEpochInFileTime = LL_CONSTANT(0x01b41e2a18d64000);
 
@@ -81,7 +84,7 @@ private:
     epicsTimerQueueActive * pTimerQueue;
     epicsTimer * pTimer;
     bool perfCtrPresent;
-
+    static const int pllDelay; /* integer seconds */
     epicsTimerNotify::expireStatus expire ( const epicsTime & );
 };
 
@@ -91,6 +94,8 @@ static const LONGLONG EPICS_TIME_TICKS_PER_SEC = 1000000000;
 static const LONGLONG ET_TICKS_PER_FT_TICK =
             EPICS_TIME_TICKS_PER_SEC / FILE_TIME_TICKS_PER_SEC;
 
+const int currentTime :: pllDelay = 5;
+    
 //
 // Start and register time provider
 //
@@ -302,8 +307,8 @@ currentTime::currentTime () :
     }
     else {
         errlogPrintf (
-            "win32 osdTime.cpp detected questionable "
-            "system date prior to EPICS epoch\n" );
+            "win32 osdTime.cpp init detected questionable "
+            "system date prior to EPICS epoch, epics time will not advance\n" );
         this->epicsTimeLast = 0;
     }
 
@@ -346,7 +351,7 @@ void currentTime::getCurrentTime ( epicsTimeStamp & dest )
             // counter resolution will more than likely improve over time.
             //
             offset = ( MAXLONGLONG - this->lastPerfCounter )
-                                + ( curPerfCounter.QuadPart + MAXLONGLONG );
+                                + ( curPerfCounter.QuadPart - MINLONGLONG ) + 1;
         }
         if ( offset < MAXLONGLONG / EPICS_TIME_TICKS_PER_SEC ) {
             offset *= EPICS_TIME_TICKS_PER_SEC;
@@ -392,6 +397,8 @@ void currentTime::getCurrentTime ( epicsTimeStamp & dest )
 //
 epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
 {
+    EnterCriticalSection ( & this->mutex );
+
     // avoid interruptions by briefly becoming a time critical thread
     LARGE_INTEGER curFileTime;
     LARGE_INTEGER curPerfCounter;
@@ -407,10 +414,8 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
         curFileTime.HighPart = ft.dwHighDateTime;
     }
 
-    EnterCriticalSection ( & this->mutex );
-
-    LONGLONG perfCounterDiff = curPerfCounter.QuadPart - this->lastPerfCounterPLL;
-    if ( curPerfCounter.QuadPart >= this->lastPerfCounter ) {
+    LONGLONG perfCounterDiff;
+    if ( curPerfCounter.QuadPart >= this->lastPerfCounterPLL ) {
         perfCounterDiff = curPerfCounter.QuadPart - this->lastPerfCounterPLL;
     }
     else {
@@ -424,7 +429,7 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
         // counter resolution will more than likely improve over time.
         //
         perfCounterDiff = ( MAXLONGLONG - this->lastPerfCounterPLL )
-                            + ( curPerfCounter.QuadPart + MAXLONGLONG );
+                            + ( curPerfCounter.QuadPart - MINLONGLONG ) + 1;
     }
     this->lastPerfCounterPLL = curPerfCounter.QuadPart;
 
@@ -432,10 +437,10 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
     this->lastFileTimePLL = curFileTime.QuadPart;
 
     // discard glitches
-    if ( fileTimeDiff == 0 ) {
+    if ( fileTimeDiff <= 0 ) {
         LeaveCriticalSection( & this->mutex );
-        debugPrintf ( ( "currentTime: file time difference in PLL was zero\n" ) );
-        return expireStatus ( restart, 1.0 /* sec */ );
+        debugPrintf ( ( "currentTime: file time difference in PLL was less than zero\n" ) );
+        return expireStatus ( restart, pllDelay /* sec */ );
     }
 
     LONGLONG freq = ( FILE_TIME_TICKS_PER_SEC * perfCounterDiff ) / fileTimeDiff;
@@ -449,7 +454,7 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
             static_cast < int > ( -bound ),
             static_cast < int > ( delta ),
             static_cast < int > ( bound ) ) );
-        return expireStatus ( restart, 1.0 /* sec */ );
+        return expireStatus ( restart, pllDelay /* sec */ );
     }
 
     // update feedback loop estimating the performance counter's frequency
@@ -473,7 +478,21 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
         //
         perfCounterDiffSinceLastFetch =
             ( MAXLONGLONG - this->lastPerfCounter )
-                            + ( curPerfCounter.QuadPart + MAXLONGLONG );
+                            + ( curPerfCounter.QuadPart - MINLONGLONG ) + 1;
+    }
+    
+    // discard performance counter delay measurement glitches
+    {
+        const LONGLONG expectedDly = this->perfCounterFreq * pllDelay;
+        const LONGLONG bnd = expectedDly / 4;
+        if ( perfCounterDiffSinceLastFetch <= 0 || 
+                perfCounterDiffSinceLastFetch >= expectedDly + bnd ) {
+            LeaveCriticalSection( & this->mutex );
+            debugPrintf ( ( "perf ctr measured delay out of bounds m=%d max=%d\n",               
+                static_cast < int > ( perfCounterDiffSinceLastFetch ),
+                static_cast < int > ( expectedDly + bnd ) ) );
+            return expireStatus ( restart, pllDelay /* sec */ );
+        }
     }
 
     // Update the current estimated time.
@@ -482,9 +501,32 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
             / this->perfCounterFreq;
     this->lastPerfCounter = curPerfCounter.QuadPart;
 
-    LONGLONG epicsTimeFromCurrentFileTime =
-        ( curFileTime.QuadPart - epicsEpochInFileTime ) *
-        ET_TICKS_PER_FT_TICK;
+    LONGLONG epicsTimeFromCurrentFileTime;
+    
+    {
+        static bool firstMessageWasSent = false;
+        if ( curFileTime.QuadPart >= epicsEpochInFileTime ) {
+            epicsTimeFromCurrentFileTime =
+                ( curFileTime.QuadPart - epicsEpochInFileTime ) *
+                ET_TICKS_PER_FT_TICK;
+            firstMessageWasSent = false;
+        }
+        else {
+            /*
+             * if the system time jumps to before the EPICS epoch
+             * then latch to the EPICS epoch printing only one
+             * warning message the first time that the issue is
+             * detected
+             */
+            if ( ! firstMessageWasSent ) {
+                errlogPrintf (
+                    "win32 osdTime.cpp time PLL update detected questionable "
+                    "system date prior to EPICS epoch, epics time will not advance\n" );
+                firstMessageWasSent = true;
+            }
+            epicsTimeFromCurrentFileTime = 0;
+        }
+    }
 
     delta = epicsTimeFromCurrentFileTime - this->epicsTimeLast;
     if ( delta > EPICS_TIME_TICKS_PER_SEC || delta < -EPICS_TIME_TICKS_PER_SEC ) {
@@ -537,7 +579,7 @@ epicsTimerNotify::expireStatus currentTime::expire ( const epicsTime & )
 
     LeaveCriticalSection ( & this->mutex );
 
-    return expireStatus ( restart, 1.0 /* sec */ );
+    return expireStatus ( restart, pllDelay /* sec */ );
 }
 
 void currentTime::startPLL ()
@@ -546,7 +588,7 @@ void currentTime::startPLL ()
     if ( this->perfCtrPresent && ! this->pTimerQueue ) {
         this->pTimerQueue = & epicsTimerQueueActive::allocate ( true );
         this->pTimer      = & this->pTimerQueue->createTimer ();
-        this->pTimer->start ( *this, 1.0 );
+        this->pTimer->start ( *this, pllDelay );
     }
 }
 

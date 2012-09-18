@@ -1,0 +1,8 @@
+#
+# Revision-Id: jba@aps.anl.gov-20101109211220-yrh6mszvmacr91js
+#
+# Site Specific Configuration Information
+# Only the local epics system manager should modify this file
+
+-include $(TOP)/configure/os/CONFIG_SITE.solaris-x86.solaris-x86
+

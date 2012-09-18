@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /* 
- * logMsgToErrlog.cpp,v 1.3.2.2 2003/08/06 18:17:30 mrk Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  * route vxWorks logMsg messages into the EPICS logging system
  *

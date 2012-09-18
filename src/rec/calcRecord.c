@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* calcRecord.c,v 1.20.2.6 2009/04/03 14:40:13 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101124193504-syc2zmdo7fl70mcz */
 
 /* Record Support Routines for Calculation records */
 /*
@@ -159,12 +159,13 @@ static long get_units(DBADDR *paddr, char *units)
 static long get_precision(DBADDR *paddr, long *pprecision)
 {
     calcRecord *prec = (calcRecord *)paddr->precord;
+    int fieldIndex = dbGetFieldIndex(paddr);
 
-    if (paddr->pfield == (void *)&prec->val) {
-	*pprecision = prec->prec;
-    } else {
+    *pprecision = prec->prec;
+
+    if (fieldIndex != calcRecordVAL)
 	recGblGetPrec(paddr, pprecision);
-    }
+
     return 0;
 }
 

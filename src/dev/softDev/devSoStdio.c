@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* devSoStdio.c,v 1.1.2.4 2008/09/29 17:54:35 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 #include <stdio.h>
 #include <string.h>

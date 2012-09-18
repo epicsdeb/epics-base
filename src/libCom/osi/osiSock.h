@@ -8,7 +8,7 @@
 \*************************************************************************/
 
 /*
- *	    osiSock.h,v 1.20.2.6 2009/06/04 21:31:39 anj Exp
+ *	    Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      socket support library API def
  *

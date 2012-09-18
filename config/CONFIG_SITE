@@ -1,5 +1,5 @@
 #
-#  CONFIG_SITE,v 1.35.2.1 2003/06/19 17:28:39 jba Exp
+#  Revision-Id: anj@aps.anl.gov-20101014190140-s9gxgtnoyhbck6id
 #
 #  CONFIG_SITE  - EPICS BASE config file
 #	by Matthew Needes and Mike Bordua
@@ -16,7 +16,6 @@
 #	Borland
 #	Linux
 #	WIN32
-#	alpha
 #	cygwin32
 #	hp700
 #	sgi

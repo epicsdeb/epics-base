@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      tsDefs.c,v 1.3 2002/07/12 21:35:15 jba Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  */
 
 #define epicsExportSharedSymbols

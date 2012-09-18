@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* dbStaticLib.h,v 1.30.2.10 2009/04/23 21:56:22 anj Exp
+/* Revision-Id: anj@aps.anl.gov-20111128185555-mu76mhfkfutzrdca
  *
  *      Author: Marty Kraimer
  *      Date:   06-08-93
@@ -73,6 +73,8 @@ epicsShareFunc void epicsShareAPI dbFinishEntry(DBENTRY *pdbentry);
 epicsShareFunc DBENTRY * epicsShareAPI dbCopyEntry(DBENTRY *pdbentry);
 epicsShareFunc void epicsShareAPI dbCopyEntryContents(DBENTRY *pfrom,
     DBENTRY *pto);
+
+epicsShareExtern int dbBptNotMonotonic;
 
 epicsShareFunc long epicsShareAPI dbReadDatabase(DBBASE **ppdbbase,
     const char *filename, const char *path, const char *substitutions);

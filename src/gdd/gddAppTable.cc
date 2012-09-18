@@ -10,7 +10,7 @@
 // Author: Jim Kowalkowski
 // Date: 2/96
 // 
-// gddAppTable.cc,v 1.16 2003/02/12 18:53:08 jhill Exp
+// Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 // 
 
 #define epicsExportSharedSymbols

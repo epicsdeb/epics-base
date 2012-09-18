@@ -1,6 +1,6 @@
 # CONFIG.win32-x86.Common
 #
-# CONFIG.win32-x86.Common,v 1.8.2.4 2009/07/10 14:42:09 jba Exp
+# Revision-Id: anj@aps.anl.gov-20110606145131-rpql3fdjvli0113i
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86 host archs
@@ -8,10 +8,11 @@
 #-------------------------------------------------------
 
 CP = $(PERL) -MExtUtils::Command -e cp
-MV = $(PERL) -MExtUtils::Command -e mv 
+MV = $(PERL) -MExtUtils::Command -e mv
 RM = $(PERL) -MExtUtils::Command -e rm_f
 MKDIR = $(PERL) -MExtUtils::Command -e mkpath
 RMDIR = $(PERL) -MExtUtils::Command -e rm_rf
+COMMENT = $(PERL) -e ''
 
 WIND_HOST_TYPE = x86-win32
 OSITHREAD_USE_DEFAULT_STACK = NO

@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* aiRecord.c,v 1.20.2.6 2009/04/03 14:40:12 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* aiRecord.c - Record Support Routines for Analog Input records */
 /*
@@ -145,6 +145,10 @@ static long init_record(void *precord,int pass)
 	}
 	return (status);
     }
+    prec->mlst = prec->val;
+    prec->alst = prec->val;
+    prec->lalm = prec->val;
+    prec->oraw = prec->rval;
     return(0);
 }
 

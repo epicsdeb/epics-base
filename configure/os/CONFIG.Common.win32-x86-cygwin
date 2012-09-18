@@ -1,6 +1,6 @@
 # CONFIG.Common.win32-x86-cygwin
 #
-# CONFIG.Common.win32-x86-cygwin,v 1.6.2.13 2008/08/27 19:07:56 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for cygwin-x86 target builds

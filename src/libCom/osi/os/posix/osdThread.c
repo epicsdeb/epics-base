@@ -75,6 +75,13 @@ typedef struct epicsThreadOSD {
     char              *name;
 } epicsThreadOSD;
 
+#ifdef _POSIX_THREAD_PRIORITY_SCHEDULING
+typedef struct {
+    int min_pri, max_pri;
+    int policy;
+} priAvailable;
+#endif
+
 static pthread_key_t getpthreadInfo;
 static pthread_mutex_t onceLock;
 static pthread_mutex_t listLock;
@@ -201,6 +208,101 @@ static void free_threadInfo(epicsThreadOSD *pthreadInfo)
     free(pthreadInfo);
 }
 
+#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+/*
+ * The actually available range priority range (at least under linux)
+ * may be restricted by resource limitations (but that is ignored
+ * by sched_get_priority_max()). See bug #835138 which is fixed by
+ * this code.
+ */
+
+static int try_pri(int pri, int policy)
+{
+struct sched_param  schedp;
+
+    schedp.sched_priority = pri;
+    return pthread_setschedparam(pthread_self(), policy, &schedp);
+}
+
+static void*
+find_pri_range(void *arg)
+{
+priAvailable *prm = arg;
+int           min = sched_get_priority_min(prm->policy);
+int           max = sched_get_priority_max(prm->policy);
+int           low, try;
+
+    if ( -1 == min || -1 == max ) {
+        /* something is very wrong; maintain old behavior
+         * (warning message if sched_get_priority_xxx() fails
+         * and use default policy's sched_priority [even if
+         * that is likely to cause epicsThreadCreate to fail
+         * because that priority is not suitable for SCHED_FIFO]).
+         */
+        prm->min_pri = prm->max_pri = -1;
+        return 0;
+    }
+
+
+    if ( try_pri(min, prm->policy) ) {
+        /* cannot create thread at minimum priority;
+         * probably no permission to use SCHED_FIFO
+         * at all. However, we still must return
+         * a priority range accepted by the SCHED_FIFO
+         * policy. Otherwise, epicsThreadCreate() cannot
+         * detect the unsufficient permission (EPERM)
+         * and fall back to a non-RT thread (because
+         * pthread_attr_setschedparam would fail with
+         * EINVAL due to the bad priority).
+         */
+        prm->min_pri = prm->max_pri = min;
+        return 0;
+    }
+
+
+    /* Binary search through available priorities.
+     * The actually available range may be restricted
+     * by resource limitations (but that is ignored
+     * by sched_get_priority_max() [linux]).
+     */
+    low = min;
+
+    while ( low < max ) {
+        try = (max+low)/2;
+        if ( try_pri(try, prm->policy) ) {
+            max = try;
+        } else {
+            low = try + 1;
+        }
+    }
+
+    prm->min_pri = min;
+    prm->max_pri = try_pri(max, prm->policy) ? max-1 : max;
+
+    return 0;
+}
+
+static void findPriorityRange(commonAttr *a_p)
+{
+priAvailable arg;
+pthread_t    id;
+void         *dummy;
+int          status;
+
+    arg.policy = a_p->schedPolicy;
+
+    status = pthread_create(&id, 0, find_pri_range, &arg);
+    checkStatusQuit(status, "pthread_create","epicsThreadInit");
+
+    status = pthread_join(id, &dummy);
+    checkStatusQuit(status, "pthread_join","epicsThreadInit");
+
+    a_p->minPriority = arg.min_pri;
+    a_p->maxPriority = arg.max_pri;
+}
+#endif
+
+
 static void once(void)
 {
     epicsThreadOSD *pthreadInfo;
@@ -230,13 +332,14 @@ static void once(void)
     status = pthread_attr_getschedparam(
         &pcommonAttr->attr,&pcommonAttr->schedParam);
     checkStatusOnce(status,"pthread_attr_getschedparam");
-    pcommonAttr->maxPriority = sched_get_priority_max(pcommonAttr->schedPolicy);
+
+    findPriorityRange(pcommonAttr);
+
     if(pcommonAttr->maxPriority == -1) {
         pcommonAttr->maxPriority = pcommonAttr->schedParam.sched_priority;
         fprintf(stderr,"sched_get_priority_max failed set to %d\n",
             pcommonAttr->maxPriority);
     }
-    pcommonAttr->minPriority = sched_get_priority_min(pcommonAttr->schedPolicy);
     if(pcommonAttr->minPriority == -1) {
         pcommonAttr->minPriority = pcommonAttr->schedParam.sched_priority;
         fprintf(stderr,"sched_get_priority_min failed set to %d\n",
@@ -321,40 +424,45 @@ epicsShareFunc unsigned int epicsShareAPI epicsThreadGetStackSize (epicsThreadSt
 #endif /*_POSIX_THREAD_ATTR_STACKSIZE*/
 }
 
-/* epicsThreadOnce is a macro that calls epicsThreadOnceOsd */
-epicsShareFunc void epicsShareAPI epicsThreadOnceOsd(epicsThreadOnceId *id, void (*func)(void *), void *arg)
+epicsShareFunc void epicsShareAPI epicsThreadOnce(epicsThreadOnceId *id, void (*func)(void *), void *arg)
 {
+    static struct epicsThreadOSD threadOnceComplete;
+    #define EPICS_THREAD_ONCE_DONE &threadOnceComplete
     int status;
+
     epicsThreadInit();
     status = mutexLock(&onceLock);
     if(status) {
-        fprintf(stderr,"epicsThreadOnceOsd: pthread_mutex_lock returned %s.\n",
+        fprintf(stderr,"epicsThreadOnce: pthread_mutex_lock returned %s.\n",
             strerror(status));
         exit(-1);
     }
-    if (*id == 0) { /*  0 => first call */
-        *id = -1;   /* -1 => func() active */
-        /* avoid recursive locking */
-        status = pthread_mutex_unlock(&onceLock);
-        checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadOnceOsd");
-        func(arg);
-        status = mutexLock(&onceLock);
-        checkStatusQuit(status,"pthread_mutex_lock","epicsThreadOnceOsd");
-        *id = +1;   /* +1 => func() done */
-    } else
-        while (*id < 0) {
-            /* Someone is in the above func(arg) call.  If that someone is
-             * actually us, we're screwed, but the other OS implementations
-             * will fire an assert() that should detect this condition.
-             */
+
+    if (*id != EPICS_THREAD_ONCE_DONE) {
+        if (*id == EPICS_THREAD_ONCE_INIT) { /* first call */
+            *id = epicsThreadGetIdSelf();    /* mark active */
             status = pthread_mutex_unlock(&onceLock);
-            checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadOnceOsd");
-            epicsThreadSleep(0.01);
+            checkStatusQuit(status,"pthread_mutex_unlock", "epicsThreadOnce");
+            func(arg);
             status = mutexLock(&onceLock);
-            checkStatusQuit(status,"pthread_mutex_lock","epicsThreadOnceOsd");
-        }
+            checkStatusQuit(status,"pthread_mutex_lock", "epicsThreadOnce");
+            *id = EPICS_THREAD_ONCE_DONE;    /* mark done */
+        } else if (*id == epicsThreadGetIdSelf()) {
+            status = pthread_mutex_unlock(&onceLock);
+            checkStatusQuit(status,"pthread_mutex_unlock", "epicsThreadOnce");
+            cantProceed("Recursive epicsThreadOnce() initialization\n");
+        } else
+            while (*id != EPICS_THREAD_ONCE_DONE) {
+                /* Another thread is in the above func(arg) call. */
+                status = pthread_mutex_unlock(&onceLock);
+                checkStatusQuit(status,"pthread_mutex_unlock", "epicsThreadOnce");
+                epicsThreadSleep(epicsThreadSleepQuantum());
+                status = mutexLock(&onceLock);
+                checkStatusQuit(status,"pthread_mutex_lock", "epicsThreadOnce");
+            }
+    }
     status = pthread_mutex_unlock(&onceLock);
-    checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadOnceOsd");
+    checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadOnce");
 }
 
 epicsShareFunc epicsThreadId epicsShareAPI epicsThreadCreate(const char *name,
@@ -417,7 +525,7 @@ static epicsThreadOSD *createImplicit(void)
     int status;
 
     tid = pthread_self();
-    sprintf(name, "non-EPICS_%d", (int)tid);
+    sprintf(name, "non-EPICS_%ld", (long)tid);
     pthreadInfo = create_threadInfo(name);
     pthreadInfo->tid = tid;
     pthreadInfo->osiPriority = 0;

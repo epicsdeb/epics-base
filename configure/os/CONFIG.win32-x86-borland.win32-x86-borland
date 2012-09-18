@@ -1,6 +1,6 @@
 # CONFIG.win32-x86-borland.win32-x86-borland
 #
-# CONFIG.win32-x86-borland.win32-x86-borland,v 1.30.2.9 2009/04/24 19:31:57 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86-borland target arch when host arch is win32-x86-borland

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devAoSoftRaw.c */
-/* base/src/dev devAoSoftRaw.c,v 1.12.2.1 2009/04/03 15:45:02 lange Exp */
+/* base/src/dev Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* Device Support Routines for soft raw Analog Output Records*/
 /*

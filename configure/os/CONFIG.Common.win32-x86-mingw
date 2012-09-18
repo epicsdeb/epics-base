@@ -1,6 +1,6 @@
 # CONFIG.Common.win32-x86-mingw
 #
-# CONFIG.Common.win32-x86-mingw,v 1.1.2.12 2008/07/31 21:58:37 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86-mingw target builds

@@ -6,7 +6,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /*
- * osdTime.cpp,v 1.6.2.13 2008/10/11 16:40:46 norume Exp
+ * Revision-Id: anj@aps.anl.gov-20110823182000-bubidbqy4olqqdvq
  *
  * Author: W. Eric Norum
  */
@@ -14,9 +14,11 @@
 #include <epicsStdio.h>
 #include <rtems.h>
 #include <errno.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <rtems/rtems_bsdnet_internal.h>
 #include "epicsTime.h"
 #include "osdTime.h"
 #include "osiNTPTime.h"
@@ -54,7 +56,7 @@ void osdNTPInit(void)
     }
     memset (&myAddr, 0, sizeof myAddr);
     myAddr.sin_family = AF_INET;
-    myAddr.sin_port = htons (123);
+    myAddr.sin_port = htons (0);
     myAddr.sin_addr.s_addr = htonl (INADDR_ANY);
     if (bind (ntpSocket, (struct sockaddr *)&myAddr, sizeof myAddr) < 0) {
         printf("osdNTPInit() Can't bind socket: %s\n", strerror (errno));
@@ -116,16 +118,20 @@ double rtemsTicksPerSecond_double, rtemsTicksPerTwoSeconds_double;
  * explicitly calls osdTimeRegister() at the appropriate time.
  * However if we are loaded dynamically we *do* register our
  * standard time providers at static constructor time; in this
- * case the tick rate will have been set already.
+ * case the network is available already.
  */
 static int staticTimeRegister(void)
 {
-    if (rtemsTicksPerSecond != 0)
-        osdTimeRegister();
-
     rtems_clock_get (RTEMS_CLOCK_GET_TICKS_PER_SECOND, &rtemsTicksPerSecond);
     rtemsTicksPerSecond_double = rtemsTicksPerSecond;
     rtemsTicksPerTwoSeconds_double = rtemsTicksPerSecond_double * 2.0;
+
+    /* If networking is already up at the time static constructors
+     * are executed then we are probably run-time loaded and it's
+     * OK to osdTimeRegister() at this point.
+     */
+    if (rtems_bsdnet_ticks_per_second != 0)
+        osdTimeRegister();
 
     return 1;
 }

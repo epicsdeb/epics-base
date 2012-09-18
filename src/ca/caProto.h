@@ -40,6 +40,8 @@
 #   define CA_V49(MINOR) ((MINOR)>=9u)    /* large arrays, dispatch priorities */
 #   define CA_V410(MINOR) ((MINOR)>=10u)  /* beacon counter */
 #   define CA_V411(MINOR) ((MINOR)>=11u)  /* sequence numbers in UDP version command */
+#   define CA_V412(MINOR) ((MINOR)>=12u)  /* TCP-based search requests */
+#   define CA_V413(MINOR) ((MINOR)>=13u)  /* Allow zero length in requests. */
 #elif CA_MAJOR_PROTOCOL_REVISION > 4u
 #   define CA_V41(MINOR) ( 1u )
 #   define CA_V42(MINOR) ( 1u )
@@ -52,6 +54,8 @@
 #   define CA_V49(MINOR) ( 1u )
 #   define CA_V410(MINOR) ( 1u )
 #   define CA_V411(MINOR) ( 1u )
+#   define CA_V412(MINOR) ( 1u )
+#   define CA_V413(MINOR) ( 1u )
 #else
 #   define CA_V41(MINOR) ( 0u )
 #   define CA_V42(MINOR) ( 0u )
@@ -64,7 +68,9 @@
 #   define CA_V49(MINOR) ( 0u )
 #   define CA_V410(MINOR) ( 0u )
 #   define CA_V411(MINOR) ( 0u )
-#endif 
+#   define CA_V412(MINOR) ( 0u )
+#   define CA_V413(MINOR) ( 0u )
+#endif
 
 /*
  * These port numbers are only used if the CA repeater and 

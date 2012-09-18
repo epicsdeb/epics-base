@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- * osdTime.h,v 1.6.2.1 2004/03/29 19:55:34 evans Exp
+ * Revision-Id: jba@aps.anl.gov-20101026214840-203j1gphhlgj61p0
  *
  * Author: Jeff Hill
  */
@@ -17,10 +17,12 @@
 #ifndef osdTimeh
 #define osdTimeh
 
+#if ! defined(_MINGW) || ! defined(_TIMESPEC_DEFINED)
 struct timespec {
 	time_t tv_sec; /* seconds since some epoch */
 	long tv_nsec; /* nanoseconds within the second */
 };
+#endif /* ! defined(_MINGW) || ! defined(_TIMESPEC_DEFINED) */
 
 #endif /* ifndef osdTimeh */
 

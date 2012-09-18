@@ -7,7 +7,7 @@ eval 'exec perl -S -w  $0 ${1+"$@"}'  # -*- Mode: perl -*-
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# fullPathName.pl,v 1.1.2.5 2009/08/03 22:03:33 anj Exp
+# Revision-Id: anj@aps.anl.gov-20110608171518-onrlqi2bcf4wmbhs
 
 # Determines an absolute pathname for its argument,
 # which may be either a relative or absolute path and
@@ -16,7 +16,7 @@ eval 'exec perl -S -w  $0 ${1+"$@"}'  # -*- Mode: perl -*-
 use strict;
 
 use FindBin qw($Bin);
-use lib "$Bin/../../lib/perl";
+use lib ("$Bin/../../lib/perl", $Bin);
 
 use Getopt::Std;
 use EPICS::Path;
@@ -27,6 +27,9 @@ $Getopt::Std::OUTPUT_HELP_VERSION = 1;
 &HELP_MESSAGE if !getopts('h') || $opt_h || @ARGV != 1;
 
 my $path = AbsPath(shift);
+
+# Escape shell special characters unless on Windows, which doesn't allow them.
+$path =~ s/([!"\$&'\(\)*,:;<=>?\[\\\]^`{|}])/\\$1/g unless $^O eq 'MSWin32';
 
 print "$path\n";
 

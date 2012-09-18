@@ -10,7 +10,7 @@
 \*************************************************************************/
 
 /*
- * osdSockAddrReuse.cpp,v 1.1.2.1 2003/08/21 18:22:35 jhill Exp
+ * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  * Author: Jeff Hill
  */
 

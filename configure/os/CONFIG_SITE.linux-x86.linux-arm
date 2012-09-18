@@ -1,6 +1,6 @@
 #  CONFIG_SITE.linux-x86.linux-arm
 #
-# CONFIG_SITE.linux-x86.linux-arm,v 1.1.2.2 2006/12/08 23:27:18 anj Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 # Site specific definitions for linux-x86 host - linux-arm target builds
 #-------------------------------------------------------

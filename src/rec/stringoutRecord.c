@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* stringoutRecord.c,v 1.16.2.3 2009/07/08 18:14:11 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recStringout.c - Record Support Routines for Stringout records */
 /*
@@ -95,6 +95,7 @@ static long writeValue(stringoutRecord *);
 
 static long init_record(stringoutRecord *prec, int pass)
 {
+    STATIC_ASSERT(sizeof(prec->oval)==sizeof(prec->val));
     struct stringoutdset *pdset;
     long status=0;
 
@@ -121,6 +122,7 @@ static long init_record(stringoutRecord *prec, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(prec))) return(status);
     }
+    strcpy(prec->oval,prec->val);
     return(0);
 }
 
@@ -145,7 +147,6 @@ static long process(stringoutRecord *prec)
 
         if(prec->udf == TRUE ){
                 recGblSetSevr(prec,UDF_ALARM,INVALID_ALARM);
-                goto finish;
         }
 
         if (prec->nsev < INVALID_ALARM )
@@ -172,7 +173,7 @@ static long process(stringoutRecord *prec)
 
 	/* check if device support set pact */
 	if ( !pact && prec->pact ) return(0);
-finish:
+
 	prec->pact = TRUE;
 	recGblGetTimeStamp(prec);
 	monitor(prec);
@@ -186,9 +187,9 @@ static void monitor(stringoutRecord *prec)
     unsigned short  monitor_mask;
 
     monitor_mask = recGblResetAlarms(prec);
-    if(strncmp(prec->oval,prec->val,sizeof(prec->val))) {
+    if(strcmp(prec->oval,prec->val)) {
 	monitor_mask |= DBE_VALUE|DBE_LOG;
-	strncpy(prec->oval,prec->val,sizeof(prec->val));
+	strcpy(prec->oval,prec->val);
     }
     if (prec->mpst == stringoutPOST_Always)
 	monitor_mask |= DBE_VALUE;

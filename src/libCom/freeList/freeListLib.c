@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* freeListLib.c,v 1.18 2002/07/12 21:34:33 jba Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /* Author:  Marty Kraimer Date:    04-19-94 */
 
 

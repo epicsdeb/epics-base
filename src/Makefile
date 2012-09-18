@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# Makefile,v 1.41.2.19 2009/03/12 15:50:50 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101012153723-0ft6f95pnz93ivxw
 #
 
 TOP = ..
@@ -61,7 +61,7 @@ DIRS += rec
 rec_DEPEND_DIRS = as registry
 
 DIRS += misc
-misc_DEPEND_DIRS = rsrv rec
+misc_DEPEND_DIRS = dbtools rsrv rec
 
 DIRS += dev
 dev_DEPEND_DIRS = rec misc
@@ -82,10 +82,10 @@ DIRS += softIoc
 softIoc_DEPEND_DIRS = dev dbtools RTEMS
 
 DIRS += gdd
-gdd_DEPEND_DIRS = libCom
+gdd_DEPEND_DIRS = ca
 
 DIRS += cas
-cas_DEPEND_DIRS = ca gdd
+cas_DEPEND_DIRS = gdd dbStatic
 
 DIRS += excas
 excas_DEPEND_DIRS = cas as registry

@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-//      fdManager.cpp,v 1.58.2.2 2009/07/30 23:21:19 jhill Exp
+//      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 //
 //      File descriptor management C++ class library
 //      (for multiplexing IO in a single threaded environment)
@@ -20,8 +20,6 @@
 // NOTES: 
 // 1) This library is not thread safe
 //
-
-#define FD_SETSIZE 4096
 
 //
 // ANSI C

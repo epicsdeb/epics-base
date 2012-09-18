@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* cvtFast.h,v 1.7 2002/12/06 14:13:36 mrk Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  * Very efficient routines to convert numbers to strings
  *
  *      Author: Bob Dalesio wrote cvtFloatToString (called FF_TO_STR)

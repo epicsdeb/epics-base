@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* devAiSoft.c,v 1.10.2.2 2009/04/09 15:03:09 anj Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Original Authors: Bob Dalesio and Marty Kraimer
  *      Date: 3/6/91

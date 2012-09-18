@@ -1,6 +1,6 @@
 # CONFIG.win32-x86.win32-x86
 #
-# CONFIG.win32-x86.win32-x86,v 1.32.2.20 2009/07/16 14:33:52 jba Exp
+# Revision-Id: jba@aps.anl.gov-20110805170230-c0yd86k1a0ujy7fu
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86 target archs when host arch is win32-x86
@@ -23,7 +23,7 @@ WINLINK = link
 
 RCCMD = rc -l 0x409 $(INCLUDES) -fo $@ $<
 
-ARCMD = lib /nologo /verbose /out:$@ $(LIBRARY_LD_OBJS)
+ARCMD = lib /nologo /verbose /out:$@ $(LIB_OPT_LDFLAGS) $(LIBRARY_LD_OBJS)
 
 BAFCMD = bscmake /nologo /o $@
 
@@ -31,7 +31,9 @@ BAFCMD = bscmake /nologo /o $@
 # Configure OS vendor C compiler
 CC = cl
 
+# Override CONFIG.gnuCommon for cross builds.
 GNU = NO
+HDEPENDS_METHOD = CMD
 
 #
 # /W<N> use warning level N
@@ -149,6 +151,8 @@ RANLIB=
 LINK_OPT_FLAGS_YES = /LTCG /incremental:no /opt:ref /release $(PROD_VERSION:%=/version:%) 
 LINK_OPT_FLAGS_NO = /debug /incremental:no /fixed:no
 OPT_LDFLAGS = $(LINK_OPT_FLAGS_$(HOST_OPT))
+LIB_OPT_FLAGS_YES =  /LTCG
+LIB_OPT_LDFLAGS = $(LIB_OPT_FLAGS_$(HOST_OPT))
 
 ARCH_DEP_CFLAGS=
 SHRLIB_CFLAGS=
@@ -166,12 +170,12 @@ BAF=.bsc
 BOF=.sbr
 
 #       Problem: MS Visual C++ does not recognize  *.cc as C++ source,
-#       we have to compile xx.cc  using the flag -Tp xx.cc,
-#       i.e.  -Tp  has to be immediately before the source file name
-SOURCE_CXXFLAG = /Tp
+#       so we do C++ compiles using the global flag -TP 
+COMPILER_CXXFLAGS = /TP
 
 #	Operating system flags 
 OP_SYS_CFLAGS =
+OP_SYS_CXXFLAGS = $(COMPILER_CXXFLAGS)
 
 #
 # WIN32 specific include files
@@ -185,7 +189,7 @@ OP_SYS_CFLAGS =
 #		'-entry:_DllMainCRTStartup$(DLLENTRY)'
 DLLENTRY = @12
 
-WIN32_DLLFLAGS = /subsystem:windows /dll $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(LIB_LDFLAGS)
+WIN32_DLLFLAGS = /subsystem:windows /dll $(OPT_LDFLAGS) $(USR_LDFLAGS) $(TARGET_LDFLAGS) $(LIB_LDFLAGS)
 
 #
 # specify dll .def file only if it exists
@@ -199,7 +203,7 @@ DLL_DEF_FLAG = $(addprefix /def:,$(wildcard ../$(addsuffix .def,$*)))
 #	x.exp: what you need to build the dll (in no variable)
 #
 LINK.shrlib = $(WINLINK) /nologo $(WIN32_DLLFLAGS) /implib:$*.lib /out:$*.dll $(DLL_DEF_FLAG)
-LINK.shrlib += $(LIBRARY_LD_OBJS) $(LIBRARY_LD_RESS) $(SHRLIB_LDLIBS)
+LINK.shrlib += $(call PATH_FILTER, $(LIBRARY_LD_OBJS) $(LIBRARY_LD_RESS) $(SHRLIB_LDLIBS))
 MUNCH_CMD =  $(CCC) /Fo $@ $^
 
 
@@ -275,7 +279,7 @@ SHRLIB_LDLIBS += $(addsuffix .lib, \
 #--------------------------------------------------
 # Linker definition
 LINK.cpp = $(WINLINK) -nologo $(STATIC_LDFLAGS) $(LDFLAGS) $(PROD_LDFLAGS) -out:$@ \
-	$(PROD_LD_OBJS) $(PROD_LD_RESS) $(PROD_LDLIBS)
+	$(call PATH_FILTER, $(PROD_LD_OBJS) $(PROD_LD_RESS) $(PROD_LDLIBS))
 
 #--------------------------------------------------
 # UseManifestTool.pl checks MS Visual c++ compiler version number to

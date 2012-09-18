@@ -1,5 +1,5 @@
 /*************************************************************************\
-* Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
+* Copyright (c) 2010 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
@@ -20,6 +20,7 @@
 
 #define epicsExportSharedSymbols
 #define ERRLOG_INIT
+#include "adjustment.h"
 #include "dbDefs.h"
 #include "epicsThread.h"
 #include "cantProceed.h"
@@ -36,12 +37,10 @@
 
 #define BUFFER_SIZE 1280
 #define MAX_MESSAGE_SIZE 256
-#define MAX_ALIGNMENT 8
 
 /*Declare storage for errVerbose */
 epicsShareDef int errVerbose = 0;
 
-static void errlogCleanup(void);
 static void exitHandler(void *);
 static void errlogThread(void);
 
@@ -76,13 +75,14 @@ static struct {
     ELLLIST      listenerList;
     ELLLIST      msgQueue;
     msgNode      *pnextSend;
-    int	         errlogInitFailed;
-    int	         buffersize;
-    int	         maxMsgSize;
-    int	         sevToLog;
-    int	         toConsole;
-    int	         missedMessages;
-    void         *pbuffer;
+    int          errlogInitFailed;
+    int          buffersize;
+    int          maxMsgSize;
+    int          msgNeeded;
+    int          sevToLog;
+    int          toConsole;
+    int          missedMessages;
+    char         *pbuffer;
 } pvtData;
 
 
@@ -118,10 +118,11 @@ epicsShareFunc int errlogPrintf(const char *pFormat, ...)
     errlogInit(0);
     if (pvtData.atExit || (isOkToBlock && pvtData.toConsole)) {
         va_start(pvar, pFormat);
-        vfprintf(stderr, pFormat, pvar);
+        nchar = vfprintf(stderr, pFormat, pvar);
         va_end (pvar);
         fflush(stderr);
     }
+    if (pvtData.atExit) return nchar;
     pbuffer = msgbufGetFree(isOkToBlock);
     if (!pbuffer) return 0;
     va_start(pvar, pFormat);
@@ -357,6 +358,7 @@ epicsShareFunc void errPrintf(long status, const char *pFileName,
         va_start(pvar, pformat);
         vfprintf(stderr, pformat, pvar);
         va_end(pvar);
+        fputc('\n', stderr);
         fflush(stderr);
     }
     if (pvtData.atExit) return;
@@ -372,7 +374,7 @@ epicsShareFunc void errPrintf(long status, const char *pFileName,
         pnext += nchar; totalChar += nchar;
     }
     va_start(pvar, pformat);
-    nchar = tvsnPrint(pnext, pvtData.maxMsgSize, pformat, pvar);
+    nchar = tvsnPrint(pnext, pvtData.maxMsgSize - totalChar - 1, pformat, pvar);
     va_end(pvar);
     if (nchar>0) {
         pnext += nchar;
@@ -388,8 +390,15 @@ static void exitHandler(void *pvt)
     pvtData.atExit = 1;
     epicsEventSignal(pvtData.waitForWork);
     epicsEventMustWait(pvtData.waitForExit);
+
+    free(pvtData.pbuffer);
+    epicsMutexDestroy(pvtData.flushLock);
+    epicsEventDestroy(pvtData.flush);
+    epicsEventDestroy(pvtData.waitForFlush);
+    epicsMutexDestroy(pvtData.listenerLock);
+    epicsMutexDestroy(pvtData.msgQueueLock);
+    epicsEventDestroy(pvtData.waitForWork);
     epicsEventDestroy(pvtData.waitForExit);
-    return;
 }
 
 struct initArgs {
@@ -405,6 +414,8 @@ static void errlogInitPvt(void *arg)
     pvtData.errlogInitFailed = TRUE;
     pvtData.buffersize = pconfig->bufsize;
     pvtData.maxMsgSize = pconfig->maxMsgSize;
+    pvtData.msgNeeded = adjustToWorstCaseAlignment(pvtData.maxMsgSize +
+        sizeof(msgNode));
     ellInit(&pvtData.listenerList);
     ellInit(&pvtData.msgQueue);
     pvtData.toConsole = TRUE;
@@ -427,25 +438,13 @@ static void errlogInitPvt(void *arg)
         pvtData.errlogInitFailed = FALSE;
     }
 }
-
-static void errlogCleanup(void)
-{
-    free(pvtData.pbuffer);
-    epicsMutexDestroy(pvtData.flushLock);
-    epicsEventDestroy(pvtData.flush);
-    epicsEventDestroy(pvtData.waitForFlush);
-    epicsMutexDestroy(pvtData.listenerLock);
-    epicsMutexDestroy(pvtData.msgQueueLock);
-    epicsEventDestroy(pvtData.waitForWork);
-    /*Note that exitHandler must destroy waitForExit*/
-}
 
 epicsShareFunc int epicsShareAPI errlogInit2(int bufsize, int maxMsgSize)
 {
     static epicsThreadOnceId errlogOnceFlag = EPICS_THREAD_ONCE_INIT;
     struct initArgs config;
 
-    if (errlogOnceFlag > 0 && pvtData.atExit)
+    if (pvtData.atExit)
         return 0;
 
     if (bufsize < BUFFER_SIZE) bufsize = BUFFER_SIZE;
@@ -490,9 +489,7 @@ static void errlogThread(void)
     epicsAtExit(exitHandler,0);
     while (TRUE) {
         epicsEventMustWait(pvtData.waitForWork);
-        if (pvtData.atExit) break;
         while ((pmessage = msgbufGetSend(&noConsoleMessage))) {
-            if (pvtData.atExit) break;
             epicsMutexMustLock(pvtData.listenerLock);
             if (pvtData.toConsole && !noConsoleMessage) {
                 fprintf(stderr,"%s",pmessage);
@@ -511,38 +508,36 @@ static void errlogThread(void)
         epicsThreadSleep(.2); /*just wait an extra .2 seconds*/
         epicsEventSignal(pvtData.waitForFlush);
     }
-    errlogCleanup();
     epicsEventSignal(pvtData.waitForExit);
 }
 
 static msgNode *msgbufGetNode(void)
 {
-    char *pbuffer = (char *)pvtData.pbuffer;
-    msgNode *pnextSend = 0;
+    char *pbuffer = pvtData.pbuffer;
+    char *pnextFree;
+    msgNode *pnextSend;
 
     if (ellCount(&pvtData.msgQueue) == 0 ) {
-        pnextSend = (msgNode *)pbuffer;
+        pnextFree = pbuffer;        /* Reset if empty */
     } else {
-        int needed;
-        int remaining;
-        msgNode *plast;
+        msgNode *pfirst = (msgNode *)ellFirst(&pvtData.msgQueue);
+        msgNode *plast = (msgNode *)ellLast(&pvtData.msgQueue);
+        char *plimit = pbuffer + pvtData.buffersize;
 
-        plast = (msgNode *)ellLast(&pvtData.msgQueue);
-        needed = pvtData.maxMsgSize + sizeof(msgNode) + MAX_ALIGNMENT;
-        remaining = pvtData.buffersize
-            - ((plast->message - pbuffer) + plast->length);
-        if (needed < remaining) {
-            int length, adjust;
-
-            length = plast->length;
-            /*Make length a multiple of MAX_ALIGNMENT*/
-            adjust = length%MAX_ALIGNMENT;
-            if(adjust) length += (MAX_ALIGNMENT-adjust);
-            pnextSend = (msgNode *)(plast->message + length);
+        pnextFree = plast->message + adjustToWorstCaseAlignment(plast->length);
+        if (pfirst > plast) {
+            plimit = (char *)pfirst;
+        }
+        else if (pnextFree + pvtData.msgNeeded > plimit) {
+            pnextFree = pbuffer;    /* Hit end, wrap to start */
+            plimit = (char *)pfirst;
+        }
+        if (pnextFree + pvtData.msgNeeded > plimit) {
+            return 0;               /* No room */
         }
     }
-    if (!pnextSend) return 0;
-    pnextSend->message = (char *)pnextSend + sizeof(msgNode);
+    pnextSend = (msgNode *)pnextFree;
+    pnextSend->message = pnextFree + sizeof(msgNode);
     pnextSend->length = 0;
     return pnextSend;
 }
@@ -551,14 +546,15 @@ static char *msgbufGetFree(int noConsoleMessage)
 {
     msgNode *pnextSend;
 
-    epicsMutexMustLock(pvtData.msgQueueLock);
+    if (epicsMutexLock(pvtData.msgQueueLock) != epicsMutexLockOK)
+        return 0;
+
     if ((ellCount(&pvtData.msgQueue) == 0) && pvtData.missedMessages) {
         int nchar;
 
         pnextSend = msgbufGetNode();
         nchar = sprintf(pnextSend->message,
-            "errlog = %d messages were discarded\n",
-            pvtData.missedMessages);
+            "errlog: %d messages were discarded\n", pvtData.missedMessages);
         pnextSend->length = nchar + 1;
         pvtData.missedMessages = 0;
         ellAdd(&pvtData.msgQueue, &pnextSend->node);
@@ -567,7 +563,7 @@ static char *msgbufGetFree(int noConsoleMessage)
     if (pnextSend) {
         pnextSend->noConsoleMessage = noConsoleMessage;
         pnextSend->length = 0;
-        return pnextSend->message;
+        return pnextSend->message;  /* NB: msgQueueLock is still locked */
     }
     ++pvtData.missedMessages;
     epicsMutexUnlock(pvtData.msgQueueLock);

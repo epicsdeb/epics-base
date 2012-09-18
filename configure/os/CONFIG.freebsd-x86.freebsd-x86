@@ -1,4 +1,4 @@
-# CONFIG.freebsd-x86.freebsd-x86,v 1.1.2.2 2007/12/11 20:22:05 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 #
 # Definitions for freebsd-x86 host - freebsd-x86 target builds
 # Sites may override these definitions in CONFIG_SITE.freebsd-x86.freebsd-x86

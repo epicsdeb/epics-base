@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* devMbbiDirectSoftRaw.c,v 1.11.2.1 2008/08/06 22:11:50 anj Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Original Authors: Bob Dalesio and Matthew Needes
  *      Date: 10-08-93

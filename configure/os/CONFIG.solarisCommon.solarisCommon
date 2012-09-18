@@ -1,6 +1,6 @@
 # CONFIG.solarisCommon.solarisCommon
 #
-# CONFIG.solarisCommon.solarisCommon,v 1.1.2.9 2009/05/07 16:16:13 jba Exp
+# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
 # This file is maintained by the build community.
 #
 # Definitions for solaris-sparc host - solaris-sparc target build
@@ -57,6 +57,10 @@ OP_SYS_LDFLAGS += -z ignore -z combreloc -z lazyload
 # when including headers created during win32 build.
 #COMPILE_FILTER.c = 2>&1 | $(EPICS_BASE)/configure/tools/filterWarnings.pl
 #COMPILE_FILTER.cpp = $(COMPILE_FILTER.c)
+
+# Header dependency file generation command
+HDEPENDS_METHOD=CMD 
+HDEPENDSCMD = $(if $(filter .c,$(suffix $<)),$(COMPILE.c),$(COMPILE.cpp)) -xM1 $< >$*$(DEP)
 
 #--------------------------------------------------
 # Allow site overrides

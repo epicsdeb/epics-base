@@ -1,5 +1,5 @@
 #
-# CONFIG_SITE.cygwin-x86.cygwin-x86,v 1.1.2.4 2009/07/21 17:11:02 jba Exp
+# Revision-Id: jba@aps.anl.gov-20101109213708-vcvrlsgrj9nv2lmp
 #
 # Site Specific Configuration Information
 # Only the local epics system manager should modify this file
@@ -10,6 +10,7 @@
 #
 
 -include $(TOP)/configure/os/CONFIG_SITE.Common.Common
+-include $(TOP)/configure/os/CONFIG_SITE.win32-x86.win32-x86
 
 # ---------- java definitions
 JAVA_DIR=c:/j2sdk1.4.1_01
@@ -29,11 +30,11 @@ IDL = /usr/local/idl
 #  IDL=$(IDL)/external/rpc is the sun4 version
 IDLRPC = $(IDL)/external/rpc.solaris
 
-X11_LIB = c:/cygwin/lib
-X11_INC = c:/cygwin/include
+#X11_LIB = c:/cygwin/lib
+#X11_INC = c:/cygwin/include
 
-MOTIF_LIB = $(X11_LIB)
-MOTIF_INC = $(X11_INC)
+#MOTIF_LIB = $(X11_LIB)
+#MOTIF_INC = $(X11_INC)
 
 OPENWIN =
 INTERVIEWS_BIN =

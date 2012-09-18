@@ -9,7 +9,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* osdSock.c */
-/* epicsSocketConvertErrnoToString.cpp,v 1.2 2003/04/24 17:09:58 jhill Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  *      Author:		Jeff Hill 
  *      Date:          	04-05-94 

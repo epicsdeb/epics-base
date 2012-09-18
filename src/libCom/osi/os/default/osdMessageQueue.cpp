@@ -8,12 +8,15 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      osdMessageQueue.cpp,v 1.5.2.1 2003/05/29 03:10:14 norume Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  W. Eric Norum
  *              norume@aps.anl.gov
  *              630 252 4793
  */
+
+#include <stdexcept>
+#include <string.h>
 
 #define epicsExportSharedSymbols
 #include "epicsMessageQueue.h"
@@ -21,8 +24,6 @@
 #include <epicsAssert.h>
 #include <epicsEvent.h>
 #include <epicsMutex.h>
-#include <stdexcept>
-#include <string.h>
 
 /*
  * Event cache

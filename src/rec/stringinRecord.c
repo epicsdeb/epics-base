@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* stringinRecord.c,v 1.13.2.3 2009/07/08 18:14:11 anj Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recStringin.c - Record Support Routines for Stringin records */
 /*
@@ -93,6 +93,7 @@ static long readValue(stringinRecord *);
 
 static long init_record(stringinRecord *prec, int pass)
 {
+    STATIC_ASSERT(sizeof(prec->oval)==sizeof(prec->val));
     struct stringindset *pdset;
     long status;
 
@@ -119,6 +120,7 @@ static long init_record(stringinRecord *prec, int pass)
     if( pdset->init_record ) {
 	if((status=(*pdset->init_record)(prec))) return(status);
     }
+    strcpy(prec->oval,prec->val);
     return(0);
 }
 
@@ -157,9 +159,9 @@ static void monitor(stringinRecord *prec)
     unsigned short  monitor_mask;
 
     monitor_mask = recGblResetAlarms(prec);
-    if(strncmp(prec->oval,prec->val,sizeof(prec->val))) {
+    if(strcmp(prec->oval,prec->val)) {
 	monitor_mask |= DBE_VALUE|DBE_LOG;
-	strncpy(prec->oval,prec->val,sizeof(prec->val));
+	strcpy(prec->oval,prec->val);
     }
     if (prec->mpst == stringinPOST_Always)
 	monitor_mask |= DBE_VALUE;

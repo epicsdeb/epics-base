@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* dfanoutRecord.c,v 1.20.2.4 2009/04/03 14:40:13 lange Exp */
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* recDfanout.c - Record Support Routines for Dfanout records */
 /*

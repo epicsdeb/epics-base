@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      epicsTimer.cpp,v 1.38.2.3 2009/05/11 22:50:06 jhill Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -17,6 +17,8 @@
 
 #include <string>
 #include <stdexcept>
+
+#include "epicsMath.h"
 
 #define epicsExportSharedSymbols
 #include "epicsTimer.h"
@@ -127,7 +129,7 @@ epicsShareFunc epicsTimerNotify::expireStatus::expireStatus
         throw std::logic_error 
             ( "no timer restart was requested, but a delay was specified?" );
     }
-    if ( this->delay < 0.0 ) {
+    if ( this->delay < 0.0 || !finite(this->delay) ) {
         throw std::logic_error 
             ( "timer restart was requested, but a negative delay was specified?" );
     }
@@ -135,12 +137,12 @@ epicsShareFunc epicsTimerNotify::expireStatus::expireStatus
 
 epicsShareFunc bool epicsTimerNotify::expireStatus::restart () const
 {
-    return this->delay >= 0.0;
+    return this->delay >= 0.0 && finite(this->delay);
 }
 
 epicsShareFunc double epicsTimerNotify::expireStatus::expirationDelay () const
 {
-    if ( this->delay < 0.0 ) {
+    if ( this->delay < 0.0 || !finite(this->delay) ) {
         throw std::logic_error 
             ( "no timer restart was requested, but you are asking for a restart delay?" );
     }

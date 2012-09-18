@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* db_field_log.h,v 1.5 2002/07/12 21:33:47 jba Exp
+/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  * 	Author: 	Jeffrey O. Hill 
  *      Date:            4-1-89
  */

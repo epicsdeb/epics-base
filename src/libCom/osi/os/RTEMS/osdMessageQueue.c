@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      osdMessageQueue.c,v 1.2.2.7 2009/04/24 17:01:39 anj Exp
+ *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
  *
  *      Author  W. Eric Norum
  *              norume@aps.anl.gov

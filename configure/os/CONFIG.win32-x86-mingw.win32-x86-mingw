@@ -1,6 +1,6 @@
 #  CONFIG.win32-x86-mingw.win32-x86-mingw
 #
-# CONFIG.win32-x86-mingw.win32-x86-mingw,v 1.1.2.8 2009/03/10 16:44:28 jba Exp
+# Revision-Id: jba@aps.anl.gov-20101108141612-a8fp39dp7wnk5hu5
 #
 # Definitions for win32-x86-mingw host - win32-x86-mingw target builds
 # Sites may override these definitions in CONFIG_SITE.win32-x86-mingw.win32-x86-mingw
@@ -25,8 +25,5 @@ LOADABLE_SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
 
 # Override linking with gcc library from CONFIG.gnuCommon
 GNU_LDLIBS_YES =
-
-OPT_CFLAGS_NO = -O3 -g
-OPT_CXXFLAGS_NO = -O3 -g
 
 OP_SYS_LDLIBS = -lws2_32 
