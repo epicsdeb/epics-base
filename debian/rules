@@ -35,7 +35,8 @@ USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRep
 
 override_dh_install:
 
-	rm -f debian/usr/lib/epics/bin/linux-*/*.o
+	# some object code is getting installed somehow
+	rm -f debian/tmp/usr/lib/epics/bin/linux-*/*.o
 
 	# relocate configure/
 	# copy to /etc/epics/configure and /usr/share/epics-dev/configure
