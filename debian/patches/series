@@ -20,3 +20,5 @@
 0020-install-makeInstallDir.pl.patch
 0021-for-init-scripts-ensure-abs.-path-is-used.patch
 0022-don-t-auto-run-test-epicsMessageQueueTest-during-pac.patch
+0023-SKIP_HOST-build-option.patch
+0024-rtems-use-macro-for-BIN2BOOT.patch
