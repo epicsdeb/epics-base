@@ -1,0 +1,2 @@
+epics-perl: unstripped-binary-or-object ./usr/lib/epics/lib/linux-x86-debug/libCap5.so
+# Don't know why dh_strip is leaving this alone?

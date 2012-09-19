@@ -1,0 +1,182 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DH_VERBOSE=1
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+BMAKEFLAGS += -j$(NUMJOBS)
+endif
+
+EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+
+# chop out the source version from Changelog (ie 3.14.11)
+# Taken from CDBS
+DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
+DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
+SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 1 -d '-')
+DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 2- -d '-')
+
+DEBUG_TAGETS=$(EPICS_HOST_ARCH)-debug
+TARGETS+=$(DEBUG_TAGETS)
+
+# Since we are disabling RPATH this is needed to ensure that
+# we don't accidentally pick up things from other versions
+# of Base installed on the build host
+DEB_MAKE_ENVVARS += PATH="$(CURDIR)/bin/$(EPICS_HOST_ARCH):$$PATH"
+DEB_MAKE_ENVVARS += LD_LIBRARY_PATH="$(CURDIR)/lib/$(EPICS_HOST_ARCH):$$LD_LIBRARY_PATH"
+
+DEB_MAKE_MAKEVARS += USE_RPATH=NO
+DEB_MAKE_MAKEVARS += CROSS_COMPILER_TARGET_ARCHS="$(TARGETS)"
+# ABS_INSTALL_DIR is used in the 'softIoc' executable
+DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/lib/epics
+DEB_MAKE_MAKEVARS += EPICS_SITE_VERSION="$(DEBV)"
+
+# Prevent CFLAGS and similar from being passed to EPICS since
+# this will break cross-builds of things.
+DEB_MAKE_INVOKE  = $(DEB_MAKE_ENVVARS) $(MAKE) $(DEB_MAKE_MAKEVARS)
+
+build: build-stamp
+
+build-stamp:
+	dh build --before configure
+
+	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all
+
+	dh build --after auto_build
+
+	touch $@
+
+clean:
+	dh clean --before auto_clean
+
+	$(DEB_MAKE_INVOKE) distclean
+
+	dh clean --after auto_clean
+
+# All the libraries which are part of Base
+epics_libs+= asHost asIoc ca cas Com
+epics_libs+= dbIoc dbStaticHost dbStaticIoc dbtoolsIoc
+epics_libs+= gdd miscIoc recIoc registryIoc
+epics_libs+= rsrvIoc softDevIoc testDevIoc
+
+prefix=debian/tmp/usr
+epicsbase=$(prefix)/lib/epics
+
+epicsbin=$(epicsbase)/bin/$(EPICS_HOST_ARCH)
+epicslib=$(epicsbase)/lib/$(EPICS_HOST_ARCH)
+
+## Shared libraries
+
+# lib*.so.3.14.11
+epics_libfiles = $(patsubst %,$(epicslib)/lib%.so.$(SOV),$(epics_libs))
+# lib*.so
+epics_linklib  = $(patsubst %,$(epicslib)/lib%.so,$(epics_libs))
+
+## Utilities
+
+epics_utils+= caget cainfo camonitor caput casw caRepeater
+#epics_utils+= iocLogServer softIoc
+
+epics_bins = $(patsubst %,debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/%,$(epics_utils))
+
+install: build
+	# Why is install trying to re-run build???
+	dh install --before auto_install
+
+	$(DEB_MAKE_INVOKE) $(BMAKEFLAGS) all INSTALL_LOCATION=$(CURDIR)/debian/tmp/usr/lib/epics
+
+	# Copy host sonamed libraries to /usr/lib
+	# Leave a symlink in /usr/lib/epics/lib/$(EPICS_HOST_ARCH)
+	
+	install -d $(prefix)/lib
+	mv -t $(prefix)/lib $(epics_libfiles)
+	for ff in $(epics_libs); do \
+		rm -f $(epicslib)/lib$$ff.so; \
+		ln -s ../../../../lib/lib$$ff.so.$(SOV) $(epicslib)/lib$$ff.so; \
+	done
+
+	install -d $(prefix)/bin
+	install -d $(epicsbase)/startup
+
+	install -m 755 -t $(epicsbase)/startup \
+startup/EpicsHostArch startup/EpicsHostArch.pl \
+startup/Site.profile
+
+	# User can override this with a command line option
+	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" \
+        $(epicsbin)/makeBaseApp.pl
+
+	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/makeBaseApp.pl $(prefix)/bin/makeBaseApp
+	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/makeBaseExt.pl $(prefix)/bin/makeBaseExt
+	ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/softIoc $(prefix)/bin/softIoc
+
+	install -d $(prefix)/share
+	mv $(epicsbase)/lib/perl $(prefix)/share/perl5
+	# This path is used by CA.pm
+	ln -s ${EPICS_HOST_ARCH} $(epicsbase)/lib/host
+
+	# Move some utilities to /usr/bin
+	# Leave a symlink in /usr/lib/epics/bin/$(EPICS_HOST_ARCH)
+	install -d $(prefix)/bin
+	mv -t $(prefix)/bin $(epics_bins)
+	for ff in $(epics_bins); do rm -f $$ff; ln -s ../../../../bin/`basename $$ff` $$ff; done
+
+	install -d $(CURDIR)/debian/tmp/usr/lib/epics
+	cp -r $(CURDIR)/config $(CURDIR)/debian/tmp/usr/lib/epics/
+
+	# relocate configure/
+	# copy to /etc/epics/configure and /usr/share/epics-dev/configure
+	# populated /usr/lib/epics/configure with symlinks to /etc/epics/configure
+	# except for conf.d and rules.d
+
+	install -d $(CURDIR)/debian/tmp/etc/epics
+	install -d $(CURDIR)/debian/tmp/usr/share/epics-dev
+
+	cp -dR $(prefix)/lib/epics/configure $(CURDIR)/debian/tmp/etc/epics/
+	mv $(prefix)/lib/epics/configure $(CURDIR)/debian/tmp/usr/share/epics-dev/configure
+
+	install -d $(prefix)/lib/epics/configure
+
+	cd $(CURDIR)/debian/tmp/etc/epics/configure && for ff in * ; do \
+		ln -s /etc/epics/configure/$$ff $(CURDIR)/$(prefix)/lib/epics/configure/$$ff; done
+
+	install -d debian/tmp/etc/epics/configure/conf.d
+	echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $(TARGETS)" > debian/tmp/etc/epics/configure/conf.d/01debug.make
+	dh install --after auto_install --before dh_install
+
+	dh_install --fail-missing
+
+	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
+
+	dh install --after dh_install --before dh_installdocs
+
+	dh_installdocs -A README
+
+	dh install --after dh_installdocs
+
+binary-arch: install
+	dh binary-arch --before dh_strip
+
+	# prevent debug and cross targets from being stripped
+	dh_strip -a --dbg-package=libepics$(SOV)-dbg
+
+	dh binary-arch --after dh_strip --before makeshlibs
+
+	dh_makeshlibs -Nepics-dev -a
+	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
+	dh_makeshlibs -pepics-dev -Xusr/lib/epics
+
+	dh binary-arch --after makeshlibs --before shlibdeps
+
+	dh_shlibdeps -Nlibepics$(SOV) -a
+	# Prevent self dependency
+	#  This would happen because the package provides several dependent libraries
+	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
+
+	dh binary-arch --after shlibdeps
+
+binary-indep: install
+	dh binary-indep
+
+binary: binary-arch binary-indep

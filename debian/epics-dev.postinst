@@ -1,0 +1,14 @@
+#!/bin/bash -e
+
+if [ "$1" = "configure" ]
+then
+    # move any user files to the new location (added in 3.14.11-7)
+    if [ -d /usr/lib/epics/configure/os -a ! -h /usr/lib/epics/configure/os -a -d /etc/epics/configure/os ]
+    then
+        (cd /usr/lib/epics/configure/os && tar -c .) | (cd /etc/epics/configure/os && tar -x)
+        rmdir /usr/lib/epics/configure/os
+        ln -s /etc/epics/configure/os /usr/lib/epics/configure/os
+    fi
+fi
+
+#DEBHELPER#

@@ -1,0 +1,113 @@
+Source: epics-base
+Section: devel
+Priority: extra
+Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
+Build-Depends: debhelper (>= 7),
+               libreadline6-dev, libncurses5-dev, perl,
+Standards-Version: 3.8.0
+Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
+Homepage: http://www.aps.anl.gov/epics/
+
+Package: libepics3.14.11
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: epics-catools
+Conflicts: epics-perl (<= 3.14.10-7), epics-libs
+Provides: epics-libs, libepics
+Replaces: epics-libs
+Description: EPICS Base libraries for clients and servers
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ This package contains host system shared libraries for clients and IOCs.
+
+Package: libepics3.14.11-dbg
+Section: debug
+Architecture: any
+Depends: libepics3.14.11 (= ${binary:Version})
+Provides: libepics-dbg
+Description: Files needed to develop new EPICS applications
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Debug symbols for EPICS shared libraries and utilities.
+
+Package: epics-dev
+Architecture: any
+Depends: libepics3.14.11 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+         epics-perl (= ${binary:Version}),
+         libreadline6-dev,
+        ${shlibs:Depends}, ${misc:Depends}
+Recommends: epics-msi
+Suggests: epics-doc
+Conflicts: epics-catools (<= 3.14.11-6)
+Description: Files needed to develop new EPICS applications
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Libraries, headers, and utilities needed to develop applications
+ targeted to the host system.
+
+Package: epics-compat-dev
+Architecture: any
+Depends: epics-dev (= ${binary:Version}),
+         epics-perl (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Suggests: epics-doc
+Description: Files needed to develop new EPICS applications
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ This package contains additional files needed for compatibility with
+ EPICS 3.13.x series.
+
+Package: epics-pcas-dev
+Architecture: all
+Depends: epics-dev (= ${binary:Version}),
+        ${shlibs:Depends}, ${misc:Depends}
+Description: Files needed to develop new EPICS applications
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Private headers for the portable CA server needed by some special applications
+
+Package: epics-catools
+Section: admin
+Architecture: any
+Depends: libepics3.14.11 (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Description: Command line utilities for EPICS
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS utilities such as caget and caput as well as the caRepeater daemon.
+
+Package: epics-perl
+Architecture: any
+Depends: libepics3.14.11 (= ${binary:Version}),
+         ${shlibs:Depends}, ${perl:Depends}, ${misc:Depends}
+Conflicts: epics-libs (<= 3.14.10-7)
+Description: Perl bindings for EPICS
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Perl bindings for EPICS
+
+Package: epics-doc
+Architecture: all
+Depends: ${misc:Depends}
+Section: doc
+Description: EPICS documentation
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Documentation for EPICS Base
