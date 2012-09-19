@@ -1,0 +1,20 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:29:35 -0400
+Subject: [PATCH] rtems: mvme5500 needs libbspExt
+
+---
+ configure/os/CONFIG.Common.RTEMS-mvme5500 |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/configure/os/CONFIG.Common.RTEMS-mvme5500 b/configure/os/CONFIG.Common.RTEMS-mvme5500
+index 9fcc083..ab0ace1 100644
+--- a/configure/os/CONFIG.Common.RTEMS-mvme5500
++++ b/configure/os/CONFIG.Common.RTEMS-mvme5500
+@@ -22,4 +22,6 @@ define MUNCH_CMD
+ 	$(RTEMS_TOOLS)/bin/$(OBJCOPY_FOR_TARGET) -O binary $< $@
+ endef
+ 
++OP_SYS_LDLIBS += -lbspExt
++
+ include $(CONFIG)/os/CONFIG.Common.RTEMS
+-- 

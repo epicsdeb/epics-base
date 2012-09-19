@@ -1,0 +1,22 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:35:00 -0400
+Subject: [PATCH] install makeInstallDir.pl
+
+---
+ src/softIoc/Makefile |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/src/softIoc/Makefile b/src/softIoc/Makefile
+index 80989a4..b48e1cf 100644
+--- a/src/softIoc/Makefile
++++ b/src/softIoc/Makefile
+@@ -11,6 +11,8 @@ include $(TOP)/configure/CONFIG
+ 
+ PROD_IOC = softIoc
+ 
++PERL_SCRIPTS += makeInstallDir.pl
++
+ DBD += softIoc.dbd
+ softIoc_DBD += base.dbd
+ softIoc_DBD += dlload.dbd
+-- 

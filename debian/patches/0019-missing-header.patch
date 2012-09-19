@@ -1,0 +1,21 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:32:56 -0400
+Subject: [PATCH] missing header
+
+---
+ src/libCom/cxxTemplates/epicsSingleton.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/libCom/cxxTemplates/epicsSingleton.h b/src/libCom/cxxTemplates/epicsSingleton.h
+index 25e5037..9b1ff33 100644
+--- a/src/libCom/cxxTemplates/epicsSingleton.h
++++ b/src/libCom/cxxTemplates/epicsSingleton.h
+@@ -19,6 +19,7 @@
+ #define epicsSingleton_h
+ 
+ #include <new>
++#include <cstddef>
+ 
+ #include "shareLib.h"
+ #include "epicsAssert.h"
+-- 

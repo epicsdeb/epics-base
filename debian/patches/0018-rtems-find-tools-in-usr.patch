@@ -1,0 +1,24 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:32:46 -0400
+Subject: [PATCH] rtems: find tools in /usr
+
+---
+ configure/os/CONFIG_SITE.Common.RTEMS |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
+index 863f211..522499b 100644
+--- a/configure/os/CONFIG_SITE.Common.RTEMS
++++ b/configure/os/CONFIG_SITE.Common.RTEMS
+@@ -5,8 +5,8 @@
+ 
+ # Where to find RTEMS
+ #
+-RTEMS_VERSION=4.9.2
+-RTEMS_BASE=/usr/local/rtems/rtems-$(RTEMS_VERSION)
++RTEMS_VERSION=4.9
++RTEMS_BASE=/usr
+ 
+ # Cross-compile toolchain in $(RTEMS_TOOLS)/bin
+ #
+-- 
