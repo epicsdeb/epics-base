@@ -28,8 +28,8 @@ DEB_MAKE_ENVVARS += LD_LIBRARY_PATH="$(CURDIR)/lib/$(EPICS_HOST_ARCH):$$LD_LIBRA
 
 DEB_MAKE_MAKEVARS += USE_RPATH=NO
 DEB_MAKE_MAKEVARS += CROSS_COMPILER_TARGET_ARCHS="$(TARGETS)"
-# ABS_INSTALL_DIR is used in the 'softIoc' executable
-DEB_MAKE_MAKEVARS += ABS_INSTALL_DIR=/usr/lib/epics
+# FINAL_LOCATION is used in the 'softIoc' executable
+DEB_MAKE_MAKEVARS += FINAL_LOCATION=/usr/lib/epics
 DEB_MAKE_MAKEVARS += EPICS_SITE_VERSION="$(DEBV)"
 
 # Prevent CFLAGS and similar from being passed to EPICS since
