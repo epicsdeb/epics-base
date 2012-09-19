@@ -2,7 +2,7 @@ Source: epics-base
 Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7.0.50~), epics-debhelper (>= 6~),
+Build-Depends: debhelper (>= 7.0.50~), epics-debhelper (>= 8.6~),
                libreadline6-dev, libncurses5-dev, perl,
 Standards-Version: 3.8.0
 Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
