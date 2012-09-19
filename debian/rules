@@ -59,9 +59,14 @@ override_dh_install:
 
 	install -d debian/tmp/usr/bin
 
-	# install executable sym-links to /usr/bin
-	for B in $(USRBINS); do ln -s ../lib/epics/bin/$(EPICS_HOST_ARCH)/$$B debian/tmp/usr/bin/$$B; done
+	# install executable to /usr/bin
+	for B in $(USRBINS); do mv debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/$$B debian/tmp/usr/bin/$$B; done
+	# remove extension from perl scripts
 	for P in debian/tmp/usr/bin/*.pl; do mv $$P $${P%.pl};done
+	# leave sym-links to /usr/bin in /usr/lib/epics/bin/$EPICS_HOST_ARCH
+	for B in debian/tmp/usr/bin/*; \
+		do ln -s ../../../../bin/`basename $$B` debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/`basename $$B`; \
+	done
 
 	# install perl module cap5
 	install -d debian/tmp/usr/share
