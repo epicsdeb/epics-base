@@ -22,3 +22,4 @@
 0022-don-t-auto-run-test-epicsMessageQueueTest-during-pac.patch
 0023-SKIP_HOST-build-option.patch
 0024-rtems-use-macro-for-BIN2BOOT.patch
+0025-backport-msi-join-branch-from-3.15.patch
