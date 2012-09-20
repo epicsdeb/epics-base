@@ -35,6 +35,19 @@ Description: Files needed to develop new EPICS applications
  .
  Debug symbols for EPICS shared libraries and utilities.
 
+Package: ioclogserver
+Section: admin
+Architecture: any
+Depends: libepics3.14.12 (= ${binary:Version}),
+Description: Log recording daemon for EPICS IOCS
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ The IOC log server listens for network log messages sent from
+ IOC.  This is used by the caputlog support module to collect
+ messages relating to PV value changes.
+
 Package: epics-dev
 Architecture: any
 Depends: libepics3.14.12 (= ${binary:Version}), epics-catools (= ${binary:Version}),

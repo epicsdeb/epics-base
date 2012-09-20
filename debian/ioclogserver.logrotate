@@ -1,0 +1,8 @@
+/var/log/epics/epics.log {
+    rotate 14
+    compress
+    daily
+    missingok
+    size 10000000
+    postrotate /usr/bin/killall -HUP iocLogServer
+}

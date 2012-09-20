@@ -31,7 +31,7 @@ override_dh_auto_build:
 
 #override_dh_auto_test: # skip for development
 
-USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi
+USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer
 
 override_dh_install:
 
@@ -99,3 +99,7 @@ override_dh_shlibdeps:
 	# Prevent self dependency
 	#  This would happen because the package provides several dependent libraries
 	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
+
+# Failure to start does not halt package install
+override_dh_installinit:
+	dh_installinit --error-handler=true
