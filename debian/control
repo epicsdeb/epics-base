@@ -101,6 +101,13 @@ Description: Perl bindings for EPICS
  .
  Perl bindings for EPICS
 
+Package: epics-msi
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libepics3.14.12 (= ${binary:Version}),
+Description: EPICS Macro Substitution and Include tool
+ MSI is a general purpose macro substitution/include tool.
+ It accepts as input an ascii template file.
+
 Package: epics-doc
 Architecture: all
 Depends: ${misc:Depends}

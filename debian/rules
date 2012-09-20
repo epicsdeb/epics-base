@@ -31,7 +31,7 @@ override_dh_auto_build:
 
 #override_dh_auto_test: # skip for development
 
-USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw
+USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi
 
 override_dh_install:
 
@@ -74,6 +74,10 @@ override_dh_install:
 	mv debian/tmp/usr/lib/epics/lib/perl debian/tmp/usr/share/perl5
 	# This path is used by CA.pm
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
+
+	# include MSI documentation with executable
+	install -d debian/epics-msi/usr/share/doc/epics-msi
+	mv debian/tmp/usr/lib/epics/html/msi.html debian/epics-msi/usr/share/doc/epics-msi
 
 	dh_install --fail-missing
 
