@@ -13,9 +13,7 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-catools
-Conflicts: epics-perl (<= 3.14.10-7), epics-libs
-Provides: epics-libs, libepics
-Replaces: epics-libs
+Conflicts: epics-perl (<= 3.14.10-7)
 Description: EPICS Base libraries for clients and servers
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
