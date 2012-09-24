@@ -54,7 +54,7 @@ Depends: libepics3.14.12 (= ${binary:Version}), epics-catools (= ${binary:Versio
         ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-msi
 Suggests: epics-doc
-Conflicts: epics-catools (<= 3.14.11-6)
+Conflicts: epics-catools (<= 3.14.11-6), epics-msi (< 3),
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
