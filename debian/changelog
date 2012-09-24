@@ -1,3 +1,10 @@
+epics-base (3.14.12.2-2) unstable; urgency=low
+
+  * fix ioclogserver logrotate config
+  * debian/control: remove legecy epics-libs name from libepics# package
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 24 Sep 2012 15:31:58 -0400
+
 epics-base (3.14.12.2-1) unstable; urgency=low
 
   * New upstream version
