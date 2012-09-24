@@ -1,3 +1,9 @@
+epics-base (3.14.12.2-3) unstable; urgency=low
+
+  * add conflicts for old epics-msi
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 24 Sep 2012 16:05:18 -0400
+
 epics-base (3.14.12.2-2) unstable; urgency=low
 
   * fix ioclogserver logrotate config
