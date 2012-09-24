@@ -4,5 +4,7 @@
     daily
     missingok
     size 10000000
-    postrotate /usr/bin/killall -HUP iocLogServer
+    postrotate
+        /usr/bin/killall -HUP iocLogServer
+    endscript
 }
