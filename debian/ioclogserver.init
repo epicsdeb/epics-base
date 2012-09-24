@@ -33,7 +33,7 @@ export EPICS_IOC_LOG_FILE_NAME
 export EPICS_IOC_LOG_FILE_LIMIT
 
 PID_FILE="/var/run/$NAME.pid"
-SSD_OPTS="--quiet --background --make-pidfile --pidfile $PID_FILE"
+SSD_OPTS="--quiet --make-pidfile --pidfile $PID_FILE"
 SSD_OPTS="$SSD_OPTS --user $RUN_AS_USER --chuid $RUN_AS_USER"
 SSD_OPTS="$SSD_OPTS --exec $DAEMON"
 
@@ -46,7 +46,7 @@ set -e
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
-	start-stop-daemon --start $SSD_OPTS -- $DAEMON_OPTS
+	start-stop-daemon --start --background $SSD_OPTS -- $DAEMON_OPTS
 	echo "$NAME."
 	;;
   stop)
@@ -62,12 +62,13 @@ case "$1" in
 	echo -n "Restarting $DESC: "
 	start-stop-daemon --stop --oknodo $SSD_OPTS
 	sleep 1
-	start-stop-daemon --start $SSD_OPTS -- $DAEMON_OPTS
+	start-stop-daemon --start --background $SSD_OPTS -- $DAEMON_OPTS
 	echo "$NAME."
 	;;
   status)
 	status_of_proc -p "$PID_FILE"
 	exit $?
+	;;
   *)
 	N=/etc/init.d/$NAME
 	echo "Usage: $N {start|stop|restart|force-reload}" >&2

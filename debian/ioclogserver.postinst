@@ -9,7 +9,7 @@ case "$1" in
     if ! getent passwd scannerapp > /dev/null
     then
         echo "Creating system account '$ACCT'"
-        if ! adduser --system --quiet --group --disable-login \
+        if ! adduser --system --quiet --group --disabled-login \
           --home "$LOGDIR" --no-create-home --force-badname "$ACCT"
         then
             echo "Could not create account!  Service will not start."
