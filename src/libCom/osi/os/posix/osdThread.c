@@ -57,6 +57,7 @@ typedef struct commonAttr{
     int                maxPriority;
     int                minPriority;
     int                schedPolicy;
+    int                usePolicy;
 } commonAttr;
 
 typedef struct epicsThreadOSD {
@@ -79,6 +80,7 @@ typedef struct epicsThreadOSD {
 typedef struct {
     int min_pri, max_pri;
     int policy;
+    int ok;
 } priAvailable;
 #endif
 
@@ -137,6 +139,8 @@ static void setSchedulingPolicy(epicsThreadOSD *pthreadInfo,int policy)
 {
 #if defined (_POSIX_THREAD_PRIORITY_SCHEDULING)
     int status;
+
+    if(!pcommonAttr->usePolicy) return;
 
     status = pthread_attr_getschedparam(
         &pthreadInfo->attr,&pthreadInfo->schedParam);
@@ -232,19 +236,30 @@ int           min = sched_get_priority_min(prm->policy);
 int           max = sched_get_priority_max(prm->policy);
 int           low, try;
 
-    prm->min_pri = -1;
-    prm->max_pri = -1;
-
     if ( -1 == min || -1 == max ) {
-        /* something is very wrong... */
+        /* something is very wrong; maintain old behavior
+         * (warning message if sched_get_priority_xxx() fails
+         * and use default policy's sched_priority [even if
+         * that is likely to cause epicsThreadCreate to fail
+         * because that priority is not suitable for SCHED_FIFO]).
+         */
+        prm->min_pri = prm->max_pri = -1;
         return 0;
     }
+
 
     if ( try_pri(min, prm->policy) ) {
         /* cannot create thread at minimum priority;
          * probably no permission to use SCHED_FIFO
-         * at all.
+         * at all. However, we still must return
+         * a priority range accepted by the SCHED_FIFO
+         * policy. Otherwise, epicsThreadCreate() cannot
+         * detect the unsufficient permission (EPERM)
+         * and fall back to a non-RT thread (because
+         * pthread_attr_setschedparam would fail with
+         * EINVAL due to the bad priority).
          */
+        prm->min_pri = prm->max_pri = min;
         return 0;
     }
 
@@ -267,6 +282,7 @@ int           low, try;
 
     prm->min_pri = min;
     prm->max_pri = try_pri(max, prm->policy) ? max-1 : max;
+    prm->ok = 1;
 
     return 0;
 }
@@ -279,6 +295,7 @@ void         *dummy;
 int          status;
 
     arg.policy = a_p->schedPolicy;
+    arg.ok = 0;
 
     status = pthread_create(&id, 0, find_pri_range, &arg);
     checkStatusQuit(status, "pthread_create","epicsThreadInit");
@@ -288,6 +305,7 @@ int          status;
 
     a_p->minPriority = arg.min_pri;
     a_p->maxPriority = arg.max_pri;
+    a_p->usePolicy = arg.ok;
 }
 #endif
 
@@ -593,6 +611,7 @@ epicsShareFunc void epicsShareAPI epicsThreadSetPriority(epicsThreadId pthreadIn
     pthreadInfo->osiPriority = priority;
     if(!pthreadInfo->isFifoScheduled) return;
 #if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+    if(!pcommonAttr->usePolicy) return;
     pthreadInfo->schedParam.sched_priority = getOssPriorityValue(pthreadInfo);
     status = pthread_attr_setschedparam(
         &pthreadInfo->attr,&pthreadInfo->schedParam);
