@@ -1,3 +1,14 @@
+epics-base (3.14.11-12) squeeze-2012A; urgency=low
+
+  * Backport fixes from 3.14 branch
+    aSubRecord
+      Changing the number of elements in a VALx array triggers monitors
+      Post monitors on the NEVx fields, following EFLG
+      Remove artificial 10MB limit on array sizes
+    rec: Fix problem with NAN in MLST/ALST fields
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 25 Oct 2012 17:14:58 -0400
+
 epics-base (3.14.11-11) unstable; urgency=low
 
   * explicit ncurses dep
