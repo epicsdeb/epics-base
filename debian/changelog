@@ -1,3 +1,16 @@
+rtems-epics (3.14.11-12) squeeze-2012A; urgency=low
+
+  [ Michael Davidsaver ]
+  * update RT prio patch
+  * explicit ncurses dep
+  * On linux don't attempt RT if not supported/permitted
+
+  [ Andrew Johnson ]
+  * rec/aSub: Fixes from Michael Davidsaver
+  * rec: Fix problem with NAN in MLST/ALST fields
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 25 Oct 2012 17:36:19 -0400
+
 rtems-epics (3.14.11-9) unstable; urgency=low
 
   [ Till Straumann ]
