@@ -1,3 +1,14 @@
+rtems-epics (3.14.11-13) squeeze-2012A; urgency=low
+
+  [ Andrew Johnson ]
+  * util: Support logrotate with iocLogServer
+
+  [ Michael Davidsaver ]
+  * Revert "rec/aSub: Fixes from Michael Davidsaver"
+    This change breaks ABI compatibility.
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 05 Dec 2012 16:19:59 -0500
+
 rtems-epics (3.14.11-12) squeeze-2012A; urgency=low
 
   [ Michael Davidsaver ]
