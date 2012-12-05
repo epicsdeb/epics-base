@@ -903,39 +903,34 @@ static void serviceSighupRequest(void *pParam)
 	}
 
 	/*
-	 * If it's changed, open the new file.
+	 * Try (re)opening the file.
 	 */
-	if (strcmp(ioc_log_file_name, pserver->outfile) == 0) {
+	status = openLogFile(pserver);
+	if(status<0){
 		fprintf(stderr,
-			"iocLogServer: log file name unchanged; not re-opened\n");
-	}
-	else {
+			"File access problems to `%s' because `%s'\n", 
+			ioc_log_file_name,
+			strerror(errno));
+		/* Revert to old filename */
+		strcpy(ioc_log_file_name, pserver->outfile);
 		status = openLogFile(pserver);
 		if(status<0){
 			fprintf(stderr,
-				"File access problems to `%s' because `%s'\n", 
+				"File access problems to `%s' because `%s'\n",
 				ioc_log_file_name,
 				strerror(errno));
-			strcpy(ioc_log_file_name, pserver->outfile);
-			status = openLogFile(pserver);
-			if(status<0){
-				fprintf(stderr,
-                                "File access problems to `%s' because `%s'\n",
-                                ioc_log_file_name,
-                                strerror(errno));
-				return;
-			}
-			else {
-				fprintf(stderr,
-				"iocLogServer: re-opened old log file %s\n",
-				ioc_log_file_name);
-			}
+			return;
 		}
 		else {
 			fprintf(stderr,
-				"iocLogServer: opened new log file %s\n",
+				"iocLogServer: re-opened old log file %s\n",
 				ioc_log_file_name);
 		}
+	}
+	else {
+		fprintf(stderr,
+			"iocLogServer: opened new log file %s\n",
+			ioc_log_file_name);
 	}
 }
 
