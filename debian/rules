@@ -30,8 +30,11 @@ binary-arch binary-indep: install
 binary: binary-arch binary-indep
 
 override_dh_auto_build:
-	dh_auto_build
+	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
+
+override_dh_auto_install:
+	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics
 
 #override_dh_auto_test: # skip for development
 
