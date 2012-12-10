@@ -107,6 +107,9 @@ override_dh_shlibdeps:
 	#  This would happen because the package provides several dependent libraries
 	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
 
+# We provide our own deps
+override_dh_epicsdep:
+
 # Failure to start does not halt package install
 override_dh_installinit:
 	dh_installinit --error-handler=true
