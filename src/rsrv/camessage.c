@@ -1987,6 +1987,15 @@ static int clear_channel_reply ( caHdrLargeArray *mp,
      cas_commit_msg ( client, 0u );
      SEND_UNLOCK(client);
      
+     /*
+      * remove from access control list
+      */
+     status = asRemoveClient(&pciu->asClientPVT);
+     if(status != 0 && status != S_asLib_asNotActive){
+         errMessage(status, RECORD_NAME(&pciu->addr));
+         return RSRV_ERROR;
+     }
+
      epicsMutexMustLock ( client->chanListLock );
      if ( pciu->state == rsrvCS_inService || 
             pciu->state == rsrvCS_pendConnectResp  ) {
@@ -2005,15 +2014,6 @@ static int clear_channel_reply ( caHdrLargeArray *mp,
         return RSRV_ERROR;
      }
      epicsMutexUnlock( client->chanListLock );
-     
-     /*
-      * remove from access control list
-      */
-     status = asRemoveClient(&pciu->asClientPVT);
-     if(status != 0 && status != S_asLib_asNotActive){
-         errMessage(status, RECORD_NAME(&pciu->addr));
-         return RSRV_ERROR;
-     }
      
      LOCK_CLIENTQ;
      status = bucketRemoveItemUnsignedId (pCaBucket, &pciu->sid);
