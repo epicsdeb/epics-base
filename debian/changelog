@@ -1,3 +1,11 @@
+epics-base (3.14.11-15) squeeze-2012A; urgency=low
+
+  * rec/aSub: Remove artificial limit on array sizes
+    Reapply part of "rec/aSub: Fixes from Michael Davidsaver"
+    which does not effect ABI.
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 08 Jan 2013 11:27:39 -0500
+
 epics-base (3.14.11-14) squeeze-2012A; urgency=low
 
   [ Andrew Johnson ]
