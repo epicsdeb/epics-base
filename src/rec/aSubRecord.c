@@ -91,7 +91,6 @@ static void monitor(aSubRecord *);
 static long do_sub(aSubRecord *);
 
 #define NUM_ARGS        21
-#define MAX_ARRAY_SIZE 10000000
 
 /* These are the names of the Input fields */
 static const char *Ifldnames[] = {
@@ -234,14 +233,7 @@ static long initFields(epicsEnum16 *pft, epicsUInt32 *pno, epicsUInt32 *pne,
 
         flen = dbValueSize(*pft);
         num = *pno * flen;
-
-        if (num > MAX_ARRAY_SIZE) {
-            epicsPrintf("Link %s - Array too large! %d Bytes\n", fldnames[i], num);
-            *pno = num = 0;
-            status = S_db_errArg;
-        } else
-            *pval = (char *)callocMustSucceed(*pno, flen,
-                "aSubRecord::init_record");
+        *pval = callocMustSucceed(*pno, flen, "aSubRecord::init_record");
 
         *pne = *pno;
 
