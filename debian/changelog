@@ -1,3 +1,10 @@
+rtems-epics (3.14.12.2-2) unstable; urgency=low
+
+  * Revert to RTEMS 4.9
+  * remove rtems-epics-beatnik
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 25 Feb 2013 14:59:23 -0500
+
 rtems-epics (3.14.12.2-1) unstable; urgency=low
 
   * New upstream version
