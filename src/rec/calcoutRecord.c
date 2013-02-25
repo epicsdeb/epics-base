@@ -209,7 +209,7 @@ static long init_record(calcoutRecord *prec, int pass)
 static long process(calcoutRecord *prec)
 {
     rpvtStruct *prpvt = prec->rpvt;
-    int doOutput = 0;
+    int doOutput;
 
     if (!prec->pact) {
         prec->pact = TRUE;
@@ -231,27 +231,29 @@ static long process(calcoutRecord *prec)
             doOutput = 1;
             break;
         case calcoutOOPT_On_Change:
-            if (fabs(prec->pval - prec->val) > prec->mdel) doOutput = 1;
+            doOutput = ! (fabs(prec->pval - prec->val) <= prec->mdel);
             break;
         case calcoutOOPT_Transition_To_Zero:
-            if ((prec->pval != 0.0) && (prec->val == 0.0)) doOutput = 1;
+            doOutput = ((prec->pval != 0.0) && (prec->val == 0.0));
             break;
         case calcoutOOPT_Transition_To_Non_zero:
-            if ((prec->pval == 0.0) && (prec->val != 0.0)) doOutput = 1;
+            doOutput = ((prec->pval == 0.0) && (prec->val != 0.0));
             break;
         case calcoutOOPT_When_Zero:
-            if (prec->val == 0.0) doOutput = 1;
+            doOutput = (prec->val == 0.0);
             break;
         case calcoutOOPT_When_Non_zero:
-            if (prec->val != 0.0) doOutput = 1;
+            doOutput = (prec->val != 0.0);
             break;
         default:
+	    doOutput = 0;
             break;
         }
         prec->pval = prec->val;
         if (doOutput) {
             if (prec->odly > 0.0) {
                 prec->dlya = 1;
+                recGblGetTimeStamp(prec);
                 db_post_events(prec, &prec->dlya, DBE_VALUE);
                 callbackRequestProcessCallbackDelayed(&prpvt->doOutCb,
                         prec->prio, prec, (double)prec->odly);
@@ -263,9 +265,11 @@ static long process(calcoutRecord *prec)
                 prec->pact = TRUE;
             }
         }
+        recGblGetTimeStamp(prec);
     } else { /* pact == TRUE */
         if (prec->dlya) {
             prec->dlya = 0;
+            recGblGetTimeStamp(prec);
             db_post_events(prec, &prec->dlya, DBE_VALUE);
             /* Make pact FALSE for asynchronous device support*/
             prec->pact = FALSE;
@@ -274,9 +278,9 @@ static long process(calcoutRecord *prec)
             prec->pact = TRUE;
         } else {/*Device Support is asynchronous*/
             writeValue(prec);
+            recGblGetTimeStamp(prec);
         }
     }
-    recGblGetTimeStamp(prec);
     monitor(prec);
     recGblFwdLink(prec);
     prec->pact = FALSE;
@@ -581,7 +585,7 @@ static void monitor(calcoutRecord *prec)
         /* check for value change */
         delta = prec->mlst - prec->val;
         if (delta<0.0) delta = -delta;
-        if (delta > prec->mdel) {
+        if (!(delta <= prec->mdel)) { /* Handles MDEL == NAN */
                 /* post events for value change */
                 monitor_mask |= DBE_VALUE;
                 /* update last value monitored */
@@ -590,7 +594,7 @@ static void monitor(calcoutRecord *prec)
         /* check for archive change */
         delta = prec->alst - prec->val;
         if (delta<0.0) delta = -delta;
-        if (delta > prec->adel) {
+        if (!(delta <= prec->adel)) { /* Handles ADEL == NAN */
                 /* post events on value field for archive change */
                 monitor_mask |= DBE_LOG;
                 /* update last archive value monitored */

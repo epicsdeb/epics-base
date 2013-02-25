@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20101124193504-syc2zmdo7fl70mcz */
+/* Revision-Id: anj@aps.anl.gov-20121007024801-ndvgugwghwahg899 */
 
 /* Record Support Routines for Calculation records */
 /*
@@ -310,7 +310,7 @@ static void monitor(calcRecord *prec)
     /* check for value change */
     delta = prec->mlst - prec->val;
     if (delta < 0.0) delta = -delta;
-    if (delta > prec->mdel) {
+    if (!(delta <= prec->mdel)) { /* Handles MDEL == NAN */
 	/* post events for value change */
 	monitor_mask |= DBE_VALUE;
 	/* update last value monitored */
@@ -319,7 +319,7 @@ static void monitor(calcRecord *prec)
     /* check for archive change */
     delta = prec->alst - prec->val;
     if (delta < 0.0) delta = -delta;
-    if (delta > prec->adel) {
+    if (!(delta <= prec->adel)) { /* Handles ADEL == NAN */
 	/* post events on value field for archive change */
 	monitor_mask |= DBE_LOG;
 	/* update last archive value monitored */

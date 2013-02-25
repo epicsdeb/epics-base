@@ -8,7 +8,7 @@
 \*************************************************************************/
 //
 // casStreamOS.cc
-// Revision-Id: anj@aps.anl.gov-20110405210849-s4tyb3vn88bb0e16
+// Revision-Id: johill@lanl.gov-20111212231024-gr8vwpkey5enkdbr
 //
 // TO DO:
 // o armRecv() and armSend() should return bad status when
@@ -231,6 +231,18 @@ void casStreamIOWakeup::show ( unsigned level ) const
 }
 
 //
+// casStreamOS::armRecv ()
+//
+inline void casStreamOS::armRecv()
+{
+	if ( ! this->pRdReg ) {
+		if ( ! this->inBufFull() ) {
+			this->pRdReg = new casStreamReadReg ( *this );
+		}
+	}
+}
+
+//
 // casStreamIOWakeup::expire()
 //
 // This is called whenever asynchronous IO completes
@@ -295,18 +307,6 @@ void casStreamIOWakeup::start ( casStreamOS &os  )
         this->timer.start ( *this, 0.0 );
     }
     this->pOS->printStatus ( "casStreamIOWakeup tmr start" );
-}
-
-//
-// casStreamOS::armRecv ()
-//
-inline void casStreamOS::armRecv()
-{
-	if ( ! this->pRdReg ) {
-		if ( ! this->inBufFull() ) {
-			this->pRdReg = new casStreamReadReg ( *this );
-		}
-	}
 }
 
 //

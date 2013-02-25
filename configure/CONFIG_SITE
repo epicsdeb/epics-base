@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution.
 #*************************************************************************
 #
-#  Revision-Id: anj@aps.anl.gov-20110419200536-zulwts6vf1tr4uuc
+#  Revision-Id: anj@aps.anl.gov-20121203223927-t0rimstup8p1sn9m
 #
 #  CONFIG_SITE  - Global site configuration file
 #
@@ -72,6 +72,7 @@
 #       linux-cris              (Axis GNU crosscompiler on linux-x86 host)
 #       linux-cris_v10          (Axis GNU crosscompiler on linux-x86 host)
 #       linux-cris_v32          (Axis GNU crosscompiler on linux-x86 host)
+#       linux-microblaze
 #       linux-xscale_be
 #       vxWorks-486
 #       vxWorks-68040
@@ -119,9 +120,9 @@ CROSS_COMPILER_HOST_ARCHS=
 #     NOTE: os/CONFIG.$(EPICS_HOST_ARCH).$(EPICS_HOST_ARCH) files and
 #     os/CONFIG_SITE.$(EPICS_HOST_ARCH).$(EPICS_HOST_ARCH) files may override
 #
-#     NOTE WIN32: YES results in a DLL.  Valid settings are
-#                   SHARED_LIBRARIES=YES and STATIC_BUILD=NO
-#                   SHARED_LIBRARIES=NO  and STATIC_BUILD=YES
+#     NOTE Windows: YES results in a DLL.  Valid settings are
+#        SHARED_LIBRARIES=YES  and  STATIC_BUILD=NO
+#        SHARED_LIBRARIES=NO   and  STATIC_BUILD=YES
 #
 SHARED_LIBRARIES=YES
 
@@ -183,7 +184,9 @@ EPICS_SITE_VERSION =
 # between the various stages of compilation.
 GCC_PIPE = NO
 
-#  Include RPATH when linking executables and libraries.
-#       must be either YES or NO
-LINKER_USE_RPATH=YES
+# Set RPATH when linking executables and libraries.
+#  Must be either YES or NO.  If you set this to NO you must also provide a
+#  way for Base executables to find their shared libraries when they are
+#  run at build-time, e.g. set the LD_LIBRARY_PATH environment variable.
+LINKER_USE_RPATH = YES
 

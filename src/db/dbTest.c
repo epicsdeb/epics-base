@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
+/* Revision-Id: anj@aps.anl.gov-20120127154137-3ox5pcoky91em4xp */
 /*	database access test subroutines */
 
 #include <stddef.h>
@@ -317,7 +317,7 @@ long epicsShareAPI dbpf(const char *pname,const char *pvalue)
     if (nameToAddr(pname, &addr)) return -1;
     /* For enumerated types must allow for ENUM rather than string*/
     /* If entire field is digits then use DBR_ENUM else DBR_STRING*/
-    if (addr.dbr_field_type == DBR_ENUM && !*pvalue &&
+    if (addr.dbr_field_type == DBR_ENUM && *pvalue &&
         strspn(pvalue,"0123456789") == strlen(pvalue)) {
         unsigned short value;
 

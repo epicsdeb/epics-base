@@ -4,7 +4,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-// Revision-Id: anj@aps.anl.gov-20110407222502-um4y5q4rzq5vlk3e
+// Revision-Id: anj@aps.anl.gov-20121203185826-cd68u8o9fu5vbr7u
 //	Author: Andrew Johnson
 
 #include "epicsUnitTest.h"
@@ -238,7 +238,7 @@ MAIN(epicsCalcTest)
     const double a=1.0, b=2.0, c=3.0, d=4.0, e=5.0, f=6.0,
 		 g=7.0, h=8.0, i=9.0, j=10.0, k=11.0, l=12.0;
     
-    testPlan(566);
+    testPlan(577);
     
     /* LITERAL_OPERAND elements */
     testExpr(0);
@@ -253,6 +253,11 @@ MAIN(epicsCalcTest)
     testExpr(9);
     testExpr(.1);
     testExpr(0.1);
+    testExpr(0X0);
+    testExpr(0x10);
+    testExpr(0x7fffffff);
+    testCalc("0x80000000", -2147483648.0);
+    testCalc("0xffffffff", -1);
     testExpr(Inf);
     testCalc("Infinity", Inf);
     testExpr(NaN);
@@ -287,6 +292,7 @@ MAIN(epicsCalcTest)
     testExpr(-1);
     testExpr(-Inf);
     testExpr(- -1);
+    testCalc("-0x80000000", 2147483648.0);
     
     /* UNARY_OPERATOR elements */
     testExpr((1));
@@ -325,11 +331,15 @@ MAIN(epicsCalcTest)
     testExpr(isinf(NaN));
     testExpr(isnan(0));
     testExpr(isnan(Inf));
+    testExpr(isnan(-Inf));
     testExpr(isnan(NaN));
     testCalc("isnan(0,1,2)", 0);
     testCalc("isnan(0,1,NaN)", 1);
     testCalc("isnan(0,NaN,2)", 1);
     testCalc("isnan(NaN,1,2)", 1);
+    testCalc("isnan(0,1,Inf)", 0);
+    testCalc("isnan(0,Inf,2)", 0);
+    testCalc("isnan(Inf,1,2)", 0);
     testCalc("isnan(0,1,-Inf)", 0);
     testCalc("isnan(0,-Inf,2)", 0);
     testCalc("isnan(-Inf,1,2)", 0);
@@ -851,6 +861,7 @@ MAIN(epicsCalcTest)
     testArgs("13.1;B:=A;A:=B;C:=D;D:=C", A_A|A_D, A_A|A_B|A_C|A_D);
     
     // Malformed expressions
+    testBadExpr("0x0.1", CALC_ERR_SYNTAX);
     testBadExpr("1*", CALC_ERR_INCOMPLETE);
     testBadExpr("*1", CALC_ERR_SYNTAX);
     testBadExpr("MIN", CALC_ERR_INCOMPLETE);

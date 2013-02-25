@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS startup task for EPICS
- *  Revision-Id: anj@aps.anl.gov-20110405222154-yxqbrt7rvbn21o5z
+ *  Revision-Id: anj@aps.anl.gov-20120516172527-v19sgxr84hn9mecd
  *      Author: W. Eric Norum
  *              eric.norum@usask.ca
  *              (306) 966-5394
@@ -173,7 +173,7 @@ initialize_local_filesystem(char **argv)
 #if __RTEMS_MAJOR__>4 || \
    (__RTEMS_MAJOR__==4 && __RTEMS_MINOR__>9) || \
    (__RTEMS_MAJOR__==4 && __RTEMS_MINOR__==9 && __RTEMS_REVISION__==99)
-static int
+int
 nfsMount(char *uidhost, char *path, char *mntpoint)
 {
     int   devl = strlen(uidhost) + strlen(path) + 2;

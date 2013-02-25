@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- * Revision-Id: anj@aps.anl.gov-20111108215715-d8j6l4lycpi3gvvb
+ * Revision-Id: anj@aps.anl.gov-20120618195203-fn89v5ir0faou35v
  *
  * Author: Jeff Hill
  * 
@@ -446,7 +446,10 @@ epicsShareFunc epicsThreadBooleanStatus epicsShareAPI epicsThreadHighestPriority
 epicsShareFunc unsigned int epicsShareAPI 
     epicsThreadGetStackSize ( epicsThreadStackSizeClass stackSizeClass ) 
 {
-    static const unsigned stackSizeTable[epicsThreadStackBig+1] = {4000, 6000, 11000};
+    #define STACK_SIZE(f) (f * 0x10000 * sizeof(void *))
+    static const unsigned stackSizeTable[epicsThreadStackBig+1] = {
+        STACK_SIZE(1), STACK_SIZE(2), STACK_SIZE(4)
+    };
 
     if (stackSizeClass<epicsThreadStackSmall) {
         fprintf ( stderr,
@@ -776,17 +779,14 @@ epicsShareFunc void epicsShareAPI epicsThreadSleep ( double seconds )
     static const unsigned mSecPerSec = 1000;
     DWORD milliSecDelay;
 
-    if ( seconds <= 0.0 ) {
+    if ( seconds > 0.0 ) {
+        seconds *= mSecPerSec;
+        seconds += 0.99999999;  /* 8 9s here is optimal */
+        milliSecDelay = ( seconds >= INFINITE ) ?
+            INFINITE - 1 : ( DWORD ) seconds;
+    }
+    else {  /* seconds <= 0 or NAN */
         milliSecDelay = 0u;
-    }
-    else if ( seconds >= INFINITE / mSecPerSec ) {
-        milliSecDelay = INFINITE - 1;
-    }
-    else {
-        milliSecDelay = ( DWORD ) ( ( seconds * mSecPerSec ) + 0.5 );
-        if ( milliSecDelay == 0 ) {
-            milliSecDelay = 1;
-        }
     }
     Sleep ( milliSecDelay );
 }

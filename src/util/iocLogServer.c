@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* iocLogServer.c */
-/* Revision-Id: anj@aps.anl.gov-20110601205510-1lmsijq2jslrhe9m */
+/* Revision-Id: anj@aps.anl.gov-20121031185612-7y0fxq8gqcza98sl */
 
 /*
  *	archive logMsg() from several IOC's to a common rotating file
@@ -289,7 +289,7 @@ static int seekLatestLine (struct ioc_log_server *pserver)
             }
         }
         else {
-            char c = fgetc (pserver->poutfile);
+            int c = fgetc (pserver->poutfile);
  
             /*
              * bypass the line if it does not match the expected format

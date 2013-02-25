@@ -1,7 +1,6 @@
 # CONFIG_SITE.Common.iosCommon
 #
-# Revision-Id: anj@aps.anl.gov-20111202164243-clxybuefflizbyvr
-# This file is maintained by the build community.
+# Revision-Id: anj@aps.anl.gov-20121117191816-6dp6cgethi1cu2at
 #
 # Site-specific settings for Apple iOS builds
 #-------------------------------------------------------
@@ -10,17 +9,31 @@
 
 #IOS_VERSION = 3.2
 #IOS_VERSION = 4.1
+#IOS_VERSION = 4.2
 #IOS_VERSION = 4.3
-IOS_VERSION = 5.0
+#IOS_VERSION = 5.0
+#IOS_VERSION = 5.1
+IOS_VERSION = 6.0
 
 
-# Most sites will want shared libraries
+# Which compiler to use:
+#   CLANG is preferred for recent versions of Xcode
+#   LLVM_GNU uses the llvm-gcc and llvm-g++ compilers
+#   GNU is needed for older versions of Xcode
 
-STATIC_BUILD=NO
-SHARED_LIBRARIES=YES
+COMPILER = CLANG
+#COMPILER = LLVM_GNU
+#COMPILER = GNU
 
 
-# Platform path, this is probably correct
+# Most sites will want to build shared libraries (which is the
+# default), but if you get an error from ld while building libCom,
+# try uncommenting this, which is needed for some compiler versions:
+
+#SHARED_LIBRARIES = NO
+
+
+# Get platform path from OS, these are usually correct:
 
 XCODE_PATH := $(shell xcode-select -print-path)
 PLATFORM_DIR = $(XCODE_PATH)/Platforms/$(IOS_PLATFORM).platform

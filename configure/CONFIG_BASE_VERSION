@@ -1,5 +1,5 @@
 #*************************************************************************
-# Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
+# Copyright (c) 2012 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  Revision-Id: jba@aps.anl.gov-20111212200932-ms3d0pzp9t1uojxe
+#  Revision-Id: jba@aps.anl.gov-20121217201147-pyypsu14iqmtneuz
 #
 #  EPICS Version information
 #
@@ -30,7 +30,7 @@ EPICS_MODIFICATION = 12
 
 # EPICS_PATCH_LEVEL must be a number  (win32 resource file requirement)
 # Not included if zero
-EPICS_PATCH_LEVEL = 2
+EPICS_PATCH_LEVEL = 3
 
 # This will end in -DEV between official releases
 #EPICS_DEV_SNAPSHOT=-DEV
@@ -58,7 +58,7 @@ EPICS_SHORT_VERSION=$(EPICS_VERSION).$(EPICS_REVISION).$(EPICS_MODIFICATION)$(EP
 EPICS_VERSION_NUMBER=$(EPICS_SHORT_VERSION)$(EPICS_DEV_SNAPSHOT)$(EPICS_SITE_VSTRING)
 EPICS_VERSION_STRING="EPICS Version $(EPICS_VERSION_NUMBER)"
 
-COMMIT_DATE="\$Date: Mon 2011-12-12 14:09:32 -0600$"
+COMMIT_DATE="\$Date: Mon 2012-12-17 14:11:47 -0600$"
 
 # Provide these in case anyone is still using the old names
 EPICS_CVS_SNAPSHOT=$(EPICS_DEV_SNAPSHOT)

@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+/* Revision-Id: anj@aps.anl.gov-20120504183859-1ye6uv4hf0pxrlp7
  *
  *    Original Authors: Bob Dalesio and Marty Kraimer
  *    Date:             26MAR96
@@ -59,8 +59,8 @@ static epicsEventId workListEvent; /*wakeup event for dbCaTask*/
 static int removesOutstanding = 0;
 #define removesOutstandingWarning 10000
 
-static enum {
-    ctlRun, ctlPause, ctlExit
+static volatile enum {
+    ctlInit, ctlRun, ctlPause, ctlExit
 } dbCaCtl;
 static epicsEventId startStopEvent;
 

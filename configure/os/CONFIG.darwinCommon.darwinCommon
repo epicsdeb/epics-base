@@ -1,6 +1,6 @@
 # CONFIG.darwinCommon.darwinCommon
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: anj@aps.anl.gov-20121117191816-6dp6cgethi1cu2at
 # This file is maintained by the build community.
 #
 # Common definitions for darwin builds
@@ -37,11 +37,6 @@ ARCH_DEP_LDFLAGS += $(ARCH_DEP_FLAGS)
 OP_SYS_CFLAGS += -fno-common
 
 #
-# Don't try to use precompiled headers when converting sequencer files
-#
-CPPSNCFLAGS += -no-cpp-precomp
-
-#
 # Darwin os definition
 #
 OP_SYS_CPPFLAGS += -Ddarwin
@@ -51,20 +46,6 @@ OP_SYS_CPPFLAGS += -Ddarwin
 #
 OPT_CFLAGS_YES += -g
 OPT_CXXFLAGS_YES += -g
-
-#
-# The following two definitions enable the use of DarwinPorts packages.
-#
-OP_SYS_INCLUDES += -I/opt/local/include
-# dir/firstword/wildcard used to avoid warning -L: directory name (...) does not exist
-OP_SYS_LDFLAGS +=  $(addprefix -L,$(dir $(firstword $(wildcard /opt/local/lib/*))))
-
-#
-# The following two definitions enable the use of Fink packages.
-#
-OP_SYS_INCLUDES += -I/sw/include
-# dir/firstword/wildcard used to avoid warning -L: directory name (...) does not exist
-OP_SYS_LDFLAGS +=  $(addprefix -L,$(dir $(firstword $(wildcard /sw/lib/*))))
 
 #
 # Libraries for command-line editing.
@@ -86,10 +67,11 @@ CCC = $(GNU_BIN)/c++
 #
 SHRLIB_VERSION = $(EPICS_VERSION).$(EPICS_REVISION).$(EPICS_MODIFICATION)
 SHRLIB_LDFLAGS = -dynamiclib -flat_namespace -undefined suppress \
-       -install_name $(shell perl $(TOOLS)/fullPathName.pl $(INSTALL_LIB))/$@ \
+       -install_name $(shell $(PERL) $(TOOLS)/fullPathName.pl $(INSTALL_LIB))/$@ \
        -compatibility_version $(EPICS_VERSION).$(EPICS_REVISION) \
        -current_version $(SHRLIB_VERSION)
-SHRLIB_SUFFIX = .$(SHRLIB_VERSION).dylib
+SHRLIB_SUFFIX_BASE = .dylib
+SHRLIB_SUFFIX = .$(SHRLIB_VERSION)$(SHRLIB_SUFFIX_BASE)
 
 LOADABLE_SHRLIB_LDFLAGS = -bundle -flat_namespace -undefined suppress
 

@@ -1,6 +1,6 @@
 # CONFIG.Common.cygwin-x86
 #
-# Revision-Id: jba@aps.anl.gov-20101022143344-u0445dydxhg80mru
+# Revision-Id: jba@aps.anl.gov-20121205210226-0i3d06gcoe1pt39x
 # This file is maintained by the build community.
 #
 # Definitions for cygwin-x86 target builds
@@ -14,7 +14,7 @@ OS_CLASS = cygwin32
 ARCH_CLASS = x86
 
 #  Definitions used when COMMANDLINE_LIBRARY is READLINE
-LDLIBS_READLINE = -lreadline -lcurses
+LDLIBS_READLINE = -lreadline
 
 POSIX_CPPFLAGS = -D_POSIX_THREADS -D_POSIX_TIMERS
 #POSIX_CPPFLAGS += -D_POSIX_SOURCE
@@ -48,11 +48,12 @@ STATIC_CXXFLAGS_NO=  $(VISC_DLL) -D_DLL
 #	But: if there are no objects LIBRARY_LD_OBJS to include
 #	in this library (may be for e.g. base/src/libCompat
 #	on some archs), don't define (and build) any library!
-SHRLIB_PREFIX=
-SHRLIB_SUFFIX=.dll
+SHRLIB_PREFIX =
+SHRLIB_SUFFIX_BASE = .dll
+SHRLIB_SUFFIX = $(SHRLIB_SUFFIX_BASE)
 SHRLIBNAME_YES = $(BUILD_LIBRARY:%=%$(SHRLIB_SUFFIX))
-LOADABLE_SHRLIB_PREFIX=
-LOADABLE_SHRLIB_SUFFIX=.dll
+LOADABLE_SHRLIB_PREFIX =
+LOADABLE_SHRLIB_SUFFIX = $(SHRLIB_SUFFIX_BASE)
 LOADABLE_SHRLIBNAME = $(LOADABLE_BUILD_LIBRARY:%=%$(LOADABLE_SHRLIB_SUFFIX))
 
 #

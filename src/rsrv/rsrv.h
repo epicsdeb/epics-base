@@ -3,13 +3,12 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
 /*
- * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ * Revision-Id: anj@aps.anl.gov-20120514161633-fhizyzdnqaez8wwg
  *
  *  Author: Jeffrey O. Hill
  *      hill@luke.lanl.gov
@@ -31,7 +30,8 @@ epicsShareFunc void epicsShareAPI casHostNameInitiatingCurrentThread (
                         char * pBuf, unsigned bufSize );
 epicsShareFunc void epicsShareAPI casUserNameInitiatingCurrentThread (
                         char * pBuf, unsigned bufSize );
-void casStatsFetch ( unsigned *pChanCount, unsigned *pConnCount );
+epicsShareFunc void casStatsFetch (
+                        unsigned *pChanCount, unsigned *pConnCount );
 
 #define RSRV_OK 0
 #define RSRV_ERROR (-1)

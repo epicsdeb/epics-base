@@ -1,5 +1,5 @@
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: jba@aps.anl.gov-20120820172739-ceelqpmez6wkdnpk
 #
 # Site Specific Configuration Information
 # Only the local epics system manager should modify this file
@@ -28,9 +28,9 @@ PYTHON_INCLUDE=/System/Library/Frameworks/Python.framework/Versions/2.3/include/
 # XDarwin
 #
 X11_LIB=/usr/X11R6/lib
-X11_INC=/usr/X11R6/include/X11
+X11_INC=/usr/X11R6/include
 XPM_LIB=/usr/X11R6/lib
-XPM_INC=/usr/X11R6/include/X11
+XPM_INC=/usr/X11R6/include
 
 #
 # Fink OpenMotif

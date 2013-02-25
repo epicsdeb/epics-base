@@ -5,7 +5,7 @@
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# Revision-Id: anj@aps.anl.gov-20110523213458-3lhktmvu73otws64
+# Revision-Id: anj@aps.anl.gov-20120911171155-ez2rj9ndaz20kzw8
 
 use Carp;
 use Cwd qw(getcwd abs_path);
@@ -123,6 +123,7 @@ sub AbsPath {
 
     # Now calculate the absolute path
     my $abs = File::Spec->rel2abs($path, abs_path($cwd));
+    $abs = abs_path($abs) if -e $abs;
 
     return LocalPath($abs);
 }

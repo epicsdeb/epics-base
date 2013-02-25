@@ -1,6 +1,6 @@
 # CONFIG.win32-x86-borland.Common
 #
-# Revision-Id: anj@aps.anl.gov-20110606145131-rpql3fdjvli0113i
+# Revision-Id: anj@aps.anl.gov-20120501151545-qvg2fxajclez3k4r
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86-borland host archs
@@ -12,7 +12,7 @@ MV = $(PERL) -MExtUtils::Command -e mv
 RM = $(PERL) -MExtUtils::Command -e rm_f
 MKDIR = $(PERL) -MExtUtils::Command -e mkpath
 RMDIR = $(PERL) -MExtUtils::Command -e rm_rf
-COMMENT = $(PERL) -e ''
+NOP = $(PERL) -e ''
 
 WIND_HOST_TYPE = x86-win32
 OSITHREAD_USE_DEFAULT_STACK = NO

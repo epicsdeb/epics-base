@@ -1,10 +1,13 @@
 # CONFIG_SITE.Common.cygwin-x86
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: jba@aps.anl.gov-20121205210226-0i3d06gcoe1pt39x
 #
 # Site Specific definitions for cygwin-x86 target
 # Only the local epics system manager should modify this file
 
 # If readline is installed uncomment the following line
 # to add command-line editing and history support
-COMMANDLINE_LIBRARY = READLINE
+#COMMANDLINE_LIBRARY = READLINE
+
+# Uncomment the following line if readline has problems
+#LDLIBS_READLINE= -lreadline -lcurses

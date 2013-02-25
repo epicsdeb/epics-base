@@ -7,7 +7,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  Revision-Id: anj@aps.anl.gov-20111202201024-6naufg256gbustg2
+#  Revision-Id: jba@aps.anl.gov-20121205203418-15wux5bxnojrv6pn
 #
 #  CONFIG_COMMON
 #
@@ -81,8 +81,8 @@ COMMON_DIR = ../O.Common
 
 #-------------------------------------------------------
 # Make echo output - suppress echoing if make's '-s' flag is set
-COMMENT = \#
-ECHO = @$(if $(findstring s,$(patsubst T_A=%,,$(MAKEFLAGS))),$(COMMENT),echo)
+NOP = :
+ECHO = @$(if $(findstring s,$(patsubst T_A=%,,$(MAKEFLAGS))),$(NOP),echo)
 
 #-------------------------------------------------------
 ifdef T_A
@@ -371,6 +371,7 @@ INSTALL_LIB_INSTALLS = $(addprefix $(INSTALL_LIB)/,$(notdir $(LIB_INSTALLS)))
 # Installed file permissions
 BIN_PERMISSIONS = 555
 LIB_PERMISSIONS = 444
+SHRLIB_PERMISSIONS = 555
 INSTALL_PERMISSIONS = 444
 
 #---------------------------------------------------------------
