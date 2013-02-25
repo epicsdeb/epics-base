@@ -13,9 +13,6 @@ Build-Depends: debhelper (>= 7.0.50~), epics-debhelper (>= 8.6~),
                rtems-mvme5500 (>= 4.9.3),
                rtems-libbspext-mvme5500,
                rtems-cexp-mvme5500,,
-               rtems-beatnik,
-               rtems-libbspext-beatnik,
-               rtems-cexp-beatnik,
                rtems-pc386,
                rtems-cexp-pc386,
 Rtems-Depends: rtems, rtems-libbspext, rtems-cexp
@@ -85,17 +82,6 @@ Description: EPICS targeted to the MVME5500
  control systems.
  .
  EPICS for the MVME5500 powerpc based vme bus processor card
-
-Package: rtems-epics-beatnik
-Architecture: all
-Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
-Description: EPICS targeted to the beatnik BSP
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS for the beatnik BSP which supportes the MVME5500 and MVME6100
- powerpc based vme bus processor cards
 
 Package: rtems-epics-pc386
 Architecture: all

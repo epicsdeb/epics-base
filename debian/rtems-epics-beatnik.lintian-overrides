@@ -1,6 +1,0 @@
-rtems-epics-beatnik: arch-independent-package-contains-binary-or-object
-# Target binaries are independent of the host
-rtems-epics-beatnik: statically-linked-binary
-# Everything RTEMS is statically linked
-rtems-epics-beatnik: unstripped-binary-or-object
-# The user must decide whether to strip
