@@ -1,0 +1,22 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:24:53 -0400
+Subject: [PATCH] linux: use RT thread priorities
+
+---
+ configure/CONFIG_SITE |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/configure/CONFIG_SITE b/configure/CONFIG_SITE
+index d4bed90..92740fd 100644
+--- a/configure/CONFIG_SITE
++++ b/configure/CONFIG_SITE
+@@ -178,7 +178,7 @@ COMPAT_313=NO
+ #INSTALL_LOCATION=<fullpathname>
+ 
+ # Use POSIX thread priority scheduling (YES or NO)
+-USE_POSIX_THREAD_PRIORITY_SCHEDULING = NO
++USE_POSIX_THREAD_PRIORITY_SCHEDULING = YES
+ 
+ #  Site version number, if set will append '-' and this string to the
+ #  EPICS version number string that is reported by many tools
+-- 

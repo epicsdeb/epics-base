@@ -1,0 +1,29 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Tue, 18 Sep 2012 18:28:44 -0400
+Subject: [PATCH] record support santity check
+
+Catch if loaded dbd has different number of fields that expected.
+---
+ src/dbStatic/dbToRecordtypeH.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/src/dbStatic/dbToRecordtypeH.c b/src/dbStatic/dbToRecordtypeH.c
+index a97a44f..cfd6279 100644
+--- a/src/dbStatic/dbToRecordtypeH.c
++++ b/src/dbStatic/dbToRecordtypeH.c
+@@ -228,12 +228,14 @@ int main(int argc,char **argv)
+ 	fprintf(outFile,"#ifdef __cplusplus\n");
+ 	fprintf(outFile,"extern \"C\" {\n");
+ 	fprintf(outFile,"#endif\n");
++        fprintf(outFile,"#include <epicsAssert.h>\n");
+         fprintf(outFile,"#include <epicsExport.h>\n");
+ 	pdbRecordType = (dbRecordType *)ellFirst(&pdbbase->recordTypeList);
+ 	while(pdbRecordType) {
+ 		fprintf(outFile,"static int %sRecordSizeOffset(dbRecordType *pdbRecordType)\n{\n",
+ 		pdbRecordType->name);
+ 	    fprintf(outFile,"    %sRecord *prec = 0;\n",pdbRecordType->name);
++	    fprintf(outFile,"  assert(pdbRecordType->no_fields==%u);\n", pdbRecordType->no_fields);
+ 	    for(i=0; i<pdbRecordType->no_fields; i++) {
+ 		char	name[256];
+ 		int		j;
+-- 

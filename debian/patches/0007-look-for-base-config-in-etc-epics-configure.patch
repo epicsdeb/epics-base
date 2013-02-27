@@ -1,0 +1,41 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:22:39 -0400
+Subject: [PATCH] look for base config in /etc/epics/configure
+
+When building external modules (missing $(TOP)/configure/CONFIG_BASE_VERSION))
+leave EPICS_BASE=/usr/lib/epics, but take configuration from
+/etc/epics/configure.  This gives sysadmins the option to
+modify build config.
+---
+ configure/CONFIG |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/configure/CONFIG b/configure/CONFIG
+index b62edb6..ee20755 100644
+--- a/configure/CONFIG
++++ b/configure/CONFIG
+@@ -20,15 +20,21 @@
+ ifneq ($(wildcard $(TOP)/configure/CONFIG_BASE_VERSION),)
+ EPICS_BASE = $(INSTALL_LOCATION)
+ CONFIG = $(TOP)/configure
++STARTUP = $(TOP)/startup
+ BASE_TOP=YES
+ else
+-CONFIG ?= $(EPICS_BASE)/configure
++ifeq ($(CONFIG),/usr/lib/epics/configure)
++CONFIG = /etc/epics/configure
++else
++CONFIG ?= /etc/epics/configure
++endif
++STARTUP = $(EPICS_BASE)/startup
+ endif
+ 
+ # Provide a default if the user hasn't set EPICS_HOST_ARCH
+ ifeq ($(origin EPICS_HOST_ARCH), undefined)
+ # NB: Must use a simply expanded variable here for performance:
+-EPICS_HOST_ARCH := $(shell $(CONFIG)/../startup/EpicsHostArch.pl)
++EPICS_HOST_ARCH := $(shell $(STARTUP)/EpicsHostArch.pl)
+ endif
+ #
+ 
+-- 

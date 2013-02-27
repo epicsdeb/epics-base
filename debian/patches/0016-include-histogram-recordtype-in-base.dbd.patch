@@ -1,0 +1,34 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:30:06 -0400
+Subject: [PATCH] include histogram recordtype in base.dbd
+
+---
+ src/dev/softDev/devSoft.dbd |    1 +
+ src/misc/base.dbd           |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/src/dev/softDev/devSoft.dbd b/src/dev/softDev/devSoft.dbd
+index 763ac47..5f90aba 100644
+--- a/src/dev/softDev/devSoft.dbd
++++ b/src/dev/softDev/devSoft.dbd
+@@ -6,6 +6,7 @@ device(bi,CONSTANT,devBiSoft,"Soft Channel")
+ device(bo,CONSTANT,devBoSoft,"Soft Channel")
+ device(calcout,CONSTANT,devCalcoutSoft,"Soft Channel")
+ device(event,CONSTANT,devEventSoft,"Soft Channel")
++device(histogram,CONSTANT,devHistogramSoft,"Soft Channel")
+ device(longin,CONSTANT,devLiSoft,"Soft Channel")
+ device(longout,CONSTANT,devLoSoft,"Soft Channel")
+ device(mbbi,CONSTANT,devMbbiSoft,"Soft Channel")
+diff --git a/src/misc/base.dbd b/src/misc/base.dbd
+index bafe8ca..a92857c 100644
+--- a/src/misc/base.dbd
++++ b/src/misc/base.dbd
+@@ -21,6 +21,7 @@ include "compressRecord.dbd"
+ include "dfanoutRecord.dbd"
+ include "eventRecord.dbd"
+ include "fanoutRecord.dbd"
++include "histogramRecord.dbd"
+ include "longinRecord.dbd"
+ include "longoutRecord.dbd"
+ include "mbbiRecord.dbd"
+-- 

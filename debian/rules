@@ -1,0 +1,115 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DH_VERBOSE=1
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+BMAKEFLAGS += -j$(NUMJOBS)
+endif
+
+export EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+
+# chop out the source version from Changelog (ie 3.14.12)
+# Taken from CDBS
+DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
+DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
+SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '-3' -d '.')
+DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 2- -d '-')
+
+TARGETS=$(EPICS_HOST_ARCH)-debug
+
+export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
+
+export SHRLIB_VERSION=$(SOV)
+
+binary binary-arch binary-indep build install clean:
+	dh $@ --with epics -Sepicsmake --parallel
+install: build
+binary-arch binary-indep: install
+binary: binary-arch binary-indep
+
+override_dh_auto_build:
+	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics
+	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
+
+override_dh_auto_install:
+	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics
+
+#override_dh_auto_test: # skip for development
+
+USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer
+
+override_dh_install:
+
+	# some object code is getting installed somehow
+	rm -f debian/tmp/usr/lib/epics/bin/linux-*/*.o
+
+	# relocate configure/
+	# copy to /etc/epics/configure and /usr/share/epics-dev/configure
+
+	install -d debian/tmp/etc/epics
+	install -d debian/tmp/usr/share/epics-dev
+
+	cp -dR debian/tmp/usr/lib/epics/configure debian/tmp/etc/epics/
+	mv debian/tmp/usr/lib/epics/configure debian/tmp/usr/share/epics-dev/configure
+
+	install -d debian/tmp/usr/lib/epics/configure
+
+	# populated /usr/lib/epics/configure with symlinks to /etc/epics/configure
+	# except for conf.d and rules.d
+	for ff in debian/tmp/etc/epics/configure/*; do \
+		ln -s /etc/epics/configure/`basename $$ff` debian/tmp/usr/lib/epics/configure/`basename $$ff`; \
+	done
+
+	install -d debian/tmp/etc/epics/configure/conf.d
+	echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $(TARGETS)" > debian/tmp/etc/epics/configure/conf.d/01debug.make
+
+	install -d debian/tmp/usr/bin
+
+	# install executable to /usr/bin
+	for B in $(USRBINS); do mv debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/$$B debian/tmp/usr/bin/$$B; done
+	# remove extension from perl scripts
+	for P in debian/tmp/usr/bin/*.pl; do mv $$P $${P%.pl};done
+	# leave sym-links to /usr/bin in /usr/lib/epics/bin/$EPICS_HOST_ARCH
+	for B in debian/tmp/usr/bin/*; \
+		do ln -s ../../../../bin/`basename $$B` debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/`basename $$B`; \
+	done
+
+	# install perl module cap5
+	install -d debian/tmp/usr/share
+	mv debian/tmp/usr/lib/epics/lib/perl debian/tmp/usr/share/perl5
+	# This path is used by CA.pm
+	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
+
+	# include MSI documentation with executable
+	install -d debian/epics-msi/usr/share/doc/epics-msi
+	mv debian/tmp/usr/lib/epics/html/msi.html debian/epics-msi/usr/share/doc/epics-msi
+
+	dh_install --fail-missing
+
+	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
+
+override_dh_installdocs:
+	dh_installdocs -A README
+
+override_dh_strip_rtems:
+	dh_strip_rtems --dbg-package=libepics$(SOV)-dbg
+
+override_dh_makeshlibs:
+	dh_makeshlibs -Nepics-dev -a
+	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
+	dh_makeshlibs -pepics-dev -Xusr/lib/epics
+
+override_dh_shlibdeps:
+	dh_shlibdeps -Nlibepics$(SOV) -a
+	# Prevent self dependency
+	#  This would happen because the package provides several dependent libraries
+	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
+
+# We provide our own deps
+override_dh_epicsdep:
+
+# Failure to start does not halt package install
+override_dh_installinit:
+	dh_installinit --error-handler=true

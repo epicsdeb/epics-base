@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+ACCT=ioclogserver
+LOGDIR=/var/log/epics
+
+#DEBHELPER#
+
+case "$1" in
+  purge)
+    echo "Removing: $LOGDIR"
+    rm -rf "$LOGDIR" || true
+    echo "Account '$ACCT' will not be removed automatically."
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,79 @@
+#! /bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          ioclogserver
+# Required-Start:    $remote_fs $local_fs $network $syslog $time
+# Required-Stop:     $remote_fs $local_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Log recorder daemon for EPICS IOCS
+# Description:       Receives log messages from IOCS and writes them to file
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/iocLogServer
+NAME=ioclogserver
+DESC="Log recorder daemon for EPICS IOCS"
+
+# defaults
+RUN=no
+RUN_AS_USER=ioclogserver
+
+EPICS_IOC_LOG_FILE_NAME=/var/log/epics/epics.log
+EPICS_IOC_LOG_FILE_LIMIT="100000000"
+
+# Include admin settings if available
+if [ -f /etc/default/ioclogserver ] ; then
+    . /etc/default/ioclogserver
+fi
+
+# iocLogServer daemon is configured through the environment
+export EPICS_IOC_LOG_PORT
+export EPICS_IOC_LOG_FILE_NAME
+export EPICS_IOC_LOG_FILE_LIMIT
+
+PID_FILE="/var/run/$NAME.pid"
+SSD_OPTS="--quiet --make-pidfile --pidfile $PID_FILE"
+SSD_OPTS="$SSD_OPTS --user $RUN_AS_USER --chuid $RUN_AS_USER"
+SSD_OPTS="$SSD_OPTS --exec $DAEMON"
+
+DAEMON_OPTS=""
+
+set -e
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --background $SSD_OPTS -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	start-stop-daemon --stop --oknodo $SSD_OPTS
+	echo "$NAME."
+	;;
+  force-reload)
+	# check whether $DAEMON is running. If so, restart
+	start-stop-daemon --stop --test $SSD_OPTS && $0 restart || exit 0
+	;;
+  restart)
+	echo -n "Restarting $DESC: "
+	start-stop-daemon --stop --oknodo $SSD_OPTS
+	sleep 1
+	start-stop-daemon --start --background $SSD_OPTS -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  status)
+	status_of_proc -p "$PID_FILE"
+	exit $?
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
