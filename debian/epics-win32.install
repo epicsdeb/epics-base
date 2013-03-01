@@ -1,0 +1,2 @@
+usr/lib/epics/bin/win32-*
+usr/lib/epics/lib/win32-*/*.lib

@@ -17,7 +17,7 @@ DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
 SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '1' -d '-')
 DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f 2- -d '-')
 
-TARGETS=$(EPICS_HOST_ARCH)-debug
+TARGETS=$(EPICS_HOST_ARCH)-debug win32-x86-mingw
 
 export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 
@@ -36,7 +36,7 @@ override_dh_auto_build:
 override_dh_auto_install:
 	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics
 
-#override_dh_auto_test: # skip for development
+override_dh_auto_test: # skip for development
 
 USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer
 
@@ -87,6 +87,9 @@ override_dh_install:
 	mv debian/tmp/usr/lib/epics/html/msi.html debian/epics-msi/usr/share/doc/epics-msi
 
 	dh_install --fail-missing
+
+	install -d debian/epics-win32/usr/lib/epics/include/os
+	mv debian/epics-dev/usr/lib/epics/include/os/WIN32 debian/epics-win32/usr/lib/epics/include/os/
 
 	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
 

@@ -4,6 +4,7 @@ Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7.0.50~), epics-debhelper (>= 8.6~),
                libreadline6-dev, libncurses5-dev, perl,
+               mingw32,
 Standards-Version: 3.8.0
 Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
 Homepage: http://www.aps.anl.gov/epics/
@@ -129,3 +130,16 @@ Description: EPICS documentation
  control systems.
  .
  Documentation for EPICS Base
+
+Package: epics-win32
+Architecture: all
+Depends: ${misc:Depends},
+         epics-dev (>= ${source:Version}), epics-dev (<< ${source:Version}.1~),
+Suggests: wine
+Section: libdevel
+Description: EPICS built with mingw32
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Core EPICS libraries and utilities cross-compiled with mingw32.
