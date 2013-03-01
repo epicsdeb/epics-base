@@ -1,3 +1,9 @@
+epics-base (3.14.12.3-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 01 Mar 2013 12:24:57 -0500
+
 epics-base (3.14.12.2-5) unstable; urgency=low
 
   * Revert RTEMS version to 4.9
