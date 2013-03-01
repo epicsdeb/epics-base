@@ -7,12 +7,12 @@ Subject: [PATCH] install makeInstallDir.pl
  1 files changed, 2 insertions(+), 0 deletions(-)
 
 diff --git a/src/softIoc/Makefile b/src/softIoc/Makefile
-index 80989a4..b48e1cf 100644
+index c3e8679..8b8ec34 100644
 --- a/src/softIoc/Makefile
 +++ b/src/softIoc/Makefile
-@@ -11,6 +11,8 @@ include $(TOP)/configure/CONFIG
- 
- PROD_IOC = softIoc
+@@ -12,6 +12,8 @@ include $(TOP)/configure/CONFIG
+ PROD_IOC_DEFAULT = softIoc
+ PROD_IOC_iOS = -nil-
  
 +PERL_SCRIPTS += makeInstallDir.pl
 +

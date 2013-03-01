@@ -33,7 +33,7 @@ index ac6542e..ccf876e 100644
  bootstrap Cap5 $VERSION;
  
 diff --git a/src/makeBaseApp/makeBaseApp.pl b/src/makeBaseApp/makeBaseApp.pl
-index 2bfe8b8..cd93ff3 100755
+index 6a72b30..8958d57 100755
 --- a/src/makeBaseApp/makeBaseApp.pl
 +++ b/src/makeBaseApp/makeBaseApp.pl
 @@ -66,7 +66,7 @@ sub ReplaceFilename { # (filename)

@@ -18,7 +18,7 @@ USR_CFLAGS += yyyy
  1 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
-index d9ee39a..93bc286 100644
+index a26f077..297ec46 100644
 --- a/configure/CONFIG_COMMON
 +++ b/configure/CONFIG_COMMON
 @@ -198,11 +198,11 @@ OP_SYS_INCLUDES =

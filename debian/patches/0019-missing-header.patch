@@ -7,7 +7,7 @@ Subject: [PATCH] missing header
  1 files changed, 1 insertions(+), 0 deletions(-)
 
 diff --git a/src/libCom/cxxTemplates/epicsSingleton.h b/src/libCom/cxxTemplates/epicsSingleton.h
-index 25e5037..9b1ff33 100644
+index 92f7239..1837f29 100644
 --- a/src/libCom/cxxTemplates/epicsSingleton.h
 +++ b/src/libCom/cxxTemplates/epicsSingleton.h
 @@ -19,6 +19,7 @@

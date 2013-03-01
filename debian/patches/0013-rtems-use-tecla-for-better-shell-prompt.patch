@@ -21,13 +21,15 @@ index 61e6708..39c2bd3 100644
  
  #--------------------------------------------------
 diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
-index 81f2ecd..863f211 100644
+index a276bfa..d277ae8 100644
 --- a/configure/os/CONFIG_SITE.Common.RTEMS
 +++ b/configure/os/CONFIG_SITE.Common.RTEMS
-@@ -28,4 +28,4 @@ USE_GESYS=NO
- #
- # Specify your desired command-line-input library
+@@ -27,6 +27,6 @@ USE_GESYS=NO
+ 
+ # Select the command-line-input library to use
  #
 -COMMANDLINE_LIBRARY = EPICS
 +COMMANDLINE_LIBRARY = LIBTECLA
+ #COMMANDLINE_LIBRARY = LIBTECLA
+ #COMMANDLINE_LIBRARY = READLINE
 -- 

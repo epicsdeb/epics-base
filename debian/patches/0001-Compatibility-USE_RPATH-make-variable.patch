@@ -8,10 +8,10 @@ Our legacy name for LINKER_USE_RPATH
  1 files changed, 6 insertions(+), 1 deletions(-)
 
 diff --git a/configure/CONFIG_SITE b/configure/CONFIG_SITE
-index 7aa32ef..d4bed90 100644
+index a37d48a..fe644cf 100644
 --- a/configure/CONFIG_SITE
 +++ b/configure/CONFIG_SITE
-@@ -125,6 +125,11 @@ CROSS_COMPILER_HOST_ARCHS=
+@@ -126,6 +126,11 @@ CROSS_COMPILER_HOST_ARCHS=
  #
  SHARED_LIBRARIES=YES
  
@@ -23,11 +23,11 @@ index 7aa32ef..d4bed90 100644
  #  Build client objects statically ?
  #        must be either YES or NO
  #
-@@ -185,5 +190,5 @@ GCC_PIPE = NO
- 
- #  Include RPATH when linking executables and libraries.
- #       must be either YES or NO
--LINKER_USE_RPATH=YES
-+LINKER_USE_RPATH=$(USE_RPATH)
+@@ -188,5 +193,5 @@ GCC_PIPE = NO
+ #  Must be either YES or NO.  If you set this to NO you must also provide a
+ #  way for Base executables to find their shared libraries when they are
+ #  run at build-time, e.g. set the LD_LIBRARY_PATH environment variable.
+-LINKER_USE_RPATH = YES
++LINKER_USE_RPATH = $(USE_RPATH)
  
 -- 

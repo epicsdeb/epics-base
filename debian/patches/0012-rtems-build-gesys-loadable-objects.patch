@@ -9,10 +9,10 @@ Subject: [PATCH] rtems: build gesys loadable objects
  3 files changed, 51 insertions(+), 0 deletions(-)
 
 diff --git a/configure/RULES_BUILD b/configure/RULES_BUILD
-index 867be84..88d3598 100644
+index f9702e6..7e4881b 100644
 --- a/configure/RULES_BUILD
 +++ b/configure/RULES_BUILD
-@@ -321,6 +321,13 @@ $(OBJLIB_MUNCHNAME):%.munch : %_ctdt$(OBJ) %$(OBJ)
+@@ -322,6 +322,13 @@ $(OBJLIB_MUNCHNAME):%.munch : %_ctdt$(OBJ) %$(OBJ)
  	@$(RM) $@
  	$(MUNCH_CMD)
  
@@ -23,7 +23,7 @@ index 867be84..88d3598 100644
 +	@$(RM) $@
 +	$(DEBUGCMD) $(LINK.mod)
 +
- runtests: $(TESTSCRIPTS_$(BUILD_CLASS))
+ runtests: $(TESTSCRIPTS)
  	-$(PERL) -MTest::Harness -e 'runtests @ARGV if @ARGV;' $^
  
 diff --git a/configure/os/CONFIG.Common.RTEMS b/configure/os/CONFIG.Common.RTEMS
@@ -83,12 +83,12 @@ index e2d29b3..61e6708 100644
  # RTEMS has neither shared libraries nor dynamic loading
  STATIC_BUILD=YES
 diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
-index bf6195b..81f2ecd 100644
+index d8b700b..a276bfa 100644
 --- a/configure/os/CONFIG_SITE.Common.RTEMS
 +++ b/configure/os/CONFIG_SITE.Common.RTEMS
-@@ -12,6 +12,12 @@ RTEMS_BASE=/usr/local/rtems/rtems-$(RTEMS_VERSION)
+@@ -12,6 +12,12 @@ RTEMS_BASE = /usr/local/rtems/rtems-$(RTEMS_VERSION)
  #
- RTEMS_TOOLS=$(RTEMS_BASE)
+ RTEMS_TOOLS = $(RTEMS_BASE)
  
 +# Link Generic System loadable objects instead of full executable.
 +#
@@ -98,5 +98,5 @@ index bf6195b..81f2ecd 100644
 +USE_GESYS=NO
  
  # If you're using neither BOOTP/DHCP nor FLASH to pick up your IOC
- # network configuration you must uncomment and specify your Internet 
+ # network configuration you must uncomment and specify your Internet
 -- 

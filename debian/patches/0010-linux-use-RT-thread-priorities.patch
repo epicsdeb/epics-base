@@ -7,10 +7,10 @@ Subject: [PATCH] linux: use RT thread priorities
  1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/configure/CONFIG_SITE b/configure/CONFIG_SITE
-index d4bed90..92740fd 100644
+index fe644cf..81d7acb 100644
 --- a/configure/CONFIG_SITE
 +++ b/configure/CONFIG_SITE
-@@ -178,7 +178,7 @@ COMPAT_313=NO
+@@ -179,7 +179,7 @@ COMPAT_313=NO
  #INSTALL_LOCATION=<fullpathname>
  
  # Use POSIX thread priority scheduling (YES or NO)

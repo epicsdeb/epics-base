@@ -13,7 +13,7 @@ to set RT priority if the initial test was positive.
  1 files changed, 8 insertions(+), 0 deletions(-)
 
 diff --git a/src/libCom/osi/os/posix/osdThread.c b/src/libCom/osi/os/posix/osdThread.c
-index f7e47b1..916678b 100644
+index 30583e1..0f15235 100644
 --- a/src/libCom/osi/os/posix/osdThread.c
 +++ b/src/libCom/osi/os/posix/osdThread.c
 @@ -57,6 +57,7 @@ typedef struct commonAttr{
@@ -65,7 +65,7 @@ index f7e47b1..916678b 100644
  }
  #endif
  
-@@ -609,6 +616,7 @@ epicsShareFunc void epicsShareAPI epicsThreadSetPriority(epicsThreadId pthreadIn
+@@ -608,6 +615,7 @@ epicsShareFunc void epicsShareAPI epicsThreadSetPriority(epicsThreadId pthreadIn
      pthreadInfo->osiPriority = priority;
      if(!pthreadInfo->isFifoScheduled) return;
  #if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
