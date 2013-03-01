@@ -24,3 +24,5 @@
 0024-rtems-use-macro-for-BIN2BOOT.patch
 0025-backport-msi-join-branch-from-3.15.patch
 0026-libCom-test-blockingSockTest-use-arbitrary-port.patch
+0027-cross-mingw-doesn-t-provide-_vscprintf.patch
+0028-cross-build-with-mingw32.patch
