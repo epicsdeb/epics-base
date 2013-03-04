@@ -1,0 +1,6 @@
+rtems-epics-pc386: arch-independent-package-contains-binary-or-object
+# Target binaries are independent of the host
+rtems-epics-pc386: statically-linked-binary
+# Everything RTEMS is statically linked
+rtems-epics-pc386: unstripped-binary-or-object
+# The user must decide whether to strip

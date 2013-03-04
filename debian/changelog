@@ -1,48 +1,17 @@
-epics-base (3.14.12.3-1) unstable; urgency=low
+rtems-epics (3.14.12.2-2) unstable; urgency=low
+
+  * Revert to RTEMS 4.9
+  * remove rtems-epics-beatnik
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 25 Feb 2013 14:59:23 -0500
+
+rtems-epics (3.14.12.2-1) unstable; urgency=low
 
   * New upstream version
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 01 Mar 2013 12:24:57 -0500
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 19 Sep 2012 15:25:23 -0400
 
-epics-base (3.14.12.2-5) unstable; urgency=low
-
-  * Revert RTEMS version to 4.9
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 25 Feb 2013 15:39:52 -0500
-
-epics-base (3.14.12.2-4) unstable; urgency=low
-
-  * Correctly set FINAL_LOCATION
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 06 Dec 2012 14:17:54 -0500
-
-epics-base (3.14.12.2-3) unstable; urgency=low
-
-  * add conflicts for old epics-msi
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 24 Sep 2012 16:05:18 -0400
-
-epics-base (3.14.12.2-2) unstable; urgency=low
-
-  * fix ioclogserver logrotate config
-  * debian/control: remove legecy epics-libs name from libepics# package
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 24 Sep 2012 15:31:58 -0400
-
-epics-base (3.14.12.2-1) unstable; urgency=low
-
-  * New upstream version
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 18 Sep 2012 17:50:22 -0400
-
-epics-base (3.14.11-10) unstable; urgency=low
-
-  * update RT prio patch
-     LP# 835138
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 25 Oct 2011 16:46:03 -0400
-
-epics-base (3.14.11-9) unstable; urgency=low
+rtems-epics (3.14.11-9) unstable; urgency=low
 
   [ Till Straumann ]
   * RTEMS: Time registration when dynamically loading
@@ -60,90 +29,66 @@ epics-base (3.14.11-9) unstable; urgency=low
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Sun, 11 Sep 2011 14:21:22 -0400
 
-epics-base (3.14.11-8) unstable; urgency=low
+rtems-epics (3.14.11-8) unstable; urgency=low
 
   [ Michael Davidsaver ]
-  * Fix postinst
-  * Change default max array size to 1M
-  * move conf.d to CONFIG
+  * change default max array bytes to 1M
 
   [ Nick Hastings ]
   * g++-4.6 fix: "#include <cstddef>"
 
   [ Michael Davidsaver ]
-  * override CONFIG
-  * Use 3.14.12 method to detect EPICS_HOST_ARCH if unset
   * test of timerQ ref counting
 
   [ Jeff Hill ]
   * only delete a timer queue when the ref count is 0
-     Fixes LP 786979
 
   [ Michael Davidsaver ]
   * Drop "mutable" references
-     Fixes LP 736273
   * Missing bspExt for mvme5500
-  * Install sample Makefile
-  * correct location for EpicsHostArch.pl
-  * pcas headers use install list
+  * merge with epics-base 3.14.11-8
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 06 Jun 2011 10:29:06 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 06 Jun 2011 11:55:31 -0400
 
-epics-base (3.14.11-7) unstable; urgency=low
+rtems-epics (3.14.11-7) unstable; urgency=low
 
-  * libCom: Fix errlogPrintf() assert fail at shutdown
-  * fix description of -x in softIoc manpage
-  * detect EPICS_HOST_ARCH if unset
-  * use auto host detection
-  * manpage for softIoc in wrong package
-  * relocate configure/ as /etc/epics/configure
-  * populate ALL_CROSS_COMPILER_TARGET_ARCHS with debug target
+  * populate ALL_CROSS_COMPILER_TARGET_ARCHS with
+    RTEMS targets
+  * Merge with epics-base 3.14.11-7
+  *   libCom: Fix errlogPrintf() assert fail at shutdown
+  *   detect EPICS_HOST_ARCH if unset
+  *   relocate configure/ as /etc/epics/configure
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 12 May 2011 17:38:15 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 11 May 2011 17:13:40 -0400
 
-epics-base (3.14.11-6) unstable; urgency=low
+rtems-epics (3.14.11-6) unstable; urgency=low
 
-  * change readline to 6
+  * Sync with epics-base
+  * change readline dependency to 6
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 16 Nov 2010 10:45:47 -0500
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 20 Jan 2011 11:59:57 -0500
 
-epics-base (3.14.11-5) unstable; urgency=low
+rtems-epics (3.14.11-4) unstable; urgency=low
 
-  * incorrect path in S99caRepeater and S99logServer init scripts
-      Reported by Martin Konrad
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 10 Nov 2010 11:01:06 -0500
-
-epics-base (3.14.11-4) unstable; urgency=low
-
-  * fix use of temp files during builds
-      Fixes problem with parallel builds expanding MSI templates
+  * Packages without host binaries can be marked all
   * rtems: Bind NTP client to a random port
       Fixes time sync bug on networks with NTP broadcasts
       Launchpad bug #663875
+  * Skip 3.14.11-3 to keep up with epics host package
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 20 Oct 2010 13:06:50 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 21 Oct 2010 16:56:58 -0400
 
-epics-base (3.14.11-3) unstable; urgency=low
+rtems-epics (3.14.11-2) unstable; urgency=low
 
-  * wrong paths in perl scripts
-  * correct dbd path for softIoc
+  * change install location to usr/lib/epics
+  * fix dependency to epics-dev
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 08 Sep 2010 15:02:53 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 16 Aug 2010 13:53:54 -0400
 
-epics-base (3.14.11-2) unstable; urgency=low
+rtems-epics (3.14.11-1) unstable; urgency=low
 
-  * change install location to /usr/lib/epics/
-  * add manpages for makeBaseApp/Ext and softIoc
-  * update manpages for caget, camonitor, and caput
-  * update lintian overrides
-
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 16 Aug 2010 13:54:32 -0400
-
-epics-base (3.14.11-1) unstable; urgency=low
-
+  * Create new source package for RTEMS
   * New upstream version
-  * Split RTEMS packages to separate source package rtems-epics
   * Applied Known Problems patches: softIoc, long_string, and macCore
   * Backported from bazaar repository
       fix for mantis 366
@@ -154,7 +99,7 @@ epics-base (3.14.11-1) unstable; urgency=low
         to Average at runtime. (Fixes #552803)
       Fix NULL handle issue in macParseDefns()
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Thu, 15 Jul 2010 14:27:29 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 14 Jun 2010 16:06:49 -0400
 
 epics-base (3.14.10-16) unstable; urgency=low
 

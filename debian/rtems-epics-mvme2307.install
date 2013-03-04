@@ -1,0 +1,3 @@
+usr/lib/epics/bin/RTEMS-mvme2307
+usr/lib/epics/lib/RTEMS-mvme2307
+etc/epics/configure/conf.d/05RTEMS-mvme2307.make

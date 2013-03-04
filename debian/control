@@ -1,131 +1,97 @@
-Source: epics-base
+Source: rtems-epics
 Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7.0.50~), epics-debhelper (>= 8.6~),
-               libreadline6-dev, libncurses5-dev, perl,
+               libreadline6-dev, perl,
+               rtems-libbspext-mvme2100,
+               rtems-cexp-mvme2100,
+               rtems-libbspext-mvme2307,
+               rtems-cexp-mvme2307,
+               rtems-libbspext-mvme3100,
+               rtems-cexp-mvme3100,
+               rtems-mvme5500 (>= 4.9.3),
+               rtems-libbspext-mvme5500,
+               rtems-cexp-mvme5500,,
+               rtems-pc386,
+               rtems-cexp-pc386,
+Rtems-Depends: rtems, rtems-libbspext, rtems-cexp
 Standards-Version: 3.8.0
 Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
 Homepage: http://www.aps.anl.gov/epics/
 
-Package: libepics3.14.12.3
-Section: libs
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: epics-catools
-Conflicts: epics-perl (<= 3.14.10-7)
-Description: EPICS Base libraries for clients and servers
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- This package contains host system shared libraries for clients and IOCs.
-
-Package: libepics3.14.12.3-dbg
-Section: debug
-Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version})
-Provides: libepics-dbg
-Description: Files needed to develop new EPICS applications
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Debug symbols for EPICS shared libraries and utilities.
-
-Package: ioclogserver
-Section: admin
-Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}),
-Description: Log recording daemon for EPICS IOCS
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- The IOC log server listens for network log messages sent from
- IOC.  This is used by the caputlog support module to collect
- messages relating to PV value changes.
-
-Package: epics-dev
-Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}), epics-catools (= ${binary:Version}),
-         epics-perl (= ${binary:Version}),
-         libreadline6-dev,
-        ${shlibs:Depends}, ${misc:Depends}
-Recommends: epics-msi
-Suggests: epics-doc
-Conflicts: epics-catools (<= 3.14.11-6), epics-msi (< 3),
-Description: Files needed to develop new EPICS applications
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Libraries, headers, and utilities needed to develop applications
- targeted to the host system.
-
-Package: epics-compat-dev
-Architecture: any
-Depends: epics-dev (= ${binary:Version}),
-         epics-perl (= ${binary:Version}),
-         ${shlibs:Depends}, ${misc:Depends}
-Suggests: epics-doc
-Description: Files needed to develop new EPICS applications
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- This package contains additional files needed for compatibility with
- EPICS 3.13.x series.
-
-Package: epics-pcas-dev
+Package: rtems-epics
 Architecture: all
-Depends: epics-dev (= ${binary:Version}),
-        ${shlibs:Depends}, ${misc:Depends}
-Description: Files needed to develop new EPICS applications
+Depends: epics-dev (>= 3.14.11-7~), ${misc:Depends}
+Conflicts: epics-dev (<< 3.14.11)
+Description: EPICS headers for RTEMS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
  control systems.
  .
- Private headers for the portable CA server needed by some special applications
+ Contains the OS specific headers needed to build IOCs for RTEMS
 
-Package: epics-catools
-Section: admin
-Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}),
-         ${shlibs:Depends}, ${misc:Depends}
-Description: Command line utilities for EPICS
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- EPICS utilities such as caget and caput as well as the caRepeater daemon.
-
-Package: epics-perl
-Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}),
-         ${shlibs:Depends}, ${perl:Depends}, ${misc:Depends}
-Conflicts: epics-libs (<= 3.14.10-7)
-Description: Perl bindings for EPICS
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Perl bindings for EPICS
-
-Package: epics-msi
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libepics3.14.12.3 (= ${binary:Version}),
-Description: EPICS Macro Substitution and Include tool
- MSI is a general purpose macro substitution/include tool.
- It accepts as input an ascii template file.
-
-Package: epics-doc
+Package: rtems-epics-mvme2100
 Architecture: all
-Depends: ${misc:Depends}
-Section: doc
-Description: EPICS documentation
+Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
+Conflicts: epics-rtems-mvme2100
+Provides: epics-rtems-mvme2100
+Replaces: epics-rtems-mvme2100
+Description: EPICS targeted to the MVME2100
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
  control systems.
  .
- Documentation for EPICS Base
+ EPICS for the MVME2100 powerpc based vme bus processor card
+
+Package: rtems-epics-mvme2307
+Architecture: all
+Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
+Conflicts: epics-rtems-mvme2307
+Provides: epics-rtems-mvme2307
+Replaces: epics-rtems-mvme2307
+Description: EPICS targeted to the MVME2307
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS for the MVME2307 powerpc based vme bus processor card
+
+Package: rtems-epics-mvme3100
+Architecture: all
+Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
+Conflicts: epics-rtems-mvme3100
+Provides: epics-rtems-mvme3100
+Replaces: epics-rtems-mvme3100
+Description: EPICS targeted to the MVME3100
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS for the MVME3100 powerpc based vme bus processor card
+
+Package: rtems-epics-mvme5500
+Architecture: all
+Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
+Conflicts: epics-rtems-mvme5500
+Provides: epics-rtems-mvme5500
+Replaces: epics-rtems-mvme5500
+Description: EPICS targeted to the MVME5500
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS for the MVME5500 powerpc based vme bus processor card
+
+Package: rtems-epics-pc386
+Architecture: all
+Depends: ${rtems:Depends}, rtems-epics (= ${source:Version}), ${misc:Depends}
+Conflicts: epics-rtems-pc386
+Provides: epics-rtems-pc386
+Replaces: epics-rtems-pc386
+Description: EPICS targeted to the PC system with >= 386 cpus
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS for the standard 386 compatible cpu and PC hardware.
