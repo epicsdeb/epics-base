@@ -25,7 +25,7 @@ Description: EPICS Base libraries for clients and servers
 Package: libepics3.14.12.3-dbg
 Section: debug
 Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version})
+Depends: libepics3.14.12.3 (= ${binary:Version}), ${misc:Depends},
 Provides: libepics-dbg
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
@@ -37,7 +37,7 @@ Description: Files needed to develop new EPICS applications
 Package: ioclogserver
 Section: admin
 Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}),
+Depends: libepics3.14.12.3 (= ${binary:Version}), ${misc:Depends},
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -55,7 +55,7 @@ Depends: libepics3.14.12.3 (= ${binary:Version}), epics-catools (= ${binary:Vers
         ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-msi
 Suggests: epics-doc
-Conflicts: epics-catools (<= 3.14.11-6), epics-msi (< 3),
+Conflicts: epics-catools (<= 3.14.11-6), epics-msi (<< 3),
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -80,7 +80,7 @@ Description: Files needed to develop new EPICS applications
 
 Package: epics-pcas-dev
 Architecture: all
-Depends: epics-dev (= ${binary:Version}),
+Depends: epics-dev (>= ${source:Version}), epics-dev (<< ${source:Version}.1~),
         ${shlibs:Depends}, ${misc:Depends}
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
