@@ -10,7 +10,7 @@ Avoid need to play games as install location is known.
  3 files changed, 4 insertions(+), 9 deletions(-)
 
 diff --git a/src/cap5/CA.pm b/src/cap5/CA.pm
-index ac6542e..ccf876e 100644
+index ac6542e..05ae5b4 100644
 --- a/src/cap5/CA.pm
 +++ b/src/cap5/CA.pm
 @@ -6,7 +6,6 @@ use warnings;
@@ -28,7 +28,7 @@ index ac6542e..ccf876e 100644
 -use File::Basename;
 -my $Lib = dirname(__FILE__);
 -push @DynaLoader::dl_library_path, "$Lib/$perl_version/$perl_archname";
-+push @DynaLoader::dl_library_path, "/usr/lib/epics/lib/host";
++push @DynaLoader::dl_library_path, "/usr/lib/perl5/auto";
  
  bootstrap Cap5 $VERSION;
  
