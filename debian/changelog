@@ -1,3 +1,10 @@
+epics-base (3.14.12.3-2) unstable; urgency=low
+
+  * move EPICS::* perl modules to epics-dev
+    epics-dev no longer depends on epics-perl
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 11 Mar 2013 14:14:52 -0400
+
 epics-base (3.14.12.3-1) unstable; urgency=low
 
   * New upstream version
