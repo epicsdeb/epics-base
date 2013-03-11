@@ -10,6 +10,9 @@ endif
 
 export EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
+# eg. "5.10.1"
+PERLVER:=$(shell perl -mConfig -e 'print "$$Config::Config{version}";')
+
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
@@ -76,9 +79,20 @@ override_dh_install:
 		do ln -s ../../../../bin/`basename $$B` debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/`basename $$B`; \
 	done
 
-	# install perl module cap5
-	install -d debian/tmp/usr/share
-	mv debian/tmp/usr/lib/epics/lib/perl debian/tmp/usr/share/perl5
+	install -d debian/tmp/usr/share/perl5
+	install -d debian/tmp/usr/lib/perl5/auto
+
+	# install EPICS::* modules under /usr/share/perl5/
+	mv debian/tmp/usr/lib/epics/lib/perl/EPICS debian/tmp/usr/share/perl5/
+
+	# Relocate CA to /usr/lib/perl5/
+	mv debian/tmp/usr/lib/epics/lib/perl/CA.pm debian/tmp/usr/lib/perl5/
+	# libCap5.so to /usr/lib/perl5/auto/
+	mv debian/tmp/usr/lib/epics/lib/perl/5.*/*/libCap5.so debian/tmp/usr/lib/perl5/auto/
+
+	# Don't need other copies
+	rm debian/tmp/usr/lib/epics/lib/linux-*/libCap5.so
+
 	# This path is used by CA.pm
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 

@@ -50,12 +50,12 @@ Description: Log recording daemon for EPICS IOCS
 Package: epics-dev
 Architecture: any
 Depends: libepics3.14.12.3 (= ${binary:Version}), epics-catools (= ${binary:Version}),
-         epics-perl (= ${binary:Version}),
+         perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-msi
 Suggests: epics-doc
-Conflicts: epics-catools (<= 3.14.11-6), epics-msi (<< 3),
+Conflicts: epics-catools (<= 3.14.11-6), epics-msi (<< 3), epics-perl (<= 3.14.12.3-1),
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -67,7 +67,6 @@ Description: Files needed to develop new EPICS applications
 Package: epics-compat-dev
 Architecture: any
 Depends: epics-dev (= ${binary:Version}),
-         epics-perl (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc
 Description: Files needed to develop new EPICS applications

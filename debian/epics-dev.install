@@ -10,9 +10,11 @@ usr/lib/epics/lib/linux-*/libCom*
 usr/lib/epics/lib/linux-*/libca*
 usr/lib/epics/lib/linux-*/libgdd*
 usr/lib/epics/lib/linux-*/libcas*
+usr/lib/epics/lib/host
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
+usr/share/perl5/EPICS
 usr/share/epics-dev/configure
 etc/epics/configure
 
