@@ -10,9 +10,6 @@ endif
 
 export EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 
-# eg. "5.10.1"
-PERLVER:=$(shell perl -mConfig -e 'print "$$Config::Config{version}";')
-
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
@@ -42,6 +39,8 @@ override_dh_auto_install:
 override_dh_auto_test: # skip for development
 
 USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer
+
+PERLBINS=caget.pl caput.pl camonitor.pl cainfo.pl capr.pl
 
 override_dh_install:
 
@@ -101,6 +100,13 @@ override_dh_install:
 	mv debian/tmp/usr/lib/epics/html/msi.html debian/epics-msi/usr/share/doc/epics-msi
 
 	dh_install --fail-missing
+
+	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
+	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)-debug
+
+	for arch in $(EPICS_HOST_ARCH) $(EPICS_HOST_ARCH)-debug; do for name in $(PERLBINS); do \
+	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \
+	;done ;done
 
 	install -d debian/epics-win32/usr/lib/epics/include/os
 	mv debian/epics-dev/usr/lib/epics/include/os/WIN32 debian/epics-win32/usr/lib/epics/include/os/
