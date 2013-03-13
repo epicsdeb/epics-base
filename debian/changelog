@@ -1,3 +1,10 @@
+epics-base (3.14.12.3-5) unstable; urgency=low
+
+  * Added some Recommands and Suggests for epics-dev
+  * Added README.Debian
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 13 Mar 2013 18:10:15 -0400
+
 epics-base (3.14.12.3-4) unstable; urgency=low
 
   * missing Conflicts entry from previous move
