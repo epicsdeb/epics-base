@@ -1,0 +1,26 @@
+EPICS Base on Debian
+
+= Changes made to upstream source
+
+== Backport of new MSI tool for EPICS Base 3.15 series.
+
+This change includes adding a second argument to
+the dbLoadTemplate() function.  This allows
+runtime loading of a subsitution file with
+extra macros defined.  For example:
+
+dbLoadTemplate("db/motor.subsitution", "N=axis1")
+dbLoadTemplate("db/motor.subsitution", "N=axis2")
+
+= Packaging "features"
+
+== Init script for iocLogServer
+
+When the 'ioclogserver' package is installed, the logger
+automatically runs and begins writing /var/log/epics/epics.log
+
+== epics-win32
+
+The Mingw32 cross-compiler is used to build for the win32-x86-mingw
+target.  Currently no DLLs are produced.  Only .lib and
+statically linked executables.
