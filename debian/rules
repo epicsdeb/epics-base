@@ -33,10 +33,10 @@ binary-arch binary-indep: install
 binary: binary-arch binary-indep
 
 override_dh_auto_build:
-	dh_auto_build EPICS_SITE_VERSION="$(DEBV)"
+	dh_auto_build -- USE_GESYS=YES EPICS_SITE_VERSION="$(DEBV)"
 
 override_dh_auto_install:
-	dh_auto_install -- EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_install -- USE_GESYS=YES EPICS_SITE_VERSION=$(DEBV)
 
 override_dh_auto_test: # skip host tests
 
