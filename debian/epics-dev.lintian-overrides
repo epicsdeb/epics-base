@@ -1,6 +1,0 @@
-epics-dev: executable-not-elf-or-script ./usr/lib/epics/bin/linux-x86-debug/makeInstallDir.pl
-epics-dev: executable-not-elf-or-script ./usr/lib/epics/bin/linux-x86/makeInstallDir.pl
-# Dependent modules are hardcoded expect to find this script with the .pl extensions
-epics-dev: unstripped-binary-or-object
-# dh_strip doesn't seem to want to touch usr/lib/epics/lib/*-debug/*.so
-# not sure why?

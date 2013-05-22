@@ -1,3 +1,0 @@
-libepics3.14.12: package-name-doesnt-match-sonames
-# Don't want to package the many Base libraries seperately
-# All have the same soname

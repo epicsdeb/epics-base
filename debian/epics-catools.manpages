@@ -1,7 +1,0 @@
-debian/man/caget.1
-debian/man/cainfo.1
-debian/man/camonitor.1
-debian/man/caput.1
-debian/man/caRepeater.8
-debian/man/makeBaseApp.1
-debian/man/makeBaseExt.1

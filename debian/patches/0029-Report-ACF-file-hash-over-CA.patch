@@ -1,0 +1,309 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 22 May 2013 12:05:55 -0400
+Subject: [PATCH] Report ACF file hash over CA
+
+Define a new callback function which is invoked
+after a new access security file is parsed,
+but before it is applied.  The AS global lock
+is held.
+
+The callback receives a hash of all the lines read
+(All EOL sequences become \n)
+and a error code (zero is success).
+
+add asSetFileCallback() to set a new callback.
+Returns the previous callback to allow chaining.
+
+dset and db file for AS file hash
+---
+ src/as/asLib.h                      |    6 ++
+ src/as/asLibRoutines.c              |   37 +++++++++++-
+ src/dev/softDev/Makefile            |    1 +
+ src/dev/softDev/devAccessSecurity.c |  115 +++++++++++++++++++++++++++++++++++
+ src/dev/softDev/devSoft.dbd         |    3 +
+ src/softIoc/Makefile                |    1 +
+ src/softIoc/acfFileHash.db          |    7 ++
+ 7 files changed, 168 insertions(+), 2 deletions(-)
+ create mode 100644 src/dev/softDev/devAccessSecurity.c
+ create mode 100644 src/softIoc/acfFileHash.db
+
+diff --git a/src/as/asLib.h b/src/as/asLib.h
+index b3da2f8..f16e9f2 100644
+--- a/src/as/asLib.h
++++ b/src/as/asLib.h
+@@ -222,6 +222,12 @@ epicsShareFunc long epicsShareAPI asComputeAsg(ASG *pasg);
+ /*following is "friend" function*/
+ epicsShareFunc void * epicsShareAPI asCalloc(size_t nobj,size_t size);
+ epicsShareFunc char * epicsShareAPI asStrdup(unsigned char *str);
++
++#ifdef BNL_LOCAL_API
++typedef void (*ASFILECALLBACK)(unsigned int hash, long status);
++epicsShareFunc ASFILECALLBACK asSetFileCallback(ASFILECALLBACK cb);
++#endif
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/src/as/asLibRoutines.c b/src/as/asLibRoutines.c
+index 2a5c0d7..ee486a8 100644
+--- a/src/as/asLibRoutines.c
++++ b/src/as/asLibRoutines.c
+@@ -16,7 +16,9 @@
+ #include <string.h>
+ #include <ctype.h>
+ 
++#define BNL_LOCAL_API
+ #include "epicsStdioRedirect.h"
++
+ #include "dbDefs.h"
+ #include "epicsThread.h"
+ #include "cantProceed.h"
+@@ -26,6 +28,7 @@
+ #include "freeList.h"
+ #include "macLib.h"
+ #include "postfix.h"
++#include "epicsString.h"
+  
+ static epicsMutexId asLock;
+ #define LOCK epicsMutexMustLock(asLock)
+@@ -81,6 +84,30 @@ static void asInitializeOnce(void *arg)
+ {
+     asLock  = epicsMutexMustCreate();
+ }
++
++static epicsThreadOnceId asInitializeOnceFlag = EPICS_THREAD_ONCE_INIT;
++static ASFILECALLBACK filecb;
++static unsigned int stream_hash;
++static long status_last;
++
++/* Install callback which will be invoked after an
++ * access security file is parsed.
++ */
++epicsShareFunc ASFILECALLBACK asSetFileCallback(ASFILECALLBACK cb)
++{
++    ASFILECALLBACK prev;
++
++    epicsThreadOnce(&asInitializeOnceFlag,asInitializeOnce,(void *)0);
++    LOCK;
++    prev = filecb;
++    filecb = cb;
++    /* run now if some file was already been loaded */
++    if(asActive && cb)
++        (*filecb)(stream_hash, status_last);
++    UNLOCK;
++    return prev;
++}
++
+ long epicsShareAPI asInitialize(ASINPUTFUNCPTR inputfunction)
+ {
+     ASG		*pasg;
+@@ -91,7 +118,6 @@ long epicsShareAPI asInitialize(ASINPUTFUNCPTR inputfunction)
+     UAGNAME	*puagname;
+     HAG		*phag;
+     HAGNAME	*phagname;
+-    static epicsThreadOnceId asInitializeOnceFlag = EPICS_THREAD_ONCE_INIT;
+ 
+     epicsThreadOnce(&asInitializeOnceFlag,asInitializeOnce,(void *)0);
+     LOCK;
+@@ -101,7 +127,10 @@ long epicsShareAPI asInitialize(ASINPUTFUNCPTR inputfunction)
+     ellInit(&pasbasenew->hagList);
+     ellInit(&pasbasenew->asgList);
+     asAsgAdd(DEFAULT);
+-    status = myParse(inputfunction);
++    stream_hash = 0;
++    status_last = status = myParse(inputfunction);
++    if(filecb)
++        (*filecb)(stream_hash, status);
+     if(status) {
+ 	status = S_asLib_badConfig;
+ 	/*Not safe to call asFreeAll */
+@@ -215,7 +244,10 @@ static int myInputFunction(char *buf, int max_size)
+ 	my_buffer_ptr = my_buffer;
+     }
+     l = strlen(my_buffer_ptr);
++    stream_hash = epicsStrHash(my_buffer_ptr, stream_hash);
+     n = (l<=max_size ? l : max_size);
++    if(n<0)
++        n=0;
+     memcpy(buf,my_buffer_ptr,n);
+     my_buffer_ptr += n;
+     return(n);
+@@ -231,6 +263,7 @@ long epicsShareAPI asInitFP(FILE *fp,const char *substitutions)
+     buffer[0] = 0;
+     my_buffer = buffer;
+     my_buffer_ptr = my_buffer;
++    stream_hash = 0;
+     stream = fp;
+     if(substitutions) {
+ 	if((status = macCreateHandle(&macHandle,NULL))) {
+diff --git a/src/dev/softDev/Makefile b/src/dev/softDev/Makefile
+index 6c4f11c..48c65ca 100644
+--- a/src/dev/softDev/Makefile
++++ b/src/dev/softDev/Makefile
+@@ -40,6 +40,7 @@ LIBSRCS += devSiSoft.c
+ LIBSRCS += devSoSoft.c
+ LIBSRCS += devWfSoft.c
+ LIBSRCS += devGeneralTime.c
++LIBSRCS += devAccessSecurity.c
+ 
+ LIBSRCS += devAoSoftCallback.c
+ LIBSRCS += devBoSoftCallback.c
+diff --git a/src/dev/softDev/devAccessSecurity.c b/src/dev/softDev/devAccessSecurity.c
+new file mode 100644
+index 0000000..d9bea84
+--- /dev/null
++++ b/src/dev/softDev/devAccessSecurity.c
+@@ -0,0 +1,115 @@
++/*************************************************************************\
++* Copyright (c) 2013 Brookhaven National Laboratory.
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
++\*************************************************************************/
++
++#define BNL_LOCAL_API
++
++#include <stdio.h>
++
++#include "devSup.h"
++#include "recGbl.h"
++#include "dbScan.h"
++#include "recGbl.h"
++#include "dbAccess.h"
++#include "alarm.h"
++#include "epicsMutex.h"
++#include "epicsTime.h"
++#include "biRecord.h"
++#include "longinRecord.h"
++#include "asLib.h"
++#include "epicsExport.h"
++
++static epicsMutexId last_lock;
++static unsigned int last_sum;
++static long last_status;
++static epicsTimeStamp last_time;
++
++static IOSCANPVT as_scan;
++static ASFILECALLBACK next_cb;
++
++static void asupdate(unsigned int sum, long status)
++{
++    epicsMutexMustLock(last_lock);
++    last_sum = sum;
++    last_status = status;
++    epicsTimeGetCurrent(&last_time);
++    epicsMutexUnlock(last_lock);
++
++    if(next_cb)
++        (*next_cb)(sum, status);
++
++    if(interruptAccept)
++        scanIoRequest(as_scan);
++}
++
++static long init_record(void *prec)
++{
++    static int initialized = 0;
++    if(initialized)
++        return 0;
++    initialized = 1;
++    last_lock = epicsMutexMustCreate();
++    next_cb = asSetFileCallback(&asupdate);
++    scanIoInit(&as_scan);
++    return 0;
++}
++
++static long get_io_intr_info(int cmd, struct dbCommon *prec, IOSCANPVT *scan)
++{
++    *scan = as_scan;
++    return 0;
++}
++
++static long read_status(biRecord *prec)
++{
++    epicsMutexMustLock(last_lock);
++    prec->rval = last_status;
++    if(!asActive)
++        recGblSetSevr(prec, STATE_ALARM, MINOR_ALARM);
++    if(prec->tse == epicsTimeEventDeviceTime) {
++        prec->time = last_time;
++    }
++    epicsMutexUnlock(last_lock);
++    return 0;
++}
++
++static long read_sum(longinRecord *prec)
++{
++    epicsMutexMustLock(last_lock);
++    prec->val = last_sum;
++    prec->udf = 0;
++    if(last_status)
++        recGblSetSevr(prec, READ_ALARM, MAJOR_ALARM);
++    else if(!asActive)
++        recGblSetSevr(prec, STATE_ALARM, MINOR_ALARM);
++    if(prec->tse == epicsTimeEventDeviceTime) {
++        prec->time = last_time;
++    }
++    epicsMutexUnlock(last_lock);
++    return 0;
++}
++
++struct dset5 {
++    dset common;
++    DEVSUPFUN read_bi;
++};
++
++static struct dset5 devBiASStatus = {
++    {5, NULL, NULL,
++     (DEVSUPFUN)&init_record,
++     (DEVSUPFUN)&get_io_intr_info,
++    },
++    (DEVSUPFUN)&read_status
++};
++epicsExportAddress(dset, devBiASStatus);
++
++static struct dset5 devLiASSum = {
++    {5, NULL, NULL,
++     (DEVSUPFUN)&init_record,
++     (DEVSUPFUN)&get_io_intr_info,
++    },
++    (DEVSUPFUN)&read_sum
++};
++epicsExportAddress(dset, devLiASSum);
+diff --git a/src/dev/softDev/devSoft.dbd b/src/dev/softDev/devSoft.dbd
+index 5f90aba..a34a3c2 100644
+--- a/src/dev/softDev/devSoft.dbd
++++ b/src/dev/softDev/devSoft.dbd
+@@ -43,4 +43,7 @@ device(bo,	INST_IO,devBoGeneralTime,"General Time")
+ device(longin,	INST_IO,devLiGeneralTime,"General Time")
+ device(stringin,INST_IO,devSiGeneralTime,"General Time")
+ 
++device(bi,	INST_IO,devBiASStatus,"Access Security Status")
++device(longin,	INST_IO,devLiASSum,"Access Security Sum")
++
+ device(stringout,INST_IO,devSoStdio,"stdio")
+diff --git a/src/softIoc/Makefile b/src/softIoc/Makefile
+index 8b8ec34..7158399 100644
+--- a/src/softIoc/Makefile
++++ b/src/softIoc/Makefile
+@@ -26,6 +26,7 @@ softIoc_SRCS_vxWorks = -nil-
+ softIoc_LIBS = $(EPICS_BASE_IOC_LIBS)
+ 
+ DB += softIocExit.db
++DB += acfFileHash.db
+ 
+ FINAL_LOCATION ?= $(shell $(PERL) $(TOOLS)/fullPathName.pl $(INSTALL_LOCATION))
+ 
+diff --git a/src/softIoc/acfFileHash.db b/src/softIoc/acfFileHash.db
+new file mode 100644
+index 0000000..c79ac9f
+--- /dev/null
++++ b/src/softIoc/acfFileHash.db
+@@ -0,0 +1,7 @@
++record(longin, "$(N)") {
++  field(DTYP, "Access Security Sum")
++  field(DESC, "AS file sum")
++  field(PINI, "RUNNING")
++  field(SCAN, "I/O Intr")
++  field(TSE , "-2")
++}
+-- 
