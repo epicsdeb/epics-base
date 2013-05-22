@@ -1,3 +1,10 @@
+epics-base (3.14.12.3-6) unstable; urgency=low
+
+  * include deb version in EPICS_SITE_VERSION
+  * Add patch: Report ACF file hash over CA
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 22 May 2013 12:22:19 -0400
+
 epics-base (3.14.12.3-5) unstable; urgency=low
 
   * Added some Recommands and Suggests for epics-dev
