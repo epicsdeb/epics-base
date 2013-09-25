@@ -8,7 +8,14 @@ NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 BMAKEFLAGS += -j$(NUMJOBS)
 endif
 
-export EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+ifeq "$(DEB_BUILD_ARCH)" "i386"
+EPICS_HOST_ARCH:=linux-x86
+else ifeq "$(DEB_BUILD_ARCH)" "amd64"
+EPICS_HOST_ARCH:=linux-x86_64
+else
+EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+endif
+export EPICS_HOST_ARCH
 
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
