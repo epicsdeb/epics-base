@@ -1,6 +1,6 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 22 May 2013 12:05:55 -0400
-Subject: [PATCH] Report ACF file hash over CA
+Subject: Report ACF file hash over CA
 
 Define a new callback function which is invoked
 after a new access security file is parsed,
@@ -16,13 +16,13 @@ Returns the previous callback to allow chaining.
 
 dset and db file for AS file hash
 ---
- src/as/asLib.h                      |    6 ++
- src/as/asLibRoutines.c              |   37 +++++++++++-
- src/dev/softDev/Makefile            |    1 +
- src/dev/softDev/devAccessSecurity.c |  115 +++++++++++++++++++++++++++++++++++
- src/dev/softDev/devSoft.dbd         |    3 +
- src/softIoc/Makefile                |    1 +
- src/softIoc/acfFileHash.db          |    7 ++
+ src/as/asLib.h                      |   6 ++
+ src/as/asLibRoutines.c              |  37 +++++++++++-
+ src/dev/softDev/Makefile            |   1 +
+ src/dev/softDev/devAccessSecurity.c | 115 ++++++++++++++++++++++++++++++++++++
+ src/dev/softDev/devSoft.dbd         |   3 +
+ src/softIoc/Makefile                |   1 +
+ src/softIoc/acfFileHash.db          |   7 +++
  7 files changed, 168 insertions(+), 2 deletions(-)
  create mode 100644 src/dev/softDev/devAccessSecurity.c
  create mode 100644 src/softIoc/acfFileHash.db
@@ -306,4 +306,3 @@ index 0000000..c79ac9f
 +  field(SCAN, "I/O Intr")
 +  field(TSE , "-2")
 +}
--- 

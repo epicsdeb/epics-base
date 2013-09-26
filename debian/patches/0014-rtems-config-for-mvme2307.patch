@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:29:16 -0400
-Subject: [PATCH] rtems: config for mvme2307
+Subject: rtems: config for mvme2307
 
 ---
- configure/os/CONFIG.Common.RTEMS-mvme2307 |   30 +++++++++++++++++++++++++++++
- 1 files changed, 30 insertions(+), 0 deletions(-)
+ configure/os/CONFIG.Common.RTEMS-mvme2307 | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
  create mode 100644 configure/os/CONFIG.Common.RTEMS-mvme2307
 
 diff --git a/configure/os/CONFIG.Common.RTEMS-mvme2307 b/configure/os/CONFIG.Common.RTEMS-mvme2307
@@ -43,4 +43,3 @@ index 0000000..7ff144a
 +OP_SYS_LDLIBS += -lbspExt
 +
 +include $(CONFIG)/os/CONFIG.Common.RTEMS
--- 

@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:35:00 -0400
-Subject: [PATCH] install makeInstallDir.pl
+Subject: install makeInstallDir.pl
 
 ---
- src/softIoc/Makefile |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ src/softIoc/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/src/softIoc/Makefile b/src/softIoc/Makefile
 index c3e8679..8b8ec34 100644
@@ -19,4 +19,3 @@ index c3e8679..8b8ec34 100644
  DBD += softIoc.dbd
  softIoc_DBD += base.dbd
  softIoc_DBD += dlload.dbd
--- 

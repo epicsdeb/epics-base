@@ -1,11 +1,11 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Fri, 1 Mar 2013 14:35:55 -0500
-Subject: [PATCH] cross-build with mingw32
+Subject: cross-build with mingw32
 
 ---
- .../os/CONFIG.win32-x86-mingw.win32-x86-mingw      |   12 ++++++------
- configure/os/CONFIG_SITE.Common.win32-x86-mingw    |   14 ++++++++++++++
- .../os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw |    2 +-
+ configure/os/CONFIG.win32-x86-mingw.win32-x86-mingw      | 12 ++++++------
+ configure/os/CONFIG_SITE.Common.win32-x86-mingw          | 14 ++++++++++++++
+ configure/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw |  2 +-
  3 files changed, 21 insertions(+), 7 deletions(-)
 
 diff --git a/configure/os/CONFIG.win32-x86-mingw.win32-x86-mingw b/configure/os/CONFIG.win32-x86-mingw.win32-x86-mingw
@@ -67,4 +67,3 @@ index 7793d03..4c41fbd 100644
  #CC = $(CMPLR_PREFIX)gcc
  #CCC = $(CMPLR_PREFIX)g++
  #AR = $(CMPLR_PREFIX)ar -rc
--- 

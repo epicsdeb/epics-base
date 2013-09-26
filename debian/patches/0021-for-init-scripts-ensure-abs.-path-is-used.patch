@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:46:02 -0400
-Subject: [PATCH] for init scripts, ensure abs. path is used.
+Subject: for init scripts, ensure abs. path is used.
 
 ---
- src/util/Makefile |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ src/util/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/util/Makefile b/src/util/Makefile
 index e0cd22c..37ef4ed 100644
@@ -18,4 +18,3 @@ index e0cd22c..37ef4ed 100644
 +	sed -e s%:INSTALL_BIN:%$(FINAL_LOCATION)/bin/$(T_A)% $< >$@
  
  #	EOF Makefile.Host for base/src/util
--- 

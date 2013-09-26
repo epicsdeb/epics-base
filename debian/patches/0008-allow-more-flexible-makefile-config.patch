@@ -1,11 +1,11 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:23:46 -0400
-Subject: [PATCH] allow more flexible makefile config
+Subject: allow more flexible makefile config
 
 ---
- configure/CONFIG      |    7 +++++++
- configure/RULES_BUILD |    5 +++++
- 2 files changed, 12 insertions(+), 0 deletions(-)
+ configure/CONFIG      | 7 +++++++
+ configure/RULES_BUILD | 5 +++++
+ 2 files changed, 12 insertions(+)
 
 diff --git a/configure/CONFIG b/configure/CONFIG
 index ee20755..1c0d69d 100644
@@ -41,4 +41,3 @@ index f44b57c..f9702e6 100644
  .PRECIOUS: %.i %.o %.c %.nm %.cpp %.cc
  .PRECIOUS: $(COMMON_INC)
  
--- 

@@ -1,22 +1,22 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:09:52 -0400
-Subject: [PATCH] fix perl interpreter location
+Subject: fix perl interpreter location
 
 No need to use tricks since we know where it is
 ---
- config/tools/munch.pl                      |    3 +--
- config/tools/useManifestTool.pl            |    3 +--
- src/makeBaseApp/makeBaseApp.pl             |    3 +--
- src/makeBaseExt/makeBaseExt.pl             |    3 +--
- src/registry/registerRecordDeviceDriver.pl |    3 +--
- src/tools/convertRelease.pl                |    3 +--
- src/tools/cvsclean.pl                      |    3 +--
- src/tools/dos2unix.pl                      |    3 +--
- src/tools/filterWarnings.pl                |    3 +--
- src/tools/fullPathName.pl                  |    3 +--
- src/tools/replaceVAR.pl                    |    3 +--
- src/tools/useManifestTool.pl               |    3 +--
- startup/EpicsHostArch.pl                   |    3 +--
+ config/tools/munch.pl                      | 3 +--
+ config/tools/useManifestTool.pl            | 3 +--
+ src/makeBaseApp/makeBaseApp.pl             | 3 +--
+ src/makeBaseExt/makeBaseExt.pl             | 3 +--
+ src/registry/registerRecordDeviceDriver.pl | 3 +--
+ src/tools/convertRelease.pl                | 3 +--
+ src/tools/cvsclean.pl                      | 3 +--
+ src/tools/dos2unix.pl                      | 3 +--
+ src/tools/filterWarnings.pl                | 3 +--
+ src/tools/fullPathName.pl                  | 3 +--
+ src/tools/replaceVAR.pl                    | 3 +--
+ src/tools/useManifestTool.pl               | 3 +--
+ startup/EpicsHostArch.pl                   | 3 +--
  13 files changed, 13 insertions(+), 26 deletions(-)
 
 diff --git a/config/tools/munch.pl b/config/tools/munch.pl
@@ -162,4 +162,3 @@ index 3d75200..e4aa42f 100755
  #*************************************************************************
  # Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
--- 

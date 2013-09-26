@@ -1,11 +1,11 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:46:41 -0400
-Subject: [PATCH] Compatibility USE_RPATH make variable
+Subject: Compatibility USE_RPATH make variable
 
 Our legacy name for LINKER_USE_RPATH
 ---
- configure/CONFIG_SITE |    7 ++++++-
- 1 files changed, 6 insertions(+), 1 deletions(-)
+ configure/CONFIG_SITE | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/configure/CONFIG_SITE b/configure/CONFIG_SITE
 index a37d48a..fe644cf 100644
@@ -30,4 +30,3 @@ index a37d48a..fe644cf 100644
 -LINKER_USE_RPATH = YES
 +LINKER_USE_RPATH = $(USE_RPATH)
  
--- 

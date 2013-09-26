@@ -1,14 +1,14 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:13:00 -0400
-Subject: [PATCH] include EPICS_MODIFICATION in soname
+Subject: include EPICS_MODIFICATION in soname
 
 ABI compatibility between (really any) release is not
 guaranteed or checked.
 
 We will have to check any patch releases though.
 ---
- configure/CONFIG.gnuCommon |    4 ++--
- configure/CONFIG_BASE      |    4 ++--
+ configure/CONFIG.gnuCommon | 4 ++--
+ configure/CONFIG_BASE      | 4 ++--
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/configure/CONFIG.gnuCommon b/configure/CONFIG.gnuCommon
@@ -41,4 +41,3 @@ index dd55953..1d09c4a 100644
  endif # BASE_TOP
  
  #---------------------------------------------------------------
--- 

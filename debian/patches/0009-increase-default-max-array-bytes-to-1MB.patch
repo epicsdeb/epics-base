@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:24:11 -0400
-Subject: [PATCH] increase default max array bytes to 1MB
+Subject: increase default max array bytes to 1MB
 
 ---
- configure/CONFIG_ENV |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ configure/CONFIG_ENV | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/configure/CONFIG_ENV b/configure/CONFIG_ENV
 index f381ed4..1168c61 100644
@@ -19,4 +19,3 @@ index f381ed4..1168c61 100644
  EPICS_CA_BEACON_PERIOD=15.0
  EPICS_CA_MAX_SEARCH_PERIOD=300.0
  EPICS_CAS_BEACON_PERIOD=
--- 

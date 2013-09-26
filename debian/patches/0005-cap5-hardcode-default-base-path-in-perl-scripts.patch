@@ -1,12 +1,12 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:14:48 -0400
-Subject: [PATCH] cap5: hardcode default base path in perl scripts
+Subject: cap5: hardcode default base path in perl scripts
 
 Avoid need to play games as install location is known.
 ---
- src/cap5/CA.pm                 |    5 +----
- src/makeBaseApp/makeBaseApp.pl |    5 ++---
- src/makeBaseExt/makeBaseExt.pl |    3 +--
+ src/cap5/CA.pm                 | 5 +----
+ src/makeBaseApp/makeBaseApp.pl | 5 ++---
+ src/makeBaseExt/makeBaseExt.pl | 3 +--
  3 files changed, 4 insertions(+), 9 deletions(-)
 
 diff --git a/src/cap5/CA.pm b/src/cap5/CA.pm
@@ -69,4 +69,3 @@ index 4e5c3ee..9299acf 100755
      }
      "$epics_base" or Cleanup(1, "Cannot find EPICS base");
  
--- 

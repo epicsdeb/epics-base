@@ -27,3 +27,4 @@
 0027-cross-mingw-doesn-t-provide-_vscprintf.patch
 0028-cross-build-with-mingw32.patch
 0029-Report-ACF-file-hash-over-CA.patch
+0030-Fix-Werror-format-security-issues-in-cap5.patch
