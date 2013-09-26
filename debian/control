@@ -2,7 +2,8 @@ Source: epics-base
 Section: devel
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7.0.50~), epics-debhelper (>= 8.6~),
+Uploaders: Ralph Lange <Ralph.Lange@gmx.de>
+Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.10~),
                libreadline6-dev, libncurses5-dev, perl,
                mingw32,
 Standards-Version: 3.8.0
@@ -12,6 +13,8 @@ Homepage: http://www.aps.anl.gov/epics/
 Package: libepics3.14.12.3
 Section: libs
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-catools
 Conflicts: epics-perl (<= 3.14.10-7)
@@ -25,6 +28,7 @@ Description: EPICS Base libraries for clients and servers
 Package: libepics3.14.12.3-dbg
 Section: debug
 Architecture: any
+Multi-Arch: same
 Depends: libepics3.14.12.3 (= ${binary:Version}), ${misc:Depends},
 Provides: libepics-dbg
 Description: Files needed to develop new EPICS applications
@@ -38,6 +42,7 @@ Package: ioclogserver
 Section: admin
 Architecture: any
 Depends: libepics3.14.12.3 (= ${binary:Version}), ${misc:Depends},
+         ${shlibs:Depends},
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -53,7 +58,7 @@ Depends: libepics3.14.12.3 (= ${binary:Version}), epics-catools (= ${binary:Vers
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
-Recommends: epics-msi,
+Recommends: epics-msi, ioclogserver,
 Suggests: epics-doc, ioclogserver, epics-perl, epics-compat-dev, epics-pcas-dev,
 Conflicts: epics-catools (<= 3.14.11-6), epics-msi (<< 3), epics-perl (<= 3.14.12.3-1),
 Description: Files needed to develop new EPICS applications

@@ -1,3 +1,14 @@
+epics-base (3.14.12.3-7) unstable; urgency=low
+
+  * Install libraries in Multi-Arch compatible location (compat = 9)
+  * Add Debian build flags for hardened build, add fixes for sucessful build
+  * Link --as-needed to avoid unnecessary binary dependencies
+  * Make epics-dev recommend ioclogserver (avoid dangling soft link)
+  * Add Ralph Lange to Uploaders (avoid NMU warnings)
+  * Remove unused lintian overrides for epics-dev
+
+ -- Ralph Lange <Ralph.Lange@gmx.de>  Thu, 26 Sep 2013 18:31:53 +0200
+
 epics-base (3.14.12.3-6) unstable; urgency=low
 
   * include deb version in EPICS_SITE_VERSION

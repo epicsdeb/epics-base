@@ -17,6 +17,20 @@ EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 endif
 export EPICS_HOST_ARCH
 
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+# Link only --as-needed
+# EPICS uses -O3, let's not lower the standards
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+export DEB_CFLAGS_STRIP = -g -O2
+export DEB_CXXFLAGS_STRIP = -g -O2
+
+# Add Debian flags to the EPICS build
+DEB_USR_CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
+DEB_USR_CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
+DEB_USR_CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
+DEB_USR_LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
+
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
@@ -30,18 +44,20 @@ export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 
 export SHRLIB_VERSION=$(SOV)
 
-binary binary-arch binary-indep build install clean:
+%:
 	dh $@ --with epics -Sepicsmake --parallel
-install: build
-binary-arch binary-indep: install
-binary: binary-arch binary-indep
 
 override_dh_auto_build:
-	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV) \
+	USR_CFLAGS_Linux="$(DEB_USR_CFLAGS)" \
+	USR_CXXFLAGS_Linux="$(DEB_USR_CXXFLAGS)" \
+	USR_CPPFLAGS_Linux="$(DEB_USR_CPPFLAGS)" \
+	USR_LDFLAGS_Linux="$(DEB_USR_LDFLAGS)"
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
 
 override_dh_auto_install:
-	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV) \
+	USR_LDFLAGS_Linux="$(DEB_USR_LDFLAGS)"
 
 override_dh_auto_test: # skip for development
 
