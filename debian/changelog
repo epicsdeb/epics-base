@@ -1,3 +1,12 @@
+epics-base (3.14.12.3-7~bpo60+1) squeeze; urgency=low
+
+  * Backport to squeeze:
+  * Change debain/compat to 7
+  * Change debhelper dependency
+  * Change liepics.install to usr/lib/ - all per Ralph's comments
+
+ -- Leon Flaks <flaks@bnl.gov>  Fri, 01 Nov 2013 14:19:52 -0400
+
 epics-base (3.14.12.3-7) unstable; urgency=low
 
   * Install libraries in Multi-Arch compatible location (compat = 9)
