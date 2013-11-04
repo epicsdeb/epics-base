@@ -1,7 +1,7 @@
 epics-base (3.14.12.3-7~bpo60+1) squeeze; urgency=low
 
   * Backport to squeeze:
-  * Change debain/compat to 7
+  * Change debain/compat to 8
   * Change debhelper dependency
   * Change liepics.install to usr/lib/ - all per Ralph's comments
 
