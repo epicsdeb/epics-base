@@ -1,3 +1,19 @@
+epics-base (3.14.12.3-8) UNRELEASED; urgency=low
+
+  * Backports from 3.14.12.4 and beyond
+     Fix race between ACF file reload and RSRV client nice disconnect
+     libCom: Add some missing #include guards
+     libCom: Fix win32 handle leak
+     libCom: Back-ported aToIPAddr (lookup hostnames which start with a number)
+     Fixed read-back of TSEL link
+     pcas: fixed potential memory leak
+     dbStatic: Fixed crash loading record of unknown type
+     libCom: Fix epicsTime::strftime() roll-over bug
+     libCom: Fix epicsString.h comparison functions
+     post DBE_PROPERTY
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 15 Apr 2014 12:30:59 -0400
+
 epics-base (3.14.12.3-7) unstable; urgency=low
 
   * Install libraries in Multi-Arch compatible location (compat = 9)

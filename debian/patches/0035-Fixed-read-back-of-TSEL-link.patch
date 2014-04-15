@@ -1,0 +1,46 @@
+From: Andrew Johnson <anj@aps.anl.gov>
+Date: Fri, 13 Sep 2013 11:57:18 -0500
+Subject: Fixed read-back of TSEL link
+
+Reading back a .TSEL field that was originally pointed to
+another record's .TIME field was exposing internal details
+that didn't need to be made visible. This commit hides the
+.TIME => .VAL change completely, and allows a .TSEL link
+field to be saved and restored properly using autosave.
+---
+ src/db/recGbl.c            | 2 +-
+ src/dbStatic/dbStaticLib.c | 8 +++++---
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/db/recGbl.c b/src/db/recGbl.c
+index 4c2a1d7..7ca912c 100644
+--- a/src/db/recGbl.c
++++ b/src/db/recGbl.c
+@@ -303,7 +303,7 @@ void epicsShareAPI recGblTSELwasModified(struct link *plink)
+     /*Note that the VAL value will not be used*/
+     pfieldname = strstr(ppv_link->pvname, ".TIME");
+     if (pfieldname) {
+-        strcpy(pfieldname, ".VAL");
++        *pfieldname = 0;
+         ppv_link->pvlMask |= pvlOptTSELisTime;
+     }
+ }
+diff --git a/src/dbStatic/dbStaticLib.c b/src/dbStatic/dbStaticLib.c
+index 05a0be8..95118f6 100644
+--- a/src/dbStatic/dbStaticLib.c
++++ b/src/dbStatic/dbStaticLib.c
+@@ -2027,9 +2027,11 @@ char * epicsShareAPI dbGetString(DBENTRY *pdbentry)
+ 		else if(pvlMask&pvlOptCP) ppind=3;
+ 		else if(pvlMask&pvlOptCPP) ppind=4;
+ 		else ppind=0;
+-		if(plink->value.pv_link.pvname)
+-		    strcpy(message,plink->value.pv_link.pvname);
+-		else
++		if (plink->value.pv_link.pvname) {
++		    strcpy(message, plink->value.pv_link.pvname);
++		    if (pvlMask & pvlOptTSELisTime)
++			strcat(message, ".TIME");
++		} else
+ 		    strcpy(message,"");
+ 		strcat(message," ");
+ 		strcat(message,ppstring[ppind]);
