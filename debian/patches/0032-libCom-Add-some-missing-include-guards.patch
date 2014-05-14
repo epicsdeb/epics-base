@@ -1,0 +1,132 @@
+From: Andrew Johnson <anj@aps.anl.gov>
+Date: Thu, 11 Apr 2013 12:56:56 -0500
+Subject: libCom: Add some missing #include guards.
+
+There are still quite a few missing in libCom/osi/os/*
+---
+ src/libCom/misc/epicsConvert.h | 9 ++++++---
+ src/libCom/misc/epicsStdlib.h  | 9 ++++++---
+ src/libCom/osi/epicsSignal.h   | 9 ++++++---
+ src/libCom/osi/osiPoolStatus.h | 4 ++++
+ src/libCom/osi/osiProcess.h    | 4 ++++
+ 5 files changed, 26 insertions(+), 9 deletions(-)
+
+diff --git a/src/libCom/misc/epicsConvert.h b/src/libCom/misc/epicsConvert.h
+index 9674db0..1c38bc3 100644
+--- a/src/libCom/misc/epicsConvert.h
++++ b/src/libCom/misc/epicsConvert.h
+@@ -3,12 +3,14 @@
+ *     National Laboratory.
+ * Copyright (c) 2002 The Regents of the University of California, as
+ *     Operator of Los Alamos National Laboratory.
+-* EPICS BASE Versions 3.13.7
+-* and higher are distributed subject to a Software License Agreement found
+-* in file LICENSE that is included with this distribution. 
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
+ \*************************************************************************/
+ /*epicsConvert.h*/
+ 
++#ifndef INC_epicsConvert_H
++#define INC_epicsConvert_H
++
+ #include <shareLib.h>
+ 
+ #ifdef __cplusplus
+@@ -21,3 +23,4 @@ epicsShareFunc float epicsConvertDoubleToFloat(double value);
+ }
+ #endif
+ 
++#endif /* INC_epicsConvert_H */
+diff --git a/src/libCom/misc/epicsStdlib.h b/src/libCom/misc/epicsStdlib.h
+index 84d4af0..78f822e 100644
+--- a/src/libCom/misc/epicsStdlib.h
++++ b/src/libCom/misc/epicsStdlib.h
+@@ -3,13 +3,15 @@
+ *     National Laboratory.
+ * Copyright (c) 2002 The Regents of the University of California, as
+ *     Operator of Los Alamos National Laboratory.
+-* EPICS BASE Versions 3.13.7
+-* and higher are distributed subject to a Software License Agreement found
+-* in file LICENSE that is included with this distribution. 
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
+ \*************************************************************************/
+ /*epicsStdlib.h*/
+ /*Author: Eric Norum */
+ 
++#ifndef INC_epicsStdlib_H
++#define INC_epicsStdlib_H
++
+ #include <shareLib.h>
+ 
+ #ifdef __cplusplus
+@@ -26,3 +28,4 @@ epicsShareFunc int epicsScanFloat(const char *str, float *dest);
+ }
+ #endif
+ 
++#endif /* INC_epicsStdlib_H */
+diff --git a/src/libCom/osi/epicsSignal.h b/src/libCom/osi/epicsSignal.h
+index 2fd0e58..79adf71 100644
+--- a/src/libCom/osi/epicsSignal.h
++++ b/src/libCom/osi/epicsSignal.h
+@@ -3,11 +3,13 @@
+  *     National Laboratory.
+  * Copyright (c) 2002 The Regents of the University of California, as
+  *     Operator of Los Alamos National Laboratory.
+- * EPICS BASE Versions 3.13.7
+- * and higher are distributed subject to a Software License Agreement found
+- * in file LICENSE that is included with this distribution. 
++ * EPICS BASE is distributed subject to a Software License Agreement found
++ * in file LICENSE that is included with this distribution.
+ \*************************************************************************/
+ 
++#ifndef INC_epicsSignal_H
++#define INC_epicsSignal_H
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+@@ -44,3 +46,4 @@ epicsShareFunc void epicsShareAPI epicsSignalRaiseSigAlarm ( struct epicsThreadO
+ }
+ #endif
+ 
++#endif /* INC_epicsSignal_H */
+diff --git a/src/libCom/osi/osiPoolStatus.h b/src/libCom/osi/osiPoolStatus.h
+index 24cd9c4..3c453e1 100644
+--- a/src/libCom/osi/osiPoolStatus.h
++++ b/src/libCom/osi/osiPoolStatus.h
+@@ -8,6 +8,9 @@
+ * in file LICENSE that is included with this distribution. 
+ \*************************************************************************/
+ 
++#ifndef INC_osiPoolStatus_H
++#define INC_osiPoolStatus_H
++
+ /*
+  * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+  *
+@@ -39,3 +42,4 @@ epicsShareFunc int epicsShareAPI osiSufficentSpaceInPool ( size_t contiguousBloc
+ 
+ #include "osdPoolStatus.h"
+ 
++#endif /* INC_osiPoolStatus_H */
+diff --git a/src/libCom/osi/osiProcess.h b/src/libCom/osi/osiProcess.h
+index ddf375a..9d7f92a 100644
+--- a/src/libCom/osi/osiProcess.h
++++ b/src/libCom/osi/osiProcess.h
+@@ -8,6 +8,9 @@
+ * in file LICENSE that is included with this distribution. 
+ \*************************************************************************/
+ 
++#ifndef INC_osiProcess_H
++#define INC_osiProcess_H
++
+ /* 
+  * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+  * 
+@@ -44,3 +47,4 @@ epicsShareFunc osiSpawnDetachedProcessReturn epicsShareAPI osiSpawnDetachedProce
+ }
+ #endif
+ 
++#endif /* INC_osiProcess_H */
