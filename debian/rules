@@ -38,7 +38,14 @@ DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
 SOV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '1' -d '-')
 DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '2-' -d '-')
 
-TARGETS=$(EPICS_HOST_ARCH)-debug win32-x86-mingw
+# fetch the list of all binary packages being built
+ALLBINS := $(shell dh_listpackages)
+
+TARGETS = $(EPICS_HOST_ARCH)-debug
+
+ifneq (,$(findstring epics-win32,$(ALLBINS)))
+TARGETS += win32-x86-mingw
+endif
 
 export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 
@@ -132,8 +139,10 @@ override_dh_install:
 	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \
 	;done ;done
 
+ifneq (,$(findstring epics-win32,$(ALLBINS)))
 	install -d debian/epics-win32/usr/lib/epics/include/os
 	mv debian/epics-dev/usr/lib/epics/include/os/WIN32 debian/epics-win32/usr/lib/epics/include/os/
+endif
 
 	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
 
