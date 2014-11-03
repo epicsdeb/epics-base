@@ -11,6 +11,10 @@ epics-base (3.14.12.3-8) UNRELEASED; urgency=low
      libCom: Fix epicsTime::strftime() roll-over bug
      libCom: Fix epicsString.h comparison functions
      post DBE_PROPERTY
+  * quiet some lintian warnings
+  * typo in makeBaseApp manpage
+  * add linux-arm patches from Florian Feldbauer
+  * make win32 build conditional in debian/rules
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 15 Apr 2014 12:30:59 -0400
 
