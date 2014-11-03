@@ -1,4 +1,4 @@
-epics-base (3.14.12.3-8) UNRELEASED; urgency=low
+epics-base (3.14.12.3-8) unstable; urgency=low
 
   * Backports from 3.14.12.4 and beyond
      Fix race between ACF file reload and RSRV client nice disconnect
@@ -16,7 +16,7 @@ epics-base (3.14.12.3-8) UNRELEASED; urgency=low
   * add linux-arm patches from Florian Feldbauer
   * make win32 build conditional in debian/rules
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 15 Apr 2014 12:30:59 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 03 Nov 2014 18:24:52 -0500
 
 epics-base (3.14.12.3-7) unstable; urgency=low
 
