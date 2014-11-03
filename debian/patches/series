@@ -38,3 +38,5 @@
 0038-libCom-Fix-epicsTime-strftime-roll-over-bug.patch
 0039-libCom-Fix-epicsString.h-comparison-functions.patch
 0040-post-DBE_PROPERTY.patch
+0041-Added-configure-files-for-linux-arm-and-linux-arm-de.patch
+0042-Remove-definition-of-cross-compiler-for-linux-arm.patch
