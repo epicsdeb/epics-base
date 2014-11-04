@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 15:08:38 -0400
-Subject: [PATCH] rtems: use macro for BIN2BOOT
+Subject: rtems: use macro for BIN2BOOT
 
 ---
- configure/os/CONFIG.Common.RTEMS-pc386 |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ configure/os/CONFIG.Common.RTEMS-pc386 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/configure/os/CONFIG.Common.RTEMS-pc386 b/configure/os/CONFIG.Common.RTEMS-pc386
 index a812378..7ae168f 100644
@@ -19,4 +19,3 @@ index a812378..7ae168f 100644
  		$(PROJECT_RELEASE)/lib/start16.bin 0x00097C00 0 temp.bin 0x00100000 0
  	rm -f temp.bin
  endef
--- 

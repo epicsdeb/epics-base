@@ -1,14 +1,14 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 15:08:06 -0400
-Subject: [PATCH] SKIP_HOST build option
+Subject: SKIP_HOST build option
 
 Allow cross builds without building for the host arch.
 Needs access to the host based tools in another location.
 
 make SKIP_HOST=YES EPICS_BASE=/usr/epics/base
 ---
- configure/CONFIG_COMMON |    2 +-
- configure/RULES_ARCHS   |    4 ++--
+ configure/CONFIG_COMMON | 2 +-
+ configure/RULES_ARCHS   | 4 ++--
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
@@ -39,4 +39,3 @@ index d64d536..15569ac 100644
  
  #endif
  #*************************************************************************
--- 

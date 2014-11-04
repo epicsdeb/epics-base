@@ -1,11 +1,11 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:30:06 -0400
-Subject: [PATCH] include histogram recordtype in base.dbd
+Subject: include histogram recordtype in base.dbd
 
 ---
- src/dev/softDev/devSoft.dbd |    1 +
- src/misc/base.dbd           |    1 +
- 2 files changed, 2 insertions(+), 0 deletions(-)
+ src/dev/softDev/devSoft.dbd | 1 +
+ src/misc/base.dbd           | 1 +
+ 2 files changed, 2 insertions(+)
 
 diff --git a/src/dev/softDev/devSoft.dbd b/src/dev/softDev/devSoft.dbd
 index 763ac47..5f90aba 100644
@@ -31,4 +31,3 @@ index bafe8ca..a92857c 100644
  include "longinRecord.dbd"
  include "longoutRecord.dbd"
  include "mbbiRecord.dbd"
--- 

@@ -8,7 +8,14 @@ NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 BMAKEFLAGS += -j$(NUMJOBS)
 endif
 
-export EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+ifeq "$(DEB_BUILD_ARCH)" "i386"
+EPICS_HOST_ARCH:=linux-x86
+else ifeq "$(DEB_BUILD_ARCH)" "amd64"
+EPICS_HOST_ARCH:=linux-x86_64
+else
+EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+endif
+export EPICS_HOST_ARCH
 
 TARGETS += RTEMS-mvme2100
 TARGETS += RTEMS-mvme2307
@@ -23,8 +30,6 @@ export CROSS_COMPILER_TARGET_ARCHS = $(TARGETS)
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
 DEB_NOEPOCH_VERSION = $(shell echo $(DEB_VERSION) | cut -d: -f2-)
 DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '2-' -d '-')
-
-export SHRLIB_VERSION=$(SOV)
 
 binary binary-arch binary-indep build install clean:
 	dh $@ --with epics -Sepicsmake --parallel

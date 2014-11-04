@@ -1,13 +1,13 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Fri, 1 Mar 2013 14:34:53 -0500
-Subject: [PATCH] cross mingw doesn't provide _vscprintf
+Subject: cross mingw doesn't provide _vscprintf
 
 This reverts a change made by Andrew Johnson.
 Apparently hosted mingw32 does provide the _vscprintf
 symbol.
 ---
- src/libCom/osi/os/WIN32/osdStdio.c |   19 ++++++++++++++-----
- 1 files changed, 14 insertions(+), 5 deletions(-)
+ src/libCom/osi/os/WIN32/osdStdio.c | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
 
 diff --git a/src/libCom/osi/os/WIN32/osdStdio.c b/src/libCom/osi/os/WIN32/osdStdio.c
 index 8a2d58e..602651f 100644
@@ -52,4 +52,3 @@ index 8a2d58e..602651f 100644
  
      return retval;
  }
--- 

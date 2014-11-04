@@ -1,14 +1,14 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:22:39 -0400
-Subject: [PATCH] look for base config in /etc/epics/configure
+Subject: look for base config in /etc/epics/configure
 
 When building external modules (missing $(TOP)/configure/CONFIG_BASE_VERSION))
 leave EPICS_BASE=/usr/lib/epics, but take configuration from
 /etc/epics/configure.  This gives sysadmins the option to
 modify build config.
 ---
- configure/CONFIG |   10 ++++++++--
- 1 files changed, 8 insertions(+), 2 deletions(-)
+ configure/CONFIG | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/configure/CONFIG b/configure/CONFIG
 index b62edb6..ee20755 100644
@@ -38,4 +38,3 @@ index b62edb6..ee20755 100644
  endif
  #
  
--- 

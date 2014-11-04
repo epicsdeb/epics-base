@@ -1,6 +1,6 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:27:20 -0400
-Subject: [PATCH] linux: runtime disable RT priorities if not supported/permitted
+Subject: linux: runtime disable RT priorities if not supported/permitted
 
 Fixes an issue with running IOCs in GDB.  There seems to be
 an issue (possibly with GDB) if pthread_create() returns an error
@@ -9,8 +9,8 @@ an issue (possibly with GDB) if pthread_create() returns an error
 So instead remember the result of the startup check and only attempt
 to set RT priority if the initial test was positive.
 ---
- src/libCom/osi/os/posix/osdThread.c |    8 ++++++++
- 1 files changed, 8 insertions(+), 0 deletions(-)
+ src/libCom/osi/os/posix/osdThread.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/src/libCom/osi/os/posix/osdThread.c b/src/libCom/osi/os/posix/osdThread.c
 index 30583e1..0f15235 100644
@@ -73,4 +73,3 @@ index 30583e1..0f15235 100644
      pthreadInfo->schedParam.sched_priority = getOssPriorityValue(pthreadInfo);
      status = pthread_attr_setschedparam(
          &pthreadInfo->attr,&pthreadInfo->schedParam);
--- 

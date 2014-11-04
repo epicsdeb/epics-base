@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:30:49 -0400
-Subject: [PATCH] test epicsTimerQueue reference counter
+Subject: test epicsTimerQueue reference counter
 
 ---
- src/libCom/test/epicsTimerTest.cpp |   38 +++++++++++++++++++++++++++++++++++-
- 1 files changed, 37 insertions(+), 1 deletions(-)
+ src/libCom/test/epicsTimerTest.cpp | 38 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 37 insertions(+), 1 deletion(-)
 
 diff --git a/src/libCom/test/epicsTimerTest.cpp b/src/libCom/test/epicsTimerTest.cpp
 index 8d56b84..0e211f8 100644
@@ -62,4 +62,3 @@ index 8d56b84..0e211f8 100644
      testAccuracy ();
      testCancel ();
      testExpireDestroy ();
--- 

@@ -1,10 +1,10 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:24:53 -0400
-Subject: [PATCH] linux: use RT thread priorities
+Subject: linux: use RT thread priorities
 
 ---
- configure/CONFIG_SITE |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ configure/CONFIG_SITE | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/configure/CONFIG_SITE b/configure/CONFIG_SITE
 index fe644cf..81d7acb 100644
@@ -19,4 +19,3 @@ index fe644cf..81d7acb 100644
  
  #  Site version number, if set will append '-' and this string to the
  #  EPICS version number string that is reported by many tools
--- 

@@ -27,3 +27,16 @@
 0027-cross-mingw-doesn-t-provide-_vscprintf.patch
 0028-cross-build-with-mingw32.patch
 0029-Report-ACF-file-hash-over-CA.patch
+0030-Fix-Werror-format-security-issues-in-cap5.patch
+0031-fixed-problems-with-ca-clear-channel-protocol-during.patch
+0032-libCom-Add-some-missing-include-guards.patch
+0033-libCom-Fix-win32-handle-leak.patch
+0034-libCom-Back-ported-aToIPAddr-fix-from-3.15-branch.patch
+0035-Fixed-read-back-of-TSEL-link.patch
+0036-fixed-potential-memory-leak.patch
+0037-dbStatic-Fixed-crash-loading-record-of-unknown-type.patch
+0038-libCom-Fix-epicsTime-strftime-roll-over-bug.patch
+0039-libCom-Fix-epicsString.h-comparison-functions.patch
+0040-post-DBE_PROPERTY.patch
+0041-Added-configure-files-for-linux-arm-and-linux-arm-de.patch
+0042-Remove-definition-of-cross-compiler-for-linux-arm.patch

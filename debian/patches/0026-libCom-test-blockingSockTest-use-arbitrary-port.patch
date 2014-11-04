@@ -1,12 +1,12 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Thu, 6 Dec 2012 13:44:35 -0500
-Subject: [PATCH] libCom/test: blockingSockTest use arbitrary port
+Subject: libCom/test: blockingSockTest use arbitrary port
 
 Instead of using a fixed port, which is typically
 in use, have the listening socket pick a free port.
 ---
- src/libCom/test/blockingSockTest.cpp |   13 ++++++++-----
- 1 files changed, 8 insertions(+), 5 deletions(-)
+ src/libCom/test/blockingSockTest.cpp | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
 diff --git a/src/libCom/test/blockingSockTest.cpp b/src/libCom/test/blockingSockTest.cpp
 index 0dd4dc4..145ab30 100644
@@ -57,4 +57,3 @@ index 0dd4dc4..145ab30 100644
  
      server srv ( addr );
      srv.start ();
--- 

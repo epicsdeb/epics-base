@@ -1,39 +1,39 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Thu, 20 Sep 2012 10:08:16 -0400
-Subject: [PATCH] backport msi-join branch from 3.15
+Subject: backport msi-join branch from 3.15
 
 ---
- configure/CONFIG_BASE                |    2 +-
- src/Makefile                         |    3 +
- src/dbtools/Makefile                 |   13 +-
- src/dbtools/dbLoadTemplate.h         |   10 +-
- src/dbtools/dbLoadTemplate.html      |  137 ------
- src/dbtools/dbLoadTemplate.y         |  552 ++++++++++++----------
- src/dbtools/dbLoadTemplate_lex.l     |   47 +-
- src/dbtools/dbtoolsIocRegister.c     |   13 +-
- src/dbtools/msi.c                    |  841 ++++++++++++++++++++++++++++++++++
- src/dbtools/msi.html                 |  438 ++++++++++++++++++
- src/dbtools/test/Makefile            |   21 +
- src/dbtools/test/dbltExpand.c        |  100 ++++
- src/dbtools/test/msi.plt             |   48 ++
- src/dbtools/test/t1-include.txt      |    5 +
- src/dbtools/test/t1-result.txt       |   21 +
- src/dbtools/test/t1-template.txt     |   14 +
- src/dbtools/test/t2-result.txt       |    6 +
- src/dbtools/test/t2-substitution.txt |   11 +
- src/dbtools/test/t2-template.txt     |    1 +
- src/dbtools/test/t3-result.txt       |   28 ++
- src/dbtools/test/t3-substitution.txt |   37 ++
- src/dbtools/test/t3-template.txt     |    1 +
- src/dbtools/test/t4-result.txt       |    6 +
- src/dbtools/test/t4-substitution.txt |   11 +
- src/dbtools/test/t5-result.txt       |   20 +
- src/dbtools/test/t5-substitute.txt   |    9 +
- src/dbtools/test/t5-template.txt     |    5 +
- src/dbtools/test/t6-result.txt       |   20 +
- src/dbtools/test/t6-substitute.txt   |   13 +
- src/dbtools/test/t6-template.txt     |    5 +
- src/dbtools/test/template            |    5 +
+ configure/CONFIG_BASE                |   2 +-
+ src/Makefile                         |   3 +
+ src/dbtools/Makefile                 |  13 +-
+ src/dbtools/dbLoadTemplate.h         |  10 +-
+ src/dbtools/dbLoadTemplate.html      | 137 ------
+ src/dbtools/dbLoadTemplate.y         | 552 ++++++++++++-----------
+ src/dbtools/dbLoadTemplate_lex.l     |  47 +-
+ src/dbtools/dbtoolsIocRegister.c     |  13 +-
+ src/dbtools/msi.c                    | 841 +++++++++++++++++++++++++++++++++++
+ src/dbtools/msi.html                 | 438 ++++++++++++++++++
+ src/dbtools/test/Makefile            |  21 +
+ src/dbtools/test/dbltExpand.c        | 100 +++++
+ src/dbtools/test/msi.plt             |  48 ++
+ src/dbtools/test/t1-include.txt      |   5 +
+ src/dbtools/test/t1-result.txt       |  21 +
+ src/dbtools/test/t1-template.txt     |  14 +
+ src/dbtools/test/t2-result.txt       |   6 +
+ src/dbtools/test/t2-substitution.txt |  11 +
+ src/dbtools/test/t2-template.txt     |   1 +
+ src/dbtools/test/t3-result.txt       |  28 ++
+ src/dbtools/test/t3-substitution.txt |  37 ++
+ src/dbtools/test/t3-template.txt     |   1 +
+ src/dbtools/test/t4-result.txt       |   6 +
+ src/dbtools/test/t4-substitution.txt |  11 +
+ src/dbtools/test/t5-result.txt       |  20 +
+ src/dbtools/test/t5-substitute.txt   |   9 +
+ src/dbtools/test/t5-template.txt     |   5 +
+ src/dbtools/test/t6-result.txt       |  20 +
+ src/dbtools/test/t6-substitute.txt   |  13 +
+ src/dbtools/test/t6-template.txt     |   5 +
+ src/dbtools/test/template            |   5 +
  31 files changed, 2017 insertions(+), 426 deletions(-)
  delete mode 100644 src/dbtools/dbLoadTemplate.html
  create mode 100644 src/dbtools/msi.c
@@ -2307,7 +2307,7 @@ index 0000000..10efb14
 +
 diff --git a/src/dbtools/test/dbltExpand.c b/src/dbtools/test/dbltExpand.c
 new file mode 100644
-index 0000000..6326d28
+index 0000000..4fda7e3
 --- /dev/null
 +++ b/src/dbtools/test/dbltExpand.c
 @@ -0,0 +1,100 @@
@@ -2383,7 +2383,7 @@ index 0000000..6326d28
 +    }
 +
 +    macExpandString(macHandle, input_buffer, output_buffer, BUFFER_SIZE-1);
-+    printf(output_buffer);
++    printf("%s", output_buffer);
 +
 +    if (macHandle) macDeleteHandle(macHandle);
 +
@@ -2791,4 +2791,3 @@ index 0000000..561b52a
 +b = $(b)
 +c = $(c)
 +d = $(d)
--- 

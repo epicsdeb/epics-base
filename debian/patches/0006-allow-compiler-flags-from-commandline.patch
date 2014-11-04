@@ -1,6 +1,6 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:16:26 -0400
-Subject: [PATCH] allow compiler flags from commandline
+Subject: allow compiler flags from commandline
 
 make USR_CFLAGS=xxxx
 
@@ -14,8 +14,8 @@ eg.
 
 USR_CFLAGS += yyyy
 ---
- configure/CONFIG_COMMON |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+ configure/CONFIG_COMMON | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
 index a26f077..297ec46 100644
@@ -36,4 +36,3 @@ index a26f077..297ec46 100644
  USR_DBDFLAGS =
  USR_ARFLAGS =
  
--- 

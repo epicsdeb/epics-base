@@ -1,0 +1,1150 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Tue, 15 Apr 2014 11:56:03 -0400
+Subject: post DBE_PROPERTY
+
+Track which fields contain meta-data
+and post a DBE_PROPERTY event on all applicable
+subscriptions whenever any such field is changed.
+
+The USE_315_API macro is used to hide the extra
+member of struct dbFldDes from outside use.
+This should work as long as these structs are only
+allocated withing base (should be the case).
+---
+ src/db/dbAccess.c            | 11 +++++++++--
+ src/dbStatic/dbBase.h        |  3 +++
+ src/dbStatic/dbLexRoutines.c |  9 +++++++++
+ src/dbStatic/dbStaticLib.c   |  4 ++++
+ src/rec/aSubRecord.dbd       |  1 +
+ src/rec/aaiRecord.dbd        |  4 ++++
+ src/rec/aaoRecord.dbd        |  4 ++++
+ src/rec/aiRecord.dbd         | 12 ++++++++++++
+ src/rec/aoRecord.dbd         | 14 ++++++++++++++
+ src/rec/biRecord.dbd         |  2 ++
+ src/rec/boRecord.dbd         |  2 ++
+ src/rec/calcRecord.dbd       | 12 ++++++++++++
+ src/rec/calcoutRecord.dbd    | 12 ++++++++++++
+ src/rec/compressRecord.dbd   |  4 ++++
+ src/rec/dfanoutRecord.dbd    | 12 ++++++++++++
+ src/rec/histogramRecord.dbd  |  5 +++++
+ src/rec/longinRecord.dbd     |  7 +++++++
+ src/rec/longoutRecord.dbd    |  9 +++++++++
+ src/rec/selRecord.dbd        | 11 +++++++++++
+ src/rec/subArrayRecord.dbd   |  4 ++++
+ src/rec/subRecord.dbd        | 12 ++++++++++++
+ src/rec/waveformRecord.dbd   |  4 ++++
+ 22 files changed, 156 insertions(+), 2 deletions(-)
+
+diff --git a/src/db/dbAccess.c b/src/db/dbAccess.c
+index c6e3874..7b5415f 100644
+--- a/src/db/dbAccess.c
++++ b/src/db/dbAccess.c
+@@ -15,7 +15,8 @@
+  *      Date:            11-7-90
+ */
+ 
+-
++#define USE_315_API
++
+ #include <stddef.h>
+ #include <stdlib.h>
+ #include <stdarg.h>
+@@ -1456,13 +1457,19 @@ long epicsShareAPI dbPut(DBADDR *paddr, short dbrType,
+     }
+ 
+     /* Propagate monitor events for this field, */
+-    /* unless the field field is VAL and PP is true. */
++    /* unless the field is VAL and PP is true. */
+     pfldDes = paddr->pfldDes;
+     isValueField = dbIsValueField(pfldDes);
+     if (isValueField) precord->udf = FALSE;
+     if (precord->mlis.count &&
+         !(isValueField && pfldDes->process_passive))
+         db_post_events(precord, paddr->pfield, DBE_VALUE | DBE_LOG);
++    /* If this field is a property (metadata) field,
++     * then post a property change event (even if the field
++     * didn't change).
++     */
++    if (precord->mlis.count && pfldDes->prop)
++        db_post_events(precord, NULL, DBE_PROPERTY);
+ 
+     return status;
+ }
+diff --git a/src/dbStatic/dbBase.h b/src/dbStatic/dbBase.h
+index 552fd9e..a90e320 100644
+--- a/src/dbStatic/dbBase.h
++++ b/src/dbStatic/dbBase.h
+@@ -88,6 +88,9 @@ typedef struct dbFldDes{  /* field description */
+ 	short	size;		/*length in bytes of a field element	*/
+ 	/*The following are only available on run time system*/
+ 	short	offset;		/*Offset in bytes from beginning of record*/
++#ifdef USE_315_API
++	unsigned short prop;    /*field is a metadata, post DBE_PROPERTY on change*/
++#endif
+ }dbFldDes;
+ 
+ typedef struct dbInfoNode {	/*non-field per-record information*/
+diff --git a/src/dbStatic/dbLexRoutines.c b/src/dbStatic/dbLexRoutines.c
+index fb85808..1b499f9 100644
+--- a/src/dbStatic/dbLexRoutines.c
++++ b/src/dbStatic/dbLexRoutines.c
+@@ -12,6 +12,8 @@
+ 
+ /*The routines in this module are serially reusable NOT reentrant*/
+ 
++#define USE_315_API
++
+ #include <epicsStdlib.h>
+ #include <stddef.h>
+ #include <stdio.h>
+@@ -583,6 +585,13 @@ static void dbRecordtypeFieldItem(char *name,char *value)
+ 	    yyerrorAbort("menu not found");
+ 	return;
+     }
++    if(strcmp(name,"prop")==0) {
++        if(strcmp(value, "YES")==0)
++            pdbFldDes->prop = 1;
++        else
++            pdbFldDes->prop = 0;
++        return;
++    }
+ }
+ 
+ static void dbRecordtypeCdef(char *text) {
+diff --git a/src/dbStatic/dbStaticLib.c b/src/dbStatic/dbStaticLib.c
+index 95118f6..86195e6 100644
+--- a/src/dbStatic/dbStaticLib.c
++++ b/src/dbStatic/dbStaticLib.c
+@@ -8,6 +8,8 @@
+ \*************************************************************************/
+ /* Revision-Id: anj@aps.anl.gov-20120521204303-rtj11c6o13jn40dr */
+ 
++#define USE_315_API
++
+ #include <stdio.h>
+ #include <errno.h>
+ #include <limits.h>
+@@ -1103,6 +1105,7 @@ long epicsShareAPI dbWriteRecordTypeFP(
+ 		    pdbFldDes->size);
+ 	    }
+ 	    if(pdbFldDes->process_passive) fprintf(fp,"\t\tpp(TRUE)\n");
++	    if(pdbFldDes->prop) fprintf(fp,"\t\tprop(YES)\n");
+ 	    if(pdbFldDes->base) fprintf(fp,"\t\tbase(HEX)\n");
+ 	    if(pdbFldDes->interest)
+ 		fprintf(fp,"\t\tinterest(%d)\n",pdbFldDes->interest);
+@@ -3918,6 +3921,7 @@ void  epicsShareAPI dbDumpField(
+ 	    else
+ 		printf("\t     field_type: %s\n", pamapdbfType[j].strvalue);
+ 	    printf("\tprocess_passive: %hd\n",pdbFldDes->process_passive);
++	    printf("\t       property: %hd\n",pdbFldDes->prop);
+ 	    printf("\t           base: %d\n",pdbFldDes->base);
+ 	    if(!pdbFldDes->promptgroup) {
+ 		printf("\t    promptgroup: %d\n",pdbFldDes->promptgroup);
+diff --git a/src/rec/aSubRecord.dbd b/src/rec/aSubRecord.dbd
+index 23779cd..ecb0720 100644
+--- a/src/rec/aSubRecord.dbd
++++ b/src/rec/aSubRecord.dbd
+@@ -71,6 +71,7 @@ recordtype(aSub) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(EFLG,DBF_MENU) {
+ 		prompt("Output Event Flag")
+diff --git a/src/rec/aaiRecord.dbd b/src/rec/aaiRecord.dbd
+index e94fecb..fb921cf 100644
+--- a/src/rec/aaiRecord.dbd
++++ b/src/rec/aaiRecord.dbd
+@@ -24,6 +24,7 @@ recordtype(aai) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_ALARMS)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(INP,DBF_INLINK) {
+ 		prompt("Input Specification")
+@@ -35,16 +36,19 @@ recordtype(aai) {
+ 		promptgroup(GUI_BITS2)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_CALC)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_CLOCK)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(NELM,DBF_ULONG) {
+ 		prompt("Number of Elements")
+diff --git a/src/rec/aaoRecord.dbd b/src/rec/aaoRecord.dbd
+index 60b9b77..025920a 100644
+--- a/src/rec/aaoRecord.dbd
++++ b/src/rec/aaoRecord.dbd
+@@ -24,6 +24,7 @@ recordtype(aao) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_ALARMS)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(OUT,DBF_OUTLINK) {
+ 		prompt("Output Specification")
+@@ -35,16 +36,19 @@ recordtype(aao) {
+ 		promptgroup(GUI_BITS2)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_CALC)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_CLOCK)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(NELM,DBF_ULONG) {
+ 		prompt("Number of Elements")
+diff --git a/src/rec/aiRecord.dbd b/src/rec/aiRecord.dbd
+index a7518ab..731492a 100644
+--- a/src/rec/aiRecord.dbd
++++ b/src/rec/aiRecord.dbd
+@@ -24,6 +24,7 @@ recordtype(ai) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LINR,DBF_MENU) {
+ 		prompt("Linearization")
+@@ -52,16 +53,19 @@ recordtype(ai) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(AOFF,DBF_DOUBLE) {
+ 		prompt("Adjustment Offset")
+@@ -86,30 +90,35 @@ recordtype(ai) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -117,6 +126,7 @@ recordtype(ai) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -124,6 +134,7 @@ recordtype(ai) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -131,6 +142,7 @@ recordtype(ai) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/aoRecord.dbd b/src/rec/aoRecord.dbd
+index a1caa6b..2d0f364 100644
+--- a/src/rec/aoRecord.dbd
++++ b/src/rec/aoRecord.dbd
+@@ -53,6 +53,7 @@ recordtype(ao) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LINR,DBF_MENU) {
+ 		prompt("Linearization")
+@@ -81,6 +82,7 @@ recordtype(ao) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(ROFF,DBF_LONG) {
+ 		prompt("Raw Offset, obsolete")
+@@ -105,22 +107,26 @@ recordtype(ao) {
+ 		promptgroup(GUI_OUTPUT)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(DRVL,DBF_DOUBLE) {
+ 		prompt("Drive Low Limit")
+ 		promptgroup(GUI_OUTPUT)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(AOFF,DBF_DOUBLE) {
+ 		prompt("Adjustment Offset")
+@@ -139,30 +145,35 @@ recordtype(ao) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -170,6 +181,7 @@ recordtype(ao) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -177,6 +189,7 @@ recordtype(ao) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -184,6 +197,7 @@ recordtype(ao) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/biRecord.dbd b/src/rec/biRecord.dbd
+index f2c94e7..c0498c3 100644
+--- a/src/rec/biRecord.dbd
++++ b/src/rec/biRecord.dbd
+@@ -47,6 +47,7 @@ recordtype(bi) {
+ 		pp(TRUE)
+ 		interest(1)
+ 		size(26)
++		prop(YES)
+ 	}
+ 	field(ONAM,DBF_STRING) {
+ 		prompt("One Name")
+@@ -54,6 +55,7 @@ recordtype(bi) {
+ 		pp(TRUE)
+ 		interest(1)
+ 		size(26)
++		prop(YES)
+ 	}
+ 	field(RVAL,DBF_ULONG) {
+ 		prompt("Raw Value")
+diff --git a/src/rec/boRecord.dbd b/src/rec/boRecord.dbd
+index adc6704..289468c 100644
+--- a/src/rec/boRecord.dbd
++++ b/src/rec/boRecord.dbd
+@@ -42,6 +42,7 @@ recordtype(bo) {
+ 		pp(TRUE)
+ 		interest(1)
+ 		size(26)
++		prop(YES)
+ 	}
+ 	field(ONAM,DBF_STRING) {
+ 		prompt("One Name")
+@@ -49,6 +50,7 @@ recordtype(bo) {
+ 		pp(TRUE)
+ 		interest(1)
+ 		size(26)
++		prop(YES)
+ 	}
+ 	field(RVAL,DBF_ULONG) {
+ 		prompt("Raw Value")
+diff --git a/src/rec/calcRecord.dbd b/src/rec/calcRecord.dbd
+index 0248f34..2f34f73 100644
+--- a/src/rec/calcRecord.dbd
++++ b/src/rec/calcRecord.dbd
+@@ -85,51 +85,60 @@ recordtype(calc) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(PREC,DBF_SHORT) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Rng")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_DOUBLE) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -137,6 +146,7 @@ recordtype(calc) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -144,6 +154,7 @@ recordtype(calc) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -151,6 +162,7 @@ recordtype(calc) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/calcoutRecord.dbd b/src/rec/calcoutRecord.dbd
+index fc393a7..23e8dec 100644
+--- a/src/rec/calcoutRecord.dbd
++++ b/src/rec/calcoutRecord.dbd
+@@ -276,51 +276,60 @@ recordtype(calcout) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(PREC,DBF_SHORT) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Rng")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_DOUBLE) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -328,6 +337,7 @@ recordtype(calcout) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -335,6 +345,7 @@ recordtype(calcout) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -342,6 +353,7 @@ recordtype(calcout) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/compressRecord.dbd b/src/rec/compressRecord.dbd
+index 45f5a29..347b807 100644
+--- a/src/rec/compressRecord.dbd
++++ b/src/rec/compressRecord.dbd
+@@ -70,22 +70,26 @@ recordtype(compress) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(PREC,DBF_SHORT) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(EGU,DBF_STRING) {
+ 		prompt("EngineeringUnits")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(OFF,DBF_ULONG) {
+ 		prompt("Offset")
+diff --git a/src/rec/dfanoutRecord.dbd b/src/rec/dfanoutRecord.dbd
+index c68e56c..4e61907 100644
+--- a/src/rec/dfanoutRecord.dbd
++++ b/src/rec/dfanoutRecord.dbd
+@@ -91,51 +91,60 @@ recordtype(dfanout) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+         field(PREC,DBF_SHORT) {
+                 prompt("Display Precision")
+                 promptgroup(GUI_DISPLAY)
+                 interest(1)
++		prop(YES)
+         }
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_DOUBLE) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -143,6 +152,7 @@ recordtype(dfanout) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -150,6 +160,7 @@ recordtype(dfanout) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -157,6 +168,7 @@ recordtype(dfanout) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/histogramRecord.dbd b/src/rec/histogramRecord.dbd
+index 6def0f4..6f7f5f5 100644
+--- a/src/rec/histogramRecord.dbd
++++ b/src/rec/histogramRecord.dbd
+@@ -46,12 +46,14 @@ recordtype(histogram) {
+ 		promptgroup(GUI_HIST)
+ 		special(SPC_RESET)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LLIM,DBF_DOUBLE) {
+ 		prompt("Lower Signal Limit ")
+ 		promptgroup(GUI_HIST)
+ 		special(SPC_RESET)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(WDTH,DBF_DOUBLE) {
+ 		prompt("Element Width")
+@@ -66,6 +68,7 @@ recordtype(histogram) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(SVL,DBF_INLINK) {
+ 		prompt("Signal Value Location")
+@@ -128,10 +131,12 @@ recordtype(histogram) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_ULONG) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ }
+diff --git a/src/rec/longinRecord.dbd b/src/rec/longinRecord.dbd
+index 4bd7340..461df9b 100644
+--- a/src/rec/longinRecord.dbd
++++ b/src/rec/longinRecord.dbd
+@@ -25,40 +25,47 @@ recordtype(longin) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_LONG) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_LONG) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_LONG) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_LONG) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_LONG) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_LONG) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+diff --git a/src/rec/longoutRecord.dbd b/src/rec/longoutRecord.dbd
+index e29251b..5124aaf 100644
+--- a/src/rec/longoutRecord.dbd
++++ b/src/rec/longoutRecord.dbd
+@@ -36,52 +36,61 @@ recordtype(longout) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(DRVH,DBF_LONG) {
+ 		prompt("Drive High Limit")
+ 		promptgroup(GUI_OUTPUT)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(DRVL,DBF_LONG) {
+ 		prompt("Drive Low Limit")
+ 		promptgroup(GUI_OUTPUT)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_LONG) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_LONG) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_LONG) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_LONG) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_LONG) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_LONG) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+diff --git a/src/rec/selRecord.dbd b/src/rec/selRecord.dbd
+index 172f16e..0d01586 100644
+--- a/src/rec/selRecord.dbd
++++ b/src/rec/selRecord.dbd
+@@ -103,46 +103,54 @@ recordtype(sel) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Rng")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_DOUBLE) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HHSV,DBF_MENU) {
+ 		prompt("Hihi Severity")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -150,6 +158,7 @@ recordtype(sel) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -157,6 +166,7 @@ recordtype(sel) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -164,6 +174,7 @@ recordtype(sel) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/subArrayRecord.dbd b/src/rec/subArrayRecord.dbd
+index 8eeb6c0..6442ede 100644
+--- a/src/rec/subArrayRecord.dbd
++++ b/src/rec/subArrayRecord.dbd
+@@ -20,6 +20,7 @@ recordtype(subArray) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_COMMON)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(FTVL,DBF_MENU) {
+ 		prompt("Field Type of Value")
+@@ -38,16 +39,19 @@ recordtype(subArray) {
+ 		promptgroup(GUI_BITS2)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_CALC)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_CLOCK)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(MALM,DBF_ULONG) {
+ 		prompt("Maximum Elements  ")
+diff --git a/src/rec/subRecord.dbd b/src/rec/subRecord.dbd
+index 6b21c23..973cab7 100644
+--- a/src/rec/subRecord.dbd
++++ b/src/rec/subRecord.dbd
+@@ -100,45 +100,53 @@ recordtype(sub) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Rng")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIHI,DBF_DOUBLE) {
+ 		prompt("Hihi Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOLO,DBF_DOUBLE) {
+ 		prompt("Lolo Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(HIGH,DBF_DOUBLE) {
+ 		prompt("High Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOW,DBF_DOUBLE) {
+ 		prompt("Low Alarm Limit")
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(PREC,DBF_SHORT) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(BRSV,DBF_MENU) {
+ 		prompt("Bad Return Severity")
+@@ -152,6 +160,7 @@ recordtype(sub) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LLSV,DBF_MENU) {
+@@ -159,6 +168,7 @@ recordtype(sub) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HSV,DBF_MENU) {
+@@ -166,6 +176,7 @@ recordtype(sub) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(LSV,DBF_MENU) {
+@@ -173,6 +184,7 @@ recordtype(sub) {
+ 		promptgroup(GUI_ALARMS)
+ 		pp(TRUE)
+ 		interest(1)
++		prop(YES)
+ 		menu(menuAlarmSevr)
+ 	}
+ 	field(HYST,DBF_DOUBLE) {
+diff --git a/src/rec/waveformRecord.dbd b/src/rec/waveformRecord.dbd
+index 443f716..92d0fc1 100644
+--- a/src/rec/waveformRecord.dbd
++++ b/src/rec/waveformRecord.dbd
+@@ -29,6 +29,7 @@ recordtype(waveform) {
+ 		prompt("Display Precision")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(INP,DBF_INLINK) {
+ 		prompt("Input Specification")
+@@ -40,16 +41,19 @@ recordtype(waveform) {
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
+ 		size(16)
++		prop(YES)
+ 	}
+ 	field(HOPR,DBF_DOUBLE) {
+ 		prompt("High Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(LOPR,DBF_DOUBLE) {
+ 		prompt("Low Operating Range")
+ 		promptgroup(GUI_DISPLAY)
+ 		interest(1)
++		prop(YES)
+ 	}
+ 	field(NELM,DBF_ULONG) {
+ 		prompt("Number of Elements")

@@ -1,12 +1,12 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Wed, 19 Sep 2012 10:28:16 -0400
-Subject: [PATCH] rtems: build gesys loadable objects
+Subject: rtems: build gesys loadable objects
 
 ---
- configure/RULES_BUILD                 |    7 ++++++
- configure/os/CONFIG.Common.RTEMS      |   38 +++++++++++++++++++++++++++++++++
- configure/os/CONFIG_SITE.Common.RTEMS |    6 +++++
- 3 files changed, 51 insertions(+), 0 deletions(-)
+ configure/RULES_BUILD                 |  7 +++++++
+ configure/os/CONFIG.Common.RTEMS      | 38 +++++++++++++++++++++++++++++++++++
+ configure/os/CONFIG_SITE.Common.RTEMS |  6 ++++++
+ 3 files changed, 51 insertions(+)
 
 diff --git a/configure/RULES_BUILD b/configure/RULES_BUILD
 index f9702e6..7e4881b 100644
@@ -99,4 +99,3 @@ index d8b700b..a276bfa 100644
  
  # If you're using neither BOOTP/DHCP nor FLASH to pick up your IOC
  # network configuration you must uncomment and specify your Internet
--- 

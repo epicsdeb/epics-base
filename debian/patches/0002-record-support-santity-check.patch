@@ -1,11 +1,11 @@
 From: Michael Davidsaver <mdavidsaver@bnl.gov>
 Date: Tue, 18 Sep 2012 18:28:44 -0400
-Subject: [PATCH] record support santity check
+Subject: record support santity check
 
 Catch if loaded dbd has different number of fields that expected.
 ---
- src/dbStatic/dbToRecordtypeH.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ src/dbStatic/dbToRecordtypeH.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/src/dbStatic/dbToRecordtypeH.c b/src/dbStatic/dbToRecordtypeH.c
 index a97a44f..cfd6279 100644
@@ -26,4 +26,3 @@ index a97a44f..cfd6279 100644
  	    for(i=0; i<pdbRecordType->no_fields; i++) {
  		char	name[256];
  		int		j;
--- 
