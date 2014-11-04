@@ -17,6 +17,8 @@ EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
 endif
 export EPICS_HOST_ARCH
 
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
 TARGETS += RTEMS-mvme2100
 TARGETS += RTEMS-mvme2307
 TARGETS += RTEMS-mvme3100
@@ -68,7 +70,7 @@ override_dh_install:
 		echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $${tt}" > debian/tmp/etc/epics/configure/conf.d/05$${tt}.make; \
 	done
 
-	rm -rf debian/tmp/usr/lib/lib*
+	rm -rf debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/lib*
 
 	dh_install --fail-missing
 
