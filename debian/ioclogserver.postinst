@@ -6,7 +6,7 @@ LOGDIR=/var/log/epics
 
 case "$1" in
   configure)
-    if ! getent passwd scannerapp > /dev/null
+    if ! getent passwd "$ACCT" > /dev/null
     then
         echo "Creating system account '$ACCT'"
         if ! adduser --system --quiet --group --disabled-login \
