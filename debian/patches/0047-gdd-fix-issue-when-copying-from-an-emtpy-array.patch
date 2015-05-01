@@ -1,0 +1,25 @@
+From: Ralph Lange <ralph.lange@gmx.de>
+Date: Thu, 29 Jan 2015 14:36:55 +0100
+Subject: =?UTF-8?q?gdd:=20fix=20issue=20when=20copying=20from=20an=20emtpy?=
+ =?UTF-8?q?=20array=0A=20=20=20if=20the=20source=20array=20is=20empty,=20t?=
+ =?UTF-8?q?he=20index=20of=20the=20first=20element=20to=20copy=20(0)=20bei?=
+ =?UTF-8?q?ng=20equal=0A=20=20=20to=20the=20source=20array=20size=20(0)=20?=
+ =?UTF-8?q?does=20not=20constitute=20an=20out-of-bounds=20condition?=
+
+---
+ src/gdd/gdd.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/gdd/gdd.cc b/src/gdd/gdd.cc
+index b422fd6..e94738d 100644
+--- a/src/gdd/gdd.cc
++++ b/src/gdd/gdd.cc
+@@ -1353,7 +1353,7 @@ gddStatus gdd::put ( const gdd * dd )
+         // clip to upper limit of source
+         aitUint32 srcCopySize;
+         const aitUint32 unusedSrcBelow = srcCopyFirst - srcFirst;
+-        if ( srcElemCount <= unusedSrcBelow ) {
++        if ( srcElemCount && srcElemCount <= unusedSrcBelow ) {
+             return gddErrorOutOfBounds;
+         }
+ 

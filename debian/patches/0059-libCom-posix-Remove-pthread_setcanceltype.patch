@@ -1,0 +1,34 @@
+From: Andrew Johnson <anj@aps.anl.gov>
+Date: Wed, 18 Mar 2015 11:36:06 -0500
+Subject: libCom/posix: Remove pthread_setcanceltype()
+
+---
+ src/libCom/osi/os/posix/osdThread.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/libCom/osi/os/posix/osdThread.c b/src/libCom/osi/os/posix/osdThread.c
+index 0f15235..2dc4eda 100644
+--- a/src/libCom/osi/os/posix/osdThread.c
++++ b/src/libCom/osi/os/posix/osdThread.c
+@@ -368,20 +368,17 @@ static void once(void)
+     checkStatusOnce(status,"atexit");
+     epicsThreadOnceCalled = 1;
+ }
+-
++
+ static void * start_routine(void *arg)
+ {
+     epicsThreadOSD *pthreadInfo = (epicsThreadOSD *)arg;
+     int status;
+-    int oldtype;
+     sigset_t blockAllSig;
+  
+     sigfillset(&blockAllSig);
+     pthread_sigmask(SIG_SETMASK,&blockAllSig,NULL);
+     status = pthread_setspecific(getpthreadInfo,arg);
+     checkStatusQuit(status,"pthread_setspecific","start_routine");
+-    status = pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype);
+-    checkStatusQuit(status,"pthread_setcanceltype","start_routine");
+     status = mutexLock(&listLock);
+     checkStatusQuit(status,"pthread_mutex_lock","start_routine");
+     ellAdd(&pthreadList,&pthreadInfo->node);
