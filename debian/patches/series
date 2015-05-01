@@ -44,7 +44,7 @@
 0044-catools-better-out-of-bounds-handling-when-printing-.patch
 0045-Fix-buffer-overflow-in-epicsStrnRawFromEscaped.patch
 0046-Fix-FLNK-over-CA-error-message.patch
-0047-gdd-fix-issue-when-copying-from-an-emtpy-array.patch
+0047-gdd-fix-issue-when-copying-from-an-emtpy-array-if-th.patch
 0048-catools-make-caget-lb-output-0-instead-of-empty-stri.patch
 0049-Back-ported-the-tapfiles-build-target-from-3.15.patch
 0050-tool_lib.c-ensure-output-string-is-always-set.patch
@@ -58,3 +58,4 @@
 0058-Allow-compiler-flags-from-command-line.patch
 0059-libCom-posix-Remove-pthread_setcanceltype.patch
 0060-fix-for-lp-1440186.patch
+0061-shareLib-fix-for-mingw.patch

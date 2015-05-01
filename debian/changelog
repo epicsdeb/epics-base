@@ -1,3 +1,9 @@
+epics-base (3.14.12.3-10) unstable; urgency=low
+
+  * Fix mingw build failure
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 01 May 2015 14:56:07 -0400
+
 epics-base (3.14.12.3-9) unstable; urgency=low
 
   * fix ioclogserver.postinst (Richard Fearn)
