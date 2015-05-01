@@ -1,0 +1,20 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Tue, 17 Feb 2015 11:03:06 -0500
+Subject: don't destroy locked mutex
+
+---
+ src/dbStatic/dbPvdLib.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/dbStatic/dbPvdLib.c b/src/dbStatic/dbPvdLib.c
+index 43f9cd4..4906036 100644
+--- a/src/dbStatic/dbPvdLib.c
++++ b/src/dbStatic/dbPvdLib.c
+@@ -181,6 +181,7 @@ void dbPvdFreeMem(dbBase *pdbbase)
+             ellDelete(&pbucket->list, (ELLNODE *)ppvdNode);
+             free(ppvdNode);
+         }
++        epicsMutexUnlock(pbucket->lock);
+         epicsMutexDestroy(pbucket->lock);
+         free(pbucket);
+     }

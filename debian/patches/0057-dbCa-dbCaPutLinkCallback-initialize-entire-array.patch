@@ -1,0 +1,34 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Thu, 19 Feb 2015 19:18:27 -0500
+Subject: dbCa: dbCaPutLinkCallback initialize entire array
+
+CA links will write the full target array size.
+Ensure that uninitialized elements are zeroed.
+---
+ src/db/dbCa.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/db/dbCa.c b/src/db/dbCa.c
+index cc9eaeb..0e4b793 100644
+--- a/src/db/dbCa.c
++++ b/src/db/dbCa.c
+@@ -367,7 +367,7 @@ long dbCaPutLinkCallback(struct link *plink,short dbrType,
+             plink->value.pv_link.pvlMask |= pvlOptOutNative;
+  */
+         }
+-        if (nRequest == 1){
++        if (nRequest == 1 && pca->nelements==1){
+             long (*fConvert)(const void *from, void *to, struct dbAddr *paddr);
+ 
+             fConvert = dbFastPutConvertRoutine[dbrType][newType];
+@@ -384,6 +384,10 @@ long dbCaPutLinkCallback(struct link *plink,short dbrType,
+             if(nRequest>pca->nelements)
+                 nRequest = pca->nelements;
+             status = aConvert(&dbAddr, pbuffer, nRequest, pca->nelements, 0);
++            if(nRequest<pca->nelements) {
++                long elemsize = dbr_value_size[ca_field_type(pca->chid)];
++                memset(nRequest*elemsize+(char*)pca->pputNative, 0, (pca->nelements-nRequest)*elemsize);
++            }
+         }
+         link_action |= CA_WRITE_NATIVE;
+         pca->gotOutNative = TRUE;
