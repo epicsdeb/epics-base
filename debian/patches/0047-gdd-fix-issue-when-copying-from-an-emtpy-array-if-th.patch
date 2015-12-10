@@ -1,0 +1,23 @@
+From: Ralph Lange <ralph.lange@gmx.de>
+Date: Thu, 29 Jan 2015 14:36:55 +0100
+Subject: gdd: fix issue when copying from an emtpy array if the source array
+ is empty, the index of the first element to copy (0) being equal to the
+ source array size (0) does not constitute an out-of-bounds condition
+
+---
+ src/gdd/gdd.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/gdd/gdd.cc b/src/gdd/gdd.cc
+index b422fd6..e94738d 100644
+--- a/src/gdd/gdd.cc
++++ b/src/gdd/gdd.cc
+@@ -1353,7 +1353,7 @@ gddStatus gdd::put ( const gdd * dd )
+         // clip to upper limit of source
+         aitUint32 srcCopySize;
+         const aitUint32 unusedSrcBelow = srcCopyFirst - srcFirst;
+-        if ( srcElemCount <= unusedSrcBelow ) {
++        if ( srcElemCount && srcElemCount <= unusedSrcBelow ) {
+             return gddErrorOutOfBounds;
+         }
+ 

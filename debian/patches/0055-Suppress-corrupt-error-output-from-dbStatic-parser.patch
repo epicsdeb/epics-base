@@ -1,0 +1,37 @@
+From: Andrew Johnson <anj@aps.anl.gov>
+Date: Thu, 19 Feb 2015 17:33:27 -0600
+Subject: Suppress corrupt error output from dbStatic parser
+
+The yyerror() routine gets called twice in some cases.
+Don't print the yytext or input file location the second
+time through -- yytext has already been freed, and the
+user doesn't need to see the location twice.
+
+Fixes lp:1422803
+---
+ src/dbStatic/dbYacc.y | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/dbStatic/dbYacc.y b/src/dbStatic/dbYacc.y
+index b61ab26..3270a85 100644
+--- a/src/dbStatic/dbYacc.y
++++ b/src/dbStatic/dbYacc.y
+@@ -260,12 +260,14 @@ alias: tokenALIAS '(' tokenSTRING ',' tokenSTRING ')'
+ static int yyerror(char *str)
+ {
+     if (str)
+-        epicsPrintf("Error: %s\n   ", str);
++        epicsPrintf("Error: %s\n", str);
+     else
+         epicsPrintf("Error");
+-    epicsPrintf(" at or before \"%s\"", yytext);
+-    dbIncludePrint();
+-    yyFailed = TRUE;
++    if (!yyFailed) {    /* Only print this stuff once */
++        epicsPrintf(" at or before \"%s\"", yytext);
++        dbIncludePrint();
++        yyFailed = TRUE;
++    }
+     return(0);
+ }
+ static long pvt_yy_parse(void)

@@ -1,0 +1,44 @@
+From: Ralph Lange <Ralph.Lange@gmx.de>
+Date: Fri, 1 Aug 2014 17:20:55 +0200
+Subject: dev, rec: Fix smoothing for NaN/+inf/-inf values in ai record and
+ soft support
+
+---
+ src/dev/softDev/devAiSoft.c | 3 ++-
+ src/rec/aiRecord.c          | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/dev/softDev/devAiSoft.c b/src/dev/softDev/devAiSoft.c
+index b038642..f32d599 100644
+--- a/src/dev/softDev/devAiSoft.c
++++ b/src/dev/softDev/devAiSoft.c
+@@ -20,6 +20,7 @@
+ #include "alarm.h"
+ #include "dbDefs.h"
+ #include "dbAccess.h"
++#include "epicsMath.h"
+ #include "recGbl.h"
+ #include "devSup.h"
+ #include "aiRecord.h"
+@@ -78,7 +79,7 @@ static long read_ai(aiRecord *prec)
+     if (!dbGetLink(&prec->inp, DBR_DOUBLE, &val, 0, 0)) {
+ 
+         /* Apply smoothing algorithm */
+-        if (prec->smoo != 0.0 && prec->dpvt)
++        if (prec->smoo != 0.0 && prec->dpvt && finite(prec->val))
+             prec->val = val * (1.00 - prec->smoo) + (prec->val * prec->smoo);
+         else
+             prec->val = val;
+diff --git a/src/rec/aiRecord.c b/src/rec/aiRecord.c
+index 180b55d..78a532f 100644
+--- a/src/rec/aiRecord.c
++++ b/src/rec/aiRecord.c
+@@ -366,7 +366,7 @@ static void convert(aiRecord *prec)
+ 	}
+ 
+ 	/* apply smoothing algorithm */
+-	if (prec->smoo != 0.0){
++    if (prec->smoo != 0.0 && finite(prec->val)){
+ 	    if (prec->init) prec->val = val;	/* initial condition */
+ 	    prec->val = val * (1.00 - prec->smoo) + (prec->val * prec->smoo);
+ 	}else{

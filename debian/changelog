@@ -1,4 +1,36 @@
-epics-base (3.14.12.3-8) UNRELEASED; urgency=low
+epics-base (3.14.12.3-10) unstable; urgency=low
+
+  * Fix mingw build failure
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 01 May 2015 14:56:07 -0400
+
+epics-base (3.14.12.3-9) unstable; urgency=low
+
+  * fix ioclogserver.postinst (Richard Fearn)
+  * Backports from 3.14.12.5
+    dev, rec: Fix smoothing for NaN/+inf/-inf values
+    Reject NULL callback functions in ca_array_*_callback
+    catools: better out-of-bounds handling when printing enums
+    Fix buffer overflow in epicsStrnRawFromEscaped (lp:1388313)
+    Fix FLNK-over-CA error message
+    gdd fix issue when copying from an empty array
+    catools: make `caget -lb` output '0' instead of empty string
+    Back-ported the tapfiles build target from 3.15 (makefile only)
+    tool_lib.c: ensure output string is always set
+    dbReadTest.c: flush errlog on exit as per lp:1419879
+    don't destroy locked mutex
+    Fix dbVerify()'s postfix buffer size
+    db: Allow link fields to return a DOUBLE value
+    Suppress corrupt error output from dbStatic parser
+    dbCa: dbCaPutLinkCallback prevent out of bounds write
+    dbCa: dbCaPutLinkCallback initialize entire array
+    Allow compiler flags from command line (official replacement of local patch)
+    libCom/posix: Remove pthread_setcanceltype()
+    fix for lp:1440186
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Fri, 01 May 2015 14:52:10 -0400
+
+epics-base (3.14.12.3-8) unstable; urgency=low
 
   * Backports from 3.14.12.4 and beyond
      Fix race between ACF file reload and RSRV client nice disconnect
@@ -11,8 +43,12 @@ epics-base (3.14.12.3-8) UNRELEASED; urgency=low
      libCom: Fix epicsTime::strftime() roll-over bug
      libCom: Fix epicsString.h comparison functions
      post DBE_PROPERTY
+  * quiet some lintian warnings
+  * typo in makeBaseApp manpage
+  * add linux-arm patches from Florian Feldbauer
+  * make win32 build conditional in debian/rules
 
- -- Michael Davidsaver <mdavidsaver@bnl.gov>  Tue, 15 Apr 2014 12:30:59 -0400
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Mon, 03 Nov 2014 18:24:52 -0500
 
 epics-base (3.14.12.3-7) unstable; urgency=low
 

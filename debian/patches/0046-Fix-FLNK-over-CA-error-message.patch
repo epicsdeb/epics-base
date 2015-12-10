@@ -1,0 +1,27 @@
+From: Andrew Johnson <anj@aps.anl.gov>
+Date: Tue, 23 Dec 2014 10:35:09 -0600
+Subject: Fix FLNK-over-CA error message
+
+---
+ src/misc/iocInit.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/src/misc/iocInit.c b/src/misc/iocInit.c
+index 2183d24..1d851a1 100644
+--- a/src/misc/iocInit.c
++++ b/src/misc/iocInit.c
+@@ -461,9 +461,11 @@ static void doResolveLinks(dbRecordType *pdbRecordType, dbCommon *precord,
+                     if (pperiod && strstr(pperiod,"PROC")) {
+                         plink->value.pv_link.pvlMask |= pvlOptFWD;
+                     } else {
+-                        errlogPrintf("%s.FLNK is a Channel Access Link "
+-                            " but does not link to a PROC field\n",
+-                                precord->name);
++                        errlogPrintf("Forward-link uses Channel Access "
++                            "without pointing to PROC field\n"
++                            "    %s.%s = %s\n",
++                            precord->name, pdbFldDes->name,
++                            plink->value.pv_link.pvname);
+                     }
+                 }
+             }
