@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-// Revision-Id: johill@lanl.gov-20110115010153-9kqbkxz263lpqcf0
+// Revision-Id: anj@aps.anl.gov-20140925213412-lo1rca0dx74lzif7
 //
 // Author: Jeff Hill
 //
@@ -38,7 +38,7 @@ void epicsThreadRunable::run () {}
 void epicsThreadRunable::show ( unsigned int ) const {}
 
 class epicsThread :: unableToCreateThread : 
-    public exception {
+    public std :: exception {
 public:
     const char * what () const throw ();
 };
@@ -90,7 +90,7 @@ extern "C" void epicsThreadCallEntryPoint ( void * pPvt )
     }
     catch ( const epicsThread::exitException & ) {
     }
-    catch ( std::exception & except ) {
+    catch ( std :: exception & except ) {
         if ( ! waitRelease ) {
             pThread->printLastChanceExceptionMessage ( 
                 typeid ( except ).name (), except.what () );

@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
+/* Revision-Id: anj@aps.anl.gov-20140926174616-129nqa411elhow55 */
 /*
  *      Author:         Jeffrey Hill
  *      Date:           02-27-95
@@ -20,6 +20,7 @@
 #include "epicsThread.h"
 #include "epicsTime.h"
 #include "cantProceed.h"
+#include "epicsStackTrace.h"
 
 
 void epicsAssert (const char *pFile, const unsigned line,
@@ -31,6 +32,9 @@ void epicsAssert (const char *pFile, const unsigned line,
         "A call to 'assert(%s)'\n"
         "    by thread '%s' failed in %s line %u.\n",
         pExp, epicsThreadGetNameSelf(), pFile, line);
+
+    epicsStackTrace();
+
     errlogPrintf("EPICS Release %s.\n", epicsReleaseVersion);
 
     if (epicsTimeGetCurrent(&current) == 0) {

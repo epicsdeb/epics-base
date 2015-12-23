@@ -5,9 +5,9 @@
 *     Operator of Los Alamos National Laboratory.
 * EPICS BASE Versions 3.13.7
 * and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
+/* Revision-Id: mdavidsaver@bnl.gov-20120427172133-h95k7fv70h9rh8f8 */
 /* Author:  Marty Kraimer Date:    04-07-94 */
 
 /* gph provides a general purpose directory accessed via a hash table*/
@@ -37,6 +37,8 @@ epicsShareFunc void epicsShareAPI
     gphInitPvt(struct gphPvt **ppvt, int tableSize);
 epicsShareFunc GPHENTRY * epicsShareAPI
     gphFind(struct gphPvt *pvt, const char *name, void *pvtid);
+epicsShareFunc GPHENTRY * epicsShareAPI
+    gphFindParse(struct gphPvt *pvt, const char *name, size_t len, void *pvtid);
 epicsShareFunc GPHENTRY * epicsShareAPI
     gphAdd(struct gphPvt *pvt, const char *name, void *pvtid);
 epicsShareFunc void epicsShareAPI

@@ -1,0 +1,9 @@
+# CONFIG_SITE.linux-x86_64.linux-arm
+#
+# Revision-Id: anj@aps.anl.gov-20150223193045-6wkp0bkbdszjc8z4
+#
+# Site specific settings for linux-x86_64 host - linux-arm target builds
+#-------------------------------------------------------
+
+# Inherit setting from linux-x86
+include $(CONFIG)/os/CONFIG_SITE.linux-x86.linux-arm

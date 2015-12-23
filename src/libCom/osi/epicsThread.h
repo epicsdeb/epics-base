@@ -3,8 +3,8 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* Copyright (c) 2013 ITER Organization.
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 #ifndef epicsThreadh
@@ -85,6 +85,7 @@ epicsShareFunc void epicsShareAPI epicsThreadSleep(double seconds);
 epicsShareFunc double epicsShareAPI epicsThreadSleepQuantum(void);
 epicsShareFunc epicsThreadId epicsShareAPI epicsThreadGetIdSelf(void);
 epicsShareFunc epicsThreadId epicsShareAPI epicsThreadGetId(const char *name);
+epicsShareFunc int epicsThreadGetCPUs(void);
 
 epicsShareFunc const char * epicsShareAPI epicsThreadGetNameSelf(void);
 
@@ -100,6 +101,13 @@ epicsShareFunc void epicsShareAPI epicsThreadSetOkToBlock(int isOkToBlock);
 epicsShareFunc void epicsShareAPI epicsThreadShowAll(unsigned int level);
 epicsShareFunc void epicsShareAPI epicsThreadShow(
     epicsThreadId id,unsigned int level);
+
+/* Hooks called when a thread starts, map function called once for every thread */
+typedef void (*EPICS_THREAD_HOOK_ROUTINE)(epicsThreadId id);
+epicsShareFunc int epicsThreadHookAdd(EPICS_THREAD_HOOK_ROUTINE hook);
+epicsShareFunc int epicsThreadHookDelete(EPICS_THREAD_HOOK_ROUTINE hook);
+epicsShareFunc void epicsThreadHooksShow(void);
+epicsShareFunc void epicsThreadMap(EPICS_THREAD_HOOK_ROUTINE func);
 
 typedef struct epicsThreadPrivateOSD * epicsThreadPrivateId;
 epicsShareFunc epicsThreadPrivateId epicsShareAPI epicsThreadPrivateCreate(void);

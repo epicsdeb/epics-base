@@ -7,7 +7,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /*
- *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *      Revision-Id: anj@aps.anl.gov-20150302174320-4b70imjtyc0aysw3
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -28,6 +28,41 @@
 
 #define verify(exp) ((exp) ? (void)0 : \
     epicsAssert(__FILE__, __LINE__, #exp, epicsAssertAuthor))
+
+class notified : public epicsTimerNotify
+{
+public:
+    bool done;
+    notified() : epicsTimerNotify(), done(false) {}
+
+    expireStatus expire(const epicsTime &currentTime)
+    {done=true; return expireStatus(noRestart);}
+};
+
+void testRefCount()
+{
+    notified action;
+
+    epicsTimerQueueActive *Q1, *Q2;
+    epicsTimer *T1, *T2;
+
+    Q1 = &epicsTimerQueueActive::allocate ( true, epicsThreadPriorityMin );
+
+    T1 = &Q1->createTimer();
+    //timer->start(action, 0.0);
+
+    Q2 = &epicsTimerQueueActive::allocate ( true, epicsThreadPriorityMin );
+
+    testOk1(Q1==Q2);
+
+    T2 = &Q2->createTimer();
+
+    T2->destroy();
+    Q2->release();
+
+    T1->destroy();
+    Q1->release();
+}
 
 static const double delayVerifyOffset = 1.0; // sec 
 
@@ -75,7 +110,7 @@ inline double delayVerify::delay () const
 
 double delayVerify::checkError () const
 {
-    const double messageThresh = 1.0; // percent 
+    const double messageThresh = 2.0; // percent 
     double actualDelay =  this->expireStamp - this->beginStamp;
     double measuredError = actualDelay - this->expectedDelay;
     double percentError = 100.0 * fabs ( measuredError ) / this->expectedDelay;
@@ -419,7 +454,8 @@ void testPeriodic ()
 
 MAIN(epicsTimerTest)
 {
-    testPlan(40);
+    testPlan(41);
+    testRefCount();
     testAccuracy ();
     testCancel ();
     testExpireDestroy ();

@@ -3,26 +3,32 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* EPICS BASE is distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
 /*
- * Revision-Id: jba@aps.anl.gov-20101026214840-203j1gphhlgj61p0
+ * Revision-Id: anj@aps.anl.gov-20150807144148-wtz7y6y5jobxwajq
  *
  * Author: Jeff Hill
  */
 
-#ifndef osdTimeh
-#define osdTimeh
+#ifndef INC_osdTime_H
+#define INC_osdTime_H
 
 #if ! defined(_MINGW) || ! defined(_TIMESPEC_DEFINED)
+#  if _MSC_VER >= 1900
+#    include <time.h>
+#  else
+
+#define _TIMESPEC_DEFINED 1
 struct timespec {
-	time_t tv_sec; /* seconds since some epoch */
-	long tv_nsec; /* nanoseconds within the second */
+    time_t tv_sec; /* seconds since some epoch */
+    long tv_nsec; /* nanoseconds within the second */
 };
+
+#  endif /* _MSC_VER */
 #endif /* ! defined(_MINGW) || ! defined(_TIMESPEC_DEFINED) */
 
-#endif /* ifndef osdTimeh */
+#endif /* ifndef INC_osdTime_H */
 

@@ -6,7 +6,7 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
-# Revision-Id: anj@aps.anl.gov-20111114183307-7ziopjkjj2k97la3
+# Revision-Id: anj@aps.anl.gov-20150303173546-jpdozsjpm7n0w5jz
 #
 #	check for add-on CFLAGS and CXXFLAGS
 #
@@ -26,7 +26,6 @@
 #    USR_CFLAGS    C flags
 #    USR_CXXFLAGS  C++ flags
 #    USR_CPPFLAGS  c preprocesser flags
-#    INC           include-files to install
 #    SRCS          source files for building libraries and prods
 #    USR_SRCS      source files for building libraries and prods
 #    PROD_SRCS     source files for building prods
@@ -54,11 +53,15 @@
 #    TESTPROD      products to build
 #    TESTPROD_HOST products to build
 #    TESTPROD_IOC  products to build
-#    LIBRARY       products to build and install
-#    LIBRARY_HOST  products to build and install
-#    LIBRARY_IOC   products to build and install
-#    LOADABLE_LIBRARY        module to build and install
-#    LOADABLE_LIBRARY_HOST   module to build and install
+#    LIBRARY       libraries to build and install
+#    LIBRARY_HOST  libraries to build and install
+#    LIBRARY_IOC   libraries to build and install
+#    TESTLIBRARY      libraries to build
+#    TESTLIBRARY_HOST libraries to build
+#    TESTLIBRARY_IOC  libraries to build
+#    LOADABLE_LIBRARY        libraries to build and install
+#    LOADABLE_LIBRARY_HOST   libraries to build and install
+#    LOADABLE_LIBRARY_IOC    libraries to build and install
 #    SCRIPTS       scripts and install
 #    SCRIPTS_HOST  host system scripts to install
 #    SCRIPTS_IOC   ioc system scripts to install
@@ -327,6 +330,30 @@ LIBRARY_HOST+=$(LIBRARY_HOST_DEFAULT)
 endif
 endif
 
+ifneq ($(strip $(TESTLIBRARY_$(OS_CLASS))),)
+TESTLIBRARY+=$(subst -nil-,,$(TESTLIBRARY_$(OS_CLASS)))
+else
+ifneq (,$(strip $(TESTLIBRARY_DEFAULT)))
+TESTLIBRARY+=$(TESTLIBRARY_DEFAULT)
+endif
+endif
+
+ifneq ($(strip $(TESTLIBRARY_IOC_$(OS_CLASS))),)
+TESTLIBRARY_IOC+=$(subst -nil-,,$(TESTLIBRARY_IOC_$(OS_CLASS)))
+else
+ifneq (,$(strip $(TESTLIBRARY_IOC_DEFAULT)))
+TESTLIBRARY_IOC+=$(TESTLIBRARY_IOC_DEFAULT)
+endif
+endif
+
+ifneq ($(strip $(TESTLIBRARY_HOST_$(OS_CLASS))),)
+TESTLIBRARY_HOST+=$(subst -nil-,,$(TESTLIBRARY_HOST_$(OS_CLASS)))
+else
+ifneq (,$(strip $(TESTLIBRARY_HOST_DEFAULT)))
+TESTLIBRARY_HOST+=$(TESTLIBRARY_HOST_DEFAULT)
+endif
+endif
+
 ifneq ($(strip $(LOADABLE_LIBRARY_$(OS_CLASS))),)
 LOADABLE_LIBRARY+=$(subst -nil-,,$(LOADABLE_LIBRARY_$(OS_CLASS)))
 else
@@ -340,6 +367,14 @@ LOADABLE_LIBRARY_HOST+=$(subst -nil-,,$(LOADABLE_LIBRARY_HOST_$(OS_CLASS)))
 else
 ifneq (,$(strip $(LOADABLE_LIBRARY_HOST_DEFAULT)))
 LOADABLE_LIBRARY_HOST+=$(LOADABLE_LIBRARY_HOST_DEFAULT)
+endif
+endif
+
+ifneq ($(strip $(LOADABLE_LIBRARY_IOC_$(OS_CLASS))),)
+LOADABLE_LIBRARY_IOC+=$(subst -nil-,,$(LOADABLE_LIBRARY_IOC_$(OS_CLASS)))
+else
+ifneq (,$(strip $(LOADABLE_LIBRARY_IOC_DEFAULT)))
+LOADABLE_LIBRARY_IOC+=$(LOADABLE_LIBRARY_IOC_DEFAULT)
 endif
 endif
 
@@ -373,17 +408,6 @@ USR_LIBS += $(subst -nil-,,$(USR_LIBS_$(OS_CLASS)))
 else
 ifdef USR_LIBS_DEFAULT
 USR_LIBS += $(USR_LIBS_DEFAULT)
-endif
-endif
-
-#
-#	concat specific include files
-#
-ifneq ($(strip $(INC_$(OS_CLASS))),)
-INC += $(subst -nil-,,$(INC_$(OS_CLASS)))
-else
-ifdef INC_DEFAULT
-INC+=$(INC_DEFAULT)
 endif
 endif
 

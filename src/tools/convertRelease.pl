@@ -1,5 +1,4 @@
-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
-    if $running_under_some_shell; # convertRelease.pl
+#!/usr/bin/env perl
 #*************************************************************************
 # Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
@@ -9,7 +8,7 @@ eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-# Revision-Id: anj@aps.anl.gov-20110713153813-utpd5swcmji6ce4l
+# Revision-Id: anj@aps.anl.gov-20141008191808-wgqpd1v0o80ntr0d
 #
 # Convert configure/RELEASE file(s) into something else.
 #
@@ -53,9 +52,14 @@ if ($opt_T) {
 if ($opt_t) {
     $iocroot = $opt_t;
     $root = $top;
-    while (substr($iocroot, -1, 1) eq substr($root, -1, 1)) {
-        chop $iocroot;
-        chop $root;
+    if ($iocroot eq $root) {
+        # Identical paths, -t not needed
+        undef $opt_t;
+    } else {
+        while (substr($iocroot, -1, 1) eq substr($root, -1, 1)) {
+            chop $iocroot;
+            chop $root;
+        }
     }
 }
 
@@ -78,6 +82,7 @@ expandRelease(\%macros, \@apps);
 for ($outfile) {
     m/releaseTops/       and do { &releaseTops;         last; };
     m/dllPath\.bat/      and do { &dllPath;             last; };
+    m/relPaths\.sh/      and do { &relPaths;            last; };
     m/cdCommands/        and do { &cdCommands;          last; };
     m/envPaths/          and do { &envPaths;            last; };
     m/checkRelease/      and do { &checkRelease;        last; };
@@ -92,7 +97,8 @@ sub HELP_MESSAGE {
 Usage: convertRelease.pl [-a arch] [-T top] [-t ioctop] outfile
     where outfile is one of:
         releaseTops - lists the module names defined in RELEASE*s
-        dllPath.bat - path changes for cmd.exe to find WIN32 DLLs
+        dllPath.bat - path changes for cmd.exe to find Windows DLLs
+        relPaths.sh - path changes for bash to add RELEASE bin dir's
         cdCommands - generate cd path strings for vxWorks IOCs
         envPaths - generate epicsEnvSet commands for other IOCs
         checkRelease - checks consistency with support modules
@@ -109,13 +115,21 @@ sub releaseTops {
 }
 
 #
-# Generate Path files so Windows can find our DLLs
+# Generate Path files so Windows/Cygwin can find our DLLs
 #
 sub dllPath {
     unlink $outfile;
     open(OUT, ">$outfile") or die "$! creating $outfile";
     print OUT "\@ECHO OFF\n";
-    print OUT "PATH %PATH%;", join(';', binDirs()), "\n";
+    print OUT "PATH \%PATH\%;", join(';', binDirs()), "\n";
+    close OUT;
+}
+
+sub relPaths {
+    unlink $outfile;
+    open(OUT, ">$outfile") or die "$! creating $outfile";
+    print OUT "export PATH=\$PATH:",
+        join(':', map {m/\s/ ? "\"$_\"" : $_ } binDirs()), "\n";
     close OUT;
 }
 

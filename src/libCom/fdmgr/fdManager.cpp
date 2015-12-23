@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 //
-//      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+//      Revision-Id: johill@lanl.gov-20131107172603-vkmh5jo4no0nxjhp
 //
 //      File descriptor management C++ class library
 //      (for multiplexing IO in a single threaded environment)
@@ -21,19 +21,16 @@
 // 1) This library is not thread safe
 //
 
-//
-// ANSI C
-//
-#include <errno.h>
-#include <string.h>
+#include <algorithm>
 
 #define instantiateRecourceLib
 #define epicsExportSharedSymbols
 #include "epicsAssert.h"
 #include "epicsThread.h"
-#include "tsMinMax.h"
 #include "fdManager.h"
 #include "locationException.h"
+
+using std :: max;
 
 epicsShareDef fdManager fileDescriptorManager;
 
@@ -219,7 +216,7 @@ epicsShareFunc void fdManager::process (double delay)
 // fdReg::destroy()
 // (default destroy method)
 //
-epicsShareFunc void fdReg::destroy()
+void fdReg::destroy()
 {
     delete this;
 }
@@ -227,7 +224,7 @@ epicsShareFunc void fdReg::destroy()
 //
 // fdReg::~fdReg()
 //
-epicsShareFunc fdReg::~fdReg()
+fdReg::~fdReg()
 {
     this->manager.removeReg(*this);
 }
@@ -235,7 +232,7 @@ epicsShareFunc fdReg::~fdReg()
 //
 // fdReg::show()
 //
-epicsShareFunc void fdReg::show(unsigned level) const
+void fdReg::show(unsigned level) const
 {
     printf ("fdReg at %p\n", (void *) this);
     if (level>1u) {
@@ -261,9 +258,9 @@ void fdRegId::show ( unsigned level ) const
 //
 // fdManager::installReg ()
 //
-epicsShareFunc void fdManager::installReg (fdReg &reg)
+void fdManager::installReg (fdReg &reg)
 {
-    this->maxFD = tsMax ( this->maxFD, reg.getFD()+1 );
+    this->maxFD = max ( this->maxFD, reg.getFD()+1 );
     // Most applications will find that its important to push here to 
     // the front of the list so that transient writes get executed
     // first allowing incoming read protocol to find that outgoing

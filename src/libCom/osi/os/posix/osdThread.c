@@ -3,11 +3,10 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* Copyright (c) 2013 ITER Organization.
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* epicsThread.c */
 
 /* Author:  Marty Kraimer Date:    18JAN2000 */
 
@@ -24,6 +23,10 @@
 #include <sched.h>
 #include <unistd.h>
 
+#if defined(_POSIX_MEMLOCK) && _POSIX_MEMLOCK > 0
+#include <sys/mman.h>
+#endif
+
 #define epicsExportSharedSymbols
 #include "epicsStdio.h"
 #include "ellLib.h"
@@ -35,6 +38,10 @@
 #include "errlog.h"
 #include "epicsAssert.h"
 #include "epicsExit.h"
+
+epicsShareFunc void epicsThreadShowInfo(epicsThreadOSD *pthreadInfo, unsigned int level);
+epicsShareFunc void osdThreadHooksRun(epicsThreadId id);
+epicsShareFunc void osdThreadHooksRunMain(epicsThreadId id);
 
 static int mutexLock(pthread_mutex_t *id)
 {
@@ -57,28 +64,14 @@ typedef struct commonAttr{
     int                maxPriority;
     int                minPriority;
     int                schedPolicy;
+    int                usePolicy;
 } commonAttr;
 
-typedef struct epicsThreadOSD {
-    ELLNODE            node;
-    pthread_t          tid;
-    pthread_attr_t     attr;
-    struct sched_param schedParam;
-    EPICSTHREADFUNC    createFunc;
-    void              *createArg;
-    epicsEventId       suspendEvent;
-    int                isSuspended;
-    int                isEpicsThread;
-    int                isFifoScheduled;
-    int                isOnThreadList;
-    unsigned int       osiPriority;
-    char              *name;
-} epicsThreadOSD;
-
-#ifdef _POSIX_THREAD_PRIORITY_SCHEDULING
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
 typedef struct {
     int min_pri, max_pri;
     int policy;
+    int ok;
 } priAvailable;
 #endif
 
@@ -119,9 +112,9 @@ if(status) { \
 }
 
 
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING)
-static int getOssPriorityValue(epicsThreadOSD *pthreadInfo)
+epicsShareFunc int epicsThreadGetPosixPriority(epicsThreadId pthreadInfo)
 {
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     double maxPriority,minPriority,slope,oss;
 
     if(pcommonAttr->maxPriority==pcommonAttr->minPriority)
@@ -131,17 +124,23 @@ static int getOssPriorityValue(epicsThreadOSD *pthreadInfo)
     slope = (maxPriority - minPriority)/100.0;
     oss = (double)pthreadInfo->osiPriority * slope + minPriority;
     return((int)oss);
-}
+#else
+    return 0;
 #endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
+}
+
 static void setSchedulingPolicy(epicsThreadOSD *pthreadInfo,int policy)
 {
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING)
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     int status;
+
+    if(!pcommonAttr->usePolicy) return;
 
     status = pthread_attr_getschedparam(
         &pthreadInfo->attr,&pthreadInfo->schedParam);
     checkStatusOnce(status,"pthread_attr_getschedparam");
-    pthreadInfo->schedParam.sched_priority = getOssPriorityValue(pthreadInfo);
+    pthreadInfo->schedParam.sched_priority = epicsThreadGetPosixPriority(pthreadInfo);
+    pthreadInfo->schedPolicy = policy;
     status = pthread_attr_setschedpolicy(
         &pthreadInfo->attr,policy);
     checkStatusOnce(status,"pthread_attr_setschedpolicy");
@@ -158,9 +157,16 @@ static epicsThreadOSD * create_threadInfo(const char *name)
 {
     epicsThreadOSD *pthreadInfo;
 
-    pthreadInfo = callocMustSucceed(1,sizeof(*pthreadInfo),"create_threadInfo");
-    pthreadInfo->suspendEvent = epicsEventMustCreate(epicsEventEmpty);
-    pthreadInfo->name = epicsStrDup(name);
+    /* sizeof(epicsThreadOSD) includes one byte for the '\0' */
+    pthreadInfo = calloc(1,sizeof(*pthreadInfo) + strlen(name));
+    if(!pthreadInfo)
+        return NULL;
+    pthreadInfo->suspendEvent = epicsEventCreate(epicsEventEmpty);
+    if(!pthreadInfo->suspendEvent){
+        free(pthreadInfo);
+        return NULL;
+    }
+    strcpy(pthreadInfo->name, name);
     return pthreadInfo;
 }
 
@@ -172,6 +178,8 @@ static epicsThreadOSD * init_threadInfo(const char *name,
     int status;
 
     pthreadInfo = create_threadInfo(name);
+    if(!pthreadInfo)
+        return NULL;
     pthreadInfo->createFunc = funptr;
     pthreadInfo->createArg = parm;
     status = pthread_attr_init(&pthreadInfo->attr);
@@ -204,11 +212,10 @@ static void free_threadInfo(epicsThreadOSD *pthreadInfo)
     epicsEventDestroy(pthreadInfo->suspendEvent);
     status = pthread_attr_destroy(&pthreadInfo->attr);
     checkStatusQuit(status,"pthread_attr_destroy","free_threadInfo");
-    free(pthreadInfo->name);
     free(pthreadInfo);
 }
 
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
 /*
  * The actually available range priority range (at least under linux)
  * may be restricted by resource limitations (but that is ignored
@@ -278,6 +285,7 @@ int           low, try;
 
     prm->min_pri = min;
     prm->max_pri = try_pri(max, prm->policy) ? max-1 : max;
+    prm->ok = 1;
 
     return 0;
 }
@@ -290,6 +298,7 @@ void         *dummy;
 int          status;
 
     arg.policy = a_p->schedPolicy;
+    arg.ok = 0;
 
     status = pthread_create(&id, 0, find_pri_range, &arg);
     checkStatusQuit(status, "pthread_create","epicsThreadInit");
@@ -299,6 +308,7 @@ int          status;
 
     a_p->minPriority = arg.min_pri;
     a_p->maxPriority = arg.max_pri;
+    a_p->usePolicy = arg.ok;
 }
 #endif
 
@@ -322,7 +332,8 @@ static void once(void)
     checkStatusOnce(status,"pthread_attr_setdetachstate");
     status = pthread_attr_setscope(&pcommonAttr->attr,PTHREAD_SCOPE_PROCESS);
     if(errVerbose) checkStatusOnce(status,"pthread_attr_setscope");
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     status = pthread_attr_setschedpolicy(
         &pcommonAttr->attr,SCHED_FIFO);
     checkStatusOnce(status,"pthread_attr_setschedpolicy");
@@ -345,10 +356,29 @@ static void once(void)
         fprintf(stderr,"sched_get_priority_min failed set to %d\n",
             pcommonAttr->maxPriority);
     }
+
+#if defined(_POSIX_MEMLOCK) && _POSIX_MEMLOCK > 0
+    if(errVerbose)  { 
+        fprintf(stderr, "LRT: min priority: %d max priority %d\n", 
+            pcommonAttr->minPriority, pcommonAttr->maxPriority);
+    }
+    if (pcommonAttr->maxPriority > pcommonAttr->minPriority) {
+        status = mlockall(MCL_CURRENT | MCL_FUTURE);
+        if(status) { 
+            fprintf(stderr, "Unable to lock the virtual address space using mlockall\n");
+        } else { 
+            fprintf(stderr,"Successfully locked memory using mlockAll\n");
+        }
+    }
+#endif
+
+
 #else
     if(errVerbose) fprintf(stderr,"task priorities are not implemented\n");
 #endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
+
     pthreadInfo = init_threadInfo("_main_",0,epicsThreadGetStackSize(epicsThreadStackSmall),0,0);
+    assert(pthreadInfo!=NULL);
     status = pthread_setspecific(getpthreadInfo,(void *)pthreadInfo);
     checkStatusOnceQuit(status,"pthread_setspecific","epicsThreadInit");
     status = mutexLock(&listLock);
@@ -359,33 +389,31 @@ static void once(void)
     checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadInit");
     status = atexit(epicsExitCallAtExits);
     checkStatusOnce(status,"atexit");
+    osdThreadHooksRunMain(pthreadInfo);
     epicsThreadOnceCalled = 1;
 }
-
+
 static void * start_routine(void *arg)
 {
     epicsThreadOSD *pthreadInfo = (epicsThreadOSD *)arg;
     int status;
-    int oldtype;
     sigset_t blockAllSig;
- 
+
     sigfillset(&blockAllSig);
     pthread_sigmask(SIG_SETMASK,&blockAllSig,NULL);
     status = pthread_setspecific(getpthreadInfo,arg);
     checkStatusQuit(status,"pthread_setspecific","start_routine");
-    status = pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype);
-    checkStatusQuit(status,"pthread_setcanceltype","start_routine");
     status = mutexLock(&listLock);
     checkStatusQuit(status,"pthread_mutex_lock","start_routine");
     ellAdd(&pthreadList,&pthreadInfo->node);
     pthreadInfo->isOnThreadList = 1;
     status = pthread_mutex_unlock(&listLock);
     checkStatusQuit(status,"pthread_mutex_unlock","start_routine");
+    osdThreadHooksRun(pthreadInfo);
 
     (*pthreadInfo->createFunc)(pthreadInfo->createArg);
 
     epicsExitCallAtThreadExits ();
-
     free_threadInfo(pthreadInfo);
     return(0);
 }
@@ -400,11 +428,9 @@ static void epicsThreadInit(void)
 
 epicsShareFunc unsigned int epicsShareAPI epicsThreadGetStackSize (epicsThreadStackSizeClass stackSizeClass)
 {
-#if ! defined (_POSIX_THREAD_ATTR_STACKSIZE)
+#if defined (OSITHREAD_USE_DEFAULT_STACK)
     return 0;
-#elif defined (OSITHREAD_USE_DEFAULT_STACK)
-    return 0;
-#else
+#elif defined(_POSIX_THREAD_ATTR_STACKSIZE) && _POSIX_THREAD_ATTR_STACKSIZE > 0
     #define STACK_SIZE(f) (f * 0x10000 * sizeof(void *))
     static const unsigned stackSizeTable[epicsThreadStackBig+1] = {
         STACK_SIZE(1), STACK_SIZE(2), STACK_SIZE(4)
@@ -420,6 +446,8 @@ epicsShareFunc unsigned int epicsShareAPI epicsThreadGetStackSize (epicsThreadSt
     }
 
     return stackSizeTable[stackSizeClass];
+#else
+    return 0;
 #endif /*_POSIX_THREAD_ATTR_STACKSIZE*/
 }
 
@@ -480,7 +508,7 @@ epicsShareFunc epicsThreadId epicsShareAPI epicsThreadCreate(const char *name,
     if(pthreadInfo==0) return 0;
     pthreadInfo->isEpicsThread = 1;
     setSchedulingPolicy(pthreadInfo,SCHED_FIFO);
-    pthreadInfo->isFifoScheduled = 1;
+    pthreadInfo->isRealTimeScheduled = 1;
     status = pthread_create(&pthreadInfo->tid,&pthreadInfo->attr,
                 start_routine,pthreadInfo);
     if(status==EPERM){
@@ -503,17 +531,6 @@ epicsShareFunc epicsThreadId epicsShareAPI epicsThreadCreate(const char *name,
 }
 
 /*
- * Cleanup routine for threads not created by epicsThreadCreate().
- */
-/* static void nonEPICSthreadCleanup(void *arg)
-{
-    epicsThreadOSD *pthreadInfo = (epicsThreadOSD *)arg;
-
-    free(pthreadInfo->name);
-    free(pthreadInfo);
-} */
-
-/*
  * Create dummy context for threads not created by epicsThreadCreate().
  */
 static epicsThreadOSD *createImplicit(void)
@@ -526,9 +543,11 @@ static epicsThreadOSD *createImplicit(void)
     tid = pthread_self();
     sprintf(name, "non-EPICS_%ld", (long)tid);
     pthreadInfo = create_threadInfo(name);
+    assert(pthreadInfo);
     pthreadInfo->tid = tid;
     pthreadInfo->osiPriority = 0;
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     {
     struct sched_param param;
     int policy;
@@ -538,9 +557,13 @@ static epicsThreadOSD *createImplicit(void)
                     (pcommonAttr->maxPriority - pcommonAttr->minPriority + 1);
     }
 #endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
+
     status = pthread_setspecific(getpthreadInfo,(void *)pthreadInfo);
-    checkStatusQuit(status,"pthread_setspecific","createImplicit");
-/*    pthread_cleanup_push(nonEPICSthreadCleanup, pthreadInfo); */
+    checkStatus(status,"pthread_setspecific createImplicit");
+    if(status){
+        free_threadInfo(pthreadInfo);
+        return NULL;
+    }
     return pthreadInfo;
 }
 
@@ -553,7 +576,7 @@ epicsShareFunc void epicsShareAPI epicsThreadSuspendSelf(void)
     if(pthreadInfo==NULL)
         pthreadInfo = createImplicit();
     pthreadInfo->isSuspended = 1;
-    epicsEventMustWait(pthreadInfo->suspendEvent);
+    epicsEventWait(pthreadInfo->suspendEvent);
 }
 
 epicsShareFunc void epicsShareAPI epicsThreadResume(epicsThreadOSD *pthreadInfo)
@@ -595,7 +618,7 @@ epicsShareFunc unsigned int epicsShareAPI epicsThreadGetPrioritySelf(void)
 
 epicsShareFunc void epicsShareAPI epicsThreadSetPriority(epicsThreadId pthreadInfo,unsigned int priority)
 {
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     int status;
 #endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
 
@@ -606,14 +629,16 @@ epicsShareFunc void epicsShareAPI epicsThreadSetPriority(epicsThreadId pthreadIn
         return;
     }
     pthreadInfo->osiPriority = priority;
-    if(!pthreadInfo->isFifoScheduled) return;
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
-    pthreadInfo->schedParam.sched_priority = getOssPriorityValue(pthreadInfo);
+    if(!pthreadInfo->isRealTimeScheduled) return;
+
+#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
+    if(!pcommonAttr->usePolicy) return;
+    pthreadInfo->schedParam.sched_priority = epicsThreadGetPosixPriority(pthreadInfo);
     status = pthread_attr_setschedparam(
         &pthreadInfo->attr,&pthreadInfo->schedParam);
     if(errVerbose) checkStatus(status,"pthread_attr_setschedparam");
     status = pthread_setschedparam(
-        pthreadInfo->tid,pcommonAttr->schedPolicy,&pthreadInfo->schedParam);
+        pthreadInfo->tid, pthreadInfo->schedPolicy, &pthreadInfo->schedParam);
     if(errVerbose) checkStatus(status,"pthread_setschedparam");
 #endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
 }
@@ -622,7 +647,7 @@ epicsShareFunc epicsThreadBooleanStatus epicsShareAPI epicsThreadHighestPriority
     unsigned int priority, unsigned *pPriorityJustBelow)
 {
     unsigned newPriority = priority - 1;
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     int diff;
     diff = pcommonAttr->maxPriority - pcommonAttr->minPriority;
     if(diff<0) diff = -diff;
@@ -640,12 +665,13 @@ epicsShareFunc epicsThreadBooleanStatus epicsShareAPI epicsThreadLowestPriorityL
 {
     unsigned newPriority = priority + 1;
 
-#if defined (_POSIX_THREAD_PRIORITY_SCHEDULING) 
+#if defined(_POSIX_THREAD_PRIORITY_SCHEDULING) && _POSIX_THREAD_PRIORITY_SCHEDULING > 0
     int diff;
     diff = pcommonAttr->maxPriority - pcommonAttr->minPriority;
     if(diff<0) diff = -diff;
     if(diff>1 && diff <100) newPriority += 100/(diff+1);
 #endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
+
     if (newPriority <= 99) {
         *pPriorityJustAbove = newPriority;
         return epicsThreadBooleanStatusSuccess;
@@ -698,7 +724,7 @@ epicsShareFunc epicsThreadId epicsShareAPI epicsThreadGetIdSelf(void) {
     return(pthreadInfo);
 }
 
-epicsShareFunc pthread_t epicsShareAPI epicsThreadGetPosixThreadId ( epicsThreadId threadId )
+epicsShareFunc pthread_t epicsThreadGetPosixThreadId ( epicsThreadId threadId )
 {
     return threadId->tid;
 }
@@ -709,14 +735,16 @@ epicsShareFunc epicsThreadId epicsShareAPI epicsThreadGetId(const char *name) {
 
     assert(epicsThreadOnceCalled);
     status = mutexLock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_lock","epicsThreadGetId");
+    checkStatus(status,"pthread_mutex_lock epicsThreadGetId");
+    if(status)
+        return NULL;
     pthreadInfo=(epicsThreadOSD *)ellFirst(&pthreadList);
     while(pthreadInfo) {
     if(strcmp(name,pthreadInfo->name) == 0) break;
         pthreadInfo=(epicsThreadOSD *)ellNext(&pthreadInfo->node);
     }
     status = pthread_mutex_unlock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadGetId");
+    checkStatus(status,"pthread_mutex_unlock epicsThreadGetId");
 
     return(pthreadInfo);
 }
@@ -739,27 +767,23 @@ epicsShareFunc void epicsShareAPI epicsThreadGetName(epicsThreadId pthreadInfo, 
     name[size-1] = '\0';
 }
 
-static void showThreadInfo(epicsThreadOSD *pthreadInfo,unsigned int level)
+epicsShareFunc void epicsThreadMap(EPICS_THREAD_HOOK_ROUTINE func)
 {
-    if(!pthreadInfo) {
-        fprintf(epicsGetStdout(),"            NAME     EPICS ID   "
-            "PTHREAD ID   OSIPRI  OSSPRI  STATE\n");
-    } else {
-        struct sched_param param;
-        int policy;
-        int priority = 0;
+    epicsThreadOSD *pthreadInfo;
+    int status;
 
-        if(pthreadInfo->tid) {
-            int status;
-            status = pthread_getschedparam(pthreadInfo->tid,&policy,&param);
-            if(!status) priority = param.sched_priority;
-        }
-        fprintf(epicsGetStdout(),"%16.16s %12p %12lu    %3d%8d %8.8s\n",
-             pthreadInfo->name,(void *)
-             pthreadInfo,(unsigned long)pthreadInfo->tid,
-             pthreadInfo->osiPriority,priority,
-             pthreadInfo->isSuspended?"SUSPEND":"OK");
+    epicsThreadInit();
+    status = mutexLock(&listLock);
+    checkStatus(status, "pthread_mutex_lock epicsThreadMap");
+    if (status)
+        return;
+    pthreadInfo=(epicsThreadOSD *)ellFirst(&pthreadList);
+    while (pthreadInfo) {
+        func(pthreadInfo);
+        pthreadInfo = (epicsThreadOSD *)ellNext(&pthreadInfo->node);
     }
+    status = pthread_mutex_unlock(&listLock);
+    checkStatus(status, "pthread_mutex_unlock epicsThreadMap");
 }
 
 epicsShareFunc void epicsShareAPI epicsThreadShowAll(unsigned int level)
@@ -770,14 +794,16 @@ epicsShareFunc void epicsShareAPI epicsThreadShowAll(unsigned int level)
     epicsThreadInit();
     epicsThreadShow(0,level);
     status = mutexLock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_lock","epicsThreadShowAll");
+    checkStatus(status,"pthread_mutex_lock epicsThreadShowAll");
+    if(status)
+        return;
     pthreadInfo=(epicsThreadOSD *)ellFirst(&pthreadList);
     while(pthreadInfo) {
-        showThreadInfo(pthreadInfo,level);
+        epicsThreadShowInfo(pthreadInfo,level);
         pthreadInfo=(epicsThreadOSD *)ellNext(&pthreadInfo->node);
     }
     status = pthread_mutex_unlock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadShowAll");
+    checkStatus(status,"pthread_mutex_unlock epicsThreadShowAll");
 }
 
 epicsShareFunc void epicsShareAPI epicsThreadShow(epicsThreadId showThread, unsigned int level)
@@ -788,26 +814,28 @@ epicsShareFunc void epicsShareAPI epicsThreadShow(epicsThreadId showThread, unsi
 
     epicsThreadInit();
     if(!showThread) {
-        showThreadInfo(0,level);
+        epicsThreadShowInfo(0,level);
         return;
     }
     status = mutexLock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_lock","epicsThreadShowAll");
+    checkStatus(status,"pthread_mutex_lock epicsThreadShowAll");
+    if(status)
+        return;
     pthreadInfo=(epicsThreadOSD *)ellFirst(&pthreadList);
     while(pthreadInfo) {
         if (((epicsThreadId)pthreadInfo == showThread)
          || ((epicsThreadId)pthreadInfo->tid == showThread)) {
             found = 1;
-            showThreadInfo(pthreadInfo,level);
+            epicsThreadShowInfo(pthreadInfo,level);
         }
         pthreadInfo=(epicsThreadOSD *)ellNext(&pthreadInfo->node);
     }
     status = pthread_mutex_unlock(&listLock);
-    checkStatusQuit(status,"pthread_mutex_unlock","epicsThreadShowAll");
+    checkStatus(status,"pthread_mutex_unlock epicsThreadShowAll");
+    if(status) return;
     if (!found)
         printf("Thread %#lx (%lu) not found.\n", (unsigned long)showThread, (unsigned long)showThread);
 }
-
 
 epicsShareFunc epicsThreadPrivateId epicsShareAPI epicsThreadPrivateCreate(void)
 {
@@ -815,9 +843,13 @@ epicsShareFunc epicsThreadPrivateId epicsShareAPI epicsThreadPrivateCreate(void)
     int status;
 
     epicsThreadInit();
-    key = callocMustSucceed(1,sizeof(pthread_key_t),"epicsThreadPrivateCreate");
+    key = calloc(1,sizeof(pthread_key_t));
+    if(!key)
+        return NULL;
     status = pthread_key_create(key,0);
-    checkStatusQuit(status,"pthread_key_create","epicsThreadPrivateCreate");
+    checkStatus(status,"pthread_key_create epicsThreadPrivateCreate");
+    if(status)
+        return NULL;
     return((epicsThreadPrivateId)key);
 }
 
@@ -856,6 +888,23 @@ epicsShareFunc double epicsShareAPI epicsThreadSleepQuantum ()
 {
     double hz;
     hz = sysconf ( _SC_CLK_TCK );
+    if(hz<0)
+        return 0.0;
     return 1.0 / hz;
 }
 
+epicsShareFunc int epicsThreadGetCPUs(void)
+{
+    long ret;
+#ifdef _SC_NPROCESSORS_ONLN
+    ret = sysconf(_SC_NPROCESSORS_ONLN);
+    if (ret > 0)
+        return ret;
+#endif
+#ifdef _SC_NPROCESSORS_CONF
+    ret = sysconf(_SC_NPROCESSORS_CONF);
+    if (ret > 0)
+        return ret;
+#endif
+    return 1;
+}

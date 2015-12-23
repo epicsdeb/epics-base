@@ -1,6 +1,6 @@
 #
 # CONFIG.Common.RTEMS-mvme5500
-# Revision-Id: anj@aps.anl.gov-20110426174446-11te76tq9ieughhv
+# Revision-Id: anj@aps.anl.gov-20150220213559-wf9lnky336lyu725
 # Author: W. Eric Norum <wenorum@lbl.gov>
 #
 # All RTEMS targets use the same Makefile fragment
@@ -21,5 +21,7 @@ MUNCHNAME = $(PRODNAME:%$(EXE)=%$(MUNCH_SUFFIX))
 define MUNCH_CMD
 	$(RTEMS_TOOLS)/bin/$(OBJCOPY_FOR_TARGET) -O binary $< $@
 endef
+
+OP_SYS_LDLIBS += -lbspExt
 
 include $(CONFIG)/os/CONFIG.Common.RTEMS

@@ -1,6 +1,6 @@
 # CONFIG.Common.ios-arm
 #
-# Revision-Id: anj@aps.anl.gov-20111202164243-clxybuefflizbyvr
+# Revision-Id: anj@aps.anl.gov-20140217161253-vouzu6ricjyrdtdu
 # This file is maintained by the build community.
 #
 # Definitions for ios-arm target builds
@@ -11,6 +11,8 @@
 IOS_PLATFORM = iPhoneOS
 
 OP_SYS_CFLAGS += -fno-inline-functions
+OP_SYS_CFLAGS += -miphoneos-version-min=$(IOS_DEPLOYMENT_TARGET)
+OP_SYS_LDFLAGS += -miphoneos-version-min=$(IOS_DEPLOYMENT_TARGET)
 
 # iOS optimization flags for arm architecture
 OPT_CFLAGS_YES = -O2

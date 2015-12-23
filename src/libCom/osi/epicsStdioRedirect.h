@@ -9,41 +9,15 @@
 
 /* epicsStdioRedirect.h */
 
+/* This file is now obselete, and is likely to be
+ * deleted in a future release of EPICS Base.
+ *
+ * Use the epicsStdio.h header file instead.
+ */
+
 #ifndef epicsStdioRedirecth
 #define epicsStdioRedirecth
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 #include <epicsStdio.h>
-
-#undef stdin
-#define stdin epicsGetStdin()
-#undef stdout
-#define stdout epicsGetStdout()
-#undef stderr
-#define stderr epicsGetStderr()
-
-/* Make printf, puts and putchar use *our* version of stdout */
-
-#ifdef printf
-#  undef printf
-#endif /* printf */
-#define printf epicsStdoutPrintf
-
-#ifdef puts
-#  undef puts
-#endif /* puts */
-#define puts epicsStdoutPuts
-
-#ifdef putchar
-#  undef putchar
-#endif /* putchar */
-#define putchar epicsStdoutPutchar
-
-#ifdef  __cplusplus
-}
-#endif
 
 #endif /* epicsStdioRedirecth */

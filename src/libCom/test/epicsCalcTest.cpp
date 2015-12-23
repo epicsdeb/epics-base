@@ -4,7 +4,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-// Revision-Id: anj@aps.anl.gov-20121203185826-cd68u8o9fu5vbr7u
+// Revision-Id: anj@aps.anl.gov-20150302163535-xmbr20buf808urmb
 //	Author: Andrew Johnson
 
 #include "epicsUnitTest.h"
@@ -311,7 +311,7 @@ MAIN(epicsCalcTest)
     testExpr(exp(1.));
     testExpr(floor(1.5));
 
-    testExpr(finite(0));
+    testExpr(finite(0.));
     testExpr(finite(Inf));
     testExpr(finite(-Inf));
     testExpr(finite(NaN));
@@ -325,11 +325,11 @@ MAIN(epicsCalcTest)
     testCalc("finite(0,1,-Inf)", 0);
     testCalc("finite(0,-Inf,2)", 0);
     testCalc("finite(-Inf,1,2)", 0);
-    testExpr(isinf(0));
+    testExpr(isinf(0.));
     testExpr(isinf(Inf));
     testExpr(!!isinf(-Inf));    // Some GCCs return -1/0/+1 rather than 0/+1
     testExpr(isinf(NaN));
-    testExpr(isnan(0));
+    testExpr(isnan(0.));
     testExpr(isnan(Inf));
     testExpr(isnan(-Inf));
     testExpr(isnan(NaN));
@@ -407,8 +407,8 @@ MAIN(epicsCalcTest)
     testExpr(MAX( 1., 2.,Inf, 4., 5., 3.));
     testExpr(MAX( 1.,Inf, 3., 4., 5., 2.));
     testExpr(MAX(Inf, 2., 3., 4., 5., 1.));
-    testExpr(MAX(1,2,3,4,5,6,7,8,9,10));
-    testExpr(MAX(5,4,3,2,1,0,-1,-2,-3,-4));
+    testExpr(MAX(1,2,3,4,5,6,7,8,9,10,11,12));
+    testExpr(MAX(5,4,3,2,1,0,-1,-2,-3,-4,-5,-6));
     testExpr(MAX(-1,1,0));
 
     testExpr(MIN(99));
@@ -468,8 +468,8 @@ MAIN(epicsCalcTest)
     testExpr(MIN( 1., 2.,-Inf, 4., 5., 3.));
     testExpr(MIN( 1.,-Inf, 3., 4., 5., 2.));
     testExpr(MIN(-Inf, 2., 3., 4., 5., 1.));
-    testExpr(MIN(1,2,3,4,5,6,7,8,9,10));
-    testExpr(MIN(5,4,3,2,1,0,-1,-2,-3,-4));
+    testExpr(MIN(1,2,3,4,5,6,7,8,9,10,11,12));
+    testExpr(MIN(5,4,3,2,1,0,-1,-2,-3,-4,-5,-6));
     testExpr(MIN(1,-1,0));
     testExpr(MAX(MIN(0,2),MAX(0),MIN(3,2,1)));
 
@@ -553,10 +553,18 @@ MAIN(epicsCalcTest)
     testExpr(0.0 + NaN);
     testExpr(Inf + 0.0);
     testExpr(Inf + Inf);
+#if defined(_WIN64) && defined(_MSC_VER)
+    testCalc("Inf + -Inf", NaN);
+#else
     testExpr(Inf + -Inf);
+#endif
     testExpr(Inf + NaN);
     testExpr(-Inf + 0.0);
+#if defined(_WIN64) && defined(_MSC_VER)
+    testCalc("-Inf + Inf", NaN);
+#else
     testExpr(-Inf + Inf);
+#endif
     testExpr(-Inf + -Inf);
     testExpr(-Inf + NaN);
     testExpr(NaN + 0.0);

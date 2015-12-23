@@ -3,13 +3,15 @@
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* EPICS BASE is distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
+#ifndef INC_osiProcess_H
+#define INC_osiProcess_H
+
 /* 
- * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ * Revision-Id: anj@aps.anl.gov-20130411175656-dor1h3zt7zo46epw
  * 
  * Operating System Independent Interface to Process Environment
  *
@@ -44,3 +46,4 @@ epicsShareFunc osiSpawnDetachedProcessReturn epicsShareAPI osiSpawnDetachedProce
 }
 #endif
 
+#endif /* INC_osiProcess_H */

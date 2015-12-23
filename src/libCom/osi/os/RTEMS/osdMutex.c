@@ -6,7 +6,7 @@
 \*************************************************************************/
 /*
  * RTEMS osdMutex.c
- *	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *	Revision-Id: anj@aps.anl.gov-20120503171934-mwjbz33gk1batl1q
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
@@ -23,7 +23,7 @@
 #include <rtems.h>
 #include <rtems/error.h>
 
-#include "epicsStdioRedirect.h"
+#include "epicsStdio.h"
 #include "epicsMutex.h"
 #include "epicsEvent.h"
 #include "errlog.h"

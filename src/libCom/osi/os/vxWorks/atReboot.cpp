@@ -1,10 +1,9 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2013 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* atReboot.cpp */
@@ -13,37 +12,28 @@
 
 #include <stdio.h>
 
-#include "epicsDynLink.h"
+#include "epicsFindSymbol.h"
 #include "epicsExit.h"
 
-/* osdThread references atRebootExtern just to make this module load*/
-int atRebootExtern;
+extern "C" {
 
 typedef int (*sysAtReboot_t)(void(func)(void));
 
-class atRebootRegister {
-public:
-    atRebootRegister();
-};
-
-atRebootRegister::atRebootRegister()
+void atRebootRegister(void)
 {
-    STATUS status;
-    sysAtReboot_t sysAtReboot;
-    SYM_TYPE type;
+    sysAtReboot_t sysAtReboot = (sysAtReboot_t) epicsFindSymbol("_sysAtReboot");
 
-    status = symFindByNameEPICS(sysSymTbl, "_sysAtReboot",
-				(char **)&sysAtReboot, &type);
-    if (status == OK) {
-        status = sysAtReboot(epicsExitCallAtExits);
-        if (status != OK) {
+    if (sysAtReboot) {
+        STATUS status = sysAtReboot(epicsExitCallAtExits);
+
+        if (status) {
             printf("atReboot: sysAtReboot returned error %d\n", status);
         }
     } else {
-	printf("BSP routine sysAtReboot() not found, epicsExit() will not be\n"
-	       "called by reboot.  For reduced functionality, call\n"
-	       "    rebootHookAdd(epicsExitCallAtExits)\n");
+        printf("BSP routine sysAtReboot() not found, epicsExit() will not be\n"
+               "called by reboot.  For reduced functionality, call\n"
+               "    rebootHookAdd(epicsExitCallAtExits)\n");
     }
 }
 
-static atRebootRegister atRebootRegisterObj;
+}
