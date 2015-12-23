@@ -4,18 +4,18 @@ Subject: cap5: hardcode default base path in perl scripts
 
 Avoid need to play games as install location is known.
 ---
- src/cap5/CA.pm                 | 5 +----
- src/makeBaseApp/makeBaseApp.pl | 5 ++---
- src/makeBaseExt/makeBaseExt.pl | 3 +--
+ src/ca/client/perl/CA.pm         | 5 +----
+ src/template/base/makeBaseApp.pl | 5 ++---
+ src/template/ext/makeBaseExt.pl  | 3 +--
  3 files changed, 4 insertions(+), 9 deletions(-)
 
-diff --git a/src/cap5/CA.pm b/src/cap5/CA.pm
-index ac6542e..05ae5b4 100644
---- a/src/cap5/CA.pm
-+++ b/src/cap5/CA.pm
+diff --git a/src/ca/client/perl/CA.pm b/src/ca/client/perl/CA.pm
+index 2294417..d80c358 100644
+--- a/src/ca/client/perl/CA.pm
++++ b/src/ca/client/perl/CA.pm
 @@ -6,7 +6,6 @@ use warnings;
  
- my $version = '0.4';
+ my $version = '0.6';
  
 -
  package CA;
@@ -32,10 +32,10 @@ index ac6542e..05ae5b4 100644
  
  bootstrap Cap5 $VERSION;
  
-diff --git a/src/makeBaseApp/makeBaseApp.pl b/src/makeBaseApp/makeBaseApp.pl
-index 6a72b30..8958d57 100755
---- a/src/makeBaseApp/makeBaseApp.pl
-+++ b/src/makeBaseApp/makeBaseApp.pl
+diff --git a/src/template/base/makeBaseApp.pl b/src/template/base/makeBaseApp.pl
+index c98b538..880c270 100644
+--- a/src/template/base/makeBaseApp.pl
++++ b/src/template/base/makeBaseApp.pl
 @@ -66,7 +66,7 @@ sub ReplaceFilename { # (filename)
  	    } elsif (-r "$base\@Common") {	# Default version exists
  		$base = '' unless ($filearch eq "Common" && -s $file);
@@ -55,10 +55,10 @@ index 6a72b30..8958d57 100755
      }
      $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
      $app_epics_base = LocalPath($epics_base);
-diff --git a/src/makeBaseExt/makeBaseExt.pl b/src/makeBaseExt/makeBaseExt.pl
-index 4e5c3ee..9299acf 100755
---- a/src/makeBaseExt/makeBaseExt.pl
-+++ b/src/makeBaseExt/makeBaseExt.pl
+diff --git a/src/template/ext/makeBaseExt.pl b/src/template/ext/makeBaseExt.pl
+index 491dc63..a5c0f1a 100644
+--- a/src/template/ext/makeBaseExt.pl
++++ b/src/template/ext/makeBaseExt.pl
 @@ -127,8 +127,7 @@ sub get_commandline_opts { #no args
      } elsif ($eBASE) { # third choice is env var EPICS_MBE_BASE
          $epics_base = UnixPath($eBASE);

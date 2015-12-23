@@ -3,18 +3,16 @@ Date: Wed, 19 Sep 2012 10:46:02 -0400
 Subject: for init scripts, ensure abs. path is used.
 
 ---
- src/util/Makefile | 2 +-
+ src/ca/client/Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/src/util/Makefile b/src/util/Makefile
-index e0cd22c..37ef4ed 100644
---- a/src/util/Makefile
-+++ b/src/util/Makefile
-@@ -33,6 +33,6 @@ SCRIPTS_Linux := S99logServer S99caRepeater
+diff --git a/src/ca/client/Makefile b/src/ca/client/Makefile
+index fcbc574..a295cae 100644
+--- a/src/ca/client/Makefile
++++ b/src/ca/client/Makefile
+@@ -114,4 +114,4 @@ OBJS_vxWorks += ca_test
  include $(TOP)/configure/RULES
-  
+ 
  S99%: ../rc2.%
 -	sed -e s%:INSTALL_BIN:%`cd $(INSTALL_BIN); pwd`% $< >$@
 +	sed -e s%:INSTALL_BIN:%$(FINAL_LOCATION)/bin/$(T_A)% $< >$@
- 
- #	EOF Makefile.Host for base/src/util

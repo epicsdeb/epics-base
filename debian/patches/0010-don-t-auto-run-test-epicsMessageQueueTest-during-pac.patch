@@ -8,15 +8,15 @@ its really slow...
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/libCom/test/Makefile b/src/libCom/test/Makefile
-index 9bf92f5..bf385f2 100644
+index e0c1b06..51ee39f 100755
 --- a/src/libCom/test/Makefile
 +++ b/src/libCom/test/Makefile
-@@ -138,7 +138,7 @@ TESTS += blockingSockTest
+@@ -197,7 +197,7 @@ TESTS += blockingSockTest
  TESTPROD_HOST += epicsMessageQueueTest
  epicsMessageQueueTest_SRCS += epicsMessageQueueTest.cpp
  testHarness_SRCS += epicsMessageQueueTest.cpp
 -TESTS += epicsMessageQueueTest
 +#TESTS += epicsMessageQueueTest
  
- 
- # The testHarness runs all the test programs in a known working order.
+ TESTPROD_HOST += epicsStackTraceTest
+ epicsStackTraceTest_SRCS += epicsStackTraceTest.c

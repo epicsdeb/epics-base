@@ -12,11 +12,11 @@ make SKIP_HOST=YES EPICS_BASE=/usr/epics/base
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
-index a26f077..d65dcbc 100644
+index d9c4eb0..5008c7d 100644
 --- a/configure/CONFIG_COMMON
 +++ b/configure/CONFIG_COMMON
 @@ -33,7 +33,7 @@ CROSS1 = $(CROSS_COMPILER_TARGET_ARCHS$(word 1,$(CROSS_COMPILER_HOST_ARCHS)))
- # and EPICS_HOST_ARCH is one of it's words
+ # and EPICS_HOST_ARCH is one of its words
  CROSS2 = $(CROSS_COMPILER_TARGET_ARCHS$(filter-out 1,$(words $(filter $(EPICS_HOST_ARCH),$(CROSS_COMPILER_HOST_ARCHS)))))
  
 -BUILD_ARCHS = $(EPICS_HOST_ARCH) $(CROSS1) $(CROSS2)
@@ -25,17 +25,18 @@ index a26f077..d65dcbc 100644
  #-------------------------------------------------------
  # Default for perl if it's on the PATH,
 diff --git a/configure/RULES_ARCHS b/configure/RULES_ARCHS
-index d64d536..15569ac 100644
+index 02eea5f..7105769 100644
 --- a/configure/RULES_ARCHS
 +++ b/configure/RULES_ARCHS
-@@ -47,8 +47,8 @@ $(2): $$(EPICS_HOST_ARCH)
- $(1)$$(DIVIDER)$(2): $(1)$$(DIVIDER)$$(EPICS_HOST_ARCH) O.$(2)
+@@ -45,9 +45,9 @@ define DEP_template
+   $(2) : $(EPICS_HOST_ARCH)
+   $(1)$(DIVIDER)$(2) : $(1)$(DIVIDER)$(EPICS_HOST_ARCH) O.$(2)
  endef
+-$(foreach action, $(ACTIONS), \
++$(if $(SKIP_HOST),,$(foreach action, $(ACTIONS), \
+     $(foreach arch, $(CROSS_ARCHS), \
+-        $(eval $(call DEP_template,$(action),$(arch)))))
++        $(eval $(call DEP_template,$(action),$(arch))))))
  
--$(foreach action, $(ACTIONS), $(foreach arch,\
--      $(CROSS_ARCHS),$(eval $(call DEP_template,$(action),$(arch)))))
-+$(if $(SKIP_HOST),,$(foreach action, $(ACTIONS), $(foreach arch,\
-+      $(CROSS_ARCHS),$(eval $(call DEP_template,$(action),$(arch))))))
- 
- #endif
- #*************************************************************************
+ # Allows rebuild to work with parallel builds option, -j.
+ ifeq (rebuild,$(filter rebuild,$(MAKECMDGOALS)))

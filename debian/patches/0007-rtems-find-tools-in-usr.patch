@@ -4,19 +4,20 @@ Subject: rtems: find tools in /usr
 
 rtems 4.9
 ---
- configure/os/CONFIG_SITE.Common.RTEMS | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ configure/os/CONFIG_SITE.Common.RTEMS | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
-index d277ae8..5f28dfb 100644
+index cfb5641..59b4df3 100644
 --- a/configure/os/CONFIG_SITE.Common.RTEMS
 +++ b/configure/os/CONFIG_SITE.Common.RTEMS
-@@ -5,8 +5,8 @@
+@@ -7,9 +7,8 @@
  
  # Where to find RTEMS
  #
+-# APS:
 -RTEMS_VERSION = 4.10.2
--RTEMS_BASE = /usr/local/rtems/rtems-$(RTEMS_VERSION)
+-RTEMS_BASE = /usr/local/vw/rtems/rtems-$(RTEMS_VERSION)
 +RTEMS_VERSION = 4.9
 +RTEMS_BASE = /usr
  
