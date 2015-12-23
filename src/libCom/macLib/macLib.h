@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+/* Revision-Id: anj@aps.anl.gov-20141007043923-zjae64um80bas2df
  *
  * Definitions for macro substitution library (macLib)
  *
@@ -52,7 +52,7 @@ epicsShareAPI macCreateHandle(
     MAC_HANDLE  **handle,       /* address of variable to receive pointer */
                                 /* to new macro substitution context */
 
-    char        *pairs[]        /* pointer to NULL-terminated array of */
+    const char * pairs[]        /* pointer to NULL-terminated array of */
                                 /* {name,value} pair strings; a NULL */
                                 /* value implies undefined; a NULL */
                                 /* argument implies no macros */
@@ -149,6 +149,13 @@ epicsShareAPI macInstallMacros(
 epicsShareFunc char *           /* expanded string; NULL if any undefined macros */
 epicsShareAPI macEnvExpand(
     const char *str             /* string to be expanded */
+);
+
+epicsShareFunc char *           /* expanded string; NULL if any undefined macros */
+epicsShareAPI macDefExpand(
+    const char *str,            /* string to be expanded */
+    MAC_HANDLE *macros          /* opaque handle; can be NULL if default */
+                                /* special characters are to be used */
 );
 
 #ifdef __cplusplus

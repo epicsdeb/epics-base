@@ -5,7 +5,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20120831210514-z6b2h7o317s14cqi */
+/* Revision-Id: anj@aps.anl.gov-20150701170042-hz0amc8q6msvbrsv */
 /* Author:  Eric Norum Date: 12DEC2001 */
 
 #include <stdio.h>
@@ -14,6 +14,7 @@
 
 #define epicsExportSharedSymbols
 #include "envDefs.h"
+#include "epicsExit.h"
 #include "epicsReadline.h"
 
 #define EPICS_COMMANDLINE_LIBRARY_EPICS     0
@@ -78,11 +79,20 @@ epicsReadlineEnd(void *context)
 
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <unistd.h>
 
 struct readlineContext {
     FILE    *in;
     char    *line;
 };
+
+static enum {rlNone, rlIdle, rlBusy} rlState = rlNone;
+
+static void rlExit(void *dummy) {
+    if (rlState == rlBusy)
+        rl_cleanup_after_signal();
+}
+
 
 /*
  * Create a command-line context
@@ -91,6 +101,11 @@ void * epicsShareAPI
 epicsReadlineBegin(FILE *in)
 {
     struct readlineContext *readlineContext;
+
+    if (rlState == rlNone) {
+        epicsAtExit(rlExit, NULL);
+        rlState = rlIdle;
+    }
 
     readlineContext = malloc(sizeof *readlineContext);
     if (readlineContext != NULL) {
@@ -124,7 +139,17 @@ epicsReadline (const char *prompt, void *context)
     free (readlineContext->line);
     readlineContext->line = NULL;
     if (readlineContext->in == NULL) {
+        if (!isatty(fileno(stdout))) {
+            /* The libedit readline emulator on Darwin doesn't
+             * print the prompt when the terminal isn't a tty.
+             */
+            fputs (prompt, stdout);
+            fflush (stdout);
+            rl_already_prompted = 1;
+        }
+        rlState = rlBusy;
         line = readline (prompt);
+        rlState = rlIdle;
     }
     else {
         line = (char *)malloc (linesize * sizeof *line);

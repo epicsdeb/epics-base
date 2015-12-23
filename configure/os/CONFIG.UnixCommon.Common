@@ -1,6 +1,6 @@
 # CONFIG.UnixCommon.Common
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: jba@aps.anl.gov-20140909182916-n1w0rithpqm20088
 # This file is maintained by the build community.
 #
 # Definitions common to unix hosts
@@ -13,6 +13,7 @@ MV = mv
 RM = rm -f
 MKDIR = mkdir
 RMDIR = rm -rf
+CAT = cat
 
 # Allow site overrides
 -include $(CONFIG)/os/CONFIG_SITE.UnixCommon.Common

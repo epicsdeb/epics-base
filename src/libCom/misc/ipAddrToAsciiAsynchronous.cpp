@@ -25,7 +25,7 @@
 #include <string>
 #include <climits>
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
 
 #define epicsExportSharedSymbols
 #include "ipAddrToAsciiAsynchronous.h"
@@ -61,7 +61,6 @@ private:
     bool pending;
     void ipAddrToAscii ( const osiSockAddr &, ipAddrToAsciiCallBack & );
     void release (); 
-    void * operator new ( size_t ); 
     void operator delete ( void * );
     friend class ipAddrToAsciiEnginePrivate;
     ipAddrToAsciiTransactionPrivate & operator = ( const ipAddrToAsciiTransactionPrivate & );
@@ -156,7 +155,7 @@ static void ipAddrToAsciiEngineShutdownRequest ( void * )
 
 static void ipAddrToAsciiEngineGlobalMutexConstruct ( void * )
 {
-    ipAddrToAsciiEnginePrivate :: pGlobalMutex = new epicsMutex ();
+    ipAddrToAsciiEnginePrivate :: pGlobalMutex = newEpicsMutex;
     epicsAtExit ( ipAddrToAsciiEngineShutdownRequest, 0 );
 }
 
@@ -207,7 +206,7 @@ ipAddrToAsciiEnginePrivate::~ipAddrToAsciiEnginePrivate ()
     this->thread.exitWait ();
 }
 
-// for now its probably sufficent to allocate one 
+// for now its probably sufficient to allocate one
 // DNS transaction thread for all codes sharing
 // the same process that need DNS services but we 
 // leave our options open for the future
@@ -271,13 +270,6 @@ inline void ipAddrToAsciiTransactionPrivate::operator delete ( void * pTrans, ts
     freeList.release ( pTrans );
 }
 #endif
-
-void * ipAddrToAsciiTransactionPrivate::operator new ( size_t ) // X aCC 361
-{
-    // The HPUX compiler seems to require this even though no code
-    // calls it directly
-    throw std::logic_error ( "why is the compiler calling private operator new" );
-}
 
 void ipAddrToAsciiTransactionPrivate::operator delete ( void * )
 {

@@ -18,6 +18,7 @@
 #include <time.h>
 #include <errno.h>
 
+#define epicsExportSharedSymbols
 #include "epicsEvent.h"
 #include "epicsExit.h"
 #include "epicsTypes.h"
@@ -47,8 +48,6 @@ static struct {
     epicsUInt32     syncTick;
     epicsTimeStamp  clockTime;
     epicsUInt32     clockTick;
-    epicsUInt32     nsecsPerTick;
-    epicsUInt32     ticksPerSecond;
     epicsUInt32     ticksToSkip;
     double          tickRate;
 } NTPTimePvt;
@@ -90,8 +89,6 @@ static void NTPTime_InitOnce(void *pprio)
     NTPTimePvt.loopEvent      = epicsEventMustCreate(epicsEventEmpty);
     NTPTimePvt.syncsFailed    = 0;
     NTPTimePvt.lock           = epicsMutexCreate();
-    NTPTimePvt.ticksPerSecond = osdTickRateGet();
-    NTPTimePvt.nsecsPerTick   = NSEC_PER_SEC / NTPTimePvt.ticksPerSecond;
 
     /* Initialize OS-dependent code */
     osdNTPInit();
@@ -100,7 +97,7 @@ static void NTPTime_InitOnce(void *pprio)
     if (!osdNTPGet(&timespecNow)) {
         NTPTimePvt.syncTick = osdTickGet();
         if (timespecNow.tv_sec > POSIX_TIME_AT_EPICS_EPOCH && epicsTimeOK ==
-            epicsTimeFromTimespec(&NTPTimePvt.syncTime, &timespecNow)) {
+                epicsTimeFromTimespec(&NTPTimePvt.syncTime, &timespecNow)) {
             NTPTimePvt.clockTick = NTPTimePvt.syncTick;
             NTPTimePvt.clockTime = NTPTimePvt.syncTime;
             NTPTimePvt.synchronized = 1;
@@ -191,7 +188,7 @@ static void NTPTimeSync(void *dummy)
         if (diff >= 0.0) {
             NTPTimePvt.ticksToSkip = 0;
         } else { /* dont go back in time */
-            NTPTimePvt.ticksToSkip = -diff * NTPTimePvt.ticksPerSecond;
+            NTPTimePvt.ticksToSkip = -diff * osdTickRateGet();
         }
         NTPTimePvt.clockTick = tickNow;
         NTPTimePvt.clockTime = timeNow;
@@ -230,10 +227,12 @@ static int NTPTimeGetCurrent(epicsTimeStamp *pDest)
         }
 
         if (ticksSince) {
-            epicsUInt32 secsSince = ticksSince / NTPTimePvt.ticksPerSecond;
-            ticksSince -= secsSince * NTPTimePvt.ticksPerSecond;
+            epicsUInt32 ticksPerSecond = osdTickRateGet();
+            epicsUInt32 nsecsPerTick = NSEC_PER_SEC / ticksPerSecond;
+            epicsUInt32 secsSince = ticksSince / ticksPerSecond;
 
-            NTPTimePvt.clockTime.nsec += ticksSince * NTPTimePvt.nsecsPerTick;
+            ticksSince -= secsSince * ticksPerSecond;
+            NTPTimePvt.clockTime.nsec += ticksSince * nsecsPerTick;
             if (NTPTimePvt.clockTime.nsec >= NSEC_PER_SEC) {
                 secsSince++;
                 NTPTimePvt.clockTime.nsec -= NSEC_PER_SEC;
@@ -265,14 +264,15 @@ int NTPTime_Report(int level)
         }
         if (level) {
             char lastSync[32];
+
             epicsTimeToStrftime(lastSync, sizeof(lastSync),
                 "%Y-%m-%d %H:%M:%S.%06f", &NTPTimePvt.syncTime);
             printf("Syncronization interval = %.1f seconds\n",
                 NTPTimeSyncInterval);
             printf("Last synchronized at %s\n",
                 lastSync);
-            printf("OS tick rate = %u Hz (nominal)\n",
-                NTPTimePvt.ticksPerSecond);
+            printf("Current OS tick rate = %u Hz\n",
+                osdTickRateGet());
             printf("Measured tick rate = %.3f Hz\n",
                 NTPTimePvt.tickRate);
             osdNTPReport();

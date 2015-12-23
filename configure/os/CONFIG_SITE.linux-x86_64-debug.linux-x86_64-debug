@@ -1,11 +1,9 @@
 # CONFIG_SITE.linux-x86_64-debug.linux-x86_64-debug
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: anj@aps.anl.gov-20150223193045-6wkp0bkbdszjc8z4
 #
-# Site specific override definitions for solaris-sparc host builds
-# Only the local epics system manager should modify this file
-
-
+# Site specific overrides for linux-x86_64 host and target builds
+#-------------------------------------------------------
 
 #Prepares the object code to collect data for profiling with prof. 
 #PROFILE=YES

@@ -1,12 +1,11 @@
 /*************************************************************************\
 * Copyright (c) 2002 The University of Saskatchewan
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* osdEnv.c */
 /*
- * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ * Revision-Id: anj@aps.anl.gov-20141007043923-zjae64um80bas2df
  *
  * Author: Eric Norum
  *   Date: May 7, 2001
@@ -22,12 +21,13 @@
 #include <errno.h>
 
 #define epicsExportSharedSymbols
-#include <epicsStdioRedirect.h>
-#include <errlog.h>
-#include <cantProceed.h>
-#include <envDefs.h>
-#include <osiUnistd.h>
+#include "epicsStdio.h"
+#include "errlog.h"
+#include "cantProceed.h"
+#include "envDefs.h"
+#include "osiUnistd.h"
 #include "epicsFindSymbol.h"
+#include "iocsh.h"
 
 /*
  * Set the value of an environment variable
@@ -38,6 +38,8 @@ epicsShareFunc void epicsShareAPI epicsEnvSet (const char *name, const char *val
 {
     char *cp;
 
+    iocshEnvClear(name);
+    
 	cp = mallocMustSucceed (strlen (name) + strlen (value) + 2, "epicsEnvSet");
 	strcpy (cp, name);
 	strcat (cp, "=");

@@ -1,5 +1,4 @@
-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
-    if $running_under_some_shell; # makeConfigAppInclude.pl
+#!/usr/bin/env perl
 #*************************************************************************
 # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
 #     National Laboratory.
@@ -11,7 +10,7 @@ eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
 #*************************************************************************
 
 # Converts text file in DOS CR/LF format to unix ISO format
-#  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+#  Revision-Id: anj@aps.anl.gov-20130123132907-fi34uue1k4b3kig8
 
 @files=@ARGV;
 

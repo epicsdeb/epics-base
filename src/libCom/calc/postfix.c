@@ -6,7 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20121203185826-cd68u8o9fu5vbr7u
+/* Revision-Id: anj@aps.anl.gov-20131217185404-wng3r3ldfeefnu61
  *
  * Subroutines used to convert an infix expression to a postfix expression
  *
@@ -20,8 +20,10 @@
 
 #define epicsExportSharedSymbols
 #include "dbDefs.h"
+#include "epicsAssert.h"
 #include "epicsStdlib.h"
 #include "epicsString.h"
+#include "epicsTypes.h"
 #include "postfix.h"
 #include "postfixPvt.h"
 #include "shareLib.h"
@@ -205,7 +207,7 @@ static int
  * convert an infix expression to a postfix expression
  */
 epicsShareFunc long
-    postfix(const char *psrc, char * const ppostfix, short *perror)
+    postfix(const char *psrc, char *pout, short *perror)
 {
     ELEMENT stack[80];
     ELEMENT *pstacktop = stack;
@@ -213,10 +215,8 @@ epicsShareFunc long
     int operand_needed = TRUE;
     int runtime_depth = 0;
     int cond_count = 0;
-    char *pout = ppostfix;
+    char * const pdest = pout;
     char *pnext;
-    double lit_d;
-    int lit_i;
 
     if (psrc == NULL || *psrc == '\0' ||
 	pout == NULL || perror == NULL) {
@@ -243,40 +243,44 @@ epicsShareFunc long
 
             psrc -= strlen(pel->name);
             if (pel->code == LITERAL_DOUBLE) {
-                lit_d = epicsStrtod(psrc, &pnext);
-                if (pnext == psrc) {
+                double lit_d;
+                epicsInt32 lit_i;
+
+                if (epicsParseDouble(psrc, &lit_d, &pnext)) {
                     *perror = CALC_ERR_BAD_LITERAL;
                     goto bad;
                 }
                 psrc = pnext;
-                lit_i = lit_d;
+                lit_i = (int) lit_d;
                 if (lit_d != (double) lit_i) {
                     *pout++ = pel->code;
-                    memcpy(pout, (void *)&lit_d, sizeof(double));
+                    memcpy(pout, &lit_d, sizeof(double));
                     pout += sizeof(double);
                 } else {
                     *pout++ = LITERAL_INT;
-                    memcpy(pout, (void *)&lit_i, sizeof(int));
-                    pout += sizeof(int);
+                    memcpy(pout, &lit_i, sizeof(epicsInt32));
+                    pout += sizeof(epicsInt32);
                 }
             }
             else {
-                lit_i = strtoul(psrc, &pnext, 0);
-                if (pnext == psrc) {
+                epicsUInt32 lit_ui;
+
+                assert(pel->code == LITERAL_INT);
+                if (epicsParseUInt32(psrc, &lit_ui, 0, &pnext)) {
                     *perror = CALC_ERR_BAD_LITERAL;
                     goto bad;
                 }
                 psrc = pnext;
                 *pout++ = LITERAL_INT;
-                memcpy(pout, (void *)&lit_i, sizeof(int));
-                pout += sizeof(int);
+                memcpy(pout, &lit_ui, sizeof(epicsInt32));
+                pout += sizeof(epicsInt32);
             }
 
             operand_needed = FALSE;
             break;
 
 	case STORE_OPERATOR:
-	    if (pout == ppostfix || pstacktop > stack ||
+	    if (pout == pdest || pstacktop > stack ||
 		*--pout < FETCH_A || *pout > FETCH_L) {
 		*perror = CALC_ERR_BAD_ASSIGNMENT;
 		goto bad;
@@ -477,7 +481,7 @@ epicsShareFunc long
     return 0;
 
 bad:
-    *ppostfix = END_EXPRESSION;
+    *pdest = END_EXPRESSION;
     return -1;
 }
 
@@ -594,19 +598,19 @@ epicsShareFunc void
     };
     char op;
     double lit_d;
-    int lit_i;
+    epicsInt32 lit_i;
     
     while ((op = *pinst) != END_EXPRESSION) {
 	switch (op) {
 	case LITERAL_DOUBLE:
-	    memcpy((void *)&lit_d, ++pinst, sizeof(double));
+	    memcpy(&lit_d, ++pinst, sizeof(double));
 	    printf("\tDouble %g\n", lit_d);
 	    pinst += sizeof(double);
 	    break;
 	case LITERAL_INT:
-	    memcpy((void *)&lit_i, ++pinst, sizeof(int));
-	    printf("\tInteger %d\n", lit_i);
-	    pinst += sizeof(int);
+	    memcpy(&lit_i, ++pinst, sizeof(epicsInt32));
+	    printf("\tInteger %d (0x%x)\n", lit_i, lit_i);
+	    pinst += sizeof(epicsInt32);
 	    break;
 	case MIN:
 	case MAX:

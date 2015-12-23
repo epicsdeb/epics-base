@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *  Revision-Id: anj@aps.anl.gov-20120720231115-42gs7mmuebx87ofw
  *  Author: Jeff Hill 
  */
 
@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 
 #define epicsExportSharedSymbols
-#include "epicsStdio.h"
+#include "epicsTempFile.h"
 
 //
 // epicsTempName
@@ -69,13 +69,6 @@ epicsShareFunc FILE * epicsShareAPI epicsTempFile ()
     // _O_BINARY no translation 
     // _O_SHORT_LIVED avoid flush to disk
     //
-    // (Borland does not supply _O_SHORT_LIVED and _O_TEMPORARY)
-#   ifndef _O_SHORT_LIVED
-#       define _O_SHORT_LIVED 0x1000
-#   endif
-#   ifndef _O_TEMPORARY
-#       define _O_TEMPORARY 0x0040
-#   endif
     const int openFlag = _O_CREAT | _O_EXCL | _O_RDWR | 
         _O_SHORT_LIVED | _O_BINARY | _O_TEMPORARY;
     int fd = open ( pName, openFlag, _S_IWRITE );

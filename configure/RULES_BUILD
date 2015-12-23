@@ -6,11 +6,11 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
-# Revision-Id: jba@aps.anl.gov-20121205203418-15wux5bxnojrv6pn
+# Revision-Id: ralph.lange@gmx.de-20151010161735-y2c1lvvmap373zcb
 #
 #	Rules for making things specified in Makefile
 #
-#	we are in O.$(OS_CLASS), but most sources are one dir above:
+#	we are in O.$(T_A), but most sources are elsewhere
 #
 
 ifndef BASE_RULES_BUILD
@@ -19,13 +19,14 @@ BASE_RULES_BUILD=1
 vpath %.c $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.cc $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.cpp $(USR_VPATH) $(ALL_SRC_DIRS)
-vpath %.C $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.rc $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.h $(USR_VPATH) $(ALL_SRC_DIRS)
-vpath %.H $(USR_VPATH) $(ALL_SRC_DIRS)
+vpath %.hpp $(USR_VPATH) $(ALL_SRC_DIRS)
+vpath %.html $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.skel.static $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.y $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.l $(USR_VPATH) $(ALL_SRC_DIRS)
+vpath %.pl $(USR_VPATH) $(ALL_SRC_DIRS)
 
 #---------------------------------------------------------------
 
@@ -43,15 +44,18 @@ LOADABLE_LIBRARY += $(LOADABLE_LIBRARY_HOST)
 OBJS += $(OBJS_HOST)
 PROD += $(PROD_HOST)
 SCRIPTS += $(SCRIPTS_HOST)
+TESTLIBRARY += $(TESTLIBRARY_HOST)
 TESTSCRIPTS += $(TESTSCRIPTS_HOST)
 TESTPROD += $(TESTPROD_HOST)
 endif
 
 ifeq ($(findstring Ioc,$(VALID_BUILDS)),Ioc)
 LIBRARY += $(LIBRARY_IOC)
+LOADABLE_LIBRARY += $(LOADABLE_LIBRARY_IOC)
 OBJS += $(OBJS_IOC)
 PROD += $(PROD_IOC)
 SCRIPTS += $(SCRIPTS_IOC)
+TESTLIBRARY += $(TESTLIBRARY_IOC)
 TESTSCRIPTS += $(TESTSCRIPTS_IOC)
 TESTPROD += $(TESTPROD_IOC)
 endif
@@ -64,25 +68,37 @@ else
 INSTALL_TEMPLATES_SUBDIR = $(INSTALL_TEMPLATES)
 endif
 
+HTMLS_DIR ?= .
+
 #---------------------------------------------------------------
 #	First target
 
-all:	install
+all: install
+ifeq ($(EPICS_HOST_ARCH),$T_A)
+host: install
+else
+# Do nothing
+host:
+endif
+
+-include $(CONFIG)/RULES_FILE_TYPE
 
 -include $(CONFIG)/RULES.Db
 
--include $(CONFIG)/RULES_JAVA
-
-ifneq (,$(strip $(HDEPENDS_FILES)))
--include $(HDEPENDS_FILES)
-endif
-
 #---------------------------------------------------------------
-# Included defines and rules for prod,testprod, and library targets
+# Include defines and rules for prod, library and test* targets
 
-#ifneq (,$(strip $(PROD) $(TESTPROD) $(LIBRARY) $(LOADABLE_LIBRARY)))
+#ifneq (,$(strip $(PROD) $(TESTPROD) $(LIBRARY) $(TESTLIBRARY) $(LOADABLE_LIBRARY) ))
 include $(CONFIG)/RULES_TARGET
 #endif
+
+#---------------------------------------------------------------
+# Read dependency files
+
+ifneq (,$(strip $(HDEPENDS_FILES)))
+$(filter-out $(wildcard *$(DEP)), $(HDEPENDS_FILES)): | $(COMMON_INC)
+-include $(HDEPENDS_FILES)
+endif
 
 #---------------------------------------------------------------
 #   Products and Object libraries
@@ -96,19 +112,17 @@ ifneq (,$(strip $(TESTS)))
 TARGETS += testspec
 endif
 
+TAPFILES += $(TESTSCRIPTS:.t=.tap)
+
 #---------------------------------------------------------------
 #   Libraries 
 #
 
-LIBTARGETS += $(LIBNAME) $(INSTALL_LIBS) \
-              $(SHRLIBNAME) $(INSTALL_SHRLIBS) \
-              $(DLL_LINK_LIBNAME) $(INSTALL_DLL_LINK_LIBS) \
-              $(LOADABLE_SHRLIBNAME) $(INSTALL_LOADABLE_SHRLIBS)
+LIBTARGETS += $(LIBNAME) $(INSTALL_LIBS) $(TESTLIBNAME) \
+  $(SHRLIBNAME) $(INSTALL_SHRLIBS) $(TESTSHRLIBNAME) \
+  $(DLLSTUB_LIBNAME) $(INSTALL_DLLSTUB_LIBS) $(TESTDLLSTUB_LIBNAME) \
+  $(LOADABLE_SHRLIBNAME) $(INSTALL_LOADABLE_SHRLIBS)
 
-$(INSTALL_LIBS): $(INSTALL_SHRLIBS)  $(INSTALL_DLL_LINK_LIBS)  $(INSTALL_LOADABLE_SHRLIBS)
-
-
--include $(CONFIG)/RULES_FILE_TYPE
 
 #	Main targets
 
@@ -137,26 +151,21 @@ buildInstall : \
 	$(INSTALL_TEMPLATE) \
 	$(INSTALL_BIN_INSTALLS)
 
-clean::
+clean: build_clean
+
+build_clean:
 	$(ECHO) "Cleaning"
-	@$(RM) *.i *$(OBJ) *.a $(TESTPRODNAME) $(LIBNAME) $(SHRLIBNAME) \
-	$(INC) $(TARGETS) $(DLL_LINK_LIBNAME) $(TDS) \
-	*.out MakefileInclude  $(LOADABLE_SHRLIBNAME) *.manifest *.exp \
-	$(COMMON_INC) $(HDEPENDS_FILES) $(PRODTARGETS) $(TESTSCRIPTS)
+	@$(RM) *.i *$(OBJ) *.a $(TESTPRODNAME) \
+	$(LIBNAME) $(TESTLIBNAME) $(SHRLIBNAME) $(TESTSHRLIBNAME) \
+	$(DLLSTUB_LIBNAME) $(TESTDLLSTUB_LIBNAME) \
+	$(LOADABLE_SHRLIBNAME) \
+	$(INC) $(TARGETS) $(TDS) $(CLEANS) \
+	*.out MakefileInclude *.manifest *.exp \
+	$(COMMON_INC) $(HDEPENDS_FILES) $(PRODTARGETS) \
+	$(TESTSCRIPTS) $(TAPFILES)
 ifdef RES
 	@$(RM) *$(RES)
 endif
-ifdef BAF
-	@$(RM) $(PROD_BAF) $(LIB_BAF)
-endif
-ifdef BOF
-	@$(RM) *$(BOF)
-endif
-
-# WIN95/NT source browser
-#ifdef BAF
-browse: $(LIB_BAF) $(PROD_BAF)
-#endif
 
 $(DIRECTORY_TARGETS) :
 	$(MKDIR) -p $@
@@ -179,148 +188,135 @@ endif
 
 $(TESTPRODNAME) $(PRODNAME): $(PRODUCT_OBJS) $(PROD_RESS) $(PROD_DEPLIBS)
 
-$(TESTPRODNAME) $(PRODNAME):%$(EXE):
+$(TESTPRODNAME) $(PRODNAME): %$(EXE):
 	@$(RM) $@
 	$(DEBUGCMD) $(LINK.cpp)
 	$(MT_EXE_COMMAND)
-
-# object libs for R3.13 vxWorks compatibility only
-$(OBJLIBNAME): $(OBJLIB_LD_OBJS)
-
-$(OBJLIBNAME):%$(OBJ):
-	@$(RM) $@
-	$(OBJLIB_LINK.cpp)
 
 %_ctdt$(OBJ) : %_ctdt.c
 	@$(RM) $@
 	$(COMPILE.ctdt) $<
 
-%$(OBJ): %.c
-	@$(HDEPENDS_CMD)
+%$(DEP):%.c
 	@$(RM) $@
-	$(COMPILE.c) $(call PATH_FILTER,$<) $(COMPILE_FILTER.c)
+	$(HDEPENDS.c) $<
 
-%$(OBJ): %.cc
-	@$(HDEPENDS_CMD)
+%$(DEP):%.cc
 	@$(RM) $@
-	$(COMPILE.cpp) $(call PATH_FILTER,$<) $(COMPILE_FILTER.cpp)
+	$(HDEPENDS.cpp) $<
 
-%$(OBJ): %.cpp
-	@$(HDEPENDS_CMD)
+%$(DEP):%.cpp
 	@$(RM) $@
-	$(COMPILE.cpp) $(call PATH_FILTER,$<) $(COMPILE_FILTER.cpp)
+	$(HDEPENDS.cpp) $<
 
-# WIN95/NT resource compiler
+# Cancel GNUMake's built-in rules, which don't have our _INC
+# dependencies so could get used in some circumstances (gdd)
+%.o : %.c
+%.o : %.cc
+%.o : %.cpp
+
+# Include files are order-only prerequisites for compilation:
+%$(OBJ): %.c | $(COMMON_INC) $(INSTALL_INC)
+	@$(RM) $@
+	$(COMPILE.c) -c $<
+
+%$(OBJ): %.cc | $(COMMON_INC) $(INSTALL_INC)
+	@$(RM) $@
+	$(COMPILE.cpp) -c $<
+
+%$(OBJ): %.cpp | $(COMMON_INC) $(INSTALL_INC)
+	@$(RM) $@
+	$(COMPILE.cpp) -c $<
+
+# Windows resource compiler
 %$(RES): %.rc
 	@$(RM) $@
 	$(RCCMD)
 
-# WIN95/NT source browser
-%.bsc: %.sbr
-	$(ECHO) "building source browser archive $@"
-	@$(RM) $@
-	$(BAFCMD) $<
-
+YACCOPT ?= $($*_YACCOPT)
 #
 # rename the y.tab.h file only if we
 # are creating it
 #
-ifeq ($(findstring -d, $(YACCOPT)),-d)
-%.h %.c: %.y
-	$(RM) $*.c y.tab.c
-	$(RM) $*.h y.tab.h
-	$(YACC) $(YACCOPT) $<
-	$(MV) y.tab.c $*.c
-	$(MV) y.tab.h $*.h
-else
 %.c: %.y
-	$(RM) $*.c y.tab.c
-	$(YACC) $(YACCOPT) $<
-	$(MV) y.tab.c $*.c
-endif
+	@$(RM) $*.tab.c
+	@$(RM) $*.tab.h
+	$(YACC) -b$* $(YACCOPT) $<
+	$(MV) $*.tab.c $*.c
+	$(if $(findstring -d, $(YACCOPT)),$(MV) $*.tab.h $*.h,)
+
+# must be a seperate rule since when not using '-d' the
+# prefix for .h will be different then .c
+%.h : %.c %.y
 
 %.c: %.l
-	@$(RM) lex.yy.c
-	$(LEX) $(LEXOPT) $<
+	@$(RM) $*.yy.c
+	$(LEX) $(LEXOPT) -t $< > $*.yy.c
 	@$(RM) $@
-	$(MV) lex.yy.c $@
+	$(MV) $*.yy.c $@
 
-# Adl2dl rule
-%.dl : ../%.adl
-	@$(RM) $@
-	-$(ADL2DL) $< $@
+#---------------------------------------------------------------
+# Libraries, shared/DLL and stubs
 
-# Mangen Rule:
-%.1:%
-	$(MANGEN) -s $<
-	$(MV) $(<F).nr $(<F).1
+$(LIBNAME) $(TESTLIBNAME): $(LIBRARY_OBJS)
 
-# Mangen Rule:
-%.1:../%
-	$(MANGEN) -s $<
-	$(MV) $(<F).nr $(<F).1
-
-# WIN95/NT source browser
-ifdef BAF
-
-$(LIB_BAF): $(addsuffix $(BOF),$(basename $(LIBRARY_LD_OBJS)))
-	$(ECHO) "Building source browser archive $@"
-	@$(RM) $@
-	$(BAFCMD) $^
-
-endif
-
-ifneq (,$(wildcard ../baseLIBOBJS))
-$(LIBNAME): ../baseLIBOBJS
-endif
-
-$(LIBNAME): $(LIBRARY_OBJS)
-
-$(DLL_LINK_LIBNAME): $(LIBRARY_OBJS) $(LIBRARY_RESS) $(SHRLIB_DEPLIBS) 
-
-$(LIBNAME) $(DLL_LINK_LIBNAME): $(LIB_PREFIX)%$(LIB_SUFFIX):
+$(filter-out $(DLLSTUB_LIBNAME) $(TESTDLLSTUB_LIBNAME), $(LIBNAME) $(TESTLIBNAME)): $(LIB_PREFIX)%$(LIB_SUFFIX):
 	@$(RM) $@
 	$(ARCMD)
 ifneq ($(strip $(RANLIB)),)
 	$(RANLIB) $@
 endif # RANLIB
 
-$(SHRLIBNAME): $(LIBRARY_OBJS) $(LIBRARY_RESS) $(SHRLIB_DEPLIBS)
+$(SHRLIBNAME) $(DLLSTUB_LIBNAME) $(TESTSHRLIBNAME) $(TESTDLLSTUB_LIBNAME): \
+    $(LIBRARY_OBJS) $(LIBRARY_RESS) $(SHRLIB_DEPLIBS)
 
-$(SHRLIBNAME):$(SHRLIB_PREFIX)%$(SHRLIB_SUFFIX):
+$(DLLSTUB_LIBNAME): $(SHRLIBNAME);
+$(SHRLIBNAME): $(SHRLIB_PREFIX)%$(SHRLIB_SUFFIX):
 	@$(RM) $@
 	$(LINK.shrlib)
-ifeq ($(SHRLIB_SUFFIX),.dll)
 	$(MT_DLL_COMMAND)
-endif
+
+$(TESTDLLSTUB_LIBNAME): $(TESTSHRLIBNAME);
+$(TESTSHRLIBNAME): $(SHRLIB_PREFIX)%$(SHRLIB_SUFFIX):
+	@$(RM) $@
+	$(LINK.shrlib)
+	$(MT_DLL_COMMAND)
 
 $(LOADABLE_SHRLIBNAME): $(LIBRARY_OBJS) $(LIBRARY_RESS) $(SHRLIB_DEPLIBS)
 
-$(LOADABLE_SHRLIBNAME):$(LOADABLE_SHRLIB_PREFIX)%$(LOADABLE_SHRLIB_SUFFIX):
+$(LOADABLE_SHRLIBNAME): $(LOADABLE_SHRLIB_PREFIX)%$(LOADABLE_SHRLIB_SUFFIX):
 	@$(RM) $@
 	$(LINK.shrlib)
 	$(MT_DLL_COMMAND)
 
+#---------------------------------------------------------------
 # C++ munching for VxWorks
-%.nm : %$(EXE)
+
+%.nm: %$(EXE)
 	@$(RM) $@
 	$(NM) $<  > $@
 
-%.nm : %$(OBJ)
+%.nm: %$(OBJ)
 	@$(RM) $@
 	$(NM) $<  > $@
 
-%_ctdt.c : %.nm
+%_ctdt.c: %.nm $(TOOLS)/munch.pl
 	@$(RM) $@
 	$(PERL) $(TOOLS)/munch.pl -o $@ $<
 
-$(MUNCHNAME):%$(MUNCH_SUFFIX) : $(MUNCH_DEPENDS) %$(EXE)
+$(MUNCHNAME): %$(MUNCH_SUFFIX): $(MUNCH_DEPENDS) %$(EXE)
 	@$(RM) $@
 	$(MUNCH_CMD)
 
-$(OBJLIB_MUNCHNAME):%.munch : %_ctdt$(OBJ) %$(OBJ)
+#---------------------------------------------------------------
+# GeSys modules for RTEMS
+$(MODNAME): %$(MODEXT): %$(EXE)
+	@echo "Building module $@"
 	@$(RM) $@
-	$(MUNCH_CMD)
+	$(LINK.mod)
+
+#---------------------------------------------------------------
+# Automated testing
 
 runtests: $(TESTSCRIPTS)
 	-$(PERL) -MTest::Harness -e 'runtests @ARGV if @ARGV;' $^
@@ -330,21 +326,29 @@ testspec: $(TESTSCRIPTS)
 	@echo OS-class: $(OS_CLASS) > $@
 	@echo Target-arch: $(T_A) >> $@
 	$(if $^, @echo Tests: $^ >> $@)
+	$(if $(TESTFILES), @echo Files: $(TESTFILES) >> $@)
 	$(if $(TESTSPEC_$(OS_CLASS)), @echo "Harness: $(TESTSPEC_$(OS_CLASS))" >> $@)
+
+tapfiles: $(TESTSCRIPTS) $(TAPFILES)
+
+# A .tap file is the output from running the associated test script
+%.tap: %.t
+	-$(PERL) $< -tap > $@
 
 # If there's a perl test script (.plt) available, use it
 %.t: ../%.plt
 	@$(RM) $@
-	@$(CP) $< $@
+	$(CP) $< $@
 
-# Some versions of Test::Harness expect test programs in perl only.
+# Test programs (.t files) must be written in Perl.
 # Generate a perl program to exec the real test binary.
-%.t: %$(EXE)
+%.t: %$(EXE) $(TOOLS)/makeTestfile.pl
 	@$(RM) $@
-	@$(PERL) $(TOOLS)/makeTestfile.pl $@ $<
+	$(PERL) $(TOOLS)/makeTestfile.pl $@ $<
 
 #---------------------------------------------------------------
-## Install rules for BIN_INSTALLS and LIB_INSTALLS
+# Install rules for BIN_INSTALLS and LIB_INSTALLS
+
 define  BIN_INSTALLS_template
 $$(INSTALL_BIN)/$$(notdir $(1)) : $(1)
 	$(ECHO) "Installing $$(<F)"
@@ -366,20 +370,22 @@ $(INSTALL_BIN)/%: ../os/$(OS_CLASS)/%
 	@$(INSTALL_PRODUCT) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_BIN)
 
 $(INSTALL_BIN)/%: %
-	$(ECHO) "Installing created file $@"
+	$(ECHO) "Installing created executable $@"
 	@$(INSTALL_PRODUCT) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_BIN)
 
 $(INSTALL_BIN)/%: ../%
 	$(ECHO) "Installing script $@"
 	@$(INSTALL_PRODUCT) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_BIN)
 
-$(INSTALL_LIB)/%.a: %.a
+$(INSTALL_LIB)/%$(LIB_SUFFIX): %$(LIB_SUFFIX)
 	$(ECHO) "Installing library $@"
 	@$(INSTALL_LIBRARY) -d -m $(LIB_PERMISSIONS) $< $(INSTALL_LIB)
 
-$(INSTALL_LIB)/%.lib: %.lib
-	$(ECHO) "Installing library $@"
+ifneq ($(LIB_SUFFIX),$(DLLSTUB_SUFFIX))
+$(INSTALL_LIB)/%$(DLLSTUB_SUFFIX): %$(DLLSTUB_SUFFIX)
+	$(ECHO) "Installing DLL stub library $@"
 	@$(INSTALL_LIBRARY) -d -m $(LIB_PERMISSIONS) $< $(INSTALL_LIB)
+endif # SUFFIX
 
 $(INSTALL_SHRLIBS): $(INSTALL_SHRLIB)/%: %
 	$(ECHO) "Installing shared library $@"
@@ -407,7 +413,7 @@ $(INSTALL_TCLLIB)/$(TCLINDEX): $(INSTALL_TCLLIBS)
 
 $(INSTALL_LOADABLE_SHRLIBS): $(INSTALL_SHRLIB)/%: %
 	$(ECHO) "Installing loadable shared library $@"
-	@$(INSTALL_LIBRARY) -d -m 555 $< $(INSTALL_SHRLIB)
+	@$(INSTALL_LIBRARY) -d -m $(SHRLIB_PERMISSIONS) $< $(INSTALL_SHRLIB)
 ifneq ($(LOADABLE_SHRLIB_SUFFIX),$(SHRLIB_SUFFIX_BASE))
 ifneq (,$(strip $(LOADABLE_SHRLIB_VERSION)))
 	@$(RM) $(subst $(LOADABLE_SHRLIB_SUFFIX),$(SHRLIB_SUFFIX_BASE),$@)
@@ -432,7 +438,11 @@ $(INSTALL_INCLUDE)/% : %
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_INCLUDE)/os/$(OS_CLASS)/% : %
-	$(ECHO) "Installing os dependent include file $@"
+	$(ECHO) "Installing OS dependent include file $@"
+	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
+
+$(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS)/% : %
+	$(ECHO) "Installing compiler dependent include file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_DOC)/%: %
@@ -451,6 +461,10 @@ $(INSTALL_HTML)/$(HTMLS_DIR)/%: ../%
 	$(ECHO) "Installing html $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
+$(INSTALL_HTML)/$(HTMLS_DIR)/%: $(COMMON_DIR)/%
+	$(ECHO) "Installing generated html $@"
+	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
+
 $(INSTALL_TEMPLATES_SUBDIR)/%: ../%
 	$(ECHO) "Installing $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
@@ -464,8 +478,8 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
 .PRECIOUS: %.i %.o %.c %.nm %.cpp %.cc
 .PRECIOUS: $(COMMON_INC)
 
-.PHONY: all inc build install clean rebuild buildInstall
-.PHONY: runtests checkRelease warnRelease noCheckRelease
+.PHONY: all host inc build install clean rebuild buildInstall build_clean
+.PHONY: runtests tapfiles checkRelease warnRelease noCheckRelease
 
 endif # BASE_RULES_BUILD
 #	EOF RULES_BUILD

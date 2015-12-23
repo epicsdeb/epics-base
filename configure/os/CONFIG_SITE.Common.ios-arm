@@ -1,6 +1,6 @@
 # CONFIG_SITE.Common.ios-arm
 #
-# Revision-Id: anj@aps.anl.gov-20121117191816-6dp6cgethi1cu2at
+# Revision-Id: anj@aps.anl.gov-20141204200544-336ig28bkn3646mv
 #
 # Site-specific settings for ios-arm target builds
 #-------------------------------------------------------
@@ -16,11 +16,17 @@
 #
 #   Xcode 4.5 dropped support for the ARMv6.
 #
-#   ARMv7s devices: iPhone 5
-#   ARMv6 devices: iPhone 1 and 3G, iPod Touch Gen 1 and 2
-#   All other devices are ARMv7
+#   arm64 devices:  iPhone 5S, 6 and 6 Plus, iPad Air Gen 1 and 2,
+#                   iPad Mini Gen 2 and 3
+#   armv7s devices: iPhone 5 and 5C, iPad Gen 4
+#   armv7 devices:  iPhone 3GS, 4 and 4S, iPod Touch Gen 3 to 5
+#                   iPad Gen 1 to 3, iPad Mini, Apple TV Gen 2 and 3
+#   armv6 devices:  iPhone 1 and 3G, iPod Touch Gen 1 and 2
 
-ARCH_CLASS = armv7 armv7s
+#ARCH_CLASS = arm64
+#ARCH_CLASS = armv7s arm64
+ARCH_CLASS = armv7 armv7s arm64
+#ARCH_CLASS = armv7 armv7s
 #ARCH_CLASS = armv7
 #ARCH_CLASS = armv6 armv7
 #ARCH_CLASS = armv6

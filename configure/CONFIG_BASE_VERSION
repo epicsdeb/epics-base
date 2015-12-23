@@ -7,7 +7,7 @@
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  Revision-Id: jba@aps.anl.gov-20121217201147-pyypsu14iqmtneuz
+#  Revision-Id: ralph.lange@gmx.de-20151122165412-nx50g9m13ax6mk38
 #
 #  EPICS Version information
 #
@@ -17,20 +17,23 @@
 # EPICS_SITE_VERSION is defined in CONFIG_SITE for sites that want a local
 # version number to be included in the reported version string.
 
-BASE_3_14=YES
+# In 3.15 we still define BASE_3_14 so "ifdef BASE_3_14" means
+# 3.14 or later, but "ifeq ($(BASE_3_14),YES)" means 3.14 only.
+BASE_3_14 = NO
+BASE_3_15 = YES
 
 # EPICS_VERSION must be a number >0 and <256
 EPICS_VERSION = 3
 
-# EPICS_REVISION must be a number >=0 and <256
-EPICS_REVISION = 14
+# EPICS_REVISION must be a number >=0 and <256 
+EPICS_REVISION = 15
 
-# EPICS_MODIFICATION must be a number >=0 and <256
-EPICS_MODIFICATION = 12
+# EPICS_MODIFICATION must be a number >=0 and <256 
+EPICS_MODIFICATION = 3
 
-# EPICS_PATCH_LEVEL must be a number  (win32 resource file requirement)
+# EPICS_PATCH_LEVEL must be a number (win32 resource file requirement)
 # Not included if zero
-EPICS_PATCH_LEVEL = 3
+EPICS_PATCH_LEVEL = 0
 
 # This will end in -DEV between official releases
 #EPICS_DEV_SNAPSHOT=-DEV
@@ -58,9 +61,4 @@ EPICS_SHORT_VERSION=$(EPICS_VERSION).$(EPICS_REVISION).$(EPICS_MODIFICATION)$(EP
 EPICS_VERSION_NUMBER=$(EPICS_SHORT_VERSION)$(EPICS_DEV_SNAPSHOT)$(EPICS_SITE_VSTRING)
 EPICS_VERSION_STRING="EPICS Version $(EPICS_VERSION_NUMBER)"
 
-COMMIT_DATE="\$Date: Mon 2012-12-17 14:11:47 -0600$"
-
-# Provide these in case anyone is still using the old names
-EPICS_CVS_SNAPSHOT=$(EPICS_DEV_SNAPSHOT)
-CVS_DATE=$(COMMIT_DATE)
-CVS_TAG="-no-tags-"
+COMMIT_DATE="\$Date: Sun 2015-11-22 17:54:12 +0100$"

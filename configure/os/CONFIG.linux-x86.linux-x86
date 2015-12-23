@@ -1,6 +1,6 @@
 #  CONFIG.linux-x86.linux-x86
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: johill@lanl.gov-20110808233319-6uqlnwhwty38sgwi
 #
 # Definitions for linux-x86 host - linux-x86 target builds
 # Sites may override these definitions in CONFIG_SITE.linux-x86.linux-x86

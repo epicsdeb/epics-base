@@ -1,4 +1,7 @@
 <!DOCTYPE HTML>
+<!-- Generate the README.1st file from this file using:
+    elinks -dump -no-numbering -no-references -dump-width 80 README.html
+  -->
 <HTML>
 <HEAD>
 <TITLE>README - EPICS Base Installation Instructions</TITLE>
@@ -6,7 +9,7 @@
 <BODY>
 <CENTER>
 <H1>Installation Instructions</H1>
-<H2>EPICS Base Release 3.14.*</H2><BR>
+<H2>EPICS Base Release 3.15.3</H2><BR>
 </CENTER>
 <HR>
 <H3> Table of Contents</H3>
@@ -19,7 +22,6 @@
 <LI><A HREF="#0_0_6"> Software requirements</A></LI>
 <LI><A HREF="#0_0_7"> Host system storage requirements</A></LI>
 <LI><A HREF="#0_0_8"> Documentation</A></LI>
-<LI><A HREF="#0_0_9"> WWW pages</A></LI>
 <LI><A HREF="#0_0_10"> Directory Structure</A></LI>
 <LI><A HREF="#0_0_11"> Build related components</A></LI>
 <LI><A HREF="#0_0_12"> Building EPICS base (Unix and Win32)</A></LI>
@@ -88,21 +90,24 @@
  as processes on the host platform.</P>
 
 <P><B>vxWorks</B><BR>
- You must have vxWorks installed if any of your target systems are
- vxWorks systems. This provides the cross-compiler and header files
- needed to build for these target systems. The absolute path to and version
- number of the vxWorks  installation is normally specified in the
- base/configure/os/CONFIG_SITE.Common.vxWorksCommon file. Consult the EPICS web
- pages about <a href="http://www.aps.anl.gov/epics/base/tornado.php">vxWorks
- 5.x</a> and <a href="http://www.aps.anl.gov/epics/base/vxWorks6.php">vxWorks
- 6.x</a> and the vxWorks documentation for information about configuring your
- vxWorks operating system for use with EPICS.</P>
+ You must have vxWorks 5.5.x or 6.x installed if any of your target systems are
+ vxWorks systems; the C++ compiler for vxWorks 5.4 is now too old to support.
+ The vxWorks installation provides the cross-compiler and header files needed to
+ build for these targets. The absolute path to and the version number of the
+ vxWorks installation must be set in the
+ base/configure/os/CONFIG_SITE.Common.vxWorksCommon file or in one of its
+ target-specific overrides.</P>
+
+<P>Consult the <a href="http://www.aps.anl.gov/epics/base/tornado.php">vxWorks
+ 5.x</a> or <a href="http://www.aps.anl.gov/epics/base/vxWorks6.php">vxWorks
+ 6.x</a> EPICS web pages about and the vxWorks documentation for information
+ about configuring your vxWorks operating system for use with EPICS.</P>
 
 <P><B>RTEMS</B><BR>
  For RTEMS targets, you need RTEMS core and toolset version 4.9.2 or later.</P>
 
 <P><B>GNU readline or Tecla library</B><BR>
- GNU readline and Tecla librararies can be used by the IOC shell to
+ GNU readline and Tecla libraries can be used by the IOC shell to
  provide command line editing and command line history recall and edit.
  GNU readline (or Tecla library) must be installed on your target system
  when COMMANDLINE_LIBRARY is set to READLINE (or TECLA) for that target.
@@ -116,78 +121,28 @@
 </BLOCKQUOTE>
 
 <H3><A NAME="0_0_7"> Host system storage requirements</A></H3>
-<BLOCKQUOTE>The GNU zipped tar file is approximately 1.5 MB in size. The
- unzipped untarred distribution source tree is approximately 9.0 MB. The
- build created files for each host take approximately 37 MB and the
- build created files for each cross target take approximately 15 MB.</BLOCKQUOTE>
+
+<BLOCKQUOTE>The compressed tar file is approximately 1.6 MB in size. The
+ distribution source tree takes up approximately 12 MB. Each host target will
+ need around 40 MB for build files, and each cross-compiled target around 20
+ MB.</BLOCKQUOTE>
 
 <H3><A NAME="0_0_8"> Documentation</A></H3>
 <BLOCKQUOTE>EPICS documentation is available through the
  <a href="http://www.aps.anl.gov/epics/">EPICS website</a> at Argonne.
- <P>Release specific documenataion can also be found in the base/documentation
+ <P>Release specific documentation can also be found in the base/documentation
  directory of the distribution.</BLOCKQUOTE>
 
 <H3><A NAME="0_0_10"> Directory Structure</A></H3>
 <BLOCKQUOTE><H4>Distribution directory structure:</H4>
 
 <PRE>
-        base                         Root directory of the base distribution
-        base/config                  R3.13 compatibility build configuration files
-        base/config/tools            Perl and shell scripts used in the R3.13 build
-        base/configure               Operating system independent build config files
-        base/configure/os            Operating system dependent build config files
-        base/configure/tools         Perl and shell scripts used in the build
-        base/documentation           Distributation documentation
-        base/src                     All epics base source code in subdirectories
-        base/src/RTEMS               Code to configure RTEMS for EPICS
-        base/src/as                  Access security
-        base/src/bpt                 Break point table
-        base/src/ca                  Channel access
-        base/src/cap5                Channel Access client interface for Perl 5
-        base/src/cas                 Channel access server library and examples
-        base/src/catools             Channel access tools caget, cainfo, camonitor, caput
-        base/src/db                  Database access
-        base/src/db/test             Database access tests
-        base/src/dbStatic            Static database access
-        base/src/dbtools             Database dbLoadTemplate tools
-        base/src/dev                 Device support (camacDev, softDev, and testDev)
-        base/src/excas               Example channel access server
-        base/src/gdd                 General data descriptor
-        base/src/libCom              General purpose library code in subdirectories
-        base/src/libCom/bucketLib    Hash bucket
-        base/src/libCom/calc         Algebraic expression interpreter
-        base/src/libCom/cppStd       Support for C++ standard template library
-        base/src/libCom/cvtFast      Fast number to string conversion
-        base/src/libCom/cxxTemplates C++ templates and templates tests
-        base/src/libCom/dbmf         Memory management for frequent alloc/free
-        base/src/libCom/ellLib       EPICS double linked list
-        base/src/libCom/env          Default EPICS environment settings
-        base/src/libCom/error        Error handling definitions and routines
-        base/src/libCom/fdmgr        File descriptor manager
-        base/src/libCom/freeList     Memory management using free lists
-        base/src/libCom/gpHash       General purpose hash table
-        base/src/libCom/logClient    Logging client
-        base/src/libCom/macLib       Macro substitution handler
-        base/src/libCom/misc         Miscellaneous utilities
-        base/src/libCom/osi          Operating system independent API
-        base/src/libCom/osi/os       Operating system dependant code in subdirectories
-        base/src/libCom/ring         Methods for creating and using ring buffers
-        base/src/libCom/taskwd       Task watchdog
-        base/src/libCom/test         Test tools (timer, semBinary, semMutex,fdmgr, ...)
-        base/src/libCom/timer        Timer
-        base/src/libCom/tsDefs       R3.13 time stamp definitions and routines
-        base/src/makeBaseApp         Perl tool+templates to create ioc app dvl tree
-        base/src/makeBaseExt         Perl tool+templates to create extension dvl tree
-        base/src/misc                Miscellaneous (coreRelease, iocInit, asSub*)
-        base/src/rec                 Record support
-        base/src/registry            EPICS support function registry
-        base/src/rsrv                Channel access ioc resource server library
-        base/src/softIoc             Example softIoc
-        base/src/tools               Perl scripts used during the builds
-        base/src/toolsComm           Code for the build tools antelope and e_flex
-        base/src/util                Utilities (ca_test, iocLogServer, startCArepeater)
-        base/src/vxWorks             R3.13 compatibility code specific to vxWorks
-        base/startup                 Scripts for setting up path and environment
+        base                    Root directory of the base distribution
+        base/configure          Operating system independent build config files
+        base/configure/os       Operating system dependent build config files
+        base/documentation      Distribution documentation
+        base/src                Source code in various subdirectories
+        base/startup            Scripts for setting up path and environment
 </PRE>
 
 <H4>Install directories created by the build:</H4>
@@ -200,7 +155,7 @@
         html                    Installed html documentation
         include                 Installed header files
         include/os              Installed os specific header files in subdirs
-        javalib                 Installed java class and jar files
+        include/compiler        Installed compiler-specific header files
         lib                     Installed libraries in arch subdirectories
         lib/perl                Installed perl modules
         templates               Installed templates
@@ -210,18 +165,14 @@
 <H3><A NAME="0_0_11"> Build related components</A></H3>
 <BLOCKQUOTE>
 
-<H4>base/documentation/README* files</H4>
+<H4>base/documentation directory - contains setup, build, and install
+ documents</H4>
  <PRE>
         README.1st           Instructions for setup and building epics base
         README.html          html version of README.1st
-        README.WIN32         Microsoft WIN32 specific instructions
-        README.cxxTemplates  Information about C++ templates in EPICS base
-        README.niCpu030      NI cpu030 specific instructions
-        README.darwin        Installation notes for Mac OS X (Darwin)
+        README.darwin.html   Installation notes for Mac OS X (Darwin)
         RELEASE_NOTES.html   Notes on release changes
         KnownProblems.html   List of known problems and workarounds
-        Converting*To*.html  Release specific conversion instructions
-        Building*With*.html  Release specific build instructions
 </PRE>
 
 <H4>base/startup directory - contains scripts to set environment and path</H4>
@@ -230,10 +181,8 @@
         EpicsHostArch.pl    Perl script to set EPICS_HOST_ARCH env variable
         Site.profile        bourne shell script to set path and env variables
         Site.cshrc          c shell script to set path and env variables
-        borland.bat         WIN32 bat file to set borland path and env variables
         cygwin.bat          WIN32 bat file to set cygwin path and env variables
         win32.bat           WIN32 bat file to set path and env variables
-        win32-debug.bat     WIN32 debug bat file to set debug path and env variables
 </PRE>
 
 <H4>base/configure directory - contains build definitions and rules</H4>
@@ -242,14 +191,15 @@
         CONFIG.CrossCommon    Cross build definitions
         CONFIG.gnuCommon      Gnu compiler build definitions for all archs
         CONFIG_ADDONS         Definitions for &lt;osclass&gt; and DEFAULT options
+        CONFIG_APP_INCLUDE    
         CONFIG_BASE           EPICS base tool and location definitions
         CONFIG_BASE_VERSION   Definitions for EPICS base version number
         CONFIG_COMMON         Definitions common to all builds
         CONFIG_ENV            Definitions of EPICS environment variables
-        CONFIG_SITE           Site specific make defintions
+        CONFIG_FILE_TYPE      
+        CONFIG_SITE           Site specific make definitions
         CONFIG_SITE_ENV       Site defaults for EPICS environment variables
         MAKEFILE              Installs CONFIG* RULES* creates
-        CONFIG_APP_INCLUDE
         RELEASE               Location of external products
         RULES                 Includes appropriate rules file
         RULES.Db              Rules for database and database definition files
@@ -257,7 +207,9 @@
         RULES_ARCHS           Definitions and rules for building architectures
         RULES_BUILD           Build and install rules and definitions
         RULES_DIRS            Definitions and rules for building subdirectories
-        RULES_JAVA            Definitions and rules for java jars and classes
+        RULES_EXPAND          
+        RULES_FILE_TYPE       
+        RULES_TARGET          
         RULES_TOP             Rules specific to a &lt;top&gt; dir (uninstall and tar)
         Sample.Makefile       Sample makefile with comments
 </PRE>
@@ -270,30 +222,11 @@
         CONFIG.UnixCommon.Common    Definitions for Unix hosts and all targets
         CONFIG.Common.UnixCommon    Definitions for Unix targets and all hosts
         CONFIG.Common.vxWorksCommon Specific host definitions for all vx targets
-        CONFIG_COMPAT               R3.13 arch compatibility definitions
         CONFIG_SITE.&lt;host&gt;.&lt;target&gt; Site specific host-target definitions
         CONFIG_SITE.Common.&lt;target&gt; Site specific target defs for all hosts
         CONFIG_SITE.&lt;host&gt;.Common   Site specific host defs for all targets
 </PRE>
 
-<H4>base/src/tools directory - contains Perl scripts used for the build</H4>
-<PRE>
-        Makefile                Makefile for installing the scripts into cfg dir
-        convertRelease.pl       Performs consistancy checks on RELEASE files
-        cvsclean.pl             Remove all .#* files in directory tree
-        dos2unix.pl             Converts text file from DOS CR/LF to unix ISO
-        expandvars.pl           Tool to expand @VAR@ variables while copying a file
-        filterWarnings.pl       Filters warning messages during HP builds
-        fullpathName.pl         Returns fullpath name of directory arg
-        installEpics.pl         Installs built files into install directories
-        makeIncludeDbd.pl       Creates *Include.dbd file from filename args files
-        makeMakefile.pl         Creates a Makefile in O.&lt;arch&gt; dirs
-        makeTestfile.pl         Generates a test harness $target.t file
-        mkmf.pl                 Generates dependencies from include stmnts
-        munch.pl                Creates a ctdt.c file for vxWorks targets
-        replaceVAR.pl           Changes CapFast VAR(xxx) to $(xxx) notation
-        useManifestTool.pl      Use MS VC++ version to set usage of Manifest Tool
-</PRE>
 </BLOCKQUOTE>
 
 <H3><A NAME="0_0_12"> Building EPICS base (Unix and Win32)</A></H3>
@@ -311,15 +244,15 @@ Files in the base/startup directory have been provided to
  help set required path and other environment variables.
 
 <P><B>EPICS_HOST_ARCH</B><BR>
- Before you can build or use EPICS R3.14, the environment variable
+ Before you can build or use EPICS R3.15, the environment variable
  EPICS_HOST_ARCH must be defined. A perl script EpicsHostArch.pl in the
  base/startup directory has been provided to help set EPICS_HOST_ARCH.
  You should have EPICS_HOST_ARCH set to your host operating system
  followed by a dash and then your host architecture, e.g. solaris-sparc.
  If you are not using the OS vendor's c/c++ compiler for host builds,
  you will need another dash followed by the alternate compiler name
- (e.g. &quot;-gnu&quot; for GNU c/c++ compilers on a solaris host or &quot;-borland&quot;
- for Borland c/c++ compilers on a WIN32 host). See configure/CONFIG_SITE
+ (e.g. &quot;-gnu&quot; for GNU c/c++ compilers on a solaris host or &quot;-mingw&quot;
+ for MinGW c/c++ compilers on a WIN32 host). See configure/CONFIG_SITE
  for a list of supported EPICS_HOST_ARCH values.</P>
 
 <P><B>PERLLIB</B><BR>
@@ -336,23 +269,16 @@ Files in the base/startup directory have been provided to
  solaris systems you need uname in your path.</P>
 
 <P><B>LD_LIBRARY_PATH</B><BR>
- It is no longer necessary to have LD_LIBRARY_PATH include EPICS
- directories on a Unix type system. R3.14 shared libraries and
- executables will contain the full path name to libraries they require.
- However, if you move the EPICS directories from their build-time
- location then in order for libraries to be found at runtime
- LD_LIBRARY_PATH must include the full pathname to
- $(INSTALL_LOCATION)/lib/$(EPICS_HOST_ARCH) when invoking executables.
- Building shared libraries is now the default setting for all Unix type
- hosts. NOTE: You will still need LD_LIBRARY_PATH for R3.13 extension
- shared libraries even if the R3.13 extensions are built with R3.14
- base.</P>
 
-<P><B>Win32 PATH</B><BR>
- On WIN32 systems, for R3.14.7 and later, it is no longer necessary
- to add fullpathname to $(INSTALL_LOCATION)/bin/$(EPICS_HOST_ARCH) to
- your path for finding dlls during EPICS builds. The win32 configure
- files in base now add this directory to the path definition.</P>
+ R3.15 shared libraries and executables normally contain the full path
+ to any libraries they require.
+ However, if you move the EPICS files or directories from their build-time
+ location then in order for the shared libraries to be found at runtime
+ LD_LIBRARY_PATH must include the full pathname to
+ $(INSTALL_LOCATION)/lib/$(EPICS_HOST_ARCH) when invoking executables, or
+ some equivalent OS-specific mechanism (such as /etc/ld.so.conf on Linux)
+ must be used.
+ Shared libraries are now built by default on all Unix type hosts.</P>
 </BLOCKQUOTE>
 
 <H4>Do site-specific build configuration</H4>
@@ -390,12 +316,6 @@ Files in the base/startup directory have been provided to
         configure/os/CONFIG.Common.&lt;target&gt;     Target common settings
         configure/os/CONFIG.&lt;host&gt;.&lt;target&gt;     Host-target settings
 </PRE>
-
-<B>R3.13 compatibility configuration</B><BR>
- To configure EPICS base for building with R3.13 extensions and ioc
- applications , you must modify the default definitions in the
- base/config/CONFIG_SITE* files to agree with definitions you made in
- base/configure and base/configure/os files.
 </BLOCKQUOTE>
 
 <H4>Build EPICS base</H4>
@@ -424,7 +344,7 @@ Files in the base/startup directory have been provided to
  and then executed to try out this release of base. 
 
 <P>
- Instructions for building and executing the 3.14 example application
+ Instructions for building and executing the 3.15 example application
  can be found in the section &quot;Example Application&quot; of Chapter 2,
  &quot;Getting Started&quot;, in the &quot;IOC Application Developer's Guide&quot; for this
  release. The &quot;Example IOC Application&quot; section briefly explains how to

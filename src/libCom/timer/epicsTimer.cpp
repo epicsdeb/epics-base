@@ -1,14 +1,13 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2015 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* EPICS BASE is distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /*
- *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *      Revision-Id: anj@aps.anl.gov-20150918165151-dwvy0b54q8rfomvv
  *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
@@ -18,9 +17,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "epicsMath.h"
-
 #define epicsExportSharedSymbols
+#include "epicsMath.h"
 #include "epicsTimer.h"
 #include "epicsGuard.h"
 #include "timerPrivate.h"
@@ -71,6 +69,7 @@ epicsTimerQueueActiveForC ::
         bool okToShare, unsigned priority ) :
     timerQueueActive ( refMgr, okToShare, priority )
 {
+    timerQueueActive::start();
 }
 
 epicsTimerQueueActiveForC::~epicsTimerQueueActiveForC ()

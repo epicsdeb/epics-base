@@ -1,6 +1,6 @@
 # CONFIG.Common.linux-x86
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: johill@lanl.gov-20110819204100-oi6yylu9voatpdb3
 # This file is maintained by the build community.
 #
 # Definitions for linux-x86 target builds
@@ -12,9 +12,11 @@ include $(CONFIG)/os/CONFIG.Common.linuxCommon
 
 ARCH_CLASS = x86
 
+ARCH_DEP_CFLAGS = $(GNU_TUNE_CFLAGS)
 ARCH_DEP_CPPFLAGS += -D_X86_
-ARCH_DEP_CFLAGS += -m32
-ARCH_DEP_LDFLAGS += -m32
+
+OP_SYS_CFLAGS += -m32
+OP_SYS_LDFLAGS += -m32
 
 # If your crosscompiler name has a GNU target prefix like <gnutarget>-gcc,
 # e.g. x86-redhat-linux-gcc, put a GNU_TARGET definition in

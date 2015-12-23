@@ -10,7 +10,7 @@
 \*************************************************************************/
 
 /*
- * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ * Revision-Id: anj@aps.anl.gov-20150618155643-1q82x2qf8jd3aabl
  * Author: Jeff Hill
  */
 
@@ -27,7 +27,7 @@ epicsShareFunc void epicsShareAPI
         (char *) & yes, sizeof ( yes ) );
     if ( status < 0 ) {
         errlogPrintf (
-            "epicsSocketEnablePortUseForDatagramFanout: "
+            "epicsSocketEnableAddressReuseDuringTimeWaitState: "
             "unable to set SO_REUSEADDR?\n");
     }
 }

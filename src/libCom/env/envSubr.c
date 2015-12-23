@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*	Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+/*	Revision-Id: anj@aps.anl.gov-20120503171934-mwjbz33gk1batl1q
  *	Author:	Roger A. Cole
  *	Date:	07-20-91
  */
@@ -42,7 +42,7 @@
 
 #define epicsExportSharedSymbols
 #include "epicsStdlib.h"
-#include "epicsStdioRedirect.h"
+#include "epicsStdio.h"
 #include "errMdef.h"
 #include "errlog.h"
 #include "envDefs.h"

@@ -1,6 +1,6 @@
 # CONFIG.Common.win32-x86-mingw
 #
-# Revision-Id: anj@aps.anl.gov-20120330194058-if1zwps4ful5rxsr
+# Revision-Id: anj@aps.anl.gov-20150303172109-7pec4jw5l5bk9wix
 # This file is maintained by the build community.
 #
 # Definitions for win32-x86-mingw target builds
@@ -12,6 +12,7 @@ include $(CONFIG)/os/CONFIG.Common.UnixCommon
 
 OS_CLASS = WIN32
 ARCH_CLASS = x86
+POSIX = NO
 
 #  Definitions used when COMMANDLINE_LIBRARY is READLINE
 LDLIBS_READLINE = -lreadline -lcurses
@@ -34,41 +35,55 @@ ARCH_DEP_LDFLAGS += -m32
 # Override for -DUNIX from CONFIG.Common.UnixCommon
 OP_SYS_CPPFLAGS = -D_MINGW
 
-EXE=.exe
+EXE = .exe
+RES = .coff
 
-VISC_DLL_NO = -DEPICS_DLL_NO
-VISC_DLL_YES =
-VISC_DLL = $(VISC_DLL_$(SHARED_LIBRARIES))
-STATIC_CFLAGS_YES= $(VISC_DLL)
-STATIC_CFLAGS_NO=  $(VISC_DLL) -D_DLL
-STATIC_CXXFLAGS_YES= $(VISC_DLL)
-STATIC_CXXFLAGS_NO=  $(VISC_DLL) -D_DLL
+# Use .o for static object files, .obj for shared library object files
+OBJ_NO  = .o
+OBJ_YES = .obj
+OBJ = $(OBJ_$(SHARED_LIBRARIES))
 
-#	adjust names of libraries to build
+COMPILE.c   += $(if $(filter %$(OBJ),$@),-o $@)
+COMPILE.cpp += $(if $(filter %$(OBJ),$@),-o $@)
+HDEPENDS_ARCHFLAGS = -MT $*$(OBJ)
+
+BUILD_DLL_CFLAGS_YES = -DEPICS_BUILD_DLL
+BUILD_DLL_CFLAGS_NO  =
+BUILD_DLL_CFLAGS = $(BUILD_DLL_CFLAGS_$(SHARED_LIBRARIES))
+STATIC_CFLAGS_YES = $(BUILD_DLL_CFLAGS)
+STATIC_CFLAGS_NO  = $(BUILD_DLL_CFLAGS) -DEPICS_CALL_DLL
+STATIC_CXXFLAGS_YES = $(BUILD_DLL_CFLAGS)
+STATIC_CXXFLAGS_NO  = $(BUILD_DLL_CFLAGS) -DEPICS_CALL_DLL
+
+# Adjust the names of the libraries to build
 #
-#	But: if there are no objects LIBRARY_LD_OBJS to include
-#	in this library (may be for e.g. base/src/libCompat
-#	on some archs), don't define (and build) any library!
+# When SHARED_LIBRARIES is YES we build a DLL and its stub library
+#
 SHRLIB_PREFIX =
 SHRLIB_SUFFIX_BASE = .dll
 SHRLIB_SUFFIX = $(SHRLIB_SUFFIX_BASE)
 SHRLIBNAME_YES = $(BUILD_LIBRARY:%=%$(SHRLIB_SUFFIX))
+TESTSHRLIBNAME_YES = $(TESTBUILD_LIBRARY:%=%$(SHRLIB_SUFFIX_BASE))
 LOADABLE_SHRLIB_PREFIX =
 LOADABLE_SHRLIB_SUFFIX = $(SHRLIB_SUFFIX_BASE)
 LOADABLE_SHRLIBNAME = $(LOADABLE_BUILD_LIBRARY:%=%$(LOADABLE_SHRLIB_SUFFIX))
 
+DLLSTUB_PREFIX = lib
+DLLSTUB_SUFFIX = .dll.a
+DLLSTUB_LIBNAME_YES = $(BUILD_LIBRARY:%=$(DLLSTUB_PREFIX)%$(DLLSTUB_SUFFIX))
+DLLSTUB_LIBNAME = $(DLLSTUB_LIBNAME_$(SHARED_LIBRARIES))
+TESTDLLSTUB_LIBNAME_YES = $(TESTBUILD_LIBRARY:%=$(DLLSTUB_PREFIX)%$(DLLSTUB_SUFFIX))
+TESTDLLSTUB_LIBNAME = $(TESTDLLSTUB_LIBNAME_$(SHARED_LIBRARIES))
+
+# When SHARED_LIBRARIES is NO we build a static archive library
 #
-# When SHARED_LIBRARIES is YES we are building a DLL link library 
-# and when SHARED_LIBRARIES is NO we are building an object library
-#
-LIB_PREFIX=
-LIB_SUFFIX=.lib
-DLL_LINK_LIBNAME_YES = $(BUILD_LIBRARY:%=%$(LIB_SUFFIX))
-DLL_LINK_LIBNAME = $(DLL_LINK_LIBNAME_$(SHARED_LIBRARIES))
+LIB_PREFIX =
+LIB_SUFFIX = .lib
 LIBNAME_NO = $(BUILD_LIBRARY:%=%$(LIB_SUFFIX))
 LIBNAME = $(LIBNAME_$(SHARED_LIBRARIES))
+TESTLIBNAME_NO = $(TESTBUILD_LIBRARY:%=%$(LIB_SUFFIX))
+TESTLIBNAME = $(TESTLIBNAME_$(SHARED_LIBRARIES))
 
 #	dll install location
 INSTALL_SHRLIB = $(INSTALL_BIN)
-
 

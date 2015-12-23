@@ -9,10 +9,11 @@
 \*************************************************************************/
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #define epicsExportSharedSymbols
 #include "iocsh.h"
+#include "epicsStdioRedirect.h"
+#include "epicsString.h"
 #include "epicsTime.h"
 #include "epicsThread.h"
 #include "epicsMutex.h"
@@ -50,6 +51,20 @@ static void dateCallFunc (const iocshArgBuf *args)
     date(args[0].sval);
 }
 
+/* echo */
+static const iocshArg echoArg0 = { "string",iocshArgString};
+static const iocshArg * const echoArgs[1] = {&echoArg0};
+static const iocshFuncDef echoFuncDef = {"echo",1,echoArgs};
+static void echoCallFunc(const iocshArgBuf *args)
+{
+    char *str = args[0].sval;
+
+    if (str)
+        dbTranslateEscape(str, str); /* in-place is safe */
+    else
+        str = "";
+    printf("%s\n", str);
+}
 
 /* chdir */
 static const iocshArg chdirArg0 = { "directory name",iocshArgString};
@@ -57,10 +72,9 @@ static const iocshArg * const chdirArgs[1] = {&chdirArg0};
 static const iocshFuncDef chdirFuncDef = {"cd",1,chdirArgs};
 static void chdirCallFunc(const iocshArgBuf *args)
 {
-    int status;
-    status = chdir(args[0].sval);
-    if (status) {
-        printf ("Invalid directory path ignored\n");
+    if (args[0].sval == NULL ||
+        chdir(args[0].sval)) {
+        fprintf(stderr, "Invalid directory path, ignored\n");
     }
 }
 
@@ -86,11 +100,11 @@ static void epicsEnvSetCallFunc(const iocshArgBuf *args)
     char *value = args[1].sval;
 
     if (name == NULL) {
-        printf ("Missing environment variable name argument.\n");
+        fprintf(stderr, "Missing environment variable name argument.\n");
         return;
     }
     if (value == NULL) {
-        printf ("Missing environment variable value argument.\n");
+        fprintf(stderr, "Missing environment variable value argument.\n");
         return;
     }
     epicsEnvSet (name, value);
@@ -191,6 +205,15 @@ static void errlogCallFunc(const iocshArgBuf *args)
     errlogPrintfNoConsole("%s\n", args[0].sval);
 }
 
+/* iocLogPrefix */
+static const iocshArg iocLogPrefixArg0 = { "prefix",iocshArgString};
+static const iocshArg * const iocLogPrefixArgs[1] = {&iocLogPrefixArg0};
+static const iocshFuncDef iocLogPrefixFuncDef = {"iocLogPrefix",1,iocLogPrefixArgs};
+static void iocLogPrefixCallFunc(const iocshArgBuf *args)
+{
+    iocLogPrefix(args[0].sval);
+}
+
 /* epicsThreadShowAll */
 static const iocshArg epicsThreadShowAllArg0 = { "level",iocshArgInt};
 static const iocshArg * const epicsThreadShowAllArgs[1] = {&epicsThreadShowAllArg0};
@@ -231,7 +254,7 @@ static void threadCallFunc(const iocshArgBuf *args)
         if (*endp) {
             tid = epicsThreadGetId (cp);
             if (!tid) {
-                printf ("\t'%s' is not a known thread name\n", cp);
+                fprintf(stderr, "\t'%s' is not a known thread name\n", cp);
                 continue;
             }
         }
@@ -299,7 +322,7 @@ static void epicsThreadResumeCallFunc(const iocshArgBuf *args)
         if (*endp) {
             tid = epicsThreadGetId(cp);
             if (!tid) {
-                printf("*** argument %d (%s) is not a valid thread name ***\n", i, cp);
+                fprintf(stderr, "'%s' is not a valid thread name\n", cp);
                 continue;
             }
         }
@@ -307,13 +330,13 @@ static void epicsThreadResumeCallFunc(const iocshArgBuf *args)
             tid =(epicsThreadId)ltmp;
             epicsThreadGetName(tid, nameBuf, sizeof nameBuf);
             if (nameBuf[0] == '\0') {
-                printf("*** argument %d (%s) is not a valid thread id ***\n", i, cp);
+                fprintf(stderr, "'%s' is not a valid thread id\n", cp);
                 continue;
             }
 
         }
         if (!epicsThreadIsSuspended(tid)) {
-            printf("*** Thread %s is not suspended ***\n", cp);
+            fprintf(stderr, "Thread %s is not suspended\n", cp);
             continue;
         }
         epicsThreadResume(tid);
@@ -339,6 +362,7 @@ static void installLastResortEventProviderCallFunc(const iocshArgBuf *args)
 void epicsShareAPI libComRegister(void)
 {
     iocshRegister(&dateFuncDef, dateCallFunc);
+    iocshRegister(&echoFuncDef, echoCallFunc);
     iocshRegister(&chdirFuncDef, chdirCallFunc);
     iocshRegister(&pwdFuncDef, pwdCallFunc);
 
@@ -355,6 +379,7 @@ void epicsShareAPI libComRegister(void)
     iocshRegister(&errlogInitFuncDef,errlogInitCallFunc);
     iocshRegister(&errlogInit2FuncDef,errlogInit2CallFunc);
     iocshRegister(&errlogFuncDef, errlogCallFunc);
+    iocshRegister(&iocLogPrefixFuncDef, iocLogPrefixCallFunc);
 
     iocshRegister(&epicsThreadShowAllFuncDef,epicsThreadShowAllCallFunc);
     iocshRegister(&threadFuncDef, threadCallFunc);

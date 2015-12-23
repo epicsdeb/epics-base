@@ -1,5 +1,0 @@
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
-
-# win32-x86 is the new name for WIN32
--include $(EPICS_BASE)/config/CONFIG_SITE.Host.WIN32
-
