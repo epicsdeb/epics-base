@@ -1,16 +1,18 @@
 Source: epics-base
 Section: devel
 Priority: extra
-Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Uploaders: Ralph Lange <Ralph.Lange@gmx.de>
+Maintainer: Martin Konrad <konrad@frib.msu.edu>
+Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
+           Ralph Lange <Ralph.Lange@gmx.de>
 Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.10~),
                libreadline6-dev, libncurses5-dev, perl,
                mingw32,
 Standards-Version: 3.8.0
-Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
+Vcs-Git: https://github.com/epicsdeb/epics-base.git
+Vcs-Browser: https://github.com/epicsdeb/epics-base
 Homepage: http://www.aps.anl.gov/epics/
 
-Package: libepics3.14.12.3
+Package: libepics3.15.3
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -25,11 +27,11 @@ Description: EPICS Base libraries for clients and servers
  .
  This package contains host system shared libraries for clients and IOCs.
 
-Package: libepics3.14.12.3-dbg
+Package: libepics3.15.3-dbg
 Section: debug
 Architecture: any
 Multi-Arch: same
-Depends: libepics3.14.12.3 (= ${binary:Version}), ${misc:Depends},
+Depends: libepics3.15.3 (= ${binary:Version}), ${misc:Depends},
 Provides: libepics-dbg
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
@@ -41,7 +43,7 @@ Description: Files needed to develop new EPICS applications
 Package: ioclogserver
 Section: admin
 Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}), ${misc:Depends},
+Depends: libepics3.15.3 (= ${binary:Version}), ${misc:Depends},
          ${shlibs:Depends},
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
@@ -54,7 +56,7 @@ Description: Log recording daemon for EPICS IOCS
 
 Package: epics-dev
 Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+Depends: libepics3.15.3 (= ${binary:Version}), epics-catools (= ${binary:Version}),
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
@@ -96,7 +98,7 @@ Description: Files needed to develop new EPICS applications
 Package: epics-catools
 Section: admin
 Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}),
+Depends: libepics3.15.3 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
  The Experimental Physics and Industrial Control System is a collection of
@@ -107,7 +109,7 @@ Description: Command line utilities for EPICS
 
 Package: epics-perl
 Architecture: any
-Depends: libepics3.14.12.3 (= ${binary:Version}),
+Depends: libepics3.15.3 (= ${binary:Version}),
          ${shlibs:Depends}, ${perl:Depends}, ${misc:Depends}
 Conflicts: epics-libs (<= 3.14.10-7),  epics-dev (<= 3.14.12.3-2),
 Description: Perl bindings for EPICS
@@ -119,7 +121,7 @@ Description: Perl bindings for EPICS
 
 Package: epics-msi
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libepics3.14.12.3 (= ${binary:Version}),
+Depends: ${shlibs:Depends}, ${misc:Depends}, libepics3.15.3 (= ${binary:Version}),
 Description: EPICS Macro Substitution and Include tool
  MSI is a general purpose macro substitution/include tool.
  It accepts as input an ascii template file.
