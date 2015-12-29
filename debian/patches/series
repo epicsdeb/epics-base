@@ -10,5 +10,5 @@
 0010-don-t-auto-run-test-epicsMessageQueueTest-during-pac.patch
 0011-SKIP_HOST-build-option.patch
 0012-cross-mingw-doesn-t-provide-_vscprintf.patch
-0013-cross-build-with-mingw32.patch
-0014-Reject-NULL-callback-functions-in-ca_array_-_callbac.patch
+0013-Reject-NULL-callback-functions-in-ca_array_-_callbac.patch
+0014-Cross-build-with-mingw32.patch
