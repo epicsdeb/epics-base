@@ -8,13 +8,18 @@ usr/lib/epics/lib/linux-*/libCom*
 usr/lib/epics/lib/linux-*/libca*
 usr/lib/epics/lib/linux-*/libgdd*
 usr/lib/epics/lib/linux-*/libcas*
+usr/lib/epics/lib/linux-*/libdbCore*
+usr/lib/epics/lib/linux-*/libdbRecStd*
 usr/lib/epics/lib/host
+usr/lib/epics/lib/pkgconfig/*.pc
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
 usr/share/perl5/EPICS
 usr/share/epics-dev/configure
 etc/epics/configure
+usr/lib/epics/lib/perl/DBD.pm
+usr/lib/epics/lib/perl/DBD
 
 configure/Sample.Makefile usr/lib/epics/configure
 
