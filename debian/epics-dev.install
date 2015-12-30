@@ -11,7 +11,7 @@ usr/lib/epics/lib/linux-*/libcas*
 usr/lib/epics/lib/linux-*/libdbCore*
 usr/lib/epics/lib/linux-*/libdbRecStd*
 usr/lib/epics/lib/host
-usr/lib/epics/lib/pkgconfig/*.pc
+usr/lib/epics/lib/pkgconfig/*.pc usr/share/pkgconfig
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
