@@ -7,7 +7,7 @@ Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
 Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.12~),
                libreadline6-dev, libncurses5-dev, perl,
                mingw32,
-Standards-Version: 3.8.0
+Standards-Version: 3.9.6
 Vcs-Git: https://github.com/epicsdeb/epics-base.git
 Vcs-Browser: https://github.com/epicsdeb/epics-base
 Homepage: http://www.aps.anl.gov/epics/
