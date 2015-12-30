@@ -135,7 +135,7 @@ override_dh_install:
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)-debug
 
-	for arch in $(EPICS_HOST_ARCH) $(EPICS_HOST_ARCH)-debug; do for name in $(PERLBINS); do \
+	for arch in $(EPICS_HOST_ARCH); do for name in $(PERLBINS); do \
 	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \
 	;done ;done
 
