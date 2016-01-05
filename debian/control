@@ -1,9 +1,10 @@
 Source: rtems-epics
 Section: devel
 Priority: extra
-Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Uploaders: Ralph Lange <Ralph.Lange@gmx.de>
-Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.10~),
+Maintainer: Martin Konrad <konrad@frib.msu.edu>
+Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
+           Ralph Lange <Ralph.Lange@gmx.de>
+Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.12~),
                libreadline6-dev, perl,
                rtems-libbspext-mvme2100,
                rtems-cexp-mvme2100,
@@ -17,8 +18,9 @@ Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.10~),
                rtems-pc386,
                rtems-cexp-pc386,
 Rtems-Depends: rtems, rtems-libbspext, rtems-cexp
-Standards-Version: 3.8.0
-Vcs-Git: https://pubweb.bnl.gov/~mdavidsaver/git/dpack/epics-base.git
+Standards-Version: 3.9.6
+Vcs-Git: https://github.com/epicsdeb/epics-base.git
+Vcs-Browser: https://github.com/epicsdeb/epics-base
 Homepage: http://www.aps.anl.gov/epics/
 
 Package: rtems-epics

@@ -8,7 +8,7 @@
 \*************************************************************************/
 
 /*
- *	    Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *	    Revision-Id: anj@aps.anl.gov-20150211001033-b11owmx4b32jm0kj
  *
  *      socket support library API def
  *
@@ -140,9 +140,11 @@ epicsShareFunc int epicsShareAPI osiSockAttach (void); /* returns T if success, 
 epicsShareFunc void epicsShareAPI osiSockRelease (void);
 
 /*
- * convert socket error number to a string
+ * convert socket error numbers to a string
  */
-epicsShareFunc void epicsSocketConvertErrnoToString ( 
+epicsShareFunc void epicsSocketConvertErrorToString (
+        char * pBuf, unsigned bufSize, int error );
+epicsShareFunc void epicsSocketConvertErrnoToString (
         char * pBuf, unsigned bufSize );
 
 typedef union osiSockAddr {

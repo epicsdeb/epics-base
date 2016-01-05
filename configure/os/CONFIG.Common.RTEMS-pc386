@@ -1,5 +1,5 @@
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+# Revision-Id: anj@aps.anl.gov-20150220214214-jad3fog3k42f8331
 # Author: W. Eric Norum
 #         Canadian Light Source
 #         eric@cls.usask.ca
@@ -12,7 +12,7 @@ MUNCH_SUFFIX = .boot
 MUNCHNAME = $(PRODNAME:%$(EXE)=%$(MUNCH_SUFFIX))
 define MUNCH_CMD
 	$(RTEMS_TOOLS)/bin/$(OBJCOPY_FOR_TARGET) -O binary -R .comment -S $< temp.bin
-	$(PROJECT_RELEASE)/build-tools/bin2boot $@ 0x00097E00 \
+	$(BIN2BOOT) $@ 0x00097E00 \
 		$(PROJECT_RELEASE)/lib/start16.bin 0x00097C00 0 temp.bin 0x00100000 0
 	rm -f temp.bin
 endef

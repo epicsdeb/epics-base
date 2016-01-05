@@ -22,6 +22,11 @@
 #include "errlog.h"
 #include "epicsUnitTest.h"
 #include "testMain.h"
+#include "iocLog.h"
+#include "logClient.h"
+#include "envDefs.h"
+#include "osiSock.h"
+#include "fdmgr.h"
 
 #define LOGBUFSIZE 2048
 
@@ -75,11 +80,34 @@ typedef struct {
     int jam;
 } clientPvt;
 
+static void testLogPrefix(void);
+static void acceptNewClient( void *pParam );
+static void readFromClient( void *pParam );
+static void testPrefixLogandCompare( const char* logmessage);
+
+static void *pfdctx;
+static SOCKET sock;
+static SOCKET insock;
+
+static const char* prefixactualmsg[]= {
+                     "A message without prefix",
+                     "A message with prefix",
+                     "DONE"
+                     };
+static const char *prefixstring = "fac=LI21 ";
+static const char prefixexpectedmsg[] = "A message without prefix"
+                     "fac=LI21 A message with prefix"
+                     "fac=LI21 DONE"
+                     ;
+static char prefixmsgbuffer[1024];
+
+
 static
 void logClient(void* raw, const char* msg)
 {
     clientPvt *pvt = raw;
-    size_t L;
+    size_t len;
+    char show[46];
 
     /* Simulate thread priority on non-realtime
      * OSs like Linux.  This will cause the logging
@@ -94,17 +122,37 @@ void logClient(void* raw, const char* msg)
             epicsEventMustWait(pvt->jammer);
     }
 
-    L = strlen(msg);
+    len = strlen(msg);
+    if (len > 45) {
+        /* Only show start and end of long messages */
+        strncpy(show, msg, 20);
+        show[20] = 0;
+        strcat(show + 20, " ... ");
+        strcat(show + 25, msg + len - 20);
+    }
+    else {
+        strcpy(show, msg);
+    }
 
     if (pvt->checkLen)
-        if (!testOk(pvt->checkLen == L, "Received %d chars", (int) L)) {
+        if (!testOk(pvt->checkLen == len, "Received %d chars", (int) len)) {
             testDiag("Expected %d", (int) pvt->checkLen);
             if (!pvt->expect)
-                testDiag("Message was \"%s\"", msg);
+                testDiag("Message is \"%s\"", show);
         }
-    if (pvt->expect)
-        if (!testOk(strcmp(pvt->expect, msg) == 0, "msg is \"%s\"", msg))
-            testDiag("Expected \"%s\"", pvt->expect);
+
+    if (pvt->expect) {
+        if (!testOk(strcmp(pvt->expect, msg) == 0, "Message is \"%s\"", show)) {
+            len = strlen(pvt->expect);
+            if (len > 45) {
+                testDiag("Expected \"%.20s ... %s\"",
+                    pvt->expect, pvt->expect + len - 20);
+            }
+            else {
+                testDiag("Expected \"%s\"", pvt->expect);
+            }
+        }
+    }
 
     pvt->count++;
 }
@@ -115,7 +163,7 @@ MAIN(epicsErrlogTest)
     char msg[256];
     clientPvt pvt, pvt2;
 
-    testPlan(25);
+    testPlan(32);
 
     strcpy(msg, truncmsg);
 
@@ -159,8 +207,9 @@ MAIN(epicsErrlogTest)
     testOk1(pvt.count == 2);
     testOk1(pvt2.count == 1);
 
-    /* Removes the first listener, but the second remains */
-    errlogRemoveListener(&logClient);
+    /* Removes the first listener */
+    testOk(1 == errlogRemoveListeners(&logClient, &pvt),
+        "Removed 1 listener");
 
     pvt2.expect = "Testing3";
     pvt2.checkLen = strlen(pvt2.expect);
@@ -171,8 +220,10 @@ MAIN(epicsErrlogTest)
     testOk1(pvt.count == 2);
     testOk1(pvt2.count == 2);
 
-    /* Remove the second listener */
-    errlogRemoveListener(&logClient);
+    /* Add the second listener again, then remove both instances */
+    errlogAddListener(&logClient, &pvt2);
+    testOk(2 == errlogRemoveListeners(&logClient, &pvt2),
+        "Removed 2 listeners");
 
     errlogPrintfNoConsole("Something different");
     errlogFlush();
@@ -287,7 +338,146 @@ MAIN(epicsErrlogTest)
     testOk1(pvt.count == N+1);
 
     /* Clean up */
-    errlogRemoveListener(&logClient);
+    testOk(1 == errlogRemoveListeners(&logClient, &pvt),
+        "Removed 1 listener");
+
+    testLogPrefix();
 
     return testDone();
+}
+/*
+ * Tests the log prefix code
+ * The prefix is only applied to log messages as they go out to the socket,
+ * so we need to create a server listening on a port, accept connections etc.
+ * This code is a reduced version of the code in iocLogServer.
+ */
+static void testLogPrefix(void) {
+    struct sockaddr_in serverAddr;
+    int status;
+    struct timeval timeout;
+    struct sockaddr_in actualServerAddr;
+    osiSocklen_t actualServerAddrSize;
+    char portstring[16];
+
+
+    testDiag("Testing iocLogPrefix");
+
+    timeout.tv_sec = 5; /* in seconds */
+    timeout.tv_usec = 0;
+
+    memset((void*)prefixmsgbuffer, 0, sizeof prefixmsgbuffer);
+
+    /* Clear "errlog: <n> messages were discarded" status */
+    errlogPrintfNoConsole(".");
+    errlogFlush();
+
+    sock = epicsSocketCreate(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET) {
+        testAbort("epicsSocketCreate failed.");
+    }
+
+    /* We listen on a an available port. */
+    memset((void *)&serverAddr, 0, sizeof serverAddr);
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(0);
+
+    status = bind (sock, (struct sockaddr *)&serverAddr,
+                   sizeof (serverAddr) );
+    if (status < 0) {
+        testAbort("bind failed; all ports in use?");
+    }
+
+    status = listen(sock, 10);
+    if (status < 0) {
+        testAbort("listen failed!");
+    }
+
+    /* Determine the port that the OS chose */
+    actualServerAddrSize = sizeof actualServerAddr;
+    memset((void *)&actualServerAddr, 0, sizeof serverAddr);
+    status = getsockname(sock, (struct sockaddr *) &actualServerAddr,
+         &actualServerAddrSize);
+    if (status < 0) {
+        testAbort("Can't find port number!");
+    }
+
+    sprintf(portstring, "%d", ntohs(actualServerAddr.sin_port));
+    testDiag("Listening on port %s", portstring);
+
+    /* Set the EPICS environment variables for logging. */
+    epicsEnvSet ( "EPICS_IOC_LOG_INET", "localhost" );
+    epicsEnvSet ( "EPICS_IOC_LOG_PORT", portstring );
+
+    pfdctx = (void *) fdmgr_init();
+    if (status < 0) {
+        testAbort("fdmgr_init failed!");
+    }
+
+    status = fdmgr_add_callback(pfdctx, sock, fdi_read,
+        acceptNewClient, &serverAddr);
+
+    if (status < 0) {
+        testAbort("fdmgr_add_callback failed!");
+    }
+
+    testOk1(iocLogInit() == 0);
+    fdmgr_pend_event(pfdctx, &timeout);
+
+    testPrefixLogandCompare(prefixactualmsg[0]);
+
+    iocLogPrefix(prefixstring);
+    testPrefixLogandCompare(prefixactualmsg[1]);
+    testPrefixLogandCompare(prefixactualmsg[2]);
+    epicsSocketDestroy(sock);
+}
+
+static void testPrefixLogandCompare( const char* logmessage ) {
+    struct timeval timeout;
+    timeout.tv_sec = 5; /* in seconds */
+    timeout.tv_usec = 0;
+
+    errlogPrintfNoConsole("%s", logmessage);
+    errlogFlush();
+    iocLogFlush();
+    fdmgr_pend_event(pfdctx, &timeout);
+}
+
+static void acceptNewClient ( void *pParam )
+{
+    osiSocklen_t addrSize;
+    struct sockaddr_in addr;
+    int status;
+
+    addrSize = sizeof ( addr );
+    insock = epicsSocketAccept ( sock, (struct sockaddr *)&addr, &addrSize );
+    testOk(insock != INVALID_SOCKET && addrSize >= sizeof (addr),
+        "Accepted new client");
+
+    status = fdmgr_add_callback(pfdctx, insock, fdi_read,
+        readFromClient,  NULL);
+
+    testOk(status >= 0, "Client read configured");
+}
+
+static void readFromClient(void *pParam)
+{
+    char recvbuf[1024];
+    int recvLength;
+
+    memset(recvbuf, 0, 1024);
+    recvLength = recv(insock, recvbuf, 1024, 0);
+    if (recvLength > 0) {
+        strcat(prefixmsgbuffer, recvbuf);
+
+        /* If we have received all of the messages. */
+        if (strstr(prefixmsgbuffer, "DONE") != NULL) {
+            size_t msglen = strlen(prefixexpectedmsg);
+            int prefixcmp = strncmp(prefixexpectedmsg, prefixmsgbuffer, msglen);
+
+            if (!testOk(prefixcmp == 0, "prefix matches")) {
+                testDiag("Expected '%s'\n", prefixexpectedmsg);
+                testDiag("Obtained '%s'\n", prefixmsgbuffer);
+            }
+        }
+    }
 }

@@ -1,0 +1,71 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:14:48 -0400
+Subject: cap5: hardcode default base path in perl scripts
+
+Avoid need to play games as install location is known.
+---
+ src/ca/client/perl/CA.pm         | 5 +----
+ src/template/base/makeBaseApp.pl | 5 ++---
+ src/template/ext/makeBaseExt.pl  | 3 +--
+ 3 files changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/src/ca/client/perl/CA.pm b/src/ca/client/perl/CA.pm
+index 2294417..d80c358 100644
+--- a/src/ca/client/perl/CA.pm
++++ b/src/ca/client/perl/CA.pm
+@@ -6,7 +6,6 @@ use warnings;
+ 
+ my $version = '0.6';
+ 
+-
+ package CA;
+ 
+ our $VERSION = $version;
+@@ -31,9 +30,7 @@ my $perl_archname = $Config::Config{archname};
+ require DynaLoader;
+ 
+ # Add our lib/<arch> directory to the shared library search path
+-use File::Basename;
+-my $Lib = dirname(__FILE__);
+-push @DynaLoader::dl_library_path, "$Lib/$perl_version/$perl_archname";
++push @DynaLoader::dl_library_path, "/usr/lib/perl5/auto";
+ 
+ bootstrap Cap5 $VERSION;
+ 
+diff --git a/src/template/base/makeBaseApp.pl b/src/template/base/makeBaseApp.pl
+index c98b538..880c270 100644
+--- a/src/template/base/makeBaseApp.pl
++++ b/src/template/base/makeBaseApp.pl
+@@ -66,7 +66,7 @@ sub ReplaceFilename { # (filename)
+ 	    } elsif (-r "$base\@Common") {	# Default version exists
+ 		$base = '' unless ($filearch eq "Common" && -s $file);
+ 	    } else {			# No default version
+-		$base = '';
++		$base = '/usr/lib/epics';
+ 	    }
+ 	    $file = $base;	# Strip the @... part from the target name
+ 	}
+@@ -178,8 +178,7 @@ sub get_commandline_opts { #no args
+     } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
+         $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
+     } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
+-	$epics_base = $command;
+-	$epics_base =~ s|^(.*)/bin/.*makeBaseApp.*|$1|;
++	$epics_base = "/usr/lib/epics";
+     }
+     $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
+     $app_epics_base = LocalPath($epics_base);
+diff --git a/src/template/ext/makeBaseExt.pl b/src/template/ext/makeBaseExt.pl
+index 491dc63..a5c0f1a 100644
+--- a/src/template/ext/makeBaseExt.pl
++++ b/src/template/ext/makeBaseExt.pl
+@@ -127,8 +127,7 @@ sub get_commandline_opts { #no args
+     } elsif ($eBASE) { # third choice is env var EPICS_MBE_BASE
+         $epics_base = UnixPath($eBASE);
+     } elsif ($command =~ m|/bin/|) { # assume script was called with full path to base
+-	$epics_base = $command;
+-	$epics_base =~ s|(/.*)/bin/.*makeBaseExt.*|$1|;
++	$epics_base = "/usr/lib/epics";
+     }
+     "$epics_base" or Cleanup(1, "Cannot find EPICS base");
+ 

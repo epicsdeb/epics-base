@@ -1,17 +1,13 @@
 /*************************************************************************\
-* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+* Copyright (c) 2012 UChicago Argonne LLC, as Operator of Argonne
 *     National Laboratory.
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
-* EPICS BASE Versions 3.13.7
-* and higher are distributed subject to a Software License Agreement found
+* EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
  * Compiler specific key words to set up external symbols and entry points
- *
- * Currently this is only necessary for WIN32 DLLs and for VAXC on VMS but
- * other systems with similar requirements could be supported.
  *
  * USAGE:
  * There are two distinct classes of keywords in this file:
@@ -26,15 +22,12 @@
  * keyword because __stdcall (pascal) calling convention cannot support variable
  * length ed argument lists.
  *
- * int epicsShareAPI myExtFunc ( int arg );   
+ * int epicsShareAPI myExtFunc ( int arg );
  * int epicsShareAPI myExtFunc ( int arg ) {}
  *
- * ** NOTE **  epicsShareAPI is deprecated for new routines, don't use it!
- *             In a future major release (R3.15) we will remove this keyword
- *             from most EPICS APIs, although CA may continue to use it.
- *             This is a major release though, since it affects the order
- *             that arguments are pushed onto the stack on Windows and we
- *             don't want a replacement DLL to silent cause mayhem...
+ * ** NOTE **  The epicsShareAPI attribute is deprecated and has been removed
+ *             from all IOC-specific APIs.  Most libCom APIs still use it, but
+ *             it may get removed from these at some point in the future.
  *
  * 2) epicsShare{Func,Class,Extern,Def} - specifies shareable library (DLL) 
  * export/import related information in the source code. On windows these keywords 
@@ -44,14 +37,18 @@
  * names. These keywords are only necessary if the address of a function or data 
  * internal to a shareable library (DLL) needs to be visible outside of this shareable 
  * library (DLL). All compilers targeting windows accept the __declspec(dllexport)
- * and __declspec(dllimport) keywords.
+ * and __declspec(dllimport) keywords. For GCC version 4 and above the first three
+ * keywords specify a visibility attribute of "default", which marks the symbol as
+ * exported even when gcc is given the option -fvisibility=hidden. Doing this can
+ * significantly reduce the number of symbols exported to a shared library. See the
+ * URL below for more information.
  *
  * In header files declare references to externally visible variables, classes and 
  * functions like this:
  *
  * #include "shareLib.h"
- * epicsShareFunc int myExtFunc ( int arg );   
- * epicsShareExtern int myExtVar; 
+ * epicsShareFunc int myExtFunc ( int arg );
+ * epicsShareExtern int myExtVar;
  * class epicsShareClass myClass { int func ( void ); };
  *
  * In the implementation file, however, you write:
@@ -60,8 +57,8 @@
  * #define epicsExportSharedSymbols
  * #include <interfaces_implemented_in_this_shareable_library.h>
  *
- * epicsShareDef int myExtVar = 4;       
- * int myExtFunc ( int arg ) {} 
+ * epicsShareDef int myExtVar = 4;
+ * int myExtFunc ( int arg ) {}
  * int myClass::func ( void ) {}
  *
  * By default shareLib.h sets the DLL import / export keywords to import from
@@ -93,8 +90,8 @@
  * #   include "shareLib.h"
  * #endif
  *
- * epicsShareFunc int myExtFunc ( int arg );   
- * epicsShareExtern int myExtVar; 
+ * epicsShareFunc int myExtFunc ( int arg );
+ * epicsShareExtern int myExtVar;
  * class epicsShareClass myClass {};
  *
  * Fortunately, the above is only the concern of library authors and will have no 
@@ -108,28 +105,27 @@
 #undef epicsShareAPI
 #undef READONLY
 
-/*
- *
- * Also check for "EPICS_DLL_NO" not defined so that we will not use these
- * keywords if it is an object library build of base under WIN32.
- */
 #if defined(_WIN32) || defined(__CYGWIN32__)
+/*
+ * Check if EPICS_BUILD_DLL or EPICS_CALL_DLL defined and use the dllimport/
+ * dllexport keywords if this is a shared library build of base under WIN32.
+ */
 
 #   if defined(epicsExportSharedSymbols)
-#       if defined(EPICS_DLL_NO) /* this indicates that we are not building a DLL */
-#           define epicsShareExtern extern 
-#           define epicsShareClass 
-#           define epicsShareFunc
+#       if defined(EPICS_BUILD_DLL)
+#           define epicsShareExtern __declspec(dllexport) extern
+#           define epicsShareClass  __declspec(dllexport)
+#           define epicsShareFunc   __declspec(dllexport)
 #       else
-#           define epicsShareExtern __declspec(dllexport) extern 
-#           define epicsShareClass  __declspec(dllexport) 
-#           define epicsShareFunc  __declspec(dllexport)
+#           define epicsShareExtern extern
+#           define epicsShareClass
+#           define epicsShareFunc
 #       endif
 #   else
-#       if defined(_DLL) /* this indicates that we are being compiled to call DLLs */
-#           define epicsShareExtern __declspec(dllimport) extern 
-#           define epicsShareClass  __declspec(dllimport) 
-#           define epicsShareFunc  __declspec(dllimport)
+#       if defined(EPICS_CALL_DLL)
+#           define epicsShareExtern __declspec(dllimport) extern
+#           define epicsShareClass  __declspec(dllimport)
+#           define epicsShareFunc   __declspec(dllimport)
 #       else
 #           define epicsShareExtern extern
 #           define epicsShareClass
@@ -139,6 +135,28 @@
 #   define epicsShareDef 
 #   define epicsShareAPI __stdcall /* function removes arguments */
 #   define READONLY const
+
+#elif __GNUC__ >= 4
+/*
+ * See http://gcc.gnu.org/wiki/Visibility
+ * For these to work, gcc must be given the flag
+ *     -fvisibility=hidden
+ * and g++ the flags
+ *     -fvisibility=hidden -fvisibility-inlines-hidden
+ */
+
+#   define epicsShareExtern __attribute__ ((visibility("default"))) extern
+#   define epicsShareClass __attribute__ ((visibility("default")))
+#   define epicsShareFunc __attribute__ ((visibility("default")))
+
+#   define epicsShareDef
+#   define epicsShareAPI
+#   if defined(__STDC__) || defined (__cplusplus)
+#       define READONLY const
+#   else
+#       define READONLY
+#   endif
+
 /*
  * if its the old VAX C Compiler (not DEC C)
  */

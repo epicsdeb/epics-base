@@ -1,0 +1,34 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 10:28:55 -0400
+Subject: rtems: use tecla for better shell prompt
+
+---
+ configure/os/CONFIG.Common.RTEMS      | 2 +-
+ configure/os/CONFIG_SITE.Common.RTEMS | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure/os/CONFIG.Common.RTEMS b/configure/os/CONFIG.Common.RTEMS
+index d579371..33500fd 100644
+--- a/configure/os/CONFIG.Common.RTEMS
++++ b/configure/os/CONFIG.Common.RTEMS
+@@ -150,7 +150,7 @@ ARFLAGS = rc
+ 
+ #--------------------------------------------------
+ # Command-line input support
+-LDLIBS_LIBTECLA = -ltecla_r -lncurses
++LDLIBS_LIBTECLA = -ltecla_r
+ LDLIBS_READLINE = -lreadline -lncurses
+ 
+ #--------------------------------------------------
+diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
+index 7980afa..cfb5641 100644
+--- a/configure/os/CONFIG_SITE.Common.RTEMS
++++ b/configure/os/CONFIG_SITE.Common.RTEMS
+@@ -30,6 +30,6 @@ USE_GESYS = NO
+ 
+ # Select the command-line-input library to use
+ #
+-COMMANDLINE_LIBRARY = EPICS
++COMMANDLINE_LIBRARY = LIBTECLA
+ #COMMANDLINE_LIBRARY = LIBTECLA
+ #COMMANDLINE_LIBRARY = READLINE

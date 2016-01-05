@@ -4,13 +4,12 @@
 * Copyright (c) 2002 The Regents of the University of California, as
 *     Operator of Los Alamos National Laboratory.
 * EPICS BASE is distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
+/* Revision-Id: anj@aps.anl.gov-20131217185404-wng3r3ldfeefnu61 */
 
 /* Author:  Marty Kraimer Date:    04-07-94 */
-
-#include <stdio.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -18,6 +17,7 @@
 #define epicsExportSharedSymbols
 #include "cantProceed.h"
 #include "epicsMutex.h"
+#include "epicsStdioRedirect.h"
 #include "epicsString.h"
 #include "dbDefs.h"
 #include "ellLib.h"
@@ -34,13 +34,14 @@ typedef struct gphPvt {
 #define MIN_SIZE 256
 #define DEFAULT_SIZE 512
 #define MAX_SIZE 65536
-
+
+
 void epicsShareAPI gphInitPvt(gphPvt **ppvt, int size)
 {
     gphPvt *pgphPvt;
 
     if (size & (size - 1)) {
-        printf("gphInitPvt: %d is not a power of 2\n", size);
+        fprintf(stderr, "gphInitPvt: %d is not a power of 2\n", size);
         size = DEFAULT_SIZE;
     }
 
@@ -59,7 +60,7 @@ void epicsShareAPI gphInitPvt(gphPvt **ppvt, int size)
     return;
 }
 
-GPHENTRY * epicsShareAPI gphFind(gphPvt *pgphPvt, const char *name, void *pvtid)
+GPHENTRY * epicsShareAPI gphFindParse(gphPvt *pgphPvt, const char *name, size_t len, void *pvtid)
 {
     ELLLIST **paplist;
     ELLLIST *gphlist;
@@ -69,7 +70,7 @@ GPHENTRY * epicsShareAPI gphFind(gphPvt *pgphPvt, const char *name, void *pvtid)
     if (pgphPvt == NULL) return NULL;
     paplist = pgphPvt->paplist;
     hash = epicsMemHash((char *)&pvtid, sizeof(void *), 0);
-    hash = epicsStrHash(name, hash) & pgphPvt->mask;
+    hash = epicsMemHash(name, len, hash) & pgphPvt->mask;
 
     epicsMutexMustLock(pgphPvt->lock);
     gphlist = paplist[hash];
@@ -81,14 +82,20 @@ GPHENTRY * epicsShareAPI gphFind(gphPvt *pgphPvt, const char *name, void *pvtid)
 
     while (pgphNode) {
         if (pvtid == pgphNode->pvtid &&
-            strcmp(name, pgphNode->name) == 0) break;
+            strlen(pgphNode->name) == len &&
+            strncmp(name, pgphNode->name, len) == 0) break;
         pgphNode = (GPHENTRY *) ellNext((ELLNODE *)pgphNode);
     }
 
     epicsMutexUnlock(pgphPvt->lock);
     return pgphNode;
 }
-
+
+GPHENTRY * epicsShareAPI gphFind(gphPvt *pgphPvt, const char *name, void *pvtid)
+{
+    return gphFindParse(pgphPvt, name, strlen(name), pvtid);
+}
+
 GPHENTRY * epicsShareAPI gphAdd(gphPvt *pgphPvt, const char *name, void *pvtid)
 {
     ELLLIST **paplist;
@@ -104,7 +111,11 @@ GPHENTRY * epicsShareAPI gphAdd(gphPvt *pgphPvt, const char *name, void *pvtid)
     epicsMutexMustLock(pgphPvt->lock);
     plist = paplist[hash];
     if (plist == NULL) {
-        plist = callocMustSucceed(1, sizeof(ELLLIST), "gphAdd");
+        plist = calloc(1, sizeof(ELLLIST));
+        if(!plist){
+            epicsMutexUnlock(pgphPvt->lock);
+            return NULL;
+        }
         ellInit(plist);
         paplist[hash] = plist;
     }
@@ -119,15 +130,17 @@ GPHENTRY * epicsShareAPI gphAdd(gphPvt *pgphPvt, const char *name, void *pvtid)
         pgphNode = (GPHENTRY *) ellNext((ELLNODE *)pgphNode);
     }
 
-    pgphNode = callocMustSucceed(1, sizeof(GPHENTRY), "gphAdd");
-    pgphNode->name = name;
-    pgphNode->pvtid = pvtid;
-    ellAdd(plist, (ELLNODE *)pgphNode);
+    pgphNode = calloc(1, sizeof(GPHENTRY));
+    if(pgphNode) {
+        pgphNode->name = name;
+        pgphNode->pvtid = pvtid;
+        ellAdd(plist, (ELLNODE *)pgphNode);
+    }
 
     epicsMutexUnlock(pgphPvt->lock);
     return (pgphNode);
 }
-
+
 void epicsShareAPI gphDelete(gphPvt *pgphPvt, const char *name, void *pvtid)
 {
     ELLLIST **paplist;
@@ -161,7 +174,7 @@ void epicsShareAPI gphDelete(gphPvt *pgphPvt, const char *name, void *pvtid)
     epicsMutexUnlock(pgphPvt->lock);
     return;
 }
-
+
 void epicsShareAPI gphFreeMem(gphPvt *pgphPvt)
 {
     ELLLIST **paplist;
@@ -203,9 +216,10 @@ void epicsShareAPI gphDumpFP(FILE *fp, gphPvt *pgphPvt)
     ELLLIST **paplist;
     int h;
 
-    if (pgphPvt == NULL) return;
+    if (pgphPvt == NULL)
+        return;
 
-    printf("Hash table has %d buckets", pgphPvt->size);
+    fprintf(fp, "Hash table has %d buckets", pgphPvt->size);
 
     paplist = pgphPvt->paplist;
     for (h = 0; h < pgphPvt->size; h++) {

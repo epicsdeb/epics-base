@@ -1,4 +1,0 @@
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
-
-# win32-x86-borland is the new name for Borland
--include $(EPICS_BASE)/config/CONFIG_SITE.Host.Borland

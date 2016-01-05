@@ -1,0 +1,42 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Wed, 19 Sep 2012 15:08:06 -0400
+Subject: SKIP_HOST build option
+
+Allow cross builds without building for the host arch.
+Needs access to the host based tools in another location.
+
+make SKIP_HOST=YES EPICS_BASE=/usr/epics/base
+---
+ configure/CONFIG_COMMON | 2 +-
+ configure/RULES_ARCHS   | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
+index d9c4eb0..5008c7d 100644
+--- a/configure/CONFIG_COMMON
++++ b/configure/CONFIG_COMMON
+@@ -33,7 +33,7 @@ CROSS1 = $(CROSS_COMPILER_TARGET_ARCHS$(word 1,$(CROSS_COMPILER_HOST_ARCHS)))
+ # and EPICS_HOST_ARCH is one of its words
+ CROSS2 = $(CROSS_COMPILER_TARGET_ARCHS$(filter-out 1,$(words $(filter $(EPICS_HOST_ARCH),$(CROSS_COMPILER_HOST_ARCHS)))))
+ 
+-BUILD_ARCHS = $(EPICS_HOST_ARCH) $(CROSS1) $(CROSS2)
++BUILD_ARCHS = $(if $(SKIP_HOST),,$(EPICS_HOST_ARCH)) $(CROSS1) $(CROSS2)
+ 
+ #-------------------------------------------------------
+ # Default for perl if it's on the PATH,
+diff --git a/configure/RULES_ARCHS b/configure/RULES_ARCHS
+index 02eea5f..7105769 100644
+--- a/configure/RULES_ARCHS
++++ b/configure/RULES_ARCHS
+@@ -45,9 +45,9 @@ define DEP_template
+   $(2) : $(EPICS_HOST_ARCH)
+   $(1)$(DIVIDER)$(2) : $(1)$(DIVIDER)$(EPICS_HOST_ARCH) O.$(2)
+ endef
+-$(foreach action, $(ACTIONS), \
++$(if $(SKIP_HOST),,$(foreach action, $(ACTIONS), \
+     $(foreach arch, $(CROSS_ARCHS), \
+-        $(eval $(call DEP_template,$(action),$(arch)))))
++        $(eval $(call DEP_template,$(action),$(arch))))))
+ 
+ # Allows rebuild to work with parallel builds option, -j.
+ ifeq (rebuild,$(filter rebuild,$(MAKECMDGOALS)))

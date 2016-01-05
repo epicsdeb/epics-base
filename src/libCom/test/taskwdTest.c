@@ -4,7 +4,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
+/* Revision-Id: anj@aps.anl.gov-20120706224756-4o1gn2rb0wh1guhj */
 
 /* Author: Andrew Johnson
  * Date:    May 21, 2008
@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "taskwd.h"
+#include "errlog.h"
 #include "epicsThread.h"
 #include "epicsUnitTest.h"
 #include "testMain.h"
@@ -66,6 +67,7 @@ void testTask2(void *arg)
 
 MAIN(taskwdTest)
 {
+    eltc(0);
     testPlan(8);
 
     taskwdInit();
@@ -87,6 +89,7 @@ MAIN(taskwdTest)
     taskwdMonitorDel(&monFuncs, NULL);
     taskwdAnyRemove(NULL);
 
+    eltc(1);
     return testDone();
 }
 

@@ -1,5 +1,4 @@
-eval 'exec perl -S -w  $0 ${1+"$@"}'  # -*- Mode: perl -*-
-    if 0;
+#!/usr/bin/env perl
 #*************************************************************************
 # Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
@@ -7,7 +6,7 @@ eval 'exec perl -S -w  $0 ${1+"$@"}'  # -*- Mode: perl -*-
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# Revision-Id: anj@aps.anl.gov-20110608171518-onrlqi2bcf4wmbhs
+# Revision-Id: anj@aps.anl.gov-20130123132907-fi34uue1k4b3kig8
 
 # Determines an absolute pathname for its argument,
 # which may be either a relative or absolute path and

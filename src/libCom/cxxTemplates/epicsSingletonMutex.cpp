@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *  Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *  Revision-Id: anj@aps.anl.gov-20150918165151-dwvy0b54q8rfomvv
  *
  *  Author: Jeff O. Hill
  *
@@ -35,7 +35,7 @@ extern "C" void SingletonMutexOnce ( void * /* pParm */ )
     // This class exists for the purpose of avoiding file scope
     // object chicken and egg problems. Therefore, pEPICSSigletonMutex 
     // is never destroyed.
-    pEPICSSigletonMutex = new epicsMutex;
+    pEPICSSigletonMutex = newEpicsMutex;
 }
 
 void SingletonUntyped :: incrRefCount ( PBuild pBuild )
@@ -52,9 +52,9 @@ void SingletonUntyped :: incrRefCount ( PBuild pBuild )
 
 void SingletonUntyped :: decrRefCount ( PDestroy pDestroy )
 {
-    assert ( _refCount > 0 );
     epicsGuard < epicsMutex > 
         guard ( *pEPICSSigletonMutex );
+    assert ( _refCount > 0 );
     _refCount--;
     if ( _refCount == 0 ) {
         ( *pDestroy ) ( _pInstance );

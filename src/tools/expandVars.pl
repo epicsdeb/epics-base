@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # Tool to expand @VAR@ variables while copying a file.
 # The file will *not* be copied if it already exists.
@@ -6,7 +6,7 @@
 # Author: Andrew Johnson <anj@aps.anl.gov>
 # Date: 10 February 2005
 #
-# Revision-Id: anj@aps.anl.gov-20101026142747-yfjkhakzmp4rnj0g
+# Revision-Id: anj@aps.anl.gov-20140925212423-7fa9rx1gceig2ccd
 #
 
 use strict;
@@ -49,9 +49,9 @@ expandRelease(\%vars);
 $vars{'ARCH'} = $opt_a if $opt_a;
 
 while ($_ = shift @opt_D) {
-    my ($var, $val) = split /=/;
-    $vars{$var} = $val;
-    print "$var = $val\n" if $opt_d;
+    m/^ (\w+) \s* = \s* (.*) $/x;
+    $vars{$1} = $2;
+    print "$1 = $2\n" if $opt_d;
 }
 
 # Do it!

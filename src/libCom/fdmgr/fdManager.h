@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
+ *      Revision-Id: johill@lanl.gov-20131107172603-vkmh5jo4no0nxjhp
  *
  *      File descriptor management C++ class library
  *      (for multiplexing IO in a single threaded environment)
@@ -104,11 +104,11 @@ private:
     fdReg * pCBReg; 
     void reschedule ();
     double quantum ();
-    epicsShareFunc void installReg (fdReg &reg);
-    epicsShareFunc void removeReg (fdReg &reg);
+    void installReg (fdReg &reg);
+    void removeReg (fdReg &reg);
     void lazyInitTimerQueue ();
-	fdManager ( const fdManager & );
-	fdManager & operator = ( const fdManager & );
+    fdManager ( const fdManager & );
+    fdManager & operator = ( const fdManager & );
     friend class fdReg;
 };
 
@@ -122,16 +122,17 @@ epicsShareExtern fdManager fileDescriptorManager;
 //
 // file descriptor registration
 //
-class fdReg : public fdRegId, public tsDLNode<fdReg>, public tsSLNode<fdReg> {
+class epicsShareClass fdReg :
+    public fdRegId, public tsDLNode<fdReg>, public tsSLNode<fdReg> {
     friend class fdManager;
 
 public:
 
-    epicsShareFunc fdReg (const SOCKET fdIn, const fdRegType type, 
+    fdReg (const SOCKET fdIn, const fdRegType type, 
         const bool onceOnly=false, fdManager &manager = fileDescriptorManager);
-    epicsShareFunc virtual ~fdReg ();
+    virtual ~fdReg ();
 
-    epicsShareFunc virtual void show (unsigned level) const;
+    virtual void show (unsigned level) const;
     
     //
     // Called by the file descriptor manager:
@@ -142,7 +143,7 @@ public:
     //
     // fdReg::destroy() does a "delete this"
     //
-    epicsShareFunc virtual void destroy ();
+    virtual void destroy ();
 
 private:
     enum state {active, pending, limbo};
@@ -154,14 +155,14 @@ private:
     // lifetime of a fdReg object if the constructor
     // specified "onceOnly"
     //
-    epicsShareFunc virtual void callBack ()=0;
+    virtual void callBack ()=0;
 
     unsigned char state; // state enums go here
     unsigned char onceOnly;
     fdManager &manager;
 
-	fdReg ( const fdReg & );
-	fdReg & operator = ( const fdReg & );
+    fdReg ( const fdReg & );
+    fdReg & operator = ( const fdReg & );
 };
 
 //

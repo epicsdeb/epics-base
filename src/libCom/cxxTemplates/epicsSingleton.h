@@ -9,7 +9,7 @@
 \*************************************************************************/
 
 /*
- *  Revision-Id: anj@aps.anl.gov-20121130193225-xyua2kqwjiqe8qhm
+ *  Revision-Id: anj@aps.anl.gov-20150220183826-a6fh133rw8uk2zfq
  *
  *  Author: Jeffrey O. Hill
  *
@@ -19,6 +19,7 @@
 #define epicsSingleton_h
 
 #include <new>
+#include <cstddef>
 
 #include "shareLib.h"
 #include "epicsAssert.h"

@@ -26,7 +26,7 @@
 #include <string.h>
 
 #define epicsExportSharedSymbols
-#include "epicsStdioRedirect.h"
+#include "epicsStdio.h"
 #include "epicsThread.h"
 #include "ellLib.h"
 #include "errlog.h"
@@ -226,6 +226,14 @@ epicsMutex :: epicsMutex () :
     }
 }
 
+epicsMutex :: epicsMutex ( const char *pFileName, int lineno ) :
+    id ( epicsMutexOsiCreate (pFileName, lineno) )
+{
+    if ( this->id == 0 ) {
+        throw mutexCreateFailed ();
+    }
+}
+
 epicsMutex ::~epicsMutex () 
 {
     epicsMutexDestroy ( this->id );
@@ -239,7 +247,7 @@ void epicsMutex::lock ()
     }
 }
 
-bool epicsMutex::tryLock () // X aCC 361
+bool epicsMutex::tryLock ()
 {
     epicsMutexLockStatus status = epicsMutexTryLock ( this->id );
     if ( status == epicsMutexLockOK ) {

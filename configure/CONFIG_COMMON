@@ -7,7 +7,7 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  Revision-Id: jba@aps.anl.gov-20121205203418-15wux5bxnojrv6pn
+#  Revision-Id: anj@aps.anl.gov-20150308202607-klpbx0rulsvudgn1
 #
 #  CONFIG_COMMON
 #
@@ -30,7 +30,7 @@ DIVIDER = .
 CROSS1 = $(CROSS_COMPILER_TARGET_ARCHS$(word 1,$(CROSS_COMPILER_HOST_ARCHS)))
 
 # CROSS2 will be defined only when CROSS_COMPILER_HOST_ARCHS is defined
-# and EPICS_HOST_ARCH is one of it's words
+# and EPICS_HOST_ARCH is one of its words
 CROSS2 = $(CROSS_COMPILER_TARGET_ARCHS$(filter-out 1,$(words $(filter $(EPICS_HOST_ARCH),$(CROSS_COMPILER_HOST_ARCHS)))))
 
 BUILD_ARCHS = $(EPICS_HOST_ARCH) $(CROSS1) $(CROSS2)
@@ -38,7 +38,7 @@ BUILD_ARCHS = $(EPICS_HOST_ARCH) $(CROSS1) $(CROSS2)
 #-------------------------------------------------------
 # Default for perl if it's on the PATH,
 # otherwise override this in os/CONFIG_SITE.<host_arch>.Common
-PERL=perl
+PERL = perl -CSD
 
 #-------------------------------------------------------
 # dbst based database optimization default
@@ -74,10 +74,12 @@ INSTALL_TEMPLATES           = $(INSTALL_LOCATION)/templates
 INSTALL_DBD                 = $(INSTALL_LOCATION)/dbd
 INSTALL_DB                  = $(INSTALL_LOCATION)/db
 INSTALL_CONFIG              = $(INSTALL_LOCATION)/configure
-INSTALL_JAVA                = $(INSTALL_LOCATION)/javalib
 
-#Directory for OS independant build created files
+# Directory for OS independant build created files
 COMMON_DIR = ../O.Common
+
+# IOC's absolute path to $(TOP), may be overridden inside the application
+IOCS_APPL_TOP               = $(shell $(FULLPATHNAME) $(INSTALL_LOCATION))
 
 #-------------------------------------------------------
 # Make echo output - suppress echoing if make's '-s' flag is set
@@ -119,12 +121,22 @@ CONFIG_TARGETS += $(CHECK_RELEASE_$(CHECK_RELEASE))
 
 #-------------------------------------------------------
 # Prefix and suffix
-DEP=.d
-OBJ = .
-CMPLR_SUFFIX=
-CMPLR_PREFIX=
-LIB_PREFIX=
-SHRLIB_PREFIX= $(LIB_PREFIX)
+DEP = .d
+OBJ = .o
+CMPLR_SUFFIX =
+CMPLR_PREFIX =
+LIB_PREFIX =
+LIB_SUFFIX =
+SHRLIB_PREFIX = $(LIB_PREFIX)
+DLLSTUB_PREFIX = $(LIB_PREFIX)
+DLLSTUB_SUFFIX = $(LIB_SUFFIX)
+
+BUILDLIB_PREFIX_YES = $(DLLSTUB_PREFIX)
+BUILDLIB_PREFIX_NO  = $(LIB_PREFIX)
+BUILDLIB_SUFFIX_YES = $(DLLSTUB_SUFFIX)
+BUILDLIB_SUFFIX_NO  = $(LIB_SUFFIX)
+BUILDLIB_PREFIX = $(BUILDLIB_PREFIX_$(SHARED_LIBRARIES))
+BUILDLIB_SUFFIX = $(BUILDLIB_SUFFIX_$(SHARED_LIBRARIES))
 
 #--------------------------------------------------
 # vpath directories
@@ -132,11 +144,14 @@ POSIX_YES = os/posix
 GENERIC_SRC_DIRS = .. $(SRC_DIRS)
 OS_SRC_DIRS += . $(foreach dir, .. $(SRC_DIRS), \
        $(addprefix $(dir)/, os/$(OS_CLASS) $(POSIX_$(POSIX)) os/default ))
-ALL_SRC_DIRS = $(OS_SRC_DIRS) $(GENERIC_SRC_DIRS)
+CMPLR_SRC_DIRS += . $(foreach dir, .. $(SRC_DIRS), \
+       $(addprefix $(dir)/, compiler/$(CMPLR_CLASS) compiler/default ))
+ALL_SRC_DIRS = $(CMPLR_SRC_DIRS) $(OS_SRC_DIRS) $(GENERIC_SRC_DIRS)
 
 #--------------------------------------------------
 # compile line include directories
 INSTALL_INCLUDES += \
+       -I$(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS) \
        -I$(INSTALL_INCLUDE)/os/$(OS_CLASS) \
        -I$(INSTALL_INCLUDE)
 SRC_INCLUDES = -I$(COMMON_DIR) $(addprefix -I, $(wildcard $(ALL_SRC_DIRS)))
@@ -148,9 +163,7 @@ PRODNAME = $(addsuffix $(EXE),$(basename $(PROD)))
 TESTPRODNAME = $(addsuffix $(EXE),$(basename $(TESTPROD)))
 
 SHRLIBNAME = $(SHRLIBNAME_$(SHARED_LIBRARIES))
-
-JAVA =
-JAR =
+TESTSHRLIBNAME = $(TESTSHRLIBNAME_$(SHARED_LIBRARIES))
 
 #--------------------------------------------------
 # obj files
@@ -164,7 +177,7 @@ LIBRARY_OBJS = $(addsuffix $(OBJ),$(basename $(SRCS) $(USR_SRCS) $(LIB_SRCS) $(L
 LIBRARY_LD_OBJS = $(USR_OBJLIBS) $(LIB_OBJLIBS) $(TARGET_OBJS) $(LIBRARY_OBJS)
 
 #--------------------------------------------------
-# WIN95/NT resource files
+# Windows resource files
 
 TARGET_RESS = $(if $(RES),$(addsuffix $(RES),$(basename $($*_RCS))),)
 
@@ -173,11 +186,6 @@ PROD_LD_RESS = $(TARGET_RESS) $(PROD_RESS)
 
 LIBRARY_RESS = $(if $(RES),$(addsuffix $(RES),$(basename $(RCS) $(LIB_RCS) $(LIBRARY_RCS))),)
 LIBRARY_LD_RESS = $(TARGET_RESS) $(LIBRARY_RESS)
-
-#--------------------------------------------------
-# WIN95/NT source browser
-PROD_BAF = $(addsuffix $(BAF), $(basename $(PROD)))
-LIB_BAF=$(addsuffix $(BAF),$(basename $(LIBRARY)))
 
 #--------------------------------------------------
 # C preprocessor, compiler, and linker flag defaults
@@ -205,6 +213,16 @@ USR_LIBS =
 USR_CPPFLAGS =
 USR_DBDFLAGS =
 USR_ARFLAGS =
+
+# Variables to be set only on the command-line:
+# CMD_INCLUDES =
+# CMD_CFLAGS =
+# CMD_CXXFLAGS =
+# CMD_LDFLAGS =
+# CMD_CPPFLAGS =
+# CMD_DBFLAGS =
+# CMD_DBDFLAGS =
+# CMD_ARFLAGS =
 
 # Debug specific options
 DEBUG_CPPFLAGS =
@@ -244,7 +262,7 @@ STATIC_LDLIBS = $(STATIC_LDLIBS_$(STATIC_BUILD))
 
 #--------------------------------------------------
 # cflags for shared library src files (from SHRLIB_CFLAGS)
-LIBRARY_SRCS=$(basename $(foreach lib,$(LIBRARY) $(LOADABLE_LIBRARY),$($(lib)_OBJSNAME) $(LIBRARY_OBJS)))
+LIBRARY_SRCS=$(basename $(foreach lib,$(LIBRARY) $(TESTLIBRARY) $(LOADABLE_LIBRARY),$($(lib)_OBJSNAME) $(LIBRARY_OBJS)))
 LIBRARY_SRC_CFLAGS=$($(patsubst $*,SHRLIB,$(findstring $*,$(LIBRARY_SRCS)))_CFLAGS)
 
 #--------------------------------------------------
@@ -264,32 +282,35 @@ RUNTIME_LDFLAGS += $(RUNTIME_LDFLAGS_$(COMMANDLINE_LIBRARY))
 # Flags
 
 INCLUDES = -I. $(SRC_INCLUDES) $(INSTALL_INCLUDES) $(RELEASE_INCLUDES)\
- $(TARGET_INCLUDES) $(USR_INCLUDES) $(OP_SYS_INCLUDES) $($(BUILD_CLASS)_INCLUDES)
+ $(TARGET_INCLUDES) $(USR_INCLUDES) $(CMD_INCLUDES) $(OP_SYS_INCLUDES)\
+ $($(BUILD_CLASS)_INCLUDES)
 
-CFLAGS = $($(BUILD_CLASS)_CFLAGS) $(POSIX_CFLAGS) $(OPT_CFLAGS) $(DEBUG_CFLAGS)\
- $(PIPE_CFLAGS) $(WARN_CFLAGS) $(TARGET_CFLAGS) $(USR_CFLAGS) $(ARCH_DEP_CFLAGS)\
- $(CODE_CFLAGS) $(STATIC_CFLAGS) $(OP_SYS_CFLAGS) $(LIBRARY_SRC_CFLAGS) $(HDEPENDS_CFLAGS)
+CFLAGS = $($(BUILD_CLASS)_CFLAGS) $(POSIX_CFLAGS) $(OPT_CFLAGS)\
+ $(DEBUG_CFLAGS) $(PIPE_CFLAGS) $(WARN_CFLAGS) $(TARGET_CFLAGS)\
+ $(USR_CFLAGS) $(CMD_CFLAGS) $(ARCH_DEP_CFLAGS) $(CODE_CFLAGS)\
+ $(STATIC_CFLAGS) $(OP_SYS_CFLAGS) $(LIBRARY_SRC_CFLAGS)
 
-CXXFLAGS = $($(BUILD_CLASS)_CXXFLAGS) $(POSIX_CXXFLAGS) $(OPT_CXXFLAGS) $(DEBUG_CXXFLAGS)\
- $(PIPE_CFLAGS) $(WARN_CXXFLAGS) $(TARGET_CXXFLAGS) $(USR_CXXFLAGS) $(ARCH_DEP_CXXFLAGS)\
- $(CODE_CXXFLAGS) $(STATIC_CXXCFLAGS) $(OP_SYS_CXXFLAGS) $(LIBRARY_SRC_CFLAGS) $(HDEPENDS_CFLAGS)
+CXXFLAGS = $($(BUILD_CLASS)_CXXFLAGS) $(POSIX_CXXFLAGS) $(OPT_CXXFLAGS)\
+ $(DEBUG_CXXFLAGS) $(PIPE_CFLAGS) $(WARN_CXXFLAGS) $(TARGET_CXXFLAGS)\
+ $(USR_CXXFLAGS) $(CMD_CXXFLAGS) $(ARCH_DEP_CXXFLAGS) $(CODE_CXXFLAGS)\
+ $(STATIC_CXXCFLAGS) $(OP_SYS_CXXFLAGS) $(LIBRARY_SRC_CFLAGS)
 
-LDFLAGS = $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(USR_LDFLAGS) $(POSIX_LDFLAGS) \
- $(ARCH_DEP_LDFLAGS) $(DEBUG_LDFLAGS) $(OP_SYS_LDFLAGS) $($(BUILD_CLASS)_LDFLAGS)\
- $(RUNTIME_LDFLAGS) $(CODE_LDFLAGS)
+LDFLAGS = $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(USR_LDFLAGS) $(CMD_LDFLAGS)\
+ $(POSIX_LDFLAGS) $(ARCH_DEP_LDFLAGS) $(DEBUG_LDFLAGS) $(OP_SYS_LDFLAGS)\
+ $($(BUILD_CLASS)_LDFLAGS) $(RUNTIME_LDFLAGS) $(CODE_LDFLAGS)
 
-LDLIBS = \
- $(POSIX_LDLIBS) $(ARCH_DEP_LDLIBS) $(DEBUG_LDLIBS) $(OP_SYS_LDLIBS) $(GNU_LDLIBS_$(GNU))
+LDLIBS = $(POSIX_LDLIBS) $(ARCH_DEP_LDLIBS) $(DEBUG_LDLIBS) $(OP_SYS_LDLIBS)\
+ $(GNU_LDLIBS_$(GNU))
 
-CPPFLAGS += $($(BUILD_CLASS)_CPPFLAGS) $(POSIX_CPPFLAGS)\
- $(OPT_CPPFLAGS) $(DEBUG_CPPFLAGS) $(WARN_CPPFLAGS)\
- $(BASE_CPPFLAGS) $(TARGET_CPPFLAGS) $(USR_CPPFLAGS) $(ARCH_DEP_CPPFLAGS)\
- $(OP_SYS_CPPFLAGS) $(OP_SYS_INCLUDE_CPPFLAGS) $(CODE_CPPFLAGS)
+CPPFLAGS = $($(BUILD_CLASS)_CPPFLAGS) $(POSIX_CPPFLAGS) $(OPT_CPPFLAGS)\
+ $(DEBUG_CPPFLAGS) $(WARN_CPPFLAGS) $(BASE_CPPFLAGS) $(TARGET_CPPFLAGS)\
+ $(USR_CPPFLAGS) $(CMD_CPPFLAGS) $(ARCH_DEP_CPPFLAGS) $(OP_SYS_CPPFLAGS)\
+ $(OP_SYS_INCLUDE_CPPFLAGS) $(CODE_CPPFLAGS)
 
 #--------------------------------------------------
 # ar definition default
 ARFLAGS =
-ARCMD = $(AR) $(ARFLAGS) $(USR_ARFLAGS) $@  $(LIBRARY_LD_OBJS)
+ARCMD = $(AR) $(ARFLAGS) $(USR_ARFLAGS) $(CMD_ARFLAGS) $@  $(LIBRARY_LD_OBJS)
 
 #--------------------------------------------------
 # 'Munch' link-edit
@@ -306,9 +327,8 @@ LEXOPT += -I
 #--------------------------------------------------
 # Build compile line here
 
-PATH_FILTER = $(1)
-COMPILE.c = $(CC) -c $(CPPFLAGS) $(CFLAGS) $(call PATH_FILTER,$(INCLUDES))
-COMPILE.cpp = $(CCC) -c $(CPPFLAGS) $(CXXFLAGS) $(call PATH_FILTER,$(INCLUDES))
+COMPILE.c   = $(CC) $(CPPFLAGS) $(CFLAGS) $(INCLUDES)
+COMPILE.cpp = $(CCC) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES)
 
 #--------------------------------------------------
 # C preprocessor command
@@ -317,28 +337,31 @@ PREPROCESS.cpp = $(CPP) $(CPPFLAGS) $(INCLUDES) $< > $@
 #--------------------------------------------------
 # Header dependency file generation
 
-HDEPENDS = YES
-HDEPENDS_METHOD = CMD
+HDEPENDS_METHOD = MKMF
 
-HDEPENDS_INCLUDES = $(subst -I,,$(INCLUDES))
-HDEPENDSFLAGS = -m $*$(DEP) $(HDEPENDS_INCLUDES) $@ $<
-HDEPENDSCMD = -$(MKMF) $(HDEPENDS_FLAGS) $(HDEPENDSFLAGS)
+HDEPENDS_MKMFFLAGS = -m $*$(DEP) $(INCLUDES) $@
+HDEPENDS_MKMF.c   = $(MKMF) $(HDEPENDS_FLAGS) $(HDEPENDS_MKMFFLAGS)
+HDEPENDS_MKMF.cpp = $(MKMF) $(HDEPENDS_FLAGS) $(HDEPENDS_MKMFFLAGS)
 
-HDEPENDS_CMD_NO = $(ECHO) ""
-HDEPENDS_CMD_YES = $(if $(filter CMD,$(HDEPENDS_METHOD)),$(HDEPENDSCMD),$(HDEPENDS_CMD_NO))
-HDEPENDS_CMD = $(HDEPENDS_CMD_$(HDEPENDS))
+HDEPENDS_COMP.c   = $(COMPILE.c) $(HDEPENDS_COMPFLAGS) $(HDEPENDS_ARCHFLAGS)
+HDEPENDS_COMP.cpp = $(COMPILE.cpp) $(HDEPENDS_COMPFLAGS) $(HDEPENDS_ARCHFLAGS)
 
-HDEPENDSCFLAGS = -MMD
-HDEPENDS_CFLAGS_YES = $(if $(filter CFLAGS,$(HDEPENDS_METHOD)),$(HDEPENDSCFLAGS))
-HDEPENDS_CFLAGS = $(HDEPENDS_CFLAGS_$(HDEPENDS))
+HDEPENDS.c = $(HDEPENDS_$(HDEPENDS_METHOD).c)
+HDEPENDS.cpp = $(HDEPENDS_$(HDEPENDS_METHOD).cpp)
 
 #--------------------------------------------------
-# depends definition
+# Dependency files
 
-TARGET_SRCS = $(foreach name, $(TESTPROD) $(PROD) $(LIBRARY) $(LOADABLE_LIBRARY), $($(name)_SRCS))
+TARGET_SRCS = $(foreach name, \
+    $(TESTPROD) $(PROD) $(TESTLIBRARY) $(LIBRARY) $(LOADABLE_LIBRARY), \
+    $($(name)_SRCS))
 SRC_FILES = $(LIB_SRCS) $(LIBSRCS) $(SRCS) $(USR_SRCS) $(PROD_SRCS) $(TARGET_SRCS)
-HDEPENDS_FILES_YES = $(addsuffix $(DEP),$(notdir $(basename $(SRC_FILES))))
-HDEPENDS_FILES = $(if $(filter NO,$(HDEPENDS)),,$(HDEPENDS_FILES_YES))
+HDEPENDS_FILES = $(addsuffix $(DEP),$(notdir $(basename $(SRC_FILES))))
+
+#--------------------------------------------------
+# Deprecated and no longer used in Base
+
+PATH_FILTER = $(1)$(warning PATH_FILTER is deprecated; used for $(1))
 
 #---------------------------------------------------------------
 # Names of installed items
@@ -351,7 +374,7 @@ INSTALL_LIBS= $(LIBNAME:%=$(INSTALL_LIB)/%)
 INSTALL_MUNCHS= $(MUNCHNAME:%=$(INSTALL_BIN)/%)
 INSTALL_SHRLIBS= $(SHRLIBNAME:%=$(INSTALL_SHRLIB)/%)
 INSTALL_LOADABLE_SHRLIBS= $(LOADABLE_SHRLIBNAME:%=$(INSTALL_SHRLIB)/%)
-INSTALL_DLL_LINK_LIBS=$(DLL_LINK_LIBNAME:%=$(INSTALL_LIB)/%)
+INSTALL_DLLSTUB_LIBS=$(DLLSTUB_LIBNAME:%=$(INSTALL_LIB)/%)
 INSTALL_TCLLIBS=$(TCLLIBNAME:%=$(INSTALL_TCLLIB)/%)
 INSTALL_TCLINDEX=$(TCLINDEX:%=$(INSTALL_TCLLIB)/%)
 INSTALL_SCRIPTS = $(SCRIPTS:%= $(INSTALL_BIN)/%)
@@ -378,23 +401,34 @@ INSTALL_PERMISSIONS = 444
 #
 # auto determine the directory paths that things are installed to
 # RULES:
-# 1) found in any one of several os specific area
+# 0) found in any one of several compiler specific paths
+#       => install to $(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS)
+# 1) not found in (0) and found in any one of several OS specific paths
 #       => install to $(INSTALL_INCLUDE)/os/$(OS_CLASS)
-# 2) not foundin (1) and found in generic area
+# 2) not found in (1) and found in generic paths
 #       => install to $(INSTALL_INCLUDE)
 # 3) not found in (1) or (2) then may be (not yet) computer generated
 #       => install into $(INSTALL_INCLUDE)/os/$(OS_CLASS) and let
 #       build rules work on vpath
 #
 # These rules guarantee that the users include from
-# no more than two directories
+# no more than three directories
 #
 INSTALL_INC += $(foreach inc, $(INC), \
     $(firstword \
+        $(CMPLR_INSTALL_INC) \
         $(OS_INSTALL_INC) \
         $(GENERIC_INSTALL_INC) \
         $(GENERATED_INSTALL_INC) ) )
 INSTALL_INC += $(addprefix $(INSTALL_INCLUDE)/os/$(OS_CLASS)/, $(INC_$(OS_CLASS)) )
+
+#
+# Rule 0
+#
+CMPLR_INSTALL_INC = $(addprefix $(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS)/, $(INSTALL_INC_jjj) )
+INSTALL_INC_jjj = $(foreach dir, $(CMPLR_SRC_DIRS), $(INSTALL_INC_iii)  )
+INSTALL_INC_iii = $(subst $(dir)/, , $(INSTALL_INC_hhh) )
+INSTALL_INC_hhh = $(wildcard $(addsuffix /$(inc), $(dir)) )
 
 #
 # Rule 1
