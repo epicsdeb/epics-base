@@ -1,3 +1,24 @@
+epics-base (3.15.3-1) unstable; urgency=medium
+
+  * Imported Upstream version 3.15.3
+  * Rebase patch queue from v3.14.12.3
+  * Update control file for v3.15.3
+  * Adjust hard-coded version numbers
+  * Fix mingw32 cross-build
+  * Do not install some libraries that have been removed with 3.15
+  * Do not build package epics-compat-dev anymore
+  * Fix broken install rule for PCAS headers
+  * Add some new files to the epics-dev package
+  * Base 3.15 does not install CA tools for *-debug arch anymore
+  * Install pkg-config files into system-wide folder
+  * Use epics-debhelper >=8.12 to disable rpath
+  * Bump up standards-version to 3.9.6
+  * Add patch for binding to a specific interface
+  * Fix ambiguous epics-dev dependency
+  * Update README.Debian
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Tue, 05 Jan 2016 10:28:36 -0800
+
 epics-base (3.14.12.3-10) unstable; urgency=low
 
   * Fix mingw build failure
