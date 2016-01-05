@@ -60,6 +60,9 @@ override_dh_install:
 	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/templates
 	rm -f $(CURDIR)/debian/tmp/usr/lib/epics/include/*.*
 	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/include/os/Linux
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/include/compiler
+	rm -f $(CURDIR)/debian/tmp/usr/lib/epics/lib/pkgconfig/epics-base-linux-x86_64.pc
+	rm -f $(CURDIR)/debian/tmp/usr/lib/epics/lib/pkgconfig/epics-base.pc
 
 	chmod a-x $(CURDIR)/debian/tmp/usr/lib/epics/bin/RTEMS-*/libComTestHarness*
 	chmod a-x $(CURDIR)/debian/tmp/usr/lib/epics/bin/RTEMS-*/softIoc*

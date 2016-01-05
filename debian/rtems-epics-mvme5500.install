@@ -1,3 +1,4 @@
 usr/lib/epics/bin/RTEMS-mvme5500
 usr/lib/epics/lib/RTEMS-mvme5500
+usr/lib/epics/lib/pkgconfig/epics-base-RTEMS-mvme5500.pc usr/share/pkgconfig
 etc/epics/configure/conf.d/05RTEMS-mvme5500.make

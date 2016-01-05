@@ -1,3 +1,4 @@
 usr/lib/epics/bin/RTEMS-mvme2100
 usr/lib/epics/lib/RTEMS-mvme2100
+usr/lib/epics/lib/pkgconfig/epics-base-RTEMS-mvme2100.pc usr/share/pkgconfig
 etc/epics/configure/conf.d/05RTEMS-mvme2100.make

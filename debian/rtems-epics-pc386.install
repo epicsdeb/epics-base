@@ -1,3 +1,4 @@
 usr/lib/epics/bin/RTEMS-pc386
 usr/lib/epics/lib/RTEMS-pc386
+usr/lib/epics/lib/pkgconfig/epics-base-RTEMS-pc386.pc usr/share/pkgconfig
 etc/epics/configure/conf.d/05RTEMS-pc386.make
