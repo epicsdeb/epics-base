@@ -13,3 +13,4 @@
 0013-Reject-NULL-callback-functions-in-ca_array_-_callbac.patch
 0014-Cross-build-with-mingw32.patch
 0015-rsrv-merge-Michael-s-patch-for-binding-to-a-specific.patch
+0016-Fix-MMIO-under-VxWorks-with-C.patch
