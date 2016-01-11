@@ -1,3 +1,9 @@
+epics-base (3.15.3-1ubuntu1) unstable; urgency=medium
+
+  * Add "Fix MMIO under VxWorks with C++" patch
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Mon, 11 Jan 2016 11:07:56 -0500
+
 epics-base (3.15.3-1) unstable; urgency=medium
 
   * Imported Upstream version 3.15.3
