@@ -25,12 +25,6 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 export DEB_CFLAGS_STRIP = -g -O2
 export DEB_CXXFLAGS_STRIP = -g -O2
 
-# Add Debian flags to the EPICS build
-DEB_USR_CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
-DEB_USR_CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
-DEB_USR_CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
-DEB_USR_LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
-
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
@@ -54,17 +48,18 @@ export SHRLIB_VERSION=$(SOV)
 %:
 	dh $@ --with epics -Sepicsmake --parallel
 
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf configure/conf.d
+
 override_dh_auto_build:
-	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV) \
-	USR_CFLAGS_Linux="$(DEB_USR_CFLAGS)" \
-	USR_CXXFLAGS_Linux="$(DEB_USR_CXXFLAGS)" \
-	USR_CPPFLAGS_Linux="$(DEB_USR_CPPFLAGS)" \
-	USR_LDFLAGS_Linux="$(DEB_USR_LDFLAGS)"
+	install -d configure/conf.d
+	./debian/gen-harden.sh > configure/conf.d/05hardening.make
+	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
 
 override_dh_auto_install:
-	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV) \
-	USR_LDFLAGS_Linux="$(DEB_USR_LDFLAGS)"
+	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
 
 override_dh_auto_test: # skip for development
 
@@ -96,6 +91,7 @@ override_dh_install:
 	done
 
 	install -d debian/tmp/etc/epics/configure/conf.d
+	cp configure/conf.d/05hardening.make debian/tmp/etc/epics/configure/conf.d/
 	echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $(TARGETS)" > debian/tmp/etc/epics/configure/conf.d/01debug.make
 
 	install -d debian/tmp/usr/bin
