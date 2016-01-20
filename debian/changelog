@@ -1,11 +1,11 @@
-epics-base (3.15.3-2) UNRELEASED; urgency=medium
+epics-base (3.15.3-2) unstable; urgency=medium
 
   * Add /etc/epics/configure/conf.d/05hardening.make
     so that downstream builds for Linux targets use hardening
     flags by default.
     Can be overridden by defining 'SKIP_HARDENING=YES'
 
- -- Michael Davidsaver <mdavidsaver@gmail.com>  Tue, 19 Jan 2016 21:41:44 -0500
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Wed, 20 Jan 2016 11:10:55 -0500
 
 epics-base (3.15.3-1) unstable; urgency=medium
 
