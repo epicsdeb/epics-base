@@ -26,7 +26,6 @@ TARGETS += RTEMS-mvme5500
 TARGETS += RTEMS-pc386
 
 export CROSS_COMPILER_TARGET_ARCHS = $(TARGETS)
-
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
@@ -39,11 +38,17 @@ install: build
 binary-arch binary-indep: install
 binary: binary-arch binary-indep
 
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf configure/conf.d
+
 override_dh_auto_build:
-	dh_auto_build -- USE_GESYS=YES EPICS_SITE_VERSION="$(DEBV)"
+	install -d configure/conf.d
+	./debian/gen-harden.sh > configure/conf.d/05hardening.make
+	dh_auto_build -- USE_GESYS=YES FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
 
 override_dh_auto_install:
-	dh_auto_install -- USE_GESYS=YES EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_install -- USE_GESYS=YES FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
 
 override_dh_auto_test: # skip host tests
 
@@ -68,6 +73,7 @@ override_dh_install:
 	chmod a-x $(CURDIR)/debian/tmp/usr/lib/epics/bin/RTEMS-*/softIoc*
 
 	install -d debian/tmp/etc/epics/configure/conf.d
+	cp configure/conf.d/05hardening.make debian/tmp/etc/epics/configure/conf.d/
 
 	for tt in $(TARGETS) ; do \
 		echo "ALL_CROSS_COMPILER_TARGET_ARCHS += $${tt}" > debian/tmp/etc/epics/configure/conf.d/05$${tt}.make; \
