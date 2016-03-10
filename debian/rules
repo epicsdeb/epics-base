@@ -61,6 +61,10 @@ override_dh_auto_build:
 override_dh_auto_install:
 	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
 
+# skip this since we should install configure/RELEASE
+override_dh_epics_postinstall:
+	# no op
+
 override_dh_auto_test: # skip for development
 
 USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer
