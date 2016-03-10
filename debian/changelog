@@ -1,3 +1,9 @@
+rtems-epics (3.15.3-3) unstable; urgency=medium
+
+  * revert mis-merge with master for 3.15.3-2
+
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Thu, 10 Mar 2016 18:54:30 -0500
+
 rtems-epics (3.15.3-2) unstable; urgency=medium
 
   * Sync with EPICS Base version 3.15.3-2
