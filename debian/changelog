@@ -1,3 +1,10 @@
+epics-base (3.15.3-3) unstable; urgency=medium
+
+  * Adapt to change coming in epics-debhelper 8.14.
+    skip dh_epics_postinstall
+
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Wed, 09 Mar 2016 20:30:57 -0500
+
 epics-base (3.15.3-2) unstable; urgency=medium
 
   * Add /etc/epics/configure/conf.d/05hardening.make
