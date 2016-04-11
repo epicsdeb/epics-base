@@ -14,3 +14,4 @@
 0014-Cross-build-with-mingw32.patch
 0015-rsrv-merge-Michael-s-patch-for-binding-to-a-specific.patch
 0016-only-D-an-I-in-pkg-config-files.patch
+0017-libCom-exitWait-from-thread-exit-handler-corrupts-st.patch
