@@ -2,6 +2,8 @@ epics-base (3.15.3-5) unstable; urgency=medium
 
   * Add patch that fixes memory corruption of C++ epicsThread API
   * Add patch that fixes a crash when initializing string records
+  * Fix gen-harden.sh to append to TARGET_*FLAGS instead of
+    overwriting.
 
  -- Martin Konrad <konrad@frib.msu.edu>  Mon, 11 Apr 2016 08:54:16 -0400
 
