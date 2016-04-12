@@ -1,7 +1,9 @@
-epics-base (3.15.3-5) unstable; urgency=medium
+epics-base (3.15.3-6) UNRELEASED; urgency=medium
 
   * Add patch that fixes memory corruption of C++ epicsThread API
   * Add patch that fixes a crash when initializing string records
+  * Add patch fixing lp:1539791
+  * Add patch to fix RTEMS NTP sync. bug
   * Fix gen-harden.sh to append to TARGET_*FLAGS instead of
     overwriting.
 

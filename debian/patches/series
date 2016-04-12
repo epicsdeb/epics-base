@@ -16,3 +16,5 @@
 0016-only-D-an-I-in-pkg-config-files.patch
 0017-libCom-exitWait-from-thread-exit-handler-corrupts-st.patch
 0018-dbStatic-prevent-overflow-in-dbPutString.patch
+0019-Changes-from-patch-in-lp-1539791.patch
+0020-Fix-for-RTEMS-NTP-sync-issue.patch
