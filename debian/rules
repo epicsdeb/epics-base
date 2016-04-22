@@ -71,7 +71,11 @@ USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRep
 
 PERLBINS=caget.pl caput.pl camonitor.pl cainfo.pl capr.pl
 
-PERLDIR=$(shell perl -MErrno -MFile::Basename -e 'print dirname($$INC{"Errno.pm"})')
+# /usr/share/perl5
+PERLLIB=$(shell perl -MConfig -e 'print $$Config{vendorlib}')
+# /usr/lib/x86_64-linux-gnu/perl5/5.20  (deb8)
+# /usr/lib/perl5 (deb7)
+PERLARCH=$(shell perl -MConfig -e 'print $$Config{vendorarch}')
 
 override_dh_install:
 	sed -i -e "s|^.*EPICS_SITE_VERSION.*$$|EPICS_SITE_VERSION = $(DEBV)|" debian/tmp/usr/lib/epics/configure/CONFIG_SITE
@@ -111,16 +115,16 @@ override_dh_install:
 		do ln -s ../../../../bin/`basename $$B` debian/tmp/usr/lib/epics/bin/$(EPICS_HOST_ARCH)/`basename $$B`; \
 	done
 
-	install -d debian/tmp/usr/share/perl5
-	install -d debian/epics-perl/$(PERLDIR)/auto
+	install -d debian/epics-dev/$(PERLLIB)
+	install -d debian/epics-perl/$(PERLARCH)/auto
 
-	# install EPICS::* modules under /usr/share/perl5/
-	mv debian/tmp/usr/lib/epics/lib/perl/EPICS debian/tmp/usr/share/perl5/
+	# install EPICS::* modules under /$(PERLLIB)/
+	mv debian/tmp/usr/lib/epics/lib/perl/EPICS debian/epics-dev/$(PERLLIB)/
 
 	# Relocate CA to /usr/lib/perl5/
-	mv debian/tmp/usr/lib/epics/lib/perl/CA.pm debian/epics-perl/$(PERLDIR)/
+	mv debian/tmp/usr/lib/epics/lib/perl/CA.pm debian/epics-perl/$(PERLARCH)/
 	# libCap5.so to /usr/lib/perl5/auto/
-	mv debian/tmp/usr/lib/epics/lib/perl/5.*/*/libCap5.so debian/epics-perl/$(PERLDIR)/auto/
+	mv debian/tmp/usr/lib/epics/lib/perl/5.*/*/libCap5.so debian/epics-perl/$(PERLARCH)/auto/
 
 	# Don't need other copies
 	rm debian/tmp/usr/lib/epics/lib/linux-*/libCap5.so

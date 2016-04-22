@@ -15,7 +15,6 @@ usr/lib/epics/lib/pkgconfig/*.pc usr/share/pkgconfig
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
-usr/share/perl5/EPICS
 usr/share/epics-dev/configure
 etc/epics/configure
 usr/lib/epics/lib/perl/DBD.pm
