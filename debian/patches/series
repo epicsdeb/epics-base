@@ -18,3 +18,4 @@
 0018-dbStatic-prevent-overflow-in-dbPutString.patch
 0019-Changes-from-patch-in-lp-1539791.patch
 0020-Fix-for-RTEMS-NTP-sync-issue.patch
+0021-remove-w3-validator-link.patch
