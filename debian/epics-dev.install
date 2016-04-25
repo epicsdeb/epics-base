@@ -1,3 +1,4 @@
+usr/bin/msi
 usr/lib/epics/bin/linux-*
 usr/lib/epics/configure
 usr/lib/epics/db

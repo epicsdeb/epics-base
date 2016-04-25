@@ -60,9 +60,11 @@ Depends: libepics3.15.3 (= ${binary:Version}), epics-catools (= ${binary:Version
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
-Recommends: epics-msi, ioclogserver,
+Recommends: ioclogserver,
 Suggests: epics-doc, epics-perl, epics-compat-dev, epics-pcas-dev,
-Conflicts: epics-catools (<= 3.14.11-6), epics-msi (<< 3), epics-perl (<= 3.14.12.3-1),
+Conflicts: epics-catools (<= 3.14.11-6), epics-msi, epics-perl (<= 3.14.12.3-1),
+Replaces: epics-msi,
+Provides: epics-msi,
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -105,13 +107,6 @@ Description: Perl bindings for EPICS
  control systems.
  .
  Perl bindings for EPICS
-
-Package: epics-msi
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libepics3.15.3 (= ${binary:Version}),
-Description: EPICS Macro Substitution and Include tool
- MSI is a general purpose macro substitution/include tool.
- It accepts as input an ascii template file.
 
 Package: epics-doc
 Architecture: all
