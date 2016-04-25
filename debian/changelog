@@ -1,3 +1,11 @@
+epics-base (3.15.3-8) unstable; urgency=medium
+
+  * fold epics-msi into epics-dev
+    Avoid broken symlink in epics-dev when epics-msi was not installed.
+  * fixup copyright
+
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Mon, 25 Apr 2016 09:15:04 -0400
+
 epics-base (3.15.3-7) unstable; urgency=medium
 
   * epics-perl: Fix install location for CA.pm
