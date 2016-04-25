@@ -1,4 +1,3 @@
-usr/bin/msi
 usr/lib/epics/bin/linux-*
 usr/lib/epics/configure
 usr/lib/epics/db
@@ -16,6 +15,8 @@ usr/lib/epics/lib/pkgconfig/*.pc usr/share/pkgconfig
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
+usr/bin/iocLogServer
+usr/bin/msi
 usr/share/epics-dev/configure
 etc/epics/configure
 usr/lib/epics/lib/perl/DBD.pm

@@ -43,8 +43,9 @@ Description: Files needed to develop new EPICS applications
 Package: ioclogserver
 Section: admin
 Architecture: any
-Depends: libepics3.15.3 (= ${binary:Version}), ${misc:Depends},
-         ${shlibs:Depends}, adduser,
+Depends: libepics3.15.3 (= ${binary:Version}),
+         epics-dev (= ${binary:Version}),
+         ${misc:Depends}, ${shlibs:Depends}, adduser,
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -60,9 +61,11 @@ Depends: libepics3.15.3 (= ${binary:Version}), epics-catools (= ${binary:Version
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
-Recommends: ioclogserver,
-Suggests: epics-doc, epics-perl, epics-compat-dev, epics-pcas-dev,
-Conflicts: epics-catools (<= 3.14.11-6), epics-msi, epics-perl (<= 3.14.12.3-1),
+Suggests: epics-doc, epics-perl, epics-compat-dev, epics-pcas-dev, ioclogserver,
+Conflicts: epics-catools (<= 3.14.11-6),
+           epics-msi,
+           epics-perl (<= 3.14.12.3-1),
+           ioclogserver (<= 3.15.3-8~~),
 Replaces: epics-msi,
 Provides: epics-msi,
 Description: Files needed to develop new EPICS applications
