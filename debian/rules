@@ -132,10 +132,6 @@ override_dh_install:
 	# This path is used by CA.pm
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
-	# include MSI documentation with executable
-	install -d debian/epics-dev/usr/share/doc/epics-dev
-	mv debian/tmp/usr/lib/epics/html/msi.html debian/epics-dev/usr/share/doc/epics-dev
-
 	dh_install --fail-missing
 
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
