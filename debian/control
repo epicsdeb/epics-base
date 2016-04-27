@@ -65,7 +65,7 @@ Suggests: epics-doc, epics-perl, epics-compat-dev, epics-pcas-dev, ioclogserver,
 Conflicts: epics-catools (<= 3.14.11-6),
            epics-msi,
            epics-perl (<= 3.14.12.3-1),
-           ioclogserver (<= 3.15.3-8~~),
+           ioclogserver (< 3.15.3-9),
 Replaces: epics-msi,
 Provides: epics-msi,
 Description: Files needed to develop new EPICS applications
