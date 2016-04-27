@@ -115,7 +115,7 @@ Package: epics-doc
 Architecture: all
 Depends: ${misc:Depends}
 Section: doc
-Conflicts: epics-msi,
+Conflicts: epics-msi (<< 3.15.3-9),
 Description: EPICS documentation
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
