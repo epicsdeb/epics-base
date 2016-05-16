@@ -61,11 +61,14 @@ Depends: libepics3.15.3 (= ${binary:Version}), epics-catools (= ${binary:Version
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
-Suggests: epics-doc, epics-perl, epics-compat-dev, epics-pcas-dev, ioclogserver,
-Conflicts: epics-catools (<= 3.14.11-6),
-           epics-msi,
-           epics-perl (<= 3.14.12.3-1),
-           ioclogserver (<< 3.15.3-9),
+Suggests: epics-doc        (= ${binary:Version}),
+          epics-perl       (= ${binary:Version}),
+          epics-pcas-dev   (= ${binary:Version}),
+          ioclogserver     (= ${binary:Version}),
+Conflicts: epics-catools   (<= 3.14.11-6),
+           epics-msi       (<< 3.15.3-8~),
+           epics-perl      (<= 3.14.12.3-1),
+           ioclogserver    (<< 3.15.3-9),
 Replaces: epics-msi,
 Provides: epics-msi,
 Description: Files needed to develop new EPICS applications
@@ -115,7 +118,8 @@ Package: epics-doc
 Architecture: all
 Depends: ${misc:Depends}
 Section: doc
-Conflicts: epics-msi (<< 3.15.3-9),
+Replaces:  epics-msi (<< 3.15.3-8~),
+Breaks:    epics-msi (<< 3.15.3-8~),
 Description: EPICS documentation
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
