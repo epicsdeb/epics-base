@@ -66,11 +66,10 @@ Suggests: epics-doc        (= ${binary:Version}),
           epics-pcas-dev   (= ${binary:Version}),
           ioclogserver     (= ${binary:Version}),
 Conflicts: epics-catools   (<= 3.14.11-6),
-           epics-msi       (<< 3.15.3-8~),
            epics-perl      (<= 3.14.12.3-1),
            ioclogserver    (<< 3.15.3-9),
-Replaces: epics-msi,
-Provides: epics-msi,
+Replaces:  epics-msi (<< 3.15.3-8~),
+Breaks:    epics-msi (<< 3.15.3-8~),
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -89,6 +88,15 @@ Description: Files needed to develop new EPICS applications
  control systems.
  .
  Private headers for the portable CA server needed by some special applications
+
+Package: epics-msi
+Architecture: all
+Depends: ${misc:Depends}
+Description: EPICS Macro Substitution and Include tool
+ MSI is a general purpose macro substitution/include tool.
+ It accepts as input an ascii template file.
+ .
+ This is a dummy package which can be removed.
 
 Package: epics-catools
 Section: admin
