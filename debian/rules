@@ -67,7 +67,7 @@ override_dh_epics_postinstall:
 
 override_dh_auto_test: # skip for development
 
-USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer
+USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer ascheck
 
 PERLBINS=caget.pl caput.pl camonitor.pl cainfo.pl capr.pl
 
