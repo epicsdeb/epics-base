@@ -1,3 +1,10 @@
+epics-base (3.15.3-11) unstable; urgency=medium
+
+  [ Martin Konrad ]
+  * Install ascheck into folder /usr/bin
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Thu, 14 Jul 2016 13:36:53 -0400
+
 epics-base (3.15.3-10) unstable; urgency=medium
 
   * Update deps to fix upgrades after epics-msi removal
