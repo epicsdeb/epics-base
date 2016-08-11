@@ -19,3 +19,7 @@
 0019-Changes-from-patch-in-lp-1539791.patch
 0020-Fix-for-RTEMS-NTP-sync-issue.patch
 0021-remove-w3-validator-link.patch
+0022-bswap16-32-as-functions.patch
+0023-Applied-Till-s-fix-for-lp-1581212.patch
+0024-ca-Fix-client-bug-race-condition-in-ipAddrToAsciiEng.patch
+0025-Fix-lsi-lso-puts-with-DBF_STRING-data.patch
