@@ -1,3 +1,14 @@
+epics-base (3.15.3-12) unstable; urgency=medium
+
+  * update patch set
+      Backport
+        bswap16/32 as functions
+        Applied Till's fix for lp:1581212
+        ca: Fix client bug (race condition) in ipAddrToAsciiEngine
+        Fix lsi/lso puts with DBF_STRING data
+
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Thu, 11 Aug 2016 18:31:34 -0400
+
 epics-base (3.15.3-11) unstable; urgency=medium
 
   [ Martin Konrad ]
