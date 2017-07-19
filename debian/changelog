@@ -1,3 +1,13 @@
+epics-base (3.15.3-13) unstable; urgency=medium
+
+  [ Michael Davidsaver ]
+  * update for debian 9
+  * update build deps
+  * update mingw toolchain name
+  * patch: disable epicsExceptionTest
+
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Wed, 19 Jul 2017 15:46:36 +0200
+
 epics-base (3.15.3-12) unstable; urgency=medium
 
   * update patch set
