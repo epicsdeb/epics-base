@@ -5,8 +5,8 @@ Maintainer: Martin Konrad <konrad@frib.msu.edu>
 Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
            Ralph Lange <Ralph.Lange@gmx.de>
 Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.12~),
-               libreadline6-dev, libncurses5-dev, perl,
-               mingw32,
+               libreadline6-dev | libreadline-dev, libncurses5-dev, perl,
+               mingw32 | g++-mingw-w64,
 Standards-Version: 3.9.6
 Vcs-Git: https://github.com/epicsdeb/epics-base.git
 Vcs-Browser: https://github.com/epicsdeb/epics-base
