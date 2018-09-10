@@ -8,7 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* osdSock.c */
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /*
  *      Author:		Jeff Hill 
  *      Date:          	04-05-94 

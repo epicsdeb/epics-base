@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20120715210850-2lq2x2mobf8zrdg2
+/*
  * Breakpoint Tables
  *
  *      Author:          Marty Kraimer

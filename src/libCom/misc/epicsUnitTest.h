@@ -5,7 +5,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20150723151307-cc77tm4jnjwm1rke
+/*
  * Author: Andrew Johnson
  */
 

@@ -7,9 +7,8 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20141006055702-6sznplbat5czjlgi */
 /*	Author: Marty Kraimer	Date: 03-24-94	*/
-
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>

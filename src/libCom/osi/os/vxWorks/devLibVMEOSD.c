@@ -7,8 +7,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* 
- * Revision-Id: anj@aps.anl.gov-20110721211050-gy5n916ntorc3gnp
- *
  * Archictecture dependent support for common device driver resources 
  *
  *      Author: Jeff Hill 

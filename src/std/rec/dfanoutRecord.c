@@ -5,8 +5,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: ralph.lange@gmx.de-20140730083624-ms46zlp6umx3vhg8 */
-
 /* recDfanout.c - Record Support Routines for Dfanout records */
 /*
  * Original Author: 	Matt Bickley   (Sometime in 1994)

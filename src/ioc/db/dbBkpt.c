@@ -8,7 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbBkpt.c */
-/* base/src/db Revision-Id: mdavidsaver@bnl.gov-20141118195645-2towa94rpw3h32t1 */
 /*
  *      Author:          Matthew Needes
  *      Date:            8-30-93

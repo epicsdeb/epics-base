@@ -13,9 +13,6 @@
 /*
  * Author: Jim Kowalkowski
  * Date: 2/96
- *
- * Revision-Id: anj@aps.anl.gov-20140207201312-uxbxarzi274gmm9b
- *
  */
 
 // this file if formatted with tab stop = 4

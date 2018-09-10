@@ -10,8 +10,6 @@
 \*************************************************************************/
 
 //
-//	Revision-Id: mdavidsaver@bnl.gov-20141118164853-jfi55hsxd2ydqckb
-//
 //      Author: Jeffrey O. Hill
 //              johill@lanl.gov
 //

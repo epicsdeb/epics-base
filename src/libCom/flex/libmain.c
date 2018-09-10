@@ -8,8 +8,6 @@
 \*************************************************************************/
 /* libmain - flex run-time support library "main" function */
 
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
-
 extern int yylex();
 
 int main(int argc, char *argv[])

@@ -9,7 +9,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devLib.c - support for allocation of common device resources */
-/* Revision-Id: anj@aps.anl.gov-20140530173650-0ljvbmfe5qq5991j */
 
 /*
  *  Original Author: Marty Kraimer

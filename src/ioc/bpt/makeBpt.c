@@ -7,7 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*  Revision-Id: ralph.lange@gmx.de-20140604191843-x2hoeh8pzkvbnkrv
+/*
  *	Author: Marty Kraimer
  *	Date:	9/28/95
  *	Replacement for old bldCvtTable

@@ -9,8 +9,6 @@
 \*************************************************************************/
 
 /*
- *	    Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
- *
  *      socket support library generic code
  *
  *      7-1-97  -joh-

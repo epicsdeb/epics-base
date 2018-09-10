@@ -7,7 +7,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* Error Handling definitions */
-/* Revision-Id: anj@aps.anl.gov-20140801225553-7l7l0axieumf6gnp */
 /*
  *      Author:          Marty Kraimer
  *      Date:            6-1-90

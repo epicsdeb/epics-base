@@ -1,6 +1,5 @@
 #
 # CONFIG.Common.RTEMS-mvme3100
-# Revision-Id: anj@aps.anl.gov-20110426174446-11te76tq9ieughhv
 # Author: W. Eric Norum <wenorum@lbl.gov>
 #
 # All RTEMS targets use the same Makefile fragment

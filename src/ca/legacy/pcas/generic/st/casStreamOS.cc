@@ -8,7 +8,6 @@
 \*************************************************************************/
 //
 // casStreamOS.cc
-// Revision-Id: johill@lanl.gov-20111212231024-gr8vwpkey5enkdbr
 //
 // TO DO:
 // o armRecv() and armSend() should return bad status when

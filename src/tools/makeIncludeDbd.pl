@@ -5,8 +5,6 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
-#
-# Revision-Id: anj@aps.anl.gov-20141118200146-r9fvolb5104cf8r0
 
 use strict;
 use File::Basename;
