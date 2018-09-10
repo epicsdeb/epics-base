@@ -8,7 +8,7 @@ its really slow...
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/libCom/test/Makefile b/src/libCom/test/Makefile
-index e0c1b06..51ee39f 100755
+index 6de9232..c7ac755 100755
 --- a/src/libCom/test/Makefile
 +++ b/src/libCom/test/Makefile
 @@ -197,7 +197,7 @@ TESTS += blockingSockTest
