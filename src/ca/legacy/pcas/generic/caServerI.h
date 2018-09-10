@@ -40,8 +40,13 @@ class casIntfOS;
 class casMonitor;
 class casChannelI;
 
-caStatus convertContainerMemberToAtomic ( class gdd & dd, 
-         aitUint32 appType, aitUint32 elemCount );
+caStatus convertContainerMemberToAtomic (class gdd & dd,
+         aitUint32 appType, aitUint32 requestedCount, aitUint32 nativeCount);
+
+// Keep the old signature for backward compatibility
+inline caStatus convertContainerMemberToAtomic (class gdd & dd,
+         aitUint32 appType, aitUint32 elemCount)
+{ return convertContainerMemberToAtomic(dd, appType, elemCount, elemCount); }
 
 class caServerI : 
     public caServerIO, 
@@ -102,6 +107,8 @@ private:
 
     caStatus attachInterface ( const caNetAddr & addr, bool autoBeaconAddr,
             bool addConfigAddr );
+
+    virtual void addMCast(const osiSockAddr&);
 
     void sendBeacon ( ca_uint32_t beaconNo );
 

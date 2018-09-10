@@ -7,10 +7,8 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* share/epicsH/freeList.h	*/
-/* share/epicsH Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 /* Author:  Marty Kraimer Date:    04-19-94	*/
-
+
 #ifndef INCfreeListh
 #define INCfreeListh
 

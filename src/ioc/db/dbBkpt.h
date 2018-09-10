@@ -8,7 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* dbBkpt.h			*/
-/* base/include Revision-Id: anj@aps.anl.gov-20120715210850-2lq2x2mobf8zrdg2 */
 /*
  *      Author:          Matthew Needes
  *      Date:            8-30-93

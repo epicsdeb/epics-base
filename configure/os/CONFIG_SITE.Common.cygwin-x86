@@ -1,7 +1,5 @@
 # CONFIG_SITE.Common.cygwin-x86
 #
-# Revision-Id: anj@aps.anl.gov-20121218214435-5xa56s2e69nn626n
-#
 # Site Specific definitions for cygwin-x86 target
 
 # Depending on your version of Cygwin you'll want one of the following

@@ -1,7 +1,5 @@
 # CONFIG_SITE.Common.linux-arm
 #
-# Revision-Id: anj@aps.anl.gov-20150225180234-ikkb3wewyqyr7441
-#
 # Site Specific definitions for all linux-arm targets
 #-------------------------------------------------------
 

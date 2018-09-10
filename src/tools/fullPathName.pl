@@ -6,8 +6,6 @@
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
 
-# Revision-Id: anj@aps.anl.gov-20130123132907-fi34uue1k4b3kig8
-
 # Determines an absolute pathname for its argument,
 # which may be either a relative or absolute path and
 # might have trailing directory names that don't exist yet.

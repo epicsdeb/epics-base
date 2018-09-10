@@ -10,7 +10,6 @@
 #*************************************************************************
 
 # Converts text file in DOS CR/LF format to unix ISO format
-#  Revision-Id: anj@aps.anl.gov-20130123132907-fi34uue1k4b3kig8
 
 @files=@ARGV;
 

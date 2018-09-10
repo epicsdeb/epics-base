@@ -1,7 +1,5 @@
 # CONFIG_SITE.linux-x86_64.linux-x86_64
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
-#
 # Site specific definitions for linux-x86_64 host - linux-x86_64 target builds
 #-------------------------------------------------------
 

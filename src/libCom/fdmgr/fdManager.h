@@ -8,8 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      Revision-Id: johill@lanl.gov-20131107172603-vkmh5jo4no0nxjhp
- *
  *      File descriptor management C++ class library
  *      (for multiplexing IO in a single threaded environment)
  *

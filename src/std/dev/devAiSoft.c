@@ -7,8 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: ralph.lange@gmx.de-20140801152055-0gm1bl7f1i1a2546
- *
+/*
  *      Original Authors: Bob Dalesio and Marty Kraimer
  *      Date: 3/6/91
  */

@@ -1,8 +1,5 @@
 # CONFIG_SITE.Common.darwin-ppcx86
 #
-# Revision-Id: anj@aps.anl.gov-20101012202556-m22qur2eligwq95h
-# This file is maintained by the build community.
-#
 # Site override definitions for darwin-ppcx86 target builds
 #----------------------------------------------------------
 

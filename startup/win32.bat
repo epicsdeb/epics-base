@@ -8,7 +8,6 @@ REM  EPICS BASE Versions 3.13.7
 REM  and higher are distributed subject to a Software License Agreement found
 REM  in file LICENSE that is included with this distribution.
 REM *************************************************************************
-REM  Revision-Id: anj@aps.anl.gov-20110603202834-g02equil7ophyk5c
 REM
 REM  Site-specific EPICS environment settings
 REM 

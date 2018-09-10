@@ -1,8 +1,5 @@
 # CONFIG.Common.solaris-sparc
 #
-# Revision-Id: anj@aps.anl.gov-20140925213412-lo1rca0dx74lzif7
-# This file is maintained by the build community.
-#
 # Definitions for solaris-sparc target archs
 # Sites may override these definitions in CONFIG_SITE.Common.solaris-sparc
 #-------------------------------------------------------

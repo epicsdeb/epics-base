@@ -14,9 +14,7 @@
 
 // Author:	Jim Kowalkowski
 // Date:	3/97
-//
-// Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
-//
+
 #define epicsExportSharedSymbols
 #include "gdd.h"
 

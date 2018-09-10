@@ -32,6 +32,7 @@
 #include "ellLib.h"
 #include "epicsTime.h"
 #include "epicsAssert.h"
+#include "osiSock.h"
 
 #ifdef rsrvRestore_epicsExportSharedSymbols
 #define epicsExportSharedSymbols
@@ -88,7 +89,7 @@ typedef struct client {
   char                  *pUserName;
   char                  *pHostName;
   epicsEventId          blockSem; /* used whenever the client blocks */
-  SOCKET                sock;
+  SOCKET                sock, udpRecv;
   int                   proto;
   epicsThreadId         tid;
   unsigned              minor_version_number;
@@ -98,12 +99,25 @@ typedef struct client {
   char                  disconnect; /* disconnect detected */
 } client;
 
+/* Channel state shows which struct client list a
+ * channel_in_us::node is in.
+ *
+ * client::chanList
+ *   rsrvCS_pendConnectResp, rsrvCS_inService
+ * client::chanPendingUpdateARList
+ *   rsrvCS_pendConnectRespUpdatePendAR, rsrvCS_inServiceUpdatePendAR
+ * Not in any list
+ *   rsrvCS_shutdown
+ *
+ * rsrvCS_invalid is not used
+ */
 enum rsrvChanState {
     rsrvCS_invalid,
     rsrvCS_pendConnectResp,
     rsrvCS_inService,
     rsrvCS_pendConnectRespUpdatePendAR,
-    rsrvCS_inServiceUpdatePendAR
+    rsrvCS_inServiceUpdatePendAR,
+    rsrvCS_shutdown
 };
 
 /*
@@ -137,6 +151,16 @@ struct event_ext {
     char                    modified;   /* mod & ev flw ctrl enbl */
 };
 
+typedef struct {
+    ELLNODE node;
+    osiSockAddr tcpAddr, /* TCP listener endpoint */
+                udpAddr, /* UDP name unicast receiver endpoint */
+                udpbcastAddr; /* UDP name broadcast receiver endpoint */
+    SOCKET tcp, udp, udpbcast;
+    struct client *client, *bclient;
+
+    unsigned int startbcast:1;
+} rsrv_iface_config;
 
 enum ctl {ctlInit, ctlRun, ctlPause, ctlExit};
 
@@ -160,15 +184,16 @@ enum ctl {ctlInit, ctlRun, ctlPause, ctlExit};
 #endif
 
 GLBLTYPE int                CASDEBUG;
-GLBLTYPE SOCKET             IOC_sock;
-GLBLTYPE SOCKET             IOC_cast_sock;
-GLBLTYPE unsigned short     ca_server_port;
-GLBLTYPE ELLLIST            clientQ; /* locked by clientQlock */
+GLBLTYPE unsigned short     ca_server_port, ca_udp_port, ca_beacon_port;
+GLBLTYPE ELLLIST            clientQ; /* (TCP clients) locked by clientQlock */
+GLBLTYPE ELLLIST            clientQudp; /* locked by clientQlock */
+GLBLTYPE ELLLIST            servers; /* rsrv_iface_config::node, read-only after rsrv_init() */
 GLBLTYPE ELLLIST            beaconAddrList;
-GLBLTYPE ELLLIST            casIntfAddrList;
+GLBLTYPE SOCKET             beaconSocket;
+GLBLTYPE ELLLIST            casIntfAddrList, casMCastAddrList;
+GLBLTYPE epicsUInt32        *casIgnoreAddrs;
 GLBLTYPE epicsMutexId       clientQlock;
-GLBLTYPE struct client      *prsrv_cast_client;
-GLBLTYPE BUCKET             *pCaBucket;
+GLBLTYPE BUCKET             *pCaBucket; /* locked by clientQlock */
 GLBLTYPE void               *rsrvClientFreeList;
 GLBLTYPE void               *rsrvChanFreeList;
 GLBLTYPE void               *rsrvEventFreeList;
@@ -176,7 +201,7 @@ GLBLTYPE void               *rsrvSmallBufFreeListTCP;
 GLBLTYPE void               *rsrvLargeBufFreeListTCP;
 GLBLTYPE unsigned           rsrvSizeofLargeBufTCP;
 GLBLTYPE void               *rsrvPutNotifyFreeList;
-GLBLTYPE unsigned           rsrvChannelCount;
+GLBLTYPE unsigned           rsrvChannelCount; /* locked by clientQlock */
 
 GLBLTYPE epicsEventId       casudp_startStopEvent;
 GLBLTYPE epicsEventId       beacon_startStopEvent;
@@ -185,6 +210,7 @@ GLBLTYPE volatile enum ctl  casudp_ctl;
 GLBLTYPE volatile enum ctl  beacon_ctl;
 GLBLTYPE volatile enum ctl  castcp_ctl;
 
+GLBLTYPE unsigned int       threadPrios[5];
 
 #define CAS_HASH_TABLE_SIZE 4096
 

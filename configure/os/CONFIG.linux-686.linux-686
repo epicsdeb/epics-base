@@ -1,7 +1,5 @@
 #  CONFIG.linux-686.linux-686
 #
-# Revision-Id: jba@aps.anl.gov-20110819212053-fik7hka3jxx3s7rl
-#
 # Definitions for linux-686 host - linux-686 target builds
 # Sites may override these definitions in CONFIG_SITE.linux-686.linux-686
 #-------------------------------------------------------

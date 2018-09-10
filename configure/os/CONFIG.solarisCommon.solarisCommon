@@ -1,8 +1,5 @@
 # CONFIG.solarisCommon.solarisCommon
 #
-# Revision-Id: anj@aps.anl.gov-20150303173546-jpdozsjpm7n0w5jz
-# This file is maintained by the build community.
-#
 # Definitions for solaris host - solaris target build
 # Sites may override these definitions in CONFIG_SITE.solarisCommon.solarisCommon
 #-------------------------------------------------------

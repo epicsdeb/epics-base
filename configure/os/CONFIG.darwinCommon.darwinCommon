@@ -1,8 +1,5 @@
 # CONFIG.darwinCommon.darwinCommon
 #
-# Revision-Id: anj@aps.anl.gov-20141111185700-uiw6sn521w3lgmmr
-# This file is maintained by the build community.
-#
 # Common definitions for darwin builds
 # Sites may override these definitions in CONFIG_SITE.darwinCommon.darwinCommon
 #-------------------------------------------------------

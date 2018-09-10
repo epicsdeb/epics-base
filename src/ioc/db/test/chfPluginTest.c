@@ -418,7 +418,7 @@ static void channelRegisterPost(dbChannel *chan, void *user,
 static void channel_report(dbChannel *chan, void *user, int level,
     const unsigned short indent)
 {
-    testOk(level == R_LEVEL - 1, "channel_report: level correct");
+    testOk(level == R_LEVEL - 2, "channel_report: level correct %u == %u", level, R_LEVEL-2);
     if (user == puser1) {
         testOk(e1 & e_report, "channel_report (1) called");
         c1 |= e_report;
@@ -541,8 +541,11 @@ MAIN(chfPluginTest)
     dbChannel *pch;
     db_field_log *pfl;
 
-#if defined(WIN32) && (!defined(_MINGW) || __MSVCRT_VERSION__ >= 0x0800)
+#ifdef _WIN32
+#if (defined(_MSC_VER) && _MSC_VER < 1900) || \
+    (defined(_MINGW) && defined(_TWO_DIGIT_EXPONENT))
     _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
 #endif
 
     testPlan(1433);

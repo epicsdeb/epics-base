@@ -6,7 +6,6 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: mdavidsaver@mddesk.nsls2.bnl.gov-20140623202823-xixy078rlml5d5wx */
 /*
  *      Authors:        Benjamin Franksen (BESY) and Marty Kraimer
  *      Date:           06-01-91

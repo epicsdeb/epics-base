@@ -5,8 +5,6 @@
 \*************************************************************************/
 /* osdEnv.c */
 /*
- * Revision-Id: anj@aps.anl.gov-20141007043923-zjae64um80bas2df
- *
  * Author: Eric Norum
  *   Date: May 7, 2001
  *

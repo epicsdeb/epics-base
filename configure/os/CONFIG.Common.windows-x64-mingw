@@ -1,8 +1,5 @@
 # CONFIG.Common.windows-x64-mingw
 #
-# Revision-Id: anj@aps.anl.gov-20131120005049-xcx9o8ohtimzbib1
-# This file is maintained by the build community.
-#
 # Definitions for windows-x64-mingw target builds
 # Sites may override these definitions in CONFIG_SITE.Common.windows-x64-mingw
 #-------------------------------------------------------

@@ -5,7 +5,6 @@
 \*************************************************************************/
 /*
  * RTEMS network configuration for EPICS
- *  Revision-Id: anj@aps.anl.gov-20110603202834-g02equil7ophyk5c
  *      Author: W. Eric Norum
  *              eric.norum@usask.ca
  *              (306) 966-5394

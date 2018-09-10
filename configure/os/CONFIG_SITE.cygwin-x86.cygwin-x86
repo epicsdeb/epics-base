@@ -1,8 +1,5 @@
 # CONFIG_SITE.cygwin-x86.cygwin-x86
 #
-# Revision-Id: johill@lanl.gov-20110819204100-oi6yylu9voatpdb3
-# This file is maintained by the build community.
-#
 # Site override definitions for cygwin-x86 host - cygwin-x86 target builds
 #-------------------------------------------------------
  

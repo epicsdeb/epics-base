@@ -6,8 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20141007043923-zjae64um80bas2df
- *
+/*
  * Definitions for macro substitution library (macLib)
  *
  * William Lupton, W. M. Keck Observatory

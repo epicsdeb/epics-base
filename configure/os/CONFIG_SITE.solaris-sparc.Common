@@ -1,7 +1,5 @@
 # CONFIG_SITE.solaris-sparc.Common
 #
-# Revision-Id: anj@aps.anl.gov-20140425215128-ck6jveiqp6r49sv2
-#
 # Site specific override definitions for solaris-sparc host builds
 # Only the local epics system manager should modify this file
 

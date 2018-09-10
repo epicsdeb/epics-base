@@ -13,9 +13,6 @@
 /*
  * Authors: Jeff Hill and Jim Kowalkowski
  * Date: 6/20/96
- *
- * Revision-Id: ralph.lange@gmx.de-20150416120533-lqhjpzztj3ya2lq6
- *
  */
 
 #include <string.h>

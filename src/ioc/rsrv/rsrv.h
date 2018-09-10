@@ -8,8 +8,6 @@
 \*************************************************************************/
 
 /*
- * Revision-Id: anj@aps.anl.gov-20140529221026-pcommay3eperxu5f
- *
  *  Author: Jeffrey O. Hill
  *      hill@luke.lanl.gov
  *      (505) 665 1831
