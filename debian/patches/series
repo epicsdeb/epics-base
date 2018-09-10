@@ -12,3 +12,4 @@
 0012-only-D-an-I-in-pkg-config-files.patch
 0013-remove-w3-validator-link.patch
 0014-Applied-Till-s-fix-for-lp-1581212.patch
+0015-Add-missing-shebang-to-Perl-files.patch

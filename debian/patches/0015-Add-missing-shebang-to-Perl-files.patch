@@ -1,0 +1,31 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Mon, 10 Sep 2018 16:29:11 -0400
+Subject: Add missing shebang to Perl files
+
+---
+ src/std/softIoc/makeInstallDir.pl | 3 +--
+ startup/EpicsHostArch.pl          | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/src/std/softIoc/makeInstallDir.pl b/src/std/softIoc/makeInstallDir.pl
+index 61f271f..d5eb8a0 100644
+--- a/src/std/softIoc/makeInstallDir.pl
++++ b/src/std/softIoc/makeInstallDir.pl
+@@ -1,5 +1,4 @@
+-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
+-    if $running_under_some_shell;
++#!/usr/bin/perl
+ #*************************************************************************
+ # Copyright (c) 2010 UChicago Argonne LLC, as Operator of Argonne
+ #     National Laboratory.
+diff --git a/startup/EpicsHostArch.pl b/startup/EpicsHostArch.pl
+index 09f7ffd..78330ad 100755
+--- a/startup/EpicsHostArch.pl
++++ b/startup/EpicsHostArch.pl
+@@ -1,5 +1,4 @@
+-eval 'exec perl -S $0 ${1+"$@"}'  # -*- Mode: perl -*-
+-    if $running_under_some_shell; # EpicsHostArch.pl
++#!/usr/bin/perl
+ #*************************************************************************
+ # Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
+ #     National Laboratory.
