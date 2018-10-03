@@ -44,7 +44,7 @@ Package: ioclogserver
 Section: admin
 Architecture: any
 Depends: libepics3.15.5 (= ${binary:Version}),
-         epics-dev (= ${binary:Version}),
+         epics-dev (= ${binary:Version}), lsb-base,
          ${misc:Depends}, ${shlibs:Depends}, adduser,
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
