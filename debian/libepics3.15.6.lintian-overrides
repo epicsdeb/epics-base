@@ -1,6 +1,6 @@
-libepics3.15.5: package-name-doesnt-match-sonames
+libepics3.15.6: package-name-doesnt-match-sonames
 # Don't want to package the many Base libraries seperately
 # All have the same soname
-libepics3.15.5: dev-pkg-without-shlib-symlink
+libepics3.15.6: dev-pkg-without-shlib-symlink
 # Our policy is not to place the .so symlinks in the default search path
 # but rather in /usr/lib/epics/lib/*/
