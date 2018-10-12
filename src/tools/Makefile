@@ -32,6 +32,9 @@ PERL_MODULES += DBD/Recordtype.pm
 PERL_MODULES += DBD/Registrar.pm
 PERL_MODULES += DBD/Variable.pm
 
+# This goes into lib/perl, not bin/<host>
+PERL_MODULES += EpicsHostArch.pl
+
 PERL_SCRIPTS += assembleSnippets.pl
 PERL_SCRIPTS += convertRelease.pl
 PERL_SCRIPTS += cvsclean.pl
@@ -45,6 +48,7 @@ PERL_SCRIPTS += makeTestfile.pl
 PERL_SCRIPTS += mkmf.pl
 PERL_SCRIPTS += munch.pl
 PERL_SCRIPTS += replaceVAR.pl
+PERL_SCRIPTS += tap-to-junit-xml.pl
 PERL_SCRIPTS += useManifestTool.pl
 
 PERL_SCRIPTS += dbdToMenuH.pl

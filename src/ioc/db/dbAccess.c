@@ -291,10 +291,14 @@ static void get_alarm(DBADDR *paddr, char **ppbuffer,
     if (*options & DBR_AL_LONG) {
         struct dbr_alLong *pal = (struct dbr_alLong*) pbuffer;
 
-        pal->upper_alarm_limit   = (epicsInt32) ald.upper_alarm_limit;
-        pal->upper_warning_limit = (epicsInt32) ald.upper_warning_limit;
-        pal->lower_warning_limit = (epicsInt32) ald.lower_warning_limit;
-        pal->lower_alarm_limit   = (epicsInt32) ald.lower_alarm_limit;
+        pal->upper_alarm_limit   = finite(ald.upper_alarm_limit) ?
+            (epicsInt32) ald.upper_alarm_limit : 0;
+        pal->upper_warning_limit = finite(ald.upper_warning_limit) ?
+            (epicsInt32) ald.upper_warning_limit : 0;
+        pal->lower_warning_limit = finite(ald.lower_warning_limit) ?
+            (epicsInt32) ald.lower_warning_limit : 0;
+        pal->lower_alarm_limit   = finite(ald.lower_alarm_limit) ?
+            (epicsInt32) ald.lower_alarm_limit : 0;
 
         if (no_data)
             *options ^= DBR_AL_LONG; /*Turn off option*/
@@ -738,28 +742,34 @@ static long getLinkValue(DBADDR *paddr, short dbrType,
 {
     dbCommon *precord = paddr->precord;
     dbFldDes *pfldDes = paddr->pfldDes;
+    /* size of pbuf storage in bytes, including space for trailing nil */
     int maxlen;
     DBENTRY dbEntry;
     long status;
+    long nReq = nRequest ? *nRequest : 1;
+
+    /* dbFindRecord() below will always succeed as we have a
+     * valid DBADDR, so no point to check again.
+     * Request for zero elements always succeeds
+     */
+    if(!nReq)
+        return 0;
 
     switch (dbrType) {
     case DBR_STRING:
-        maxlen = MAX_STRING_SIZE - 1;
-        if (nRequest && *nRequest > 1) *nRequest = 1;
+        maxlen = MAX_STRING_SIZE;
+        nReq = 1;
         break;
 
     case DBR_DOUBLE:    /* Needed for dbCa links */
-        if (nRequest && *nRequest) *nRequest = 1;
+        if (nRequest) *nRequest = 1;
         *(double *)pbuf = epicsNAN;
         return 0;
 
     case DBR_CHAR:
     case DBR_UCHAR:
-            if (nRequest && *nRequest > 0) {
-            maxlen = *nRequest - 1;
-            break;
-        }
-        /* else fall through ... */
+        maxlen = nReq;
+        break;
     default:
         return S_db_badDbrtype;
     }
@@ -768,10 +778,13 @@ static long getLinkValue(DBADDR *paddr, short dbrType,
     status = dbFindRecord(&dbEntry, precord->name);
     if (!status) status = dbFindField(&dbEntry, pfldDes->name);
     if (!status) {
-        char *rtnString = dbGetString(&dbEntry);
+        const char *rtnString = dbGetString(&dbEntry);
 
-        strncpy(pbuf, rtnString, --maxlen);
-        pbuf[maxlen] = 0;
+        strncpy(pbuf, rtnString, maxlen-1);
+        pbuf[maxlen-1] = 0;
+        if(dbrType!=DBR_STRING)
+            nReq = strlen(pbuf)+1;
+        if(nRequest) *nRequest = nReq;
     }
     dbFinishEntry(&dbEntry);
     return status;
@@ -781,28 +794,31 @@ static long getAttrValue(DBADDR *paddr, short dbrType,
         char *pbuf, long *nRequest)
 {
     int maxlen;
+    long nReq = nRequest ? *nRequest : 1;
 
     if (!paddr->pfield) return S_db_badField;
 
     switch (dbrType) {
     case DBR_STRING:
-        maxlen = MAX_STRING_SIZE - 1;
-        if (nRequest && *nRequest > 1) *nRequest = 1;
+        maxlen = MAX_STRING_SIZE;
+        nReq = 1;
         break;
 
     case DBR_CHAR:
     case DBR_UCHAR:
-            if (nRequest && *nRequest > 0) {
-            maxlen = *nRequest - 1;
-            break;
-        }
+        maxlen = nReq;
+        break;
+
         /* else fall through ... */
     default:
         return S_db_badDbrtype;
     }
 
-    strncpy(pbuf, paddr->pfield, --maxlen);
-    pbuf[maxlen] = 0;
+    strncpy(pbuf, paddr->pfield, maxlen-1);
+    pbuf[maxlen-1] = 0;
+    if(dbrType!=DBR_STRING)
+        nReq = strlen(pbuf)+1;
+    if(nRequest) *nRequest = nReq;
     return 0;
 }
 
@@ -929,6 +945,15 @@ long dbGet(DBADDR *paddr, short dbrType,
             else
                 localAddr.pfield = (char *)  pfl->u.r.field;
             status = convert(&localAddr, pbuf, n, capacity, offset);
+        }
+
+        if(!status && dbrType==DBF_CHAR && nRequest &&
+                paddr->pfldDes && paddr->pfldDes->field_type==DBF_STRING)
+        {
+            /* long string ensure nil and truncate to actual length */
+            long nReq = *nRequest;
+            pbuf[nReq-1] = '\0';
+            *nRequest = strlen(pbuf)+1;
         }
     }
 done:

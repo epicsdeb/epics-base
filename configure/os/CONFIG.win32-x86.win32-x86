@@ -79,27 +79,32 @@ CPP = cl -nologo -C -E
 
 # Configure OS vendor C++ compiler
 #
-# __STDC__=0 gives us both:
-# 1) define STDC for code (pretend ANSI conformance)
-# 2) set it to 0 to use MS C "extensions" (open for _open etc.)
-# because MS uses:   if __STDC__ ... disable many nice things
-#
 # -EHsc - generate code for exceptions
 # -GR - generate code for run time type identification
 #
 CCC = cl -EHsc -GR
-CODE_CPPFLAGS += -nologo -D__STDC__=0
+
+# Other compiler flags, used for CPP, C and C++
+#
+# -FC - Show absolute path of source file in diagnostics
+# -D__STDC__=0 gives us both:
+#   1) define STDC for code (pretend ANSI conformance)
+#   2) set it to 0 to use MS C "extensions" (open for _open etc.)
+#   because MS uses:   if __STDC__ ... disable many nice things
+#
+CODE_CPPFLAGS += -nologo -FC -D__STDC__=0
 CODE_CPPFLAGS += -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 
 
 # Compiler flags for C++ files
 
 #
-# -W<N> use warning level N
-# (maximum lint level warnings at level 4)
-# -w44355 set "'this' used in the base initializer list" to be level 4
+# -W<n> disable warnings from levels > n
+# -w<n><m> set warning m to level n
+# -w44355 "'this' used in the base initializer list"
 # -w44344 "behavior change: use of explicit template arguments results in ..."
-WARN_CXXFLAGS_YES = -W3 -w44355 -w44344
+# -w44251 "class needs to have dll-interface to be used by clients of ..."
+WARN_CXXFLAGS_YES = -W3 -w44355 -w44344 -w44251
 WARN_CXXFLAGS_NO  = -W1
 
 #
@@ -136,6 +141,16 @@ STATIC_LDFLAGS=
 RANLIB=
 
 #
+# option needed for parallel builds with Visual Studio 2015 onward
+#
+# -FS Force Synchronous PDB Writes
+ifneq ($(VisualStudioVersion),)
+  OPT_CXXFLAGS_NO += -FS
+  OPT_CFLAGS_NO += -FS
+endif
+
+
+#
 # add -profile here to run the ms profiler
 # -LTCG whole program optimization
 # -incremental:no full linking
@@ -165,48 +180,38 @@ EXE=.exe
 OBJ=.obj
 RES=.res
 
-#       Problem: MS Visual C++ does not recognize  *.cc as C++ source,
-#       so we do C++ compiles using the global flag -TP 
+# MS Visual C++ doesn't recognize *.cc as a C++ source file,
+# so C++ compiles get the flag -TP
 COMPILER_CXXFLAGS = -TP
 
-#	Operating system flags 
+# Operating system flags
 OP_SYS_CFLAGS =
 OP_SYS_CXXFLAGS = $(COMPILER_CXXFLAGS)
 
-#
-#	Files and flags needed to link DLLs (used in RULES_BUILD)
-#
-WIN32_DLLFLAGS = /subsystem:windows /dll $(OPT_LDFLAGS) \
+# Files and flags needed to link DLLs (used in RULES_BUILD)
+WIN32_DLLFLAGS = -subsystem:windows -dll $(OPT_LDFLAGS) \
  $(USR_LDFLAGS) $(CMD_LDFLAGS) $(TARGET_LDFLAGS) $(LIB_LDFLAGS)
 
-#
-# specify dll .def file only if it exists
-#
+# Specify dll .def file only if it exists
 DLL_DEF_FLAG = $(addprefix -def:,$(wildcard ../$(addsuffix .def,$*)))
 
-#
-#	A WIN32 dll has three parts:
+# A WIN32 dll has three parts:
 #	x.dll: the real dll (SHRLIBNAME)
 #	x.lib: what you link to progs that use the dll (DLLSTUB_LIBNAME)
 #	x.exp: what you need to build the dll (in no variable)
-#
 LINK.shrlib = $(WINLINK) -nologo $(WIN32_DLLFLAGS) -out:$@ \
     -implib:$(@:%$(SHRLIB_SUFFIX)=%$(LIB_SUFFIX)) \
     $(DLL_DEF_FLAG) $(LIBRARY_LD_OBJS) $(LIBRARY_LD_RESS) $(SHRLIB_LDLIBS)
 
-
-#	adjust names of libraries to build
-#
+# Adjust names of libraries to build
 SHRLIB_SUFFIX_BASE = .dll
 SHRLIB_SUFFIX = $(SHRLIB_SUFFIX_BASE)
 SHRLIBNAME_YES = $(BUILD_LIBRARY:%=%$(SHRLIB_SUFFIX))
 LOADABLE_SHRLIBNAME = $(LOADABLE_BUILD_LIBRARY:%=%$(SHRLIB_SUFFIX))
 TESTSHRLIBNAME_YES = $(TESTBUILD_LIBRARY:%=%$(SHRLIB_SUFFIX_BASE))
 
-#
-# When SHARED_LIBRARIES is YES we are building a DLL link library 
-# and when SHARED_LIBRARIES is NO we are building an object library
-#
+# When SHARED_LIBRARIES is YES we are building a DLL shared library.
+# When SHARED_LIBRARIES is NO we are building an object library
 DLLSTUB_SUFFIX = .lib
 DLLSTUB_LIBNAME_YES = $(BUILD_LIBRARY:%=%.lib)
 DLLSTUB_LIBNAME = $(DLLSTUB_LIBNAME_$(SHARED_LIBRARIES))
@@ -220,7 +225,7 @@ LIBNAME = $(LIBNAME_$(SHARED_LIBRARIES))
 TESTLIBNAME_NO = $(TESTBUILD_LIBRARY:%=%.lib)
 TESTLIBNAME = $(TESTLIBNAME_$(SHARED_LIBRARIES))
 
-#	dll install location
+# dll install location
 INSTALL_SHRLIB = $(INSTALL_BIN)
 
 
@@ -280,7 +285,7 @@ LINK.cpp = $(WINLINK) -nologo $(STATIC_LDFLAGS) $(LDFLAGS) $(PROD_LDFLAGS) \
 #--------------------------------------------------
 # UseManifestTool.pl checks MS Visual c++ compiler version number to
 # decide whether or not to use the Manifest Tool command to embed the
-# linker created .manifest file into a library or product target. 
+# linker created .manifest file into a library or product target.
 # useManifestTool.pl returns 0(don't use) or 1(use).
 #
 MT.exe = mt.exe -nologo -manifest $@.manifest
@@ -290,4 +295,3 @@ MT_EXE_COMMAND_NO = $(MT.exe) "-outputresource:$@;\#1"
 MT_EXE_COMMAND1 = $(MT_EXE_COMMAND_$(STATIC_BUILD))
 MT_DLL_COMMAND = $(MT_DLL_COMMAND$(shell $(PERL) $(TOOLS)/useManifestTool.pl))
 MT_EXE_COMMAND = $(MT_EXE_COMMAND$(shell $(PERL) $(TOOLS)/useManifestTool.pl))
-

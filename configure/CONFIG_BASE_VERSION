@@ -27,7 +27,7 @@ EPICS_VERSION = 3
 EPICS_REVISION = 15
 
 # EPICS_MODIFICATION must be a number >=0 and <256
-EPICS_MODIFICATION = 5
+EPICS_MODIFICATION = 6
 
 # EPICS_PATCH_LEVEL must be a number (win32 resource file requirement)
 # Not included if zero
