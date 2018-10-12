@@ -1,3 +1,12 @@
+epics-base (3.15.6-1) unstable; urgency=medium
+
+  * New upstream version 3.15.6
+  * Rebase patch queue
+  * Update control file for 3.15.6
+  * Adjust hard-coded version numbers
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Fri, 12 Oct 2018 15:40:04 -0400
+
 epics-base (3.15.5-2) unstable; urgency=medium
 
   * ioclogserver package needs to depend on lsb-base
