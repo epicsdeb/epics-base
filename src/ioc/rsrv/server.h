@@ -63,8 +63,10 @@ typedef struct caHdrLargeArray {
 enum messageBufferType { mbtUDP, mbtSmallTCP, mbtLargeTCP };
 struct message_buffer {
   char                      *buf;
+  /*! points to first filled byte in buffer */
   unsigned                  stk;
   unsigned                  maxstk;
+  /*! points to first unused byte in buffer (after filled bytes) */
   unsigned                  cnt;
   enum messageBufferType    type;
 };
@@ -73,7 +75,9 @@ extern epicsThreadPrivateId rsrvCurrentClient;
 
 typedef struct client {
   ELLNODE               node;
+  /*! guarded by SEND_LOCK()  aka. client::lock */
   struct message_buffer send;
+  /*! accessed by receive thread w/o locks cf. camsgtask() */
   struct message_buffer recv;
   epicsMutexId          lock;
   epicsMutexId          putNotifyLock;
@@ -167,7 +171,7 @@ enum ctl {ctlInit, ctlRun, ctlPause, ctlExit};
 /*  NOTE: external used so they remember the state across loads */
 #ifdef  GLBLSOURCE
 #   define GLBLTYPE
-#   define GLBLTYPE_INIT(A)
+#   define GLBLTYPE_INIT(A) = A
 #else
 #   define GLBLTYPE extern
 #   define GLBLTYPE_INIT(A)
@@ -185,8 +189,7 @@ enum ctl {ctlInit, ctlRun, ctlPause, ctlExit};
 
 GLBLTYPE int                CASDEBUG;
 GLBLTYPE unsigned short     ca_server_port, ca_udp_port, ca_beacon_port;
-GLBLTYPE ELLLIST            clientQ; /* (TCP clients) locked by clientQlock */
-GLBLTYPE ELLLIST            clientQudp; /* locked by clientQlock */
+GLBLTYPE ELLLIST            clientQ             GLBLTYPE_INIT(ELLLIST_INIT);
 GLBLTYPE ELLLIST            servers; /* rsrv_iface_config::node, read-only after rsrv_init() */
 GLBLTYPE ELLLIST            beaconAddrList;
 GLBLTYPE SOCKET             beaconSocket;

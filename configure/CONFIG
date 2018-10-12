@@ -20,11 +20,15 @@ else
 endif
 
 # Provide a default if the user hasn't set EPICS_HOST_ARCH
-ifeq ($(origin EPICS_HOST_ARCH), undefined)
-  # NB: We use a simply expanded variable here for performance:
-  EPICS_HOST_ARCH := $(shell $(CONFIG)/../startup/EpicsHostArch.pl)
-endif
 #
+ifeq ($(origin EPICS_HOST_ARCH), undefined)
+  # Bootstrapping ...
+  EHA := $(firstword $(wildcard $(EPICS_BASE)/lib/perl/EpicsHostArch.pl \
+        $(TOP)/src/tools/EpicsHostArch.pl))
+  # NB: We use a simply expanded variable here for performance:
+  export EPICS_HOST_ARCH := $(shell perl $(EHA))
+  EHA :=
+endif
 
 -include $(CONFIG)/RELEASE
 -include $(CONFIG)/RELEASE.$(EPICS_HOST_ARCH)
@@ -73,16 +77,16 @@ ifdef T_A
   #
   -include $(CONFIG)/os/CONFIG.$(EPICS_HOST_ARCH).$(T_A)
 
+  #  Site specific target and host-target definitions and overrides
+  #
+  -include $(CONFIG)/os/CONFIG_SITE.Common.$(T_A)
+  -include $(CONFIG)/os/CONFIG_SITE.$(EPICS_HOST_ARCH).$(T_A)
+
   #  RELEASE file specific definitions
   #
   ifneq ($(CONFIG),$(TOP)/configure)
     -include $(CONFIG)/CONFIG_APP_INCLUDE
   endif
-
-  #  Site specific target and host-target definitions
-  #
-  -include $(CONFIG)/os/CONFIG_SITE.Common.$(T_A)
-  -include $(CONFIG)/os/CONFIG_SITE.$(EPICS_HOST_ARCH).$(T_A)
 
 endif # ifdef T_A
 

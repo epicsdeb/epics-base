@@ -42,40 +42,28 @@
 void camsgtask ( void *pParm )
 {
     struct client *client = (struct client *) pParm;
-    osiSockIoctl_t nchars;
-    int status;
 
     casAttachThreadToClient ( client );
 
-    /* 
-     * send the server's minor version number to the client 
-     */
-    status = cas_copy_in_header ( client, CA_PROTO_VERSION, 0, 
-        0, CA_MINOR_PROTOCOL_REVISION, 0, 0, 0 );
-    if ( status != ECA_NORMAL ) {
-        LOCK_CLIENTQ;
-        ellDelete ( &clientQ, &client->node );
-        UNLOCK_CLIENTQ;
-        destroy_tcp_client ( client );
-        return;
-    }
-
     while (castcp_ctl == ctlRun && !client->disconnect) {
+        osiSockIoctl_t check_nchars;
+        long nchars;
+        int status;
 
         /*
          * allow message to batch up if more are comming
          */
-        status = socket_ioctl (client->sock, FIONREAD, &nchars);
+        status = socket_ioctl (client->sock, FIONREAD, &check_nchars);
         if (status < 0) {
             char sockErrBuf[64];
 
             epicsSocketConvertErrnoToString ( 
                 sockErrBuf, sizeof ( sockErrBuf ) );
-            errlogPrintf("CAS: ioctl error - %s\n",
+            errlogPrintf("CAS: FIONREAD error: %s\n",
                 sockErrBuf);
             cas_send_bs_msg(client, TRUE);
         }
-        else if (nchars == 0){
+        else if (check_nchars == 0){
             cas_send_bs_msg(client, TRUE);
         }
 
@@ -151,6 +139,9 @@ void camsgtask ( void *pParm )
         }
         else {
             char buf[64];
+
+            /* flush any queued messages before shutdown */
+            cas_send_bs_msg(client, 1);
             
             client->recv.cnt = 0ul;
             
