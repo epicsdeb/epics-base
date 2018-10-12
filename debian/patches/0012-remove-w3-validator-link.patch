@@ -8,7 +8,7 @@ lintian complains about the <img> tag.
  1 file changed, 6 deletions(-)
 
 diff --git a/src/ca/client/CAref.html b/src/ca/client/CAref.html
-index 2bdd0b4..ad8bf50 100644
+index 81e2eb6..b649ae3 100644
 --- a/src/ca/client/CAref.html
 +++ b/src/ca/client/CAref.html
 @@ -45,12 +45,6 @@ GmbH.</span></p>

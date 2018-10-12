@@ -25,7 +25,7 @@ index e6e6033..681c5ce 100644
  #-------------------------------------------------------
  # Default for perl if it's on the PATH,
 diff --git a/configure/RULES_ARCHS b/configure/RULES_ARCHS
-index 6d18082..8170473 100644
+index dc3fa04..44ba29a 100644
 --- a/configure/RULES_ARCHS
 +++ b/configure/RULES_ARCHS
 @@ -42,9 +42,9 @@ define DEP_template
