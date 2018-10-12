@@ -1,0 +1,19 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Fri, 12 Oct 2018 16:58:09 -0400
+Subject: Fix shebang line of tap-to-junit-xml.pl
+
+This fixes lp:1797634.
+---
+ src/tools/tap-to-junit-xml.pl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/tools/tap-to-junit-xml.pl b/src/tools/tap-to-junit-xml.pl
+index fe8aa86..fdcfcf9 100644
+--- a/src/tools/tap-to-junit-xml.pl
++++ b/src/tools/tap-to-junit-xml.pl
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl
++#!/usr/bin/perl
+ =head1 NAME
+ 
+ tap-to-junit-xml - convert perl-style TAP test output to JUnit-style XML
