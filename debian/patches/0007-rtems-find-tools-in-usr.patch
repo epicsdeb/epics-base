@@ -8,10 +8,10 @@ rtems 4.9
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/configure/os/CONFIG_SITE.Common.RTEMS b/configure/os/CONFIG_SITE.Common.RTEMS
-index cfb5641..59b4df3 100644
+index adb2530..eeef68a 100644
 --- a/configure/os/CONFIG_SITE.Common.RTEMS
 +++ b/configure/os/CONFIG_SITE.Common.RTEMS
-@@ -7,9 +7,8 @@
+@@ -5,9 +5,8 @@
  
  # Where to find RTEMS
  #

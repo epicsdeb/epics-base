@@ -11,8 +11,6 @@
 #define INC_osiProcess_H
 
 /* 
- * Revision-Id: anj@aps.anl.gov-20130411175656-dor1h3zt7zo46epw
- * 
  * Operating System Independent Interface to Process Environment
  *
  * Author: Jeff Hill

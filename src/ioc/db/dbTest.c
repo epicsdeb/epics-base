@@ -7,7 +7,6 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20150820161401-424yl5eopw4o9z51 */
 /* database access test subroutines */
 
 #include <stddef.h>
@@ -941,7 +940,9 @@ static void printBuffer(
         }
         else {
             for (i = 0; i < no_elements; i+= MAXLINE - 5) {
-                sprintf(pmsg, " \"%.*s\"", MAXLINE - 5, (char *)pbuffer + i);
+                int width = no_elements - i;
+                if (width > MAXLINE - 5) width = MAXLINE - 5;
+                sprintf(pmsg, " \"%.*s\"", width, (char *)pbuffer + i);
                 if (i + MAXLINE - 5 < no_elements) strcat(pmsg, " +");
                 dbpr_msgOut(pMsgBuff, tab_size);
             }

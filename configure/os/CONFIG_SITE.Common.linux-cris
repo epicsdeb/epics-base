@@ -1,7 +1,5 @@
 # CONFIG_SITE.Common.linux-cris
 #
-# Revision-Id: anj@aps.anl.gov-20101122164049-brpnm0uwvpptmw80
-#
 # Site Specific definitions for linux-cris target
 # Only the local epics system manager should modify this file
 

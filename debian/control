@@ -12,7 +12,7 @@ Vcs-Git: https://github.com/epicsdeb/epics-base.git
 Vcs-Browser: https://github.com/epicsdeb/epics-base
 Homepage: http://www.aps.anl.gov/epics/
 
-Package: libepics3.15.3
+Package: libepics3.15.5
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -27,11 +27,11 @@ Description: EPICS Base libraries for clients and servers
  .
  This package contains host system shared libraries for clients and IOCs.
 
-Package: libepics3.15.3-dbg
+Package: libepics3.15.5-dbg
 Section: debug
 Architecture: any
 Multi-Arch: same
-Depends: libepics3.15.3 (= ${binary:Version}), ${misc:Depends},
+Depends: libepics3.15.5 (= ${binary:Version}), ${misc:Depends},
 Provides: libepics-dbg
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
@@ -43,8 +43,8 @@ Description: Files needed to develop new EPICS applications
 Package: ioclogserver
 Section: admin
 Architecture: any
-Depends: libepics3.15.3 (= ${binary:Version}),
-         epics-dev (= ${binary:Version}),
+Depends: libepics3.15.5 (= ${binary:Version}),
+         epics-dev (= ${binary:Version}), lsb-base,
          ${misc:Depends}, ${shlibs:Depends}, adduser,
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
@@ -57,7 +57,7 @@ Description: Log recording daemon for EPICS IOCS
 
 Package: epics-dev
 Architecture: any
-Depends: libepics3.15.3 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+Depends: libepics3.15.5 (= ${binary:Version}), epics-catools (= ${binary:Version}),
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
@@ -101,7 +101,7 @@ Description: EPICS Macro Substitution and Include tool
 Package: epics-catools
 Section: admin
 Architecture: any
-Depends: libepics3.15.3 (= ${binary:Version}),
+Depends: libepics3.15.5 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
  The Experimental Physics and Industrial Control System is a collection of
@@ -112,7 +112,7 @@ Description: Command line utilities for EPICS
 
 Package: epics-perl
 Architecture: any
-Depends: libepics3.15.3 (= ${binary:Version}),
+Depends: libepics3.15.5 (= ${binary:Version}),
          ${shlibs:Depends}, ${perl:Depends}, ${misc:Depends}
 Conflicts: epics-libs (<= 3.14.10-7),  epics-dev (<= 3.14.12.3-2),
 Description: Perl bindings for EPICS

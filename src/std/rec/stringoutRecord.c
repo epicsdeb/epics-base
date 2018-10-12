@@ -7,8 +7,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20131217185404-wng3r3ldfeefnu61 */
-
 /* recStringout.c - Record Support Routines for Stringout records */
 /*
  * Author: 	Janet Anderson

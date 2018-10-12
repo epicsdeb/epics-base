@@ -8,10 +8,10 @@ Subject: allow more flexible makefile config
  2 files changed, 12 insertions(+)
 
 diff --git a/configure/CONFIG b/configure/CONFIG
-index a64933f..01ad8a5 100644
+index 68ca9e4..959a2b1 100644
 --- a/configure/CONFIG
 +++ b/configure/CONFIG
-@@ -114,6 +114,13 @@ ifneq ($(TOP_CFG_CONFIGS),)
+@@ -112,6 +112,13 @@ ifneq ($(TOP_CFG_CONFIGS),)
    include $(TOP_CFG_CONFIGS)
  endif
  
@@ -26,10 +26,10 @@ index a64933f..01ad8a5 100644
  #
  -include $(HOME)/configure/CONFIG_USER
 diff --git a/configure/RULES_BUILD b/configure/RULES_BUILD
-index d5d3e8e..3cf64f9 100644
+index 2be4b33..4d84b73 100644
 --- a/configure/RULES_BUILD
 +++ b/configure/RULES_BUILD
-@@ -475,6 +475,11 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
+@@ -488,6 +488,11 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
  
  -include $(CONFIG)/RULES_EXPAND
  

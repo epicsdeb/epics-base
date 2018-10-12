@@ -8,10 +8,10 @@ Subject: Cross-build with mingw32
  2 files changed, 17 insertions(+), 2 deletions(-)
 
 diff --git a/configure/os/CONFIG_SITE.Common.win32-x86-mingw b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-index 79af9c9..eca3ff5 100644
+index ba19ac6..d2f74bb 100644
 --- a/configure/os/CONFIG_SITE.Common.win32-x86-mingw
 +++ b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-@@ -7,3 +7,18 @@
+@@ -5,3 +5,18 @@
  # If readline is available uncomment the following line
  # to enable command-line editing and history support
  #COMMANDLINE_LIBRARY = READLINE
@@ -31,10 +31,10 @@ index 79af9c9..eca3ff5 100644
 +
 +OP_SYS_LDLIBS = -lws2_32
 diff --git a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-index 7df1729..f7a9c66 100644
+index dfc947e..cad5db1 100644
 --- a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
 +++ b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-@@ -15,8 +15,8 @@ STATIC_BUILD = YES
+@@ -15,9 +15,9 @@
  
  # Different distribution cross-build packages use different prefixes:
  # Ubuntu:
@@ -45,3 +45,4 @@ index 7df1729..f7a9c66 100644
 +#CMPLR_PREFIX = i686-pc-mingw32-
  # Debian?
  #CMPLR_PREFIX = i586-mingw32msvc-
+ 

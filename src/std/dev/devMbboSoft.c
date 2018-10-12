@@ -8,7 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* devMbboSoft.c */
-/* base/src/dev Revision-Id: anj@aps.anl.gov-20120707205431-1m9acu6bgu55d1tc */
 /*
  *      Original Author: Bob Dalesio
  *      Current Author:  Marty Kraimer

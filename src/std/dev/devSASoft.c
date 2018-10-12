@@ -7,8 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20101112220909-zd1pn4qnqsafag0l
- *
+/*
  *      Author: Carl Lionberger
  *      Date: 9-2-93
  */

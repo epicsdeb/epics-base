@@ -1,7 +1,5 @@
 #  CONFIG.cygwin-x86.cygwin-x86
 #
-# Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
-#
 # Definitions for cygwin-x86 host - cygwin-x86 target builds
 # Sites may override these definitions in CONFIG_SITE.cygwin-x86.cygwin-x86
 #-------------------------------------------------------

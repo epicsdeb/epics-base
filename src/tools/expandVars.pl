@@ -6,8 +6,6 @@
 # Author: Andrew Johnson <anj@aps.anl.gov>
 # Date: 10 February 2005
 #
-# Revision-Id: anj@aps.anl.gov-20140925212423-7fa9rx1gceig2ccd
-#
 
 use strict;
 

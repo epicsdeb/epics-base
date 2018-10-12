@@ -12,10 +12,10 @@ make SKIP_HOST=YES EPICS_BASE=/usr/epics/base
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
-index d9c4eb0..5008c7d 100644
+index e6e6033..681c5ce 100644
 --- a/configure/CONFIG_COMMON
 +++ b/configure/CONFIG_COMMON
-@@ -33,7 +33,7 @@ CROSS1 = $(CROSS_COMPILER_TARGET_ARCHS$(word 1,$(CROSS_COMPILER_HOST_ARCHS)))
+@@ -31,7 +31,7 @@ CROSS1 = $(CROSS_COMPILER_TARGET_ARCHS$(word 1,$(CROSS_COMPILER_HOST_ARCHS)))
  # and EPICS_HOST_ARCH is one of its words
  CROSS2 = $(CROSS_COMPILER_TARGET_ARCHS$(filter-out 1,$(words $(filter $(EPICS_HOST_ARCH),$(CROSS_COMPILER_HOST_ARCHS)))))
  
@@ -25,10 +25,10 @@ index d9c4eb0..5008c7d 100644
  #-------------------------------------------------------
  # Default for perl if it's on the PATH,
 diff --git a/configure/RULES_ARCHS b/configure/RULES_ARCHS
-index 02eea5f..7105769 100644
+index 6d18082..8170473 100644
 --- a/configure/RULES_ARCHS
 +++ b/configure/RULES_ARCHS
-@@ -45,9 +45,9 @@ define DEP_template
+@@ -42,9 +42,9 @@ define DEP_template
    $(2) : $(EPICS_HOST_ARCH)
    $(1)$(DIVIDER)$(2) : $(1)$(DIVIDER)$(EPICS_HOST_ARCH) O.$(2)
  endef

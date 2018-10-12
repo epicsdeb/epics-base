@@ -8,7 +8,7 @@ lintian complains about the <img> tag.
  1 file changed, 6 deletions(-)
 
 diff --git a/src/ca/client/CAref.html b/src/ca/client/CAref.html
-index 6d2e089..cd91b43 100644
+index 2bdd0b4..ad8bf50 100644
 --- a/src/ca/client/CAref.html
 +++ b/src/ca/client/CAref.html
 @@ -45,12 +45,6 @@ GmbH.</span></p>
@@ -21,6 +21,6 @@ index 6d2e089..cd91b43 100644
 -src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01!" height="31"
 -width="88"></a></p>
 -
- <p><small><span style="font-size: smaller; font-weight:lighter;">Modified on
- Date: Mon 2015-07-13 13:05:33 -0500</span></small></p>
  <hr>
+ 
+ <h2>Table of Contents</h2>

@@ -13,9 +13,6 @@
 /*
  * Author: Jim Kowalkowski
  * Date: 3/97
- *
- * Revision-Id: anj@aps.anl.gov-20120412161350-htfzcjp2537pk1ip
- *
  */
 
 inline void gdd::setData(void* d)					{ data.Pointer=d; }

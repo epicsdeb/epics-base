@@ -11,10 +11,10 @@ modify build config.
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/configure/CONFIG b/configure/CONFIG
-index a7cce47..a64933f 100644
+index 17440a3..68ca9e4 100644
 --- a/configure/CONFIG
 +++ b/configure/CONFIG
-@@ -16,15 +16,21 @@
+@@ -14,15 +14,21 @@
  ifneq ($(wildcard $(TOP)/configure/CONFIG_BASE_VERSION),)
    EPICS_BASE = $(INSTALL_LOCATION)
    CONFIG = $(TOP)/configure

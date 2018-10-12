@@ -33,10 +33,10 @@ index 2294417..d80c358 100644
  bootstrap Cap5 $VERSION;
  
 diff --git a/src/template/base/makeBaseApp.pl b/src/template/base/makeBaseApp.pl
-index c98b538..880c270 100644
+index 13d749d..a8f404e 100644
 --- a/src/template/base/makeBaseApp.pl
 +++ b/src/template/base/makeBaseApp.pl
-@@ -66,7 +66,7 @@ sub ReplaceFilename { # (filename)
+@@ -65,7 +65,7 @@ sub ReplaceFilename { # (filename)
  	    } elsif (-r "$base\@Common") {	# Default version exists
  		$base = '' unless ($filearch eq "Common" && -s $file);
  	    } else {			# No default version
@@ -45,7 +45,7 @@ index c98b538..880c270 100644
  	    }
  	    $file = $base;	# Strip the @... part from the target name
  	}
-@@ -178,8 +178,7 @@ sub get_commandline_opts { #no args
+@@ -177,8 +177,7 @@ sub get_commandline_opts { #no args
      } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
          $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
      } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
@@ -56,10 +56,10 @@ index c98b538..880c270 100644
      $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
      $app_epics_base = LocalPath($epics_base);
 diff --git a/src/template/ext/makeBaseExt.pl b/src/template/ext/makeBaseExt.pl
-index 491dc63..a5c0f1a 100644
+index 45ce948..da3e23d 100644
 --- a/src/template/ext/makeBaseExt.pl
 +++ b/src/template/ext/makeBaseExt.pl
-@@ -127,8 +127,7 @@ sub get_commandline_opts { #no args
+@@ -126,8 +126,7 @@ sub get_commandline_opts { #no args
      } elsif ($eBASE) { # third choice is env var EPICS_MBE_BASE
          $epics_base = UnixPath($eBASE);
      } elsif ($command =~ m|/bin/|) { # assume script was called with full path to base

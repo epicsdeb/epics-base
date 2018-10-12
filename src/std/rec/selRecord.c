@@ -7,8 +7,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: ralph.lange@gmx.de-20140730083624-ms46zlp6umx3vhg8 */
-
 /* selRecord.c - Record Support Routines for Select records */
 /*
  *      Original Author: Bob Dalesio

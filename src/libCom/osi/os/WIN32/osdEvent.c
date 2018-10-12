@@ -8,7 +8,6 @@
 \*************************************************************************/
 /* osdEvent.c */
 /*
- *      Revision-Id: anj@aps.anl.gov-20110208201747-ptm51q9slgz8vx3u
  *      WIN32 version
  *
  *      Author  Jeffrey O. Hill

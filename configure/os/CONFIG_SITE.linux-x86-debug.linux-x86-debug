@@ -1,7 +1,5 @@
 # CONFIG_SITE.linux-x86-debug.linux-x86-debug
 #
-# Revision-Id: anj@aps.anl.gov-20150223193045-6wkp0bkbdszjc8z4
-#
 # Site specific overrides for linux-x86-debug host and target builds
 #-------------------------------------------------------
 

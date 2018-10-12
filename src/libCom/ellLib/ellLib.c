@@ -6,8 +6,7 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/* Revision-Id: mdavidsaver@bnl.gov-20120427172145-2ostsi5al08e0blo
- *
+/*
  *      Author: John Winans (ANL)
  *      Date:   07-02-92
  */
