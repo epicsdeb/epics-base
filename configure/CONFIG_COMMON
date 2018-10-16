@@ -7,8 +7,6 @@
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
 #
-#  Revision-Id: anj@aps.anl.gov-20150308202607-klpbx0rulsvudgn1
-#
 #  CONFIG_COMMON
 #
 #  This file is to be maintained by the community.
@@ -339,7 +337,7 @@ PREPROCESS.cpp = $(CPP) $(CPPFLAGS) $(INCLUDES) $< > $@
 
 HDEPENDS_METHOD = MKMF
 
-HDEPENDS_MKMFFLAGS = -m $*$(DEP) $(INCLUDES) $@
+HDEPENDS_MKMFFLAGS = -m $@ $(INCLUDES) $*$(OBJ)
 HDEPENDS_MKMF.c   = $(MKMF) $(HDEPENDS_FLAGS) $(HDEPENDS_MKMFFLAGS)
 HDEPENDS_MKMF.cpp = $(MKMF) $(HDEPENDS_FLAGS) $(HDEPENDS_MKMFFLAGS)
 

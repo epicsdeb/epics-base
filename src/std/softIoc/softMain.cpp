@@ -7,8 +7,6 @@
 * found in the file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/* Revision-Id: mdavidsaver@bnl.gov-20141113165835-kvfyn520rzxatikq */
-
 /* Author: Andrew Johnson	Date: 2003-04-08 */
 
 /* Usage:

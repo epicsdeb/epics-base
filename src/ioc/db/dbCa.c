@@ -7,11 +7,9 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20150723230254-svp4hywfz3z9m4mt
- *
+/*
  *    Original Authors: Bob Dalesio and Marty Kraimer
  *    Date:             26MAR96
- *
  */
 
 #include <stddef.h>

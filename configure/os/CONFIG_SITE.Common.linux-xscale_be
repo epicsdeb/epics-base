@@ -1,7 +1,5 @@
 # CONFIG_SITE.Common.linux-xscale_be
 #
-# Revision-Id: anj@aps.anl.gov-20150225180234-ikkb3wewyqyr7441
-#
 # Site specific definitions for linux-xscale_be target builds.
 #-------------------------------------------------------
 

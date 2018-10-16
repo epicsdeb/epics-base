@@ -32,12 +32,6 @@
 <body>
 <h1>EPICS Base Release Procedures &amp; Checklist</h1>
 
-<blockquote>
-  <p>Date: Fri 2015-05-15 10:06:06 -0500<br />
-    Authors: Andrew Johnson &lt;anj@aps.anl.gov&gt;<br />
-    Revision-Id: anj@aps.anl.gov-20150515150606-wwlurwdkpiupgwlf</p>
-</blockquote>
-
 <p>This document describes the procedures and provides a checklist of tasks
 that should be performed when creating new releases of EPICS Base.</p>
 
@@ -141,17 +135,17 @@ relevent roles unless the Release Manager designates otherwise:</p>
       <td>Tag the module in Bazaar, using these tag conventions:
         <ul>
           <li>
-            <tt>R3.15.3-pre<i>n</i></tt>
+            <tt>R3.15.5-pre<i>n</i></tt>
             &mdash; pre-release tag
             </li>
           <li>
-            <tt>R3.15.3-rc<i>n</i></tt>
+            <tt>R3.15.5-rc<i>n</i></tt>
             &mdash; release candidate tag, note the <tt>rc</tt> is now
             lower-case</li>
         </ul>
         <blockquote><tt>
           cd ~/base/mirror-3.15<br />
-          bzr tag R3.15.3-rc<i>n</i>
+          bzr tag R3.15.5-rc<i>n</i>
           </tt></blockquote>
         </td>
       </tr>
@@ -162,14 +156,16 @@ relevent roles unless the Release Manager designates otherwise:</p>
         generates a gzipped tarfile directly from the repository:
         <blockquote><tt>
           cd ~/base<br />
-          bzr export --keywords=publish
-            --root=base-3.15.3-rc<i>n</i>
-            -r tag:R3.15.3-rc<i>n</i>
-            base-3.15.3-rc<i>n</i>.tar.gz
+          bzr export
+            --root=base-3.15.5-rc<i>n</i>
+            -r tag:R3.15.5-rc<i>n</i>
+            base-3.15.5-rc<i>n</i>.tar.gz
             mirror-3.15
           </tt></blockquote>
-        This requires that the Bazaar keywords plugin is installed and
-        configured properly.
+        Create a GPG signature file of the tarfile as follows:
+        <blockquote><tt>
+          gpg --armor --sign --detach-sig base-3.15.5-rc<i>n</i>.tar.gz
+          </tt></blockquote>
         </td>
       </tr>
     <tr>
@@ -280,7 +276,7 @@ relevent roles unless the Release Manager designates otherwise:</p>
       <td>Tag the module in Bazaar:
         <blockquote><tt>
           cd ~/base/mirror-3.15<br />
-          bzr tag R3.15.3</i>
+          bzr tag R3.15.5</i>
           </tt></blockquote>
         </td>
       </tr>
@@ -291,14 +287,16 @@ relevent roles unless the Release Manager designates otherwise:</p>
         generates a gzipped tarfile directly from the repository:
         <blockquote><tt>
           cd ~/base<br />
-          bzr export --keywords=publish
-            --root=base-3.15.3
-            -r tag:R3.15.3
-            base-3.15.3.tar.gz
+          bzr export
+            --root=base-3.15.5
+            -r tag:R3.15.5
+            base-3.15.5.tar.gz
             mirror-3.15
           </tt></blockquote>
-        This requires that the Bazaar keywords plugin is installed and
-        configured properly.
+        Create a GPG signature file of the tarfile as follows:
+        <blockquote><tt>
+          gpg --armor --sign --detach-sig base-3.15.5.tar.gz
+          </tt></blockquote>
         </td>
       </tr>
     <tr>
@@ -314,7 +312,8 @@ relevent roles unless the Release Manager designates otherwise:</p>
       <td>&nbsp;</td>
       <td>Website Manager</td>
       <td>If necessary recreate the tarfile following the instructions above.
-        Copy the tar file to the Base download area of the website</td>
+        Copy the tar file and its <tt>.asc</tt> signature file to the Base
+        download area of the website.</td>
       </tr>
     <tr>
       <td>&nbsp;</td>

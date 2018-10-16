@@ -163,6 +163,19 @@ udpiiu::udpiiu (
         throwWithLocation ( noSocket () );
     }
 
+#ifdef IP_ADD_MEMBERSHIP
+    {
+        int flag = 1;
+        if ( setsockopt ( this->sock, IPPROTO_IP, IP_MULTICAST_LOOP,
+                          (char *) &flag, sizeof ( flag ) ) == -1 ) {
+            char sockErrBuf[64];
+            epicsSocketConvertErrnoToString (
+                sockErrBuf, sizeof ( sockErrBuf ) );
+            errlogPrintf("CAC: failed to set mcast loopback\n");
+        }
+    }
+#endif
+
     int boolValue = true;
     int status = setsockopt ( this->sock, SOL_SOCKET, SO_BROADCAST, 
                 (char *) &boolValue, sizeof ( boolValue ) );
@@ -902,10 +915,12 @@ bool udpiiu::pushDatagramMsg ( epicsGuard < epicsMutex > & guard,
 
     caHdr * pbufmsg = ( caHdr * ) &this->xmitBuf[this->nBytesInXmitBuf];
     *pbufmsg = msg;
-    memcpy ( pbufmsg + 1, pExt, extsize );
-    if ( extsize != alignedExtSize ) {
-        char *pDest = (char *) ( pbufmsg + 1 );
-        memset ( pDest + extsize, '\0', alignedExtSize - extsize );
+    if ( extsize ) {
+        memcpy ( pbufmsg + 1, pExt, extsize );
+        if ( extsize != alignedExtSize ) {
+            char *pDest = (char *) ( pbufmsg + 1 );
+            memset ( pDest + extsize, '\0', alignedExtSize - extsize );
+        }
     }
     AlignedWireRef < epicsUInt16 > ( pbufmsg->m_postsize ) = alignedExtSize;
     this->nBytesInXmitBuf += msgsize;

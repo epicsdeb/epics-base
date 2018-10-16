@@ -7,7 +7,6 @@
 \*************************************************************************/
 /*
  * RTEMS osdEvent.c
- *	Revision-Id: anj@aps.anl.gov-20110208180208-anyb02ingk7l6pmk
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055

@@ -9,8 +9,6 @@
 \*************************************************************************/
 
 /* 
- * Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
- *
  * route vxWorks logMsg messages into the EPICS logging system
  *
  * Author: Jeff Hill

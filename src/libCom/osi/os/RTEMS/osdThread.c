@@ -6,7 +6,6 @@
 \*************************************************************************/
 /*
  * RTEMS osdThread.c
- *      Revision-Id: ralph.lange@gmx.de-20130328140329-46sjs0lyfs3h3un4
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
@@ -248,6 +247,9 @@ epicsThreadInit (void)
     }
 }
 
+void epicsThreadRealtimeLock(void)
+{}
+
 /*
  * Create and start a new thread
  */
@@ -410,8 +412,6 @@ void epicsThreadGetName (epicsThreadId id, char *name, size_t size)
     struct taskVar *v;
     int haveName = 0;
 
-    if (size <= 0)
-        return;
     taskVarLock ();
     for (v=taskVarHead ; v != NULL ; v=v->forw) {
         if (v->id == tid) {
@@ -670,6 +670,7 @@ void epicsThreadShow (epicsThreadId id, unsigned int level)
     for (v = taskVarHead ; v != NULL ; v = v->forw) {
         if ((rtems_id)id == v->id) {
             epicsThreadShowInfo (v, level);
+            taskVarUnlock ();
             return;
         }
     }

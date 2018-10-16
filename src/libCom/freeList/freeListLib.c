@@ -7,9 +7,7 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20150831171130-14c0a6awwadw732m */
 /* Author:  Marty Kraimer Date:    04-19-94 */
-
 
 #include <string.h>
 #include <stdlib.h>

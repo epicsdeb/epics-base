@@ -5,7 +5,6 @@
 \*************************************************************************/
 /*
  * RTEMS osdSock.h
- *	Revision-Id: anj@aps.anl.gov-20110909221435-fdjubbxunee9gs44
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
@@ -51,6 +50,7 @@ typedef socklen_t osiSocklen_t;
 #define SOCK_ECONNRESET ECONNRESET
 #define SOCK_ETIMEDOUT ETIMEDOUT
 #define SOCK_EADDRINUSE EADDRINUSE
+#define SOCK_EADDRNOTAVAIL EADDRNOTAVAIL
 #define SOCK_ECONNREFUSED ECONNREFUSED
 #define SOCK_ECONNABORTED ECONNABORTED
 #define SOCK_EINPROGRESS EINPROGRESS

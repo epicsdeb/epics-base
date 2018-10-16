@@ -1,6 +1,5 @@
 # CONFIG.Common.cygwin-x86
 #
-# Revision-Id: jba@aps.anl.gov-20130726193755-s5xjgco9gbz3djk2
 # This file is maintained by the build community.
 #
 # Definitions for cygwin-x86 target builds
@@ -26,14 +25,14 @@ POSIX_LDLIBS += -lpthread
 ARCH_DEP_CFLAGS += -m32
 ARCH_DEP_LDFLAGS += -m32
 
-# Compiler defines _X86_ 1
-# Compiler defines __MSVCRT__ 1
+# 32-bit compiler defines _X86_ 1
 # Compiler defines __CYGWIN__ 1
-# Compiler defines __CYGWIN32__ 1
+# 32-bit compiler defines __CYGWIN32__ 1
 # Compiler defines __unix__ 1
 # Compiler defines __unix 1
 # Compiler defines unix 1
 
+# This macro now deprecated, use __CYGWIN__ in the future
 OP_SYS_CPPFLAGS += -DCYGWIN32
 
 EXE = .exe

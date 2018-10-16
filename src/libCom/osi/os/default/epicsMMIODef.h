@@ -13,6 +13,7 @@
 
 #include <epicsTypes.h>
 #include <epicsEndian.h>
+#include <compilerSpecific.h>
 #include <shareLib.h>
 
 #ifdef __cplusplus
@@ -27,7 +28,7 @@
 
 /** @brief Read a single byte.
  */
-INLINE
+static EPICS_ALWAYS_INLINE
 epicsUInt8
 ioread8(volatile void* addr)
 {
@@ -36,7 +37,7 @@ ioread8(volatile void* addr)
 
 /** @brief Write a single byte.
  */
-INLINE
+static EPICS_ALWAYS_INLINE
 void
 iowrite8(volatile void* addr, epicsUInt8 val)
 {
@@ -46,7 +47,7 @@ iowrite8(volatile void* addr, epicsUInt8 val)
 /** @brief Read two bytes in host order.
  * Not byte swapping
  */
-INLINE
+static EPICS_ALWAYS_INLINE
 epicsUInt16
 nat_ioread16(volatile void* addr)
 {
@@ -56,7 +57,7 @@ nat_ioread16(volatile void* addr)
 /** @brief Write two byte in host order.
  * Not byte swapping
  */
-INLINE
+static EPICS_ALWAYS_INLINE
 void
 nat_iowrite16(volatile void* addr, epicsUInt16 val)
 {
@@ -66,7 +67,7 @@ nat_iowrite16(volatile void* addr, epicsUInt16 val)
 /** @brief Read four bytes in host order.
  * Not byte swapping
  */
-INLINE
+static EPICS_ALWAYS_INLINE
 epicsUInt32
 nat_ioread32(volatile void* addr)
 {
@@ -76,7 +77,7 @@ nat_ioread32(volatile void* addr)
 /** @brief Write four byte in host order.
  * Not byte swapping
  */
-INLINE
+static EPICS_ALWAYS_INLINE
 void
 nat_iowrite32(volatile void* addr, epicsUInt32 val)
 {
@@ -89,15 +90,23 @@ nat_iowrite32(volatile void* addr, epicsUInt32 val)
  *@{
  */
 
-#define bswap16(value) ((epicsUInt16) (  \
-        (((epicsUInt16)(value) & 0x00ff) << 8)    |       \
-        (((epicsUInt16)(value) & 0xff00) >> 8)))
+static EPICS_ALWAYS_INLINE
+epicsUInt16
+bswap16(epicsUInt16 value)
+{
+    return (((epicsUInt16)(value) & 0x00ff) << 8)    |
+           (((epicsUInt16)(value) & 0xff00) >> 8);
+}
 
-#define bswap32(value) (  \
-        (((epicsUInt32)(value) & 0x000000ff) << 24)   |                \
-        (((epicsUInt32)(value) & 0x0000ff00) << 8)    |                \
-        (((epicsUInt32)(value) & 0x00ff0000) >> 8)    |                \
-        (((epicsUInt32)(value) & 0xff000000) >> 24))
+static EPICS_ALWAYS_INLINE
+epicsUInt32
+bswap32(epicsUInt32 value)
+{
+    return (((epicsUInt32)(value) & 0x000000ff) << 24)   |
+           (((epicsUInt32)(value) & 0x0000ff00) << 8)    |
+           (((epicsUInt32)(value) & 0x00ff0000) >> 8)    |
+           (((epicsUInt32)(value) & 0xff000000) >> 24);
+}
 
 #  define be_ioread16(A)    nat_ioread16(A)
 #  define be_ioread32(A)    nat_ioread32(A)

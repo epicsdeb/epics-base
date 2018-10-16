@@ -6,7 +6,6 @@
 \*************************************************************************/
 /*
  * RTEMS startup task for EPICS
- *  Revision-Id: anj@aps.anl.gov-20140925213412-lo1rca0dx74lzif7
  *      Author: W. Eric Norum
  *              eric.norum@usask.ca
  *              (306) 966-5394
@@ -490,7 +489,7 @@ exitHandler(void)
 rtems_task
 Init (rtems_task_argument ignored)
 {
-    int                 i;
+    int                 result;
     char               *argv[3]         = { NULL, NULL, NULL };
     char               *cp;
     rtems_task_priority newpri;
@@ -528,6 +527,12 @@ Init (rtems_task_argument ignored)
     initConsole ();
     putenv ("TERM=xterm");
     putenv ("IOCSH_HISTSIZE=20");
+
+    /*
+     * Display some OS information
+     */
+    printf("\n***** RTEMS Version: %s *****\n",
+        rtems_get_version_string());
 
     /*
      * Start network
@@ -607,8 +612,8 @@ Init (rtems_task_argument ignored)
     set_directory (argv[1]);
     epicsEnvSet ("IOC_STARTUP_SCRIPT", argv[1]);
     atexit(exitHandler);
-    i = main ((sizeof argv / sizeof argv[0]) - 1, argv);
+    result = main ((sizeof argv / sizeof argv[0]) - 1, argv);
     printf ("***** IOC application terminating *****\n");
     epicsThreadSleep(1.0);
-    epicsExit(0);
+    epicsExit(result);
 }

@@ -9,8 +9,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *      Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
- *
  *      Author  Jeffrey O. Hill
  *              johill@lanl.gov
  *              505 665 1831
@@ -32,7 +30,7 @@
 #   include "shareLib.h"
 #endif
 
-static const unsigned char CA_MINOR_PROTOCOL_REVISION = 12;
+static const unsigned char CA_MINOR_PROTOCOL_REVISION = 13;
 
 typedef ca_uint32_t caResId;
 

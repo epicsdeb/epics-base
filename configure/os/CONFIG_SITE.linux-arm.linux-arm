@@ -1,7 +1,5 @@
 #  CONFIG_SITE.linux-arm.linux-arm
 #
-# Revision-Id: anj@aps.anl.gov-20120730225030-kxdpux061bt13ng1
-#
 # Site specific definitions for native linux-arm builds
 #-------------------------------------------------------
 

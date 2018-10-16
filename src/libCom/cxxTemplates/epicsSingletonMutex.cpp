@@ -9,10 +9,7 @@
 \*************************************************************************/
 
 /*
- *  Revision-Id: anj@aps.anl.gov-20150918165151-dwvy0b54q8rfomvv
- *
  *  Author: Jeff O. Hill
- *
  */
 
 #include <climits>

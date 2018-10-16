@@ -8,10 +8,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /*
- *  Revision-Id: anj@aps.anl.gov-20140207201312-uxbxarzi274gmm9b
- *
  *  Author: Jeffrey O. Hill
- *
  */
 
 #include <new>

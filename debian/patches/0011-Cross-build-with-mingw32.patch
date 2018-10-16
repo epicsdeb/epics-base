@@ -3,21 +3,20 @@ Date: Tue, 29 Dec 2015 11:41:22 -0800
 Subject: Cross-build with mingw32
 
 ---
- configure/os/CONFIG_SITE.Common.win32-x86-mingw          | 15 +++++++++++++++
- configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw       |  4 ++--
- configure/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw |  2 +-
- 3 files changed, 18 insertions(+), 3 deletions(-)
+ configure/os/CONFIG_SITE.Common.win32-x86-mingw    | 15 +++++++++++++++
+ configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw |  4 ++--
+ 2 files changed, 17 insertions(+), 2 deletions(-)
 
 diff --git a/configure/os/CONFIG_SITE.Common.win32-x86-mingw b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-index 79af9c9..19dce01 100644
+index ba19ac6..d2f74bb 100644
 --- a/configure/os/CONFIG_SITE.Common.win32-x86-mingw
 +++ b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-@@ -7,3 +7,18 @@
+@@ -5,3 +5,18 @@
  # If readline is available uncomment the following line
  # to enable command-line editing and history support
  #COMMANDLINE_LIBRARY = READLINE
 +
-+CMPLR_PREFIX=i586-mingw32msvc-
++CMPLR_PREFIX=i686-w64-mingw32-
 +
 +SHARED_LIBRARIES=NO
 +STATIC_BUILD=YES
@@ -32,25 +31,18 @@ index 79af9c9..19dce01 100644
 +
 +OP_SYS_LDLIBS = -lws2_32
 diff --git a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-index 7df1729..bb68dd9 100644
+index dfc947e..cad5db1 100644
 --- a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
 +++ b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-@@ -17,6 +17,6 @@ STATIC_BUILD = YES
+@@ -15,9 +15,9 @@
+ 
+ # Different distribution cross-build packages use different prefixes:
  # Ubuntu:
- #CMPLR_PREFIX = i686-w64-mingw32-
+-#CMPLR_PREFIX = i686-w64-mingw32-
++CMPLR_PREFIX = i686-w64-mingw32-
  # RHEL:
 -CMPLR_PREFIX = i686-pc-mingw32-
 +#CMPLR_PREFIX = i686-pc-mingw32-
  # Debian?
--#CMPLR_PREFIX = i586-mingw32msvc-
-+CMPLR_PREFIX = i586-mingw32msvc-
-diff --git a/configure/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw b/configure/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw
-index 462b561..a0f907d 100644
---- a/configure/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw
-+++ b/configure/os/CONFIG_SITE.win32-x86-mingw.win32-x86-mingw
-@@ -8,4 +8,4 @@
+ #CMPLR_PREFIX = i586-mingw32msvc-
  
- # Set the compiler prefix for your MinGW installation
- #CMPLR_PREFIX = i686-w64-mingw32-
--#CMPLR_PREFIX = i586-mingw32msvc-
-+CMPLR_PREFIX = i586-mingw32msvc-

@@ -7,8 +7,7 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20120707205431-1m9acu6bgu55d1tc
- *
+/*
  *      Author: Janet Anderson
  *      Date: 04-21-91
  */

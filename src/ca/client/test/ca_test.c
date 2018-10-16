@@ -7,12 +7,9 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/*	@(#)ca_test.c	Revision-Id: mdavidsaver@bnl.gov-20101217172129-5hzlu2cpv5sci7x2
+/*
  *	Author:	Jeff Hill
  *	Date:	07-01-91
- *
- * make options
- *	-DvxWorks	makes a version for VxWorks
  */
 
 /*

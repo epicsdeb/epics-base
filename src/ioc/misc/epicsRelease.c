@@ -6,9 +6,6 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/*
- * Revision-Id: anj@aps.anl.gov-20141006055702-6sznplbat5czjlgi
- */
 
 #include <stdlib.h>
 #include <stdio.h>

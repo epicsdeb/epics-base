@@ -9,8 +9,6 @@
 \*************************************************************************/
 
 /* 
- * Revision-Id: anj@aps.anl.gov-20140911220849-ijcr1rwruy0jgau9
- * 
  * Operating System Dependent Implementation of osiProcess.h
  *
  * Author: Jeff Hill

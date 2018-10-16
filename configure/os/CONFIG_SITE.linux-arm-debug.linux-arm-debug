@@ -1,7 +1,5 @@
 # CONFIG_SITE.linux-arm-debug.linux-arm-debug
 #
-# Revision-Id: anj@aps.anl.gov-20150223201239-ljwtvik31qld16xy
-#
 # Site specific overrides for linux-arm-debug host and target builds
 #-------------------------------------------------------
 

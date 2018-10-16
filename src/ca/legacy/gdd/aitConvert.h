@@ -13,9 +13,6 @@
 /*
  * Author: Jim Kowalkowski
  * Date: 2/96
- *
- * Revision-Id: anj@aps.anl.gov-20120412161350-htfzcjp2537pk1ip
- *
  */
 
 #include <sys/types.h>
