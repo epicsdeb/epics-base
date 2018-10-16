@@ -1,3 +1,9 @@
+rtems-epics (3.15.5-2) unstable; urgency=medium
+
+  * Sync with epics-base
+
+ -- Anton Derbenev <aaderbenev@gmail.com>  Mon, 15 Oct 2018 20:11:47 -0400
+
 rtems-epics (3.15.3-6) unstable; urgency=medium
 
   * Sync with epics-base
