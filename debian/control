@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Martin Konrad <konrad@frib.msu.edu>
 Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
            Ralph Lange <Ralph.Lange@gmx.de>
-Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.12~),
+Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.18),
                libreadline6-dev | libreadline-dev, libncurses5-dev, perl,
                mingw32 | g++-mingw-w64,
 Standards-Version: 3.9.6
