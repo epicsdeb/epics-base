@@ -1,5 +1,3 @@
-
-
 /*************************************************************************\
 * Copyright (c) 2002 The University of Chicago, as Operator of Argonne
 *     National Laboratory.
@@ -9,9 +7,6 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-//
-// Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd
-//
 
 #ifndef caServerIOh
 #define caServerIOh
@@ -47,6 +42,8 @@ private:
 	virtual caStatus attachInterface (
         const caNetAddr & addr, bool autoBeaconAddr,
 		bool addConfigAddr ) = 0;
+
+    virtual void addMCast(const osiSockAddr&) = 0;
 };
 
 #endif // caServerIOh

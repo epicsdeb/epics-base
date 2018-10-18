@@ -6,7 +6,6 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20140926174616-129nqa411elhow55 */
 /*
  *      Author:         Jeffrey Hill
  *      Date:           02-27-95

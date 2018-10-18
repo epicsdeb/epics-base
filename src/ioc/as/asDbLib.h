@@ -7,8 +7,6 @@
 * and higher are distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
-/* share/epicsH/dbAsLib.h	*/
-/*  Revision-Id: mdavidsaver@mddesk.nsls2.bnl.gov-20140623202822-3v4qufgmn6t05atp */
 /* Author:  Marty Kraimer Date:    02-23-94*/
 
 #ifndef INCdbAsLibh

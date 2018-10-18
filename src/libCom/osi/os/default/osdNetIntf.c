@@ -8,7 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: johill@lanl.gov-20140611043721-4w1omy3ozzldc86h */
 /*
  *      Author:		Jeff Hill 
  *      Date:       04-05-94 
@@ -54,7 +53,7 @@ static struct ifreq * ifreqNext ( struct ifreq *pifreq )
     struct ifreq *ifr;
 
     ifr = ( struct ifreq * )( ifreqSize (pifreq) + ( char * ) pifreq );
-    ifDepenDebugPrintf( ("ifreqNext() pifreq 0x%08x, size 0x%08x, ifr 0x%08x\n", pifreq, ifreqSize (pifreq), ifr) );
+    ifDepenDebugPrintf( ("ifreqNext() pifreq %p, size 0x%x, ifr 0x%p\n", pifreq, (unsigned)ifreqSize (pifreq), ifr) );
     return ifr;
 }
 
@@ -105,8 +104,7 @@ epicsShareFunc void epicsShareAPI osiSockDiscoverBroadcastAddresses
     ifconf.ifc_req = pIfreqList;
     status = socket_ioctl (socket, SIOCGIFCONF, &ifconf);
     if (status < 0 || ifconf.ifc_len == 0) {
-        ifDepenDebugPrintf(("osiSockDiscoverBroadcastAddresses(): status: 0x08x, ifconf.ifc_len: %d\n", status, ifconf.ifc_len));
-        errlogPrintf ("osiSockDiscoverBroadcastAddresses(): unable to fetch network interface configuration\n");
+        errlogPrintf ("osiSockDiscoverBroadcastAddresses(): unable to fetch network interface configuration (%d)\n", status);
         free (pIfreqList);
         return;
     }
@@ -129,8 +127,8 @@ epicsShareFunc void epicsShareAPI osiSockDiscoverBroadcastAddresses
 
         ifDepenDebugPrintf (("osiSockDiscoverBroadcastAddresses(): found IFACE: %s len: 0x%x current_ifreqsize: 0x%x \n",
             pIfreqList->ifr_name,
-            ifreq_size(pifreq),
-            current_ifreqsize));
+            (unsigned)ifreq_size(pifreq),
+            (unsigned)current_ifreqsize));
 
         /*
          * If its not an internet interface then dont use it 
@@ -197,14 +195,22 @@ epicsShareFunc void epicsShareAPI osiSockDiscoverBroadcastAddresses
          * interface.
          */
         if ( pIfreqList->ifr_flags & IFF_BROADCAST ) {
+            osiSockAddr baddr;
             status = socket_ioctl (socket, SIOCGIFBRDADDR, pIfreqList);
             if ( status ) {
                 errlogPrintf ("osiSockDiscoverBroadcastAddresses(): net intf \"%s\": bcast addr fetch fail\n", pIfreqList->ifr_name);
                 free ( pNewNode );
                 continue;
             }
-            pNewNode->addr.sa = pIfreqList->ifr_broadaddr;
-            ifDepenDebugPrintf ( ( "found broadcast addr = %x\n", ntohl ( pNewNode->addr.ia.sin_addr.s_addr ) ) );
+            baddr.sa = pIfreqList->ifr_broadaddr;
+            if (baddr.ia.sin_family==AF_INET && baddr.ia.sin_addr.s_addr != INADDR_ANY) {
+                pNewNode->addr.sa = pIfreqList->ifr_broadaddr;
+                ifDepenDebugPrintf ( ( "found broadcast addr = %x\n", ntohl ( baddr.ia.sin_addr.s_addr ) ) );
+            } else {
+                ifDepenDebugPrintf ( ( "Ignoring broadcast addr = \n", ntohl ( baddr.ia.sin_addr.s_addr ) ) );
+                free ( pNewNode );
+                continue;
+            }
         }
 #if defined (IFF_POINTOPOINT)
         else if ( pIfreqList->ifr_flags & IFF_POINTOPOINT ) {

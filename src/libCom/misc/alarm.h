@@ -7,7 +7,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* Alarm definitions, must match menuAlarmSevr.dbd and menuAlarmStat.dbd */
-/* Revision-Id: anj@aps.anl.gov-20150313165026-y1u6cd26lamhawz1 */
 
 /*
  *      Authors: Bob Dalesio and Marty Kraimer

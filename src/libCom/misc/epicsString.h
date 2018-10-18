@@ -7,7 +7,6 @@
 * EPICS BASE is distributed subject to a Software License Agreement found
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
-/* Revision-Id: anj@aps.anl.gov-20101005192737-disfz3vs0f3fiixd */
 
 /* Authors: Jun-ichi Odagiri, Marty Kraimer, Eric Norum,
  *          Mark Rivers, Andrew Johnson, Ralph Lange
@@ -34,6 +33,7 @@ epicsShareFunc int epicsStrnCaseCmp(const char *s1, const char *s2, size_t len);
 epicsShareFunc char * epicsStrDup(const char *s);
 epicsShareFunc int epicsStrPrintEscaped(FILE *fp, const char *s, size_t n);
 #define epicsStrSnPrintEscaped epicsStrnEscapedFromRaw
+epicsShareFunc size_t epicsStrnLen(const char *s, size_t maxlen);
 epicsShareFunc int epicsStrGlobMatch(const char *str, const char *pattern);
 epicsShareFunc char * epicsStrtok_r(char *s, const char *delim, char **lasts);
 epicsShareFunc unsigned int epicsStrHash(const char *str, unsigned int seed);

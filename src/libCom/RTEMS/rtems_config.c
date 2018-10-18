@@ -6,7 +6,6 @@
 \*************************************************************************/
 /*
  * RTEMS configuration for EPICS
- *  Revision-Id: anj@aps.anl.gov-20140925213412-lo1rca0dx74lzif7
  *      Author: W. Eric Norum
  *              norume@aps.anl.gov
  *              (630) 252-4793

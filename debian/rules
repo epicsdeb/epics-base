@@ -47,6 +47,12 @@ override_dh_auto_install:
 
 override_dh_auto_test: # skip host tests
 
+# /usr/share/perl5
+PERLLIB=$(shell perl -MConfig -e 'print $$Config{vendorlib}')
+# /usr/lib/x86_64-linux-gnu/perl5/5.20  (deb8)
+# /usr/lib/perl5 (deb7)
+PERLARCH=$(shell perl -MConfig -e 'print $$Config{vendorarch}')
+
 override_dh_install:
 	rm -rf $(CURDIR)/debian/tmp/usr/lib/epics/bin/*/*.o
 

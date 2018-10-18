@@ -1,0 +1,21 @@
+From: Andrew Johnson <anj@aps.anl.gov>
+Date: Fri, 13 May 2016 13:30:55 -0500
+Subject: Applied Till's fix for lp:1581212
+
+---
+ src/ioc/db/db_access.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ioc/db/db_access.c b/src/ioc/db/db_access.c
+index 35712dd..fbeea02 100644
+--- a/src/ioc/db/db_access.c
++++ b/src/ioc/db/db_access.c
+@@ -43,7 +43,7 @@
+ #include "dbNotify.h"
+ #include "dbStaticLib.h"
+ #include "recSup.h"
+-
++#include "dbLock.h"
+ 
+ #define oldDBF_STRING      0
+ #define oldDBF_INT         1

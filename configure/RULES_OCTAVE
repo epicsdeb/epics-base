@@ -7,9 +7,7 @@
 # and higher are distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
-# Revision-Id: jba@aps.anl.gov-20110915190505-leb31pltg8aqxkh3
-#
-#-------------------------------------------------------
+
 # Octave definitions and rules
 
 ifeq ($(findstring Host,$(VALID_BUILDS)),Host)

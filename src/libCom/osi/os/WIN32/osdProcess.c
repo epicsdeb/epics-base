@@ -8,8 +8,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 /* 
- * Revision-Id: anj@aps.anl.gov-20140825212718-tvaddlbe90su4w4v
- * 
  * Operating System Dependent Implementation of osiProcess.h
  *
  * Author: Jeff Hill

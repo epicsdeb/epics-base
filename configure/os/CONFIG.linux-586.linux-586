@@ -1,7 +1,5 @@
 #  CONFIG.linux-586.linux-586
 #
-# Revision-Id: jba@aps.anl.gov-20110819212036-jnl69dqkz6074th3
-#
 # Definitions for linux-586 host - linux-586 target builds
 # Sites may override these definitions in CONFIG_SITE.linux-586.linux-586
 #-------------------------------------------------------

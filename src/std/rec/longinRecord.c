@@ -7,8 +7,6 @@
 * in file LICENSE that is included with this distribution. 
 \*************************************************************************/
 
-/* Revision-Id: anj@aps.anl.gov-20131217185404-wng3r3ldfeefnu61 */
-
 /* recLongin.c - Record Support Routines for Longin records */
 /*
  *      Author: 	Janet Anderson

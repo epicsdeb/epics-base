@@ -6,9 +6,6 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in the file LICENSE that is included with this distribution. 
 #*************************************************************************
-#
-# Revision-Id: mdavidsaver@bnl.gov-20140804162631-m75z668ravudz57u
-#
 
 TOP = ..
 include $(TOP)/configure/CONFIG

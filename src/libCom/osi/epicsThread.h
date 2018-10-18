@@ -57,6 +57,12 @@ typedef epicsThreadId epicsThreadOnceId;
 epicsShareFunc void epicsShareAPI epicsThreadOnce(
     epicsThreadOnceId *id, EPICSTHREADFUNC, void *arg);
 
+/* When real-time scheduling is active, attempt any post-init operations
+ * that preserve real-time performance. For POSIX targets this locks the
+ * process into RAM, preventing swap-related VM faults.
+ */
+epicsShareFunc void epicsThreadRealtimeLock(void);
+
 epicsShareFunc void epicsShareAPI epicsThreadExitMain(void);
 
 epicsShareFunc epicsThreadId epicsShareAPI epicsThreadCreate (
@@ -152,10 +158,10 @@ public:
     bool isCurrentThread () const throw ();
     bool operator == ( const epicsThread & ) const throw ();
     void show ( unsigned level ) const throw ();
+
     /* these operate on the current thread */
     static void suspendSelf () throw ();
     static void sleep (double seconds) throw ();
-    /* static epicsThread & getSelf (); */
     static const char * getNameSelf () throw ();
     static bool isOkToBlock () throw ();
     static void setOkToBlock ( bool isOkToBlock ) throw ();
@@ -168,7 +174,7 @@ private:
     epicsMutex mutex;
     epicsEvent event;
     epicsEvent exitEvent;
-    bool * pWaitReleaseFlag;
+    bool * pThreadDestroyed;
     bool begin;
     bool cancel;
     bool terminated;

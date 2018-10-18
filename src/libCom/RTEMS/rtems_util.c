@@ -6,7 +6,6 @@
 \*************************************************************************/
 /*
  * RTEMS utilitiy routines for EPICS
- *  Revision-Id: anj@aps.anl.gov-20101117225522-aecw6pd4fvylkauk
  *      Author: W. Eric Norum
  *              eric@cls.usask.ca
  *              (306) 966-6055
