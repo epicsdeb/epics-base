@@ -1,0 +1,510 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Fri, 10 Aug 2018 10:17:13 -0400
+Subject: Expose callback queue status
+
+This allows tools like iocStats to monitor the queue status of
+the callback queues. This fixes lp:1786540.
+---
+ src/ioc/db/callback.c                | 51 ++++++++++++++++++++++++++++++++++--
+ src/ioc/db/callback.h                |  9 +++++++
+ src/ioc/db/dbIocRegister.c           | 24 +++++++++++++++++
+ src/ioc/db/dbScan.c                  | 37 ++++++++++++++++++++++++++
+ src/ioc/db/dbScan.h                  |  9 +++++++
+ src/libCom/ring/epicsRingBytes.c     | 29 ++++++++++++++++++--
+ src/libCom/ring/epicsRingBytes.h     |  3 +++
+ src/libCom/ring/epicsRingPointer.cpp | 12 +++++++++
+ src/libCom/ring/epicsRingPointer.h   | 38 ++++++++++++++++++++++++---
+ 9 files changed, 205 insertions(+), 7 deletions(-)
+
+diff --git a/src/ioc/db/callback.c b/src/ioc/db/callback.c
+index b805c1c..a39ba26 100644
+--- a/src/ioc/db/callback.c
++++ b/src/ioc/db/callback.c
+@@ -55,6 +55,7 @@ typedef struct cbQueueSet {
+     epicsEventId semWakeUp;
+     epicsRingPointerId queue;
+     int queueOverflow;
++    int queueOverflows;
+     int shutdown;
+     int threadsConfigured;
+     int threadsRunning;
+@@ -100,10 +101,55 @@ int callbackSetQueueSize(int size)
+         errlogPrintf("Callback system already initialized\n");
+         return -1;
+     }
+-    callbackQueueSize = size;
++    epicsAtomicSetIntT(&callbackQueueSize, size);
+     return 0;
+ }
+ 
++int callbackQueueStatus(const int reset, callbackQueueStats *result)
++{
++    if (!callbackIsInit) return -1;
++    int ret;
++    if (result) {
++        result->size = epicsAtomicGetIntT(&callbackQueueSize);
++        int prio;
++        for(prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
++            epicsRingPointerId qId = callbackQueue[prio].queue;
++            result->numUsed[prio] = epicsRingPointerGetUsed(qId);
++            result->maxUsed[prio] = epicsRingPointerGetHighWaterMark(qId);
++            result->numOverflow[prio] = epicsAtomicGetIntT(&callbackQueue[prio].queueOverflows);
++        }
++        ret = 0;
++    } else {
++        ret = -2;
++    }
++    if (reset) {
++        int prio;
++        for(prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
++            epicsRingPointerResetHighWaterMark(callbackQueue[prio].queue);
++        }
++    }
++    return ret;
++}
++
++void callbackQueuePrintStatus(const int reset)
++{
++    callbackQueueStats stats;
++    if (callbackQueueStatus(reset, &stats) == -1) {
++        fprintf(stderr, "Callback system not initialized, yet. Please run "
++            "iocInit before using this command.\n");
++        return;
++    }
++
++    printf("PRIORITY  HIGH-WATER MARK  ITEMS IN Q  Q SIZE  %% USED  Q OVERFLOWS\n");
++    int prio;
++    for (prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
++        double qusage = 100.0 * stats.numUsed[prio] / stats.size;
++        printf("%8s  %15d  %10d  %6d  %6.1f  %11d\n", threadNamePrefix[prio],
++               stats.maxUsed[prio], stats.numUsed[prio], stats.size,
++               qusage, stats.numOverflow[prio]);
++    }
++}
++
+ int callbackParallelThreads(int count, const char *prio)
+ {
+     if (callbackIsInit) {
+@@ -241,7 +287,7 @@ void callbackInit(void)
+         epicsThreadId tid;
+ 
+         callbackQueue[i].semWakeUp = epicsEventMustCreate(epicsEventEmpty);
+-        callbackQueue[i].queue = epicsRingPointerLockedCreate(callbackQueueSize);
++        callbackQueue[i].queue = epicsRingPointerLockedCreate(epicsAtomicGetIntT(&callbackQueueSize));
+         if (callbackQueue[i].queue == 0)
+             cantProceed("epicsRingPointerLockedCreate failed for %s\n",
+                 threadNamePrefix[i]);
+@@ -291,6 +337,7 @@ int callbackRequest(CALLBACK *pcallback)
+     if (!pushOK) {
+         epicsInterruptContextMessage(fullMessage[priority]);
+         mySet->queueOverflow = TRUE;
++        epicsAtomicIncrIntT(&mySet->queueOverflows);
+         return S_db_bufFull;
+     }
+     epicsEventSignal(mySet->semWakeUp);
+diff --git a/src/ioc/db/callback.h b/src/ioc/db/callback.h
+index 9011446..408f4fc 100644
+--- a/src/ioc/db/callback.h
++++ b/src/ioc/db/callback.h
+@@ -48,6 +48,13 @@ typedef epicsCallback CALLBACK;
+ 
+ typedef void    (*CALLBACKFUNC)(struct callbackPvt*);
+ 
++typedef struct callbackQueueStats {
++    int size;
++    int numUsed[NUM_CALLBACK_PRIORITIES];
++    int maxUsed[NUM_CALLBACK_PRIORITIES];
++    int numOverflow[NUM_CALLBACK_PRIORITIES];
++} callbackQueueStats;
++
+ #define callbackSetCallback(PFUN,PCALLBACK)\
+ ( (PCALLBACK)->callback = (PFUN) )
+ #define callbackSetPriority(PRIORITY,PCALLBACK)\
+@@ -71,6 +78,8 @@ epicsShareFunc void callbackCancelDelayed(CALLBACK *pcallback);
+ epicsShareFunc void callbackRequestProcessCallbackDelayed(
+     CALLBACK *pCallback, int Priority, void *pRec, double seconds);
+ epicsShareFunc int callbackSetQueueSize(int size);
++epicsShareFunc int callbackQueueStatus(const int reset, callbackQueueStats *result);
++void callbackQueuePrintStatus(const int reset);
+ epicsShareFunc int callbackParallelThreads(int count, const char *prio);
+ 
+ #ifdef __cplusplus
+diff --git a/src/ioc/db/dbIocRegister.c b/src/ioc/db/dbIocRegister.c
+index 1a1aafb..943cd32 100644
+--- a/src/ioc/db/dbIocRegister.c
++++ b/src/ioc/db/dbIocRegister.c
+@@ -279,6 +279,17 @@ static void scanOnceSetQueueSizeCallFunc(const iocshArgBuf *args)
+     scanOnceSetQueueSize(args[0].ival);
+ }
+ 
++/* scanOnceQueueStatus */
++static const iocshArg scanOnceQueueStatusArg0 = { "reset",iocshArgInt};
++static const iocshArg * const scanOnceQueueStatusArgs[1] =
++    {&scanOnceQueueStatusArg0};
++static const iocshFuncDef scanOnceQueueStatusFuncDef =
++    {"scanOnceQueueStatus",1,scanOnceQueueStatusArgs};
++static void scanOnceQueueStatusCallFunc(const iocshArgBuf *args)
++{
++    scanOnceQueuePrintStatus(args[0].ival);
++}
++
+ /* scanppl */
+ static const iocshArg scanpplArg0 = { "rate",iocshArgDouble};
+ static const iocshArg * const scanpplArgs[1] = {&scanpplArg0};
+@@ -318,6 +329,17 @@ static void callbackSetQueueSizeCallFunc(const iocshArgBuf *args)
+     callbackSetQueueSize(args[0].ival);
+ }
+ 
++/* callbackQueueStatus */
++static const iocshArg callbackQueueStatusArg0 = { "reset", iocshArgInt};
++static const iocshArg * const callbackQueueStatusArgs[1] =
++    {&callbackQueueStatusArg0};
++static const iocshFuncDef callbackQueueStatusFuncDef =
++    {"callbackQueueStatus",1,callbackQueueStatusArgs};
++static void callbackQueueStatusCallFunc(const iocshArgBuf *args)
++{
++    callbackQueuePrintStatus(args[0].ival);
++}
++
+ /* callbackParallelThreads */
+ static const iocshArg callbackParallelThreadsArg0 = { "no of threads", iocshArgInt};
+ static const iocshArg callbackParallelThreadsArg1 = { "priority", iocshArgString};
+@@ -422,12 +444,14 @@ void dbIocRegister(void)
+     iocshRegister(&dbLockShowLockedFuncDef,dbLockShowLockedCallFunc);
+ 
+     iocshRegister(&scanOnceSetQueueSizeFuncDef,scanOnceSetQueueSizeCallFunc);
++    iocshRegister(&scanOnceQueueStatusFuncDef,scanOnceQueueStatusCallFunc);
+     iocshRegister(&scanpplFuncDef,scanpplCallFunc);
+     iocshRegister(&scanpelFuncDef,scanpelCallFunc);
+     iocshRegister(&postEventFuncDef,postEventCallFunc);
+     iocshRegister(&scanpiolFuncDef,scanpiolCallFunc);
+ 
+     iocshRegister(&callbackSetQueueSizeFuncDef,callbackSetQueueSizeCallFunc);
++    iocshRegister(&callbackQueueStatusFuncDef,callbackQueueStatusCallFunc);
+     iocshRegister(&callbackParallelThreadsFuncDef,callbackParallelThreadsCallFunc);
+ 
+     /* Needed before callback system is initialized */
+diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
+index c54a16e..6f22b09 100644
+--- a/src/ioc/db/dbScan.c
++++ b/src/ioc/db/dbScan.c
+@@ -24,6 +24,7 @@
+ #include "cantProceed.h"
+ #include "dbDefs.h"
+ #include "ellLib.h"
++#include "epicsAtomic.h"
+ #include "epicsEvent.h"
+ #include "epicsExit.h"
+ #include "epicsMutex.h"
+@@ -64,6 +65,7 @@ static volatile enum ctl scanCtl;
+ static int onceQueueSize = 1000;
+ static epicsEventId onceSem;
+ static epicsRingBytesId onceQ;
++static int onceQOverruns = 0;
+ static epicsThreadId onceTaskId;
+ static void *exitOnce;
+ 
+@@ -655,6 +657,7 @@ int scanOnce3(struct dbCommon *precord, once_complete cb, void *usr)
+     if (!pushOK) {
+         if (newOverflow) errlogPrintf("scanOnce: Ring buffer overflow\n");
+         newOverflow = FALSE;
++        epicsAtomicIncrIntT(&onceQOverruns);
+     } else {
+         newOverflow = TRUE;
+     }
+@@ -701,6 +704,40 @@ int scanOnceSetQueueSize(int size)
+     return 0;
+ }
+ 
++int scanOnceQueueStatus(const int reset, scanOnceQueueStats *result)
++{
++    if (!onceQ) return -1;
++    int ret;
++    if (result) {
++        result->size = epicsRingBytesSize(onceQ) / sizeof(onceEntry);
++        result->numUsed = epicsRingBytesUsedBytes(onceQ) / sizeof(onceEntry);
++        result->maxUsed = epicsRingBytesHighWaterMark(onceQ) / sizeof(onceEntry);
++        result->numOverflow = epicsAtomicGetIntT(&onceQOverruns);
++        ret = 0;
++    } else {
++        ret = -2;
++    }
++    if (reset) {
++        epicsRingBytesResetHighWaterMark(onceQ);
++    }
++    return ret;
++}
++
++void scanOnceQueuePrintStatus(const int reset)
++{
++    scanOnceQueueStats stats;
++    if (scanOnceQueueStatus(reset, &stats) == -1) {
++        fprintf(stderr, "scanOnce system not initialized, yet. Please run "
++            "iocInit before using this command.\n");
++        return;
++    }
++
++    printf("PRIORITY  HIGH-WATER MARK  ITEMS IN Q  Q SIZE  %% USED  Q OVERFLOWS\n");
++    double qusage = 100.0 * stats.numUsed / stats.size;
++    printf("%8s  %15d  %10d  %6d  %6.1f  %11d\n", "scanOnce", stats.maxUsed, stats.numUsed, stats.size, qusage,
++           epicsAtomicGetIntT(&onceQOverruns));
++}
++
+ static void initOnce(void)
+ {
+     if ((onceQ = epicsRingBytesLockedCreate(sizeof(onceEntry)*onceQueueSize)) == NULL) {
+diff --git a/src/ioc/db/dbScan.h b/src/ioc/db/dbScan.h
+index dff432e..65a59c3 100644
+--- a/src/ioc/db/dbScan.h
++++ b/src/ioc/db/dbScan.h
+@@ -43,6 +43,13 @@ struct dbCommon;
+ typedef void (*io_scan_complete)(void *usr, IOSCANPVT, int prio);
+ typedef void (*once_complete)(void *usr, struct dbCommon*);
+ 
++typedef struct scanOnceQueueStats {
++    int size;
++    int numUsed;
++    int maxUsed;
++    int numOverflow;
++} scanOnceQueueStats;
++
+ epicsShareFunc long scanInit(void);
+ epicsShareFunc void scanRun(void);
+ epicsShareFunc void scanPause(void);
+@@ -58,6 +65,8 @@ epicsShareFunc double scanPeriod(int scan);
+ epicsShareFunc int scanOnce(struct dbCommon *);
+ epicsShareFunc int scanOnce3(struct dbCommon *, once_complete cb, void *usr);
+ epicsShareFunc int scanOnceSetQueueSize(int size);
++epicsShareFunc int scanOnceQueueStatus(const int reset, scanOnceQueueStats *result);
++void scanOnceQueuePrintStatus(const int reset);
+ 
+ /*print periodic lists*/
+ epicsShareFunc int scanppl(double rate);
+diff --git a/src/libCom/ring/epicsRingBytes.c b/src/libCom/ring/epicsRingBytes.c
+index cb7e52e..a976d84 100644
+--- a/src/libCom/ring/epicsRingBytes.c
++++ b/src/libCom/ring/epicsRingBytes.c
+@@ -21,6 +21,7 @@
+ #include <stdio.h>
+ 
+ #define epicsExportSharedSymbols
++#include "epicsAtomic.h"
+ #include "epicsSpin.h"
+ #include "dbDefs.h"
+ #include "epicsRingBytes.h"
+@@ -38,6 +39,7 @@ typedef struct ringPvt {
+     volatile int   nextPut;
+     volatile int   nextGet;
+     int            size;
++    int            highWaterMark;
+     volatile char buffer[1]; /* actually larger */
+ }ringPvt;
+ 
+@@ -47,6 +49,7 @@ epicsShareFunc epicsRingBytesId  epicsShareAPI epicsRingBytesCreate(int size)
+     if(!pring)
+         return NULL;
+     pring->size = size + SLOP;
++    pring->highWaterMark = 0;
+     pring->nextGet = 0;
+     pring->nextPut = 0;
+     pring->lock    = 0;
+@@ -131,8 +134,13 @@ epicsShareFunc int epicsShareAPI epicsRingBytesPut(
+             if (pring->lock) epicsSpinUnlock(pring->lock);
+             return 0;
+         }
+-        if (nbytes)
++        if (nbytes) {
+             memcpy ((void *)&pring->buffer[nextPut], value, nbytes);
++            int curUsed = pring->size - SLOP - freeCount;
++            if (curUsed > epicsAtomicGetIntT(&pring->highWaterMark)) {
++                epicsAtomicSetIntT(&pring->highWaterMark, curUsed);
++            }
++        }
+         nextPut += nbytes;
+     }
+     else {
+@@ -143,8 +151,13 @@ epicsShareFunc int epicsShareAPI epicsRingBytesPut(
+         }
+         topCount = size - nextPut;
+         copyCount = (nbytes > topCount) ?  topCount : nbytes;
+-        if (copyCount)
++        if (copyCount) {
+             memcpy ((void *)&pring->buffer[nextPut], value, copyCount);
++            int curUsed = pring->size - SLOP - freeCount;
++            if (curUsed > epicsAtomicGetIntT(&pring->highWaterMark)) {
++                epicsAtomicSetIntT(&pring->highWaterMark, curUsed);
++            }
++        }
+         nextPut += copyCount;
+         if (nextPut == size) {
+             int nLeft = nbytes - copyCount;
+@@ -224,3 +237,15 @@ epicsShareFunc int epicsShareAPI epicsRingBytesIsFull(epicsRingBytesId id)
+ {
+     return (epicsRingBytesFreeBytes(id) <= 0);
+ }
++
++epicsShareFunc int epicsShareAPI epicsRingBytesHighWaterMark(epicsRingBytesIdConst id)
++{
++    ringPvt *pring = (ringPvt *)id;
++    return epicsAtomicGetIntT(&pring->highWaterMark);
++}
++
++epicsShareFunc void epicsShareAPI epicsRingBytesResetHighWaterMark(epicsRingBytesId id)
++{
++    ringPvt *pring = (ringPvt *)id;
++    epicsAtomicSetIntT(&pring->highWaterMark, epicsRingBytesUsedBytes(id));
++}
+diff --git a/src/libCom/ring/epicsRingBytes.h b/src/libCom/ring/epicsRingBytes.h
+index 011829b..3dc0081 100644
+--- a/src/libCom/ring/epicsRingBytes.h
++++ b/src/libCom/ring/epicsRingBytes.h
+@@ -24,6 +24,7 @@ extern "C" {
+ #include "shareLib.h"
+ 
+ typedef void *epicsRingBytesId;
++typedef void const *epicsRingBytesIdConst;
+ 
+ epicsShareFunc epicsRingBytesId  epicsShareAPI epicsRingBytesCreate(int nbytes);
+ /* Same, but secured by a spinlock */
+@@ -39,6 +40,8 @@ epicsShareFunc int  epicsShareAPI epicsRingBytesUsedBytes(epicsRingBytesId id);
+ epicsShareFunc int  epicsShareAPI epicsRingBytesSize(epicsRingBytesId id);
+ epicsShareFunc int  epicsShareAPI epicsRingBytesIsEmpty(epicsRingBytesId id);
+ epicsShareFunc int  epicsShareAPI epicsRingBytesIsFull(epicsRingBytesId id);
++epicsShareFunc int  epicsShareAPI epicsRingBytesHighWaterMark(epicsRingBytesIdConst id);
++epicsShareFunc void epicsShareAPI epicsRingBytesResetHighWaterMark(epicsRingBytesId id);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/libCom/ring/epicsRingPointer.cpp b/src/libCom/ring/epicsRingPointer.cpp
+index 9c144ce..709ab65 100644
+--- a/src/libCom/ring/epicsRingPointer.cpp
++++ b/src/libCom/ring/epicsRingPointer.cpp
+@@ -90,3 +90,15 @@ epicsShareFunc int epicsShareAPI epicsRingPointerIsFull(epicsRingPointerId id)
+     voidPointer *pvoidPointer = reinterpret_cast<voidPointer*>(id);
+     return((pvoidPointer->isFull()) ? 1 : 0);
+ }
++
++epicsShareFunc int epicsShareAPI epicsRingPointerGetHighWaterMark(epicsRingPointerIdConst id)
++{
++    voidPointer const *pvoidPointer = reinterpret_cast<voidPointer const*>(id);
++    return(pvoidPointer->getHighWaterMark());
++}
++
++epicsShareFunc void epicsShareAPI epicsRingPointerResetHighWaterMark(epicsRingPointerId id)
++{
++    voidPointer *pvoidPointer = reinterpret_cast<voidPointer*>(id);
++    pvoidPointer->resetHighWaterMark();
++}
+diff --git a/src/libCom/ring/epicsRingPointer.h b/src/libCom/ring/epicsRingPointer.h
+index 48d6203..b629238 100644
+--- a/src/libCom/ring/epicsRingPointer.h
++++ b/src/libCom/ring/epicsRingPointer.h
+@@ -23,6 +23,7 @@
+  *   epicsRingPointerLocked uses a spinlock.
+  */
+ 
++#include "epicsAtomic.h"
+ #include "epicsSpin.h"
+ #include "shareLib.h"
+ 
+@@ -40,18 +41,22 @@ public: /* Functions */
+     int getSize() const;
+     bool isEmpty() const;
+     bool isFull() const;
++    int getHighWaterMark() const;
++    void resetHighWaterMark();
+ 
+ private: /* Prevent compiler-generated member functions */
+     /* default constructor, copy constructor, assignment operator */
+     epicsRingPointer();
+     epicsRingPointer(const epicsRingPointer &);
+     epicsRingPointer& operator=(const epicsRingPointer &);
++    int getUsedNoLock() const;
+ 
+ private: /* Data */
+     epicsSpinId lock;
+     volatile int nextPush;
+     volatile int nextPop;
+     int size;
++    int highWaterMark;
+     T  * volatile * buffer;
+ };
+ 
+@@ -59,6 +64,7 @@ extern "C" {
+ #endif /*__cplusplus */
+ 
+ typedef void *epicsRingPointerId;
++typedef void const *epicsRingPointerIdConst;
+ 
+ epicsShareFunc epicsRingPointerId  epicsShareAPI epicsRingPointerCreate(int size);
+ /* Same, but secured by a spinlock */
+@@ -74,6 +80,8 @@ epicsShareFunc int  epicsShareAPI epicsRingPointerGetUsed(epicsRingPointerId id)
+ epicsShareFunc int  epicsShareAPI epicsRingPointerGetSize(epicsRingPointerId id);
+ epicsShareFunc int  epicsShareAPI epicsRingPointerIsEmpty(epicsRingPointerId id);
+ epicsShareFunc int  epicsShareAPI epicsRingPointerIsFull(epicsRingPointerId id);
++epicsShareFunc int  epicsShareAPI epicsRingPointerGetHighWaterMark(epicsRingPointerIdConst id);
++epicsShareFunc void epicsShareAPI epicsRingPointerResetHighWaterMark(epicsRingPointerId id);
+ 
+ /* This routine was incorrectly named in previous releases */
+ #define epicsRingPointerSize epicsRingPointerGetSize
+@@ -95,7 +103,8 @@ epicsShareFunc int  epicsShareAPI epicsRingPointerIsFull(epicsRingPointerId id);
+ 
+ template <class T>
+ inline epicsRingPointer<T>::epicsRingPointer(int sz, bool locked) :
+-    lock(0), nextPush(0), nextPop(0), size(sz+1), buffer(new T* [sz+1])
++    lock(0), nextPush(0), nextPop(0), size(sz+1), highWaterMark(0),
++    buffer(new T* [sz+1])
+ {
+     if (locked)
+         lock = epicsSpinCreate();
+@@ -121,6 +130,10 @@ inline bool epicsRingPointer<T>::push(T *p)
+     }
+     buffer[next] = p;
+     nextPush = newNext;
++    int used = getUsedNoLock();
++    if (used > epicsAtomicGetIntT(&highWaterMark)) {
++        epicsAtomicSetIntT(&highWaterMark, used);
++    }
+     if (lock) epicsSpinUnlock(lock);
+     return(true);
+ }
+@@ -162,11 +175,18 @@ inline int epicsRingPointer<T>::getFree() const
+ }
+ 
+ template <class T>
+-inline int epicsRingPointer<T>::getUsed() const
++inline int epicsRingPointer<T>::getUsedNoLock() const
+ {
+-    if (lock) epicsSpinLock(lock);
+     int n = nextPush - nextPop;
+     if (n < 0) n += size;
++    return n;
++}
++
++template <class T>
++inline int epicsRingPointer<T>::getUsed() const
++{
++    if (lock) epicsSpinLock(lock);
++    int n = getUsedNoLock();
+     if (lock) epicsSpinUnlock(lock);
+     return n;
+ }
+@@ -196,6 +216,18 @@ inline bool epicsRingPointer<T>::isFull() const
+     return((count == 0) || (count == size));
+ }
+ 
++template <class T>
++inline int epicsRingPointer<T>::getHighWaterMark() const
++{
++    return epicsAtomicGetIntT(&highWaterMark);
++}
++
++template <class T>
++inline void epicsRingPointer<T>::resetHighWaterMark()
++{
++    epicsAtomicSetIntT(&highWaterMark, getUsed());
++}
++
+ #endif /* __cplusplus */
+ 
+ #endif /* INCepicsRingPointerh */

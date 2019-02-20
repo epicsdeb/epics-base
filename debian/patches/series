@@ -17,3 +17,11 @@
 0017-Add-some-const-keywords.patch
 0018-Constructor-for-struct-subInfo.patch
 0019-Simplify-catMacroReplacements.patch
+0020-dbScan-add-scanOnce3-w-completion-callback.patch
+0021-Expose-callback-queue-status.patch
+0022-Make-code-compatible-with-ISO-C90.patch
+0023-Remove-unneeded-epicsAtomic-from-callbackQueueSize.patch
+0024-Add-tests-for-highWaterMark-feature.patch
+0025-Fix-incorrect-value-for-highWaterMark-in-epicsRingBy.patch
+0026-Prevent-data-race-between-resetHighWaterMark-and-put.patch
+0027-Simpler-implementation-using-spin-lock-rather-than-a.patch
