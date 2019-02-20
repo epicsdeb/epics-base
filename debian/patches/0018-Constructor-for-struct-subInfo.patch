@@ -1,0 +1,39 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Fri, 4 Jan 2019 13:53:07 -0500
+Subject: Constructor for struct subInfo
+
+---
+ src/ioc/dbtemplate/msi.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/ioc/dbtemplate/msi.cpp b/src/ioc/dbtemplate/msi.cpp
+index 5e67342..2195776 100644
+--- a/src/ioc/dbtemplate/msi.cpp
++++ b/src/ioc/dbtemplate/msi.cpp
+@@ -658,6 +658,8 @@ struct subInfo {
+     size_t      size;
+     size_t      curLength;
+     char        *macroReplacements;
++    subInfo() : psubFile(nullptr), isFile(0), filename(nullptr), isPattern(0),
++                size(0), curLength(0), macroReplacements(nullptr) {};
+ };
+ 
+ static char *subGetNextLine(subFile *psubFile);
+@@ -701,7 +703,7 @@ static void substituteDestruct(subInfo * const psubInfo)
+     ENTER;
+     freeSubFile(psubInfo);
+     freePattern(psubInfo);
+-    free(psubInfo);
++    delete(psubInfo);
+     EXIT;
+ }
+ 
+@@ -712,7 +714,7 @@ static void substituteOpen(subInfo **ppvt, char * const substitutionName)
+     FILE        *fp;
+ 
+     ENTER;
+-    psubInfo = static_cast<subInfo *>(calloc(1, sizeof(subInfo)));
++    psubInfo = new subInfo;
+     *ppvt = psubInfo;
+     psubFile = static_cast<subFile *>(calloc(1, sizeof(subFile)));
+     psubInfo->psubFile = psubFile;

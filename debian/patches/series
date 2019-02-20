@@ -12,3 +12,8 @@
 0012-remove-w3-validator-link.patch
 0013-Applied-Till-s-fix-for-lp-1581212.patch
 0014-Fix-shebang-line-of-tap-to-junit-xml.pl.patch
+0015-Test-expansion-of-empty-patterns-with-MSI.patch
+0016-Convert-MSI-to-C.patch
+0017-Add-some-const-keywords.patch
+0018-Constructor-for-struct-subInfo.patch
+0019-Simplify-catMacroReplacements.patch
