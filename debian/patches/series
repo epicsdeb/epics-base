@@ -25,4 +25,4 @@
 0025-Fix-incorrect-value-for-highWaterMark-in-epicsRingBy.patch
 0026-Prevent-data-race-between-resetHighWaterMark-and-put.patch
 0027-Simpler-implementation-using-spin-lock-rather-than-a.patch
-0028-libca-don-t-set-thread-local-storage-handle-to-zero-.patch
+0028-Remove-cacExitHandler.patch
