@@ -71,7 +71,7 @@ static void req_server (void *pParm)
         char sockErrBuf[64];
         epicsSocketConvertErrnoToString (
             sockErrBuf, sizeof ( sockErrBuf ) );
-        errlogPrintf ( "CAS: Listen error %s\n",
+        errlogPrintf ( "CAS: Listen error: %s\n",
             sockErrBuf );
         epicsSocketDestroy (IOC_sock);
         epicsThreadSuspendSelf ();
@@ -93,7 +93,7 @@ static void req_server (void *pParm)
             char sockErrBuf[64];
             epicsSocketConvertErrnoToString (
                 sockErrBuf, sizeof ( sockErrBuf ) );
-            errlogPrintf("CAS: Client accept error was \"%s\"\n",
+            errlogPrintf("CAS: Client accept error: %s\n",
                 sockErrBuf );
             epicsThreadSleep(15.0);
             continue;
@@ -138,7 +138,7 @@ int tryBind(SOCKET sock, const osiSockAddr* addr, const char *name)
         {
             epicsSocketConvertErrnoToString (
                         sockErrBuf, sizeof ( sockErrBuf ) );
-            errlogPrintf ( "CAS: %s bind error: \"%s\"\n",
+            errlogPrintf ( "CAS: %s bind error: %s\n",
                            name, sockErrBuf );
             epicsThreadSuspendSelf ();
         }
@@ -203,7 +203,7 @@ SOCKET* rsrv_grab_tcp(unsigned short *port)
                         char sockErrBuf[64];
                         epicsSocketConvertErrnoToString (
                             sockErrBuf, sizeof ( sockErrBuf ) );
-                        errlogPrintf ( "CAS: getsockname error was \"%s\"\n",
+                        errlogPrintf ( "CAS: getsockname error: %s\n",
                             sockErrBuf );
                         epicsThreadSuspendSelf ();
                         ok = 0;
@@ -232,16 +232,17 @@ SOCKET* rsrv_grab_tcp(unsigned short *port)
                     ok = 0;
                     break;
                 }
-                /* if SOCK_EADDRINUSE then try again with a different port number.
-                 * otherwise, fail hard
+                /* if SOCK_EADDRINUSE or SOCK_EACCES try again with a different
+                 * port number, otherwise fail hard.
                  */
-                if(errcode!=SOCK_EADDRINUSE) {
+                if (errcode != SOCK_EADDRINUSE &&
+                    errcode != SOCK_EACCES) {
                     char name[40];
                     char sockErrBuf[64];
                     epicsSocketConvertErrnoToString (
                         sockErrBuf, sizeof ( sockErrBuf ) );
                     ipAddrToDottedIP(&scratch.ia, name, sizeof(name));
-                    cantProceed( "CAS: Socket bind %s error was \"%s\"\n",
+                    cantProceed( "CAS: Socket bind %s error: %s\n",
                         name, sockErrBuf );
                 }
                 ok = 0;
@@ -307,13 +308,14 @@ void rsrv_build_addr_lists(void)
         }
 #ifdef IP_ADD_MEMBERSHIP
         {
-            int flag = 1;
+            osiSockOptMcastLoop_t flag = 1;
             if (setsockopt(beaconSocket, IPPROTO_IP, IP_MULTICAST_LOOP,
                            (char *)&flag, sizeof(flag))<0) {
                 char sockErrBuf[64];
                 epicsSocketConvertErrnoToString (
                             sockErrBuf, sizeof ( sockErrBuf ) );
-                errlogPrintf("rsrv: failed to set mcast loopback\n");
+                errlogPrintf("CAS: failed to set mcast loopback: %s\n",
+                    sockErrBuf);
             }
         }
 #endif
@@ -469,7 +471,6 @@ int rsrv_init (void)
 
     clientQlock = epicsMutexMustCreate();
 
-    ellInit ( &clientQ );
     freeListInitPvt ( &rsrvClientFreeList, sizeof(struct client), 8 );
     freeListInitPvt ( &rsrvChanFreeList, sizeof(struct channel_in_use), 512 );
     freeListInitPvt ( &rsrvEventFreeList, sizeof(struct event_ext), 512 );
@@ -639,7 +640,7 @@ int rsrv_init (void)
                         epicsSocketConvertErrnoToString (
                             sockErrBuf, sizeof ( sockErrBuf ) );
                         ipAddrToDottedIP (&temp, name, sizeof(name));
-                        fprintf(stderr, "CAS: Socket mcast join %s to %s failed with \"%s\"\n",
+                        errlogPrintf("CAS: Socket mcast join %s to %s failed: %s\n",
                             ifaceName, name, sockErrBuf );
                     }
                 }
@@ -852,7 +853,7 @@ static void log_one_client (struct client *client, unsigned level)
         printf(
         "\tUnprocessed request bytes = %u, Undelivered response bytes = %u\n",
             client->recv.cnt - client->recv.stk,
-            client->send.stk ); 
+            client->send.stk );
         printf(
         "\tState = %s%s%s\n",
             state[client->disconnect?1:0],

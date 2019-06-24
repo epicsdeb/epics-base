@@ -46,16 +46,92 @@ epicsShareFunc void testdbCleanup(void);
  * testdbPutFieldOk("pvname", DBF_FLOAT, (double)4.1);
  * testdbPutFieldOk("pvname", DBF_STRING, "hello world");
  */
-epicsShareFunc void testdbPutFieldOk(const char* pv, short dbrType, ...);
+epicsShareFunc void testdbPutFieldOk(const char* pv, int dbrType, ...);
 /* Tests for put failure */
-epicsShareFunc void testdbPutFieldFail(long status, const char* pv, short dbrType, ...);
+epicsShareFunc void testdbPutFieldFail(long status, const char* pv, int dbrType, ...);
 
 epicsShareFunc long testdbVPutField(const char* pv, short dbrType, va_list ap);
 
-epicsShareFunc void testdbGetFieldEqual(const char* pv, short dbrType, ...);
+epicsShareFunc void testdbGetFieldEqual(const char* pv, int dbrType, ...);
 epicsShareFunc void testdbVGetFieldEqual(const char* pv, short dbrType, va_list ap);
 
+/**
+ * @param pv PV name string
+ * @param dbfType One of the DBF_* macros from dbAccess.h
+ * @param nRequest Number of elements to request from pv
+ * @param pbufcnt  Number of elements pointed to be pbuf
+ * @param pbuf     Expected value buffer
+ *
+ * Execute dbGet() of nRequest elements and compare the result with
+ * pbuf (pbufcnt is an element count).
+ * Element size is derived from dbfType.
+ *
+ * nRequest > pbufcnt will detect truncation.
+ * nRequest < pbufcnt always fails.
+ * nRequest ==pbufcnt checks prefix (actual may be longer than expected)
+ */
+epicsShareFunc void testdbGetArrFieldEqual(const char* pv, short dbfType, long nRequest, unsigned long pbufcnt, const void *pbuf);
+
 epicsShareFunc dbCommon* testdbRecordPtr(const char* pv);
+
+/** Synchronize the shared callback queues.
+ *
+ * Block until all callback queue jobs which were queued, or running,
+ * have completed.
+ */
+epicsShareFunc void testSyncCallback(void);
+
+/** Global mutex for use by test code.
+ *
+ * This utility mutex is intended to be used to avoid races in situations
+ * where some other syncronization primitive is being destroyed (epicsEvent,
+ * epicsMutex, ...).
+ *
+ * For example.  The following has a subtle race where the event may be
+ * destroyed (free()'d) before the call to epicsEventMustSignal() has
+ * returned.  On some targets this leads to a use after free() error.
+ *
+ @code
+ epicsEventId evt;
+ void thread1() {
+   evt = epicsEventMustCreate(...);
+   // spawn thread2()
+   epicsEventMustWait(evt);
+   epicsEventDestroy(evt);
+ }
+ // ...
+ void thread2() {
+   epicsEventMustSignal(evt);
+ }
+ @endcode
+ *
+ * One way to avoid this race is to use a global mutex to ensure
+ * that epicsEventMustSignal() has returned before destroying
+ * the event.
+ *
+ @code
+ epicsEventId evt;
+ void thread1() {
+   evt = epicsEventMustCreate(...);
+   // spawn thread2()
+   epicsEventMustWait(evt);
+   testGlobalLock();   // <-- added
+   epicsEventDestroy(evt);
+   testGlobalUnlock(); // <-- added
+ }
+ // ...
+ void thread2() {
+   testGlobalLock();   // <-- added
+   epicsEventMustSignal(evt);
+   testGlobalUnlock(); // <-- added
+ }
+ @endcode
+ *
+ * This must be a global mutex to avoid simply shifting the race
+ * from the event to a locally allocated mutex.
+ */
+epicsShareFunc void testGlobalLock(void);
+epicsShareFunc void testGlobalUnlock(void);
 
 #ifdef __cplusplus
 }

@@ -4,7 +4,7 @@
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
 # EPICS BASE is distributed subject to a Software License Agreement found
-# in the file LICENSE that is included with this distribution. 
+# in the file LICENSE that is included with this distribution.
 #*************************************************************************
 TOP=../../../..
 
@@ -37,7 +37,19 @@ testHarness_SRCS += analogMonitorTest_registerRecordDeviceDriver.cpp
 TESTFILES += $(COMMON_DIR)/analogMonitorTest.dbd ../analogMonitorTest.db
 TESTS += analogMonitorTest
 
+TARGETS += $(COMMON_DIR)/scanEventTest.dbd
+DBDDEPENDS_FILES += scanEventTest.dbd$(DEP)
+scanEventTest_DBD += base.dbd
+TESTPROD_HOST += scanEventTest
+scanEventTest_SRCS += scanEventTest.c
+scanEventTest_SRCS += scanEventTest_registerRecordDeviceDriver.cpp
+testHarness_SRCS += scanEventTest.c
+testHarness_SRCS += scanEventTest_registerRecordDeviceDriver.cpp
+TESTFILES += $(COMMON_DIR)/scanEventTest.dbd ../scanEventTest.db
+TESTS += scanEventTest
+
 TARGETS += $(COMMON_DIR)/regressTest.dbd
+DBDDEPENDS_FILES += regressTest.dbd$(DEP)
 regressTest_DBD += base.dbd
 TESTPROD_HOST += regressTest
 regressTest_SRCS += regressTest.c

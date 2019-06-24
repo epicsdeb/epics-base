@@ -867,9 +867,9 @@ static void refer ( MAC_HANDLE *handle, MAC_ENTRY *entry, int level,
         if ( !refentry->visited ) {
             /* reference is good, use it */
             if ( !handle->dirty ) {
-                /* copy the already-expanded value, and its error status! */
+                /* copy the already-expanded value, merge any error status */
                 cpy2val( refentry->value, &v, valend );
-                entry->error = refentry->error;
+                entry->error = entry->error || refentry->error;
             } else {
                 /* translate raw value */
                 const char *rv = refentry->rawval;
@@ -902,11 +902,16 @@ static void refer ( MAC_HANDLE *handle, MAC_ENTRY *entry, int level,
         }
     }
 
-    /* Bad reference, insert $(name,errval) */
+    /* Bad reference, insert either $(name,<error>) or $(name) */
     if ( v < valend ) *v++ = '$';
     if ( v < valend ) *v++ = '(';
     cpy2val( refname, &v, valend );
-    cpy2val( errval, &v, valend );
+    if (handle->flags & FLAG_SUPPRESS_WARNINGS) {
+        if ( v < valend ) *v++ = ')';
+        *v = '\0';
+    }
+    else
+        cpy2val( errval, &v, valend );
 
 cleanup:
     if (pop) {

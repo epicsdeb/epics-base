@@ -6,7 +6,7 @@
 * Copyright (c) 2013 Helmholtz-Zentrum Berlin
 *     für Materialien und Energie GmbH.
 * EPICS BASE is distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /* dbScan.c */
 /* tasks and subroutines to scan the database */
@@ -111,8 +111,8 @@ static char *priorityName[NUM_CALLBACK_PRIORITIES] = {
 typedef struct event_list {
     CALLBACK            callback[NUM_CALLBACK_PRIORITIES];
     scan_list           scan_list[NUM_CALLBACK_PRIORITIES];
-    struct event_list *next;
-    char                event_name[MAX_STRING_SIZE];
+    struct event_list   *next;
+    char                eventname[1]; /* actually arbitrary size */
 } event_list;
 static event_list * volatile pevent_list[256];
 static epicsMutexId event_lock;
@@ -161,8 +161,11 @@ void scanStop(void)
     interruptAccept = FALSE;
 
     for (i = 0; i < nPeriodic; i++) {
-        papPeriodic[i]->scanCtl = ctlExit;
-        epicsEventSignal(papPeriodic[i]->loopEvent);
+        periodic_scan_list *ppsl = papPeriodic[i];
+
+        if (!ppsl) continue;
+        ppsl->scanCtl = ctlExit;
+        epicsEventSignal(ppsl->loopEvent);
         epicsEventWait(startStopEvent);
     }
 
@@ -207,16 +210,24 @@ void scanRun(void)
     interruptAccept = TRUE;
     scanCtl = ctlRun;
 
-    for (i = 0; i < nPeriodic; i++)
-        papPeriodic[i]->scanCtl = ctlRun;
+    for (i = 0; i < nPeriodic; i++) {
+        periodic_scan_list *ppsl = papPeriodic[i];
+
+        if (!ppsl) continue;
+        ppsl->scanCtl = ctlRun;
+    }
 }
 
 void scanPause(void)
 {
     int i;
 
-    for (i = nPeriodic - 1; i >= 0; --i)
-        papPeriodic[i]->scanCtl = ctlPause;
+    for (i = nPeriodic - 1; i >= 0; --i) {
+        periodic_scan_list *ppsl = papPeriodic[i];
+
+        if (!ppsl) continue;
+        ppsl->scanCtl = ctlPause;
+    }
 
     scanCtl = ctlPause;
     interruptAccept = FALSE;
@@ -238,11 +249,6 @@ void scanAdd(struct dbCommon *precord)
         event_list *pel;
 
         eventname = precord->evnt;
-        if (strlen(eventname) >= MAX_STRING_SIZE) {
-            recGblRecordError(S_db_badField, (void *)precord,
-                "scanAdd: too long EVNT value");
-            return;
-        }
         prio = precord->prio;
         if (prio < 0 || prio >= NUM_CALLBACK_PRIORITIES) {
             recGblRecordError(-1, (void *)precord,
@@ -288,9 +294,11 @@ void scanAdd(struct dbCommon *precord)
         }
         addToList(precord, &piosh->iosl[prio].scan_list);
     } else if (scan >= SCAN_1ST_PERIODIC) {
-        addToList(precord, &papPeriodic[scan - SCAN_1ST_PERIODIC]->scan_list);
+        periodic_scan_list *ppsl = papPeriodic[scan - SCAN_1ST_PERIODIC];
+
+        if (ppsl)
+            addToList(precord, &ppsl->scan_list);
     }
-    return;
 }
 
 void scanDelete(struct dbCommon *precord)
@@ -304,24 +312,17 @@ void scanDelete(struct dbCommon *precord)
         recGblRecordError(-1, (void *)precord,
             "scanDelete detected illegal SCAN value");
     } else if (scan == menuScanEvent) {
-        char* eventname;
         int prio;
         event_list *pel;
         scan_list *psl = 0;
 
-        eventname = precord->evnt;
         prio = precord->prio;
         if (prio < 0 || prio >= NUM_CALLBACK_PRIORITIES) {
             recGblRecordError(-1, (void *)precord,
                 "scanDelete detected illegal PRIO field");
             return;
         }
-        do /* multithreading: make sure pel is consistent */
-            pel = pevent_list[0];
-        while (pel != pevent_list[0]);
-        for (; pel; pel=pel->next) {
-            if (strcmp(pel->event_name, eventname) == 0) break;
-        }
+        pel = eventNameToHandle(precord->evnt);
         if (pel && (psl = &pel->scan_list[prio]))
             deleteFromList(precord, psl);
     } else if (scan == menuScanI_O_Intr) {
@@ -354,28 +355,48 @@ void scanDelete(struct dbCommon *precord)
         }
         deleteFromList(precord, &piosh->iosl[prio].scan_list);
     } else if (scan >= SCAN_1ST_PERIODIC) {
-        deleteFromList(precord, &papPeriodic[scan - SCAN_1ST_PERIODIC]->scan_list);
+        periodic_scan_list *ppsl = papPeriodic[scan - SCAN_1ST_PERIODIC];
+
+        if (ppsl)
+            deleteFromList(precord, &ppsl->scan_list);
     }
-    return;
 }
 
 double scanPeriod(int scan) {
+    periodic_scan_list *ppsl;
+
     scan -= SCAN_1ST_PERIODIC;
     if (scan < 0 || scan >= nPeriodic)
         return 0.0;
-    return papPeriodic[scan]->period;
+    ppsl = papPeriodic[scan];
+    return ppsl ? ppsl->period : 0.0;
 }
-
-int scanppl(double period)      /* print periodic list */
+
+int scanppl(double period)      /* print periodic scan list(s) */
 {
-    periodic_scan_list *ppsl;
+    dbMenu *pmenu = dbFindMenu(pdbbase, "menuScan");
     char message[80];
     int i;
 
+    if (!pmenu || !papPeriodic) {
+        printf("scanppl: dbScan subsystem not initialized\n");
+        return -1;
+    }
+
     for (i = 0; i < nPeriodic; i++) {
-        ppsl = papPeriodic[i];
-        if (ppsl == NULL) continue;
-        if (period > 0.0 && (fabs(period - ppsl->period) >.05)) continue;
+        periodic_scan_list *ppsl = papPeriodic[i];
+
+        if (!ppsl) {
+            const char *choice = pmenu->papChoiceValue[i + SCAN_1ST_PERIODIC];
+
+            printf("Periodic scan list for SCAN = '%s' not initialized\n",
+                choice);
+            continue;
+        }
+        if (period > 0.0 &&
+            (fabs(period - ppsl->period) > 0.05))
+            continue;
+
         sprintf(message, "Records with SCAN = '%s' (%lu over-runs):",
             ppsl->name, ppsl->overruns);
         printList(&ppsl->scan_list, message);
@@ -389,14 +410,12 @@ int scanpel(const char* eventname)   /* print event list */
     int prio;
     event_list *pel;
 
-    do /* multithreading: make sure pel is consistent */
-        pel = pevent_list[0];
-    while (pel != pevent_list[0]);
-    for (; pel; pel = pel->next) {
-        if (!eventname || strcmp(pel->event_name, eventname) == 0) {
+    for (pel = pevent_list[0]; pel; pel = pel->next) {
+        if (!eventname || epicsStrGlobMatch(pel->eventname, eventname)) {
+            printf("Event \"%s\"\n", pel->eventname);
             for (prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
                 if (ellCount(&pel->scan_list[prio].list) == 0) continue;
-                sprintf(message, "Event \"%s\" Priority %s", pel->event_name, priorityName[prio]);
+                sprintf(message, " Priority %s", priorityName[prio]);
                 printList(&pel->scan_list[prio], message);
             }
         }
@@ -447,18 +466,52 @@ event_list *eventNameToHandle(const char *eventname)
     int prio;
     event_list *pel;
     static epicsThreadOnceId onceId = EPICS_THREAD_ONCE_INIT;
+    double eventnumber = 0;
+    size_t namelength;
 
-    if (!eventname || eventname[0] == 0)
-        return NULL;
+    if (!eventname) return NULL;
+    while (isspace((unsigned char)eventname[0])) eventname++;
+    if (!eventname[0]) return NULL;
+    namelength = strlen(eventname);
+    while (isspace((unsigned char)eventname[namelength-1])) namelength--;
+
+    /* Backward compatibility with numeric events:
+       Treat any string that represents a double with an
+       integer part between 0 and 255 the same as the integer
+       because it is most probably a conversion from double
+       like from a calc record.
+    */
+    if (epicsParseDouble(eventname, &eventnumber, NULL) == 0)
+    {
+        if (eventnumber >= 0 && eventnumber < 256)
+        {
+            if (eventnumber < 1)
+                return NULL; /* 0 is no event */
+            if ((pel = pevent_list[(int)eventnumber]) != NULL)
+                return pel;
+        }
+        else
+            eventnumber = 0; /* not a numeric event between 1 and 255 */
+    }
 
     epicsThreadOnce(&onceId, eventOnce, NULL);
     epicsMutexMustLock(event_lock);
     for (pel = pevent_list[0]; pel; pel=pel->next) {
-        if (strcmp(pel->event_name, eventname) == 0) break;
+        if (strncmp(pel->eventname, eventname, namelength) == 0
+            && pel->eventname[namelength] == 0)
+            break;
     }
     if (pel == NULL) {
-        pel = dbCalloc(1, sizeof(event_list));
-        strcpy(pel->event_name, eventname);
+        pel = calloc(1, sizeof(event_list) + namelength);
+        if (!pel)
+            goto done;
+        if (eventnumber > 0) {
+            /* backward compatibility: make all numeric events look like integers */
+            sprintf(pel->eventname, "%i", (int)eventnumber);
+            pevent_list[(int)eventnumber] = pel;
+        }
+        else
+            strncpy(pel->eventname, eventname, namelength);
         for (prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
             callbackSetUser(&pel->scan_list[prio], &pel->callback[prio]);
             callbackSetPriority(prio, &pel->callback[prio]);
@@ -468,13 +521,8 @@ event_list *eventNameToHandle(const char *eventname)
         }
         pel->next=pevent_list[0];
         pevent_list[0]=pel;
-        { /* backward compatibility */
-            char* p;
-            long e = strtol(eventname, &p, 0);
-            if (*p == 0 && e > 0 && e <= 255)
-                pevent_list[e] = pel;
-        }
     }
+done:
     epicsMutexUnlock(event_lock);
     return pel;
 }
@@ -494,13 +542,8 @@ void postEvent(event_list *pel)
 /* backward compatibility */
 void post_event(int event)
 {
-    event_list* pel;
-
     if (event <= 0 || event > 255) return;
-    do { /* multithreading: make sure pel is consistent */
-        pel = pevent_list[event];
-    } while (pel != pevent_list[event]);
-    postEvent(pel);
+    postEvent(pevent_list[event]);
 }
 
 static void ioscanOnce(void *arg)
@@ -694,7 +737,7 @@ static void periodicTask(void *arg)
             if (++overruns >= 10 &&
                 epicsTimeDiffInSeconds(&now, &reported) > report_delay) {
                 errlogPrintf("\ndbScan warning from '%s' scan thread:\n"
-                    "\tScan processing averages %.2f seconds (%.2f .. %.2f).\n"
+                    "\tScan processing averages %.3f seconds (%.3f .. %.3f).\n"
                     "\tOver-runs have now happened %u times in a row.\n"
                     "\tTo fix this, move some records to a slower scan rate.\n",
                     ppsl->name, ppsl->period + overtime / overruns,
@@ -741,12 +784,8 @@ static void initPeriodic(void)
         char *unit;
         int status = epicsParseDouble(choice, &number, &unit);
 
-        ppsl->scan_list.lock = epicsMutexMustCreate();
-        ellInit(&ppsl->scan_list.list);
-        ppsl->name = choice;
-        if (status || number == 0) {
+        if (status || number <= 0) {
             errlogPrintf("initPeriodic: Bad menuScan choice '%s'\n", choice);
-            ppsl->period = i;
         }
         else if (!*unit ||
                  !epicsStrCaseCmp(unit, "second") ||
@@ -767,16 +806,24 @@ static void initPeriodic(void)
         }
         else {
             errlogPrintf("initPeriodic: Bad menuScan choice '%s'\n", choice);
-            ppsl->period = i;
         }
+        if (ppsl->period == 0) {
+            free(ppsl);
+            continue;
+        }
+
+        ppsl->scan_list.lock = epicsMutexMustCreate();
+        ellInit(&ppsl->scan_list.list);
+        ppsl->name = choice;
+        ppsl->scanCtl = ctlPause;
+        ppsl->loopEvent = epicsEventMustCreate(epicsEventEmpty);
+
         number = ppsl->period / quantum;
         if ((ppsl->period < 2 * quantum) ||
             (number / floor(number) > 1.1)) {
             errlogPrintf("initPeriodic: Scan rate '%s' is not achievable.\n",
                 choice);
         }
-        ppsl->scanCtl = ctlPause;
-        ppsl->loopEvent = epicsEventMustCreate(epicsEventEmpty);
 
         papPeriodic[i] = ppsl;
     }
@@ -788,6 +835,8 @@ static void deletePeriodic(void)
 
     for (i = 0; i < nPeriodic; i++) {
         periodic_scan_list *ppsl = papPeriodic[i];
+
+        if (!ppsl) continue;
         ellFree(&ppsl->scan_list.list);
         epicsEventDestroy(ppsl->loopEvent);
         epicsMutexDestroy(ppsl->scan_list.lock);
@@ -800,10 +849,11 @@ static void deletePeriodic(void)
 
 static void spawnPeriodic(int ind)
 {
-    periodic_scan_list *ppsl;
+    periodic_scan_list *ppsl = papPeriodic[ind];
     char taskName[20];
 
-    ppsl = papPeriodic[ind];
+    if (!ppsl) return;
+
     sprintf(taskName, "scan-%g", ppsl->period);
     periodicTaskId[ind] = epicsThreadCreate(
         taskName, epicsThreadPriorityScanLow + ind,

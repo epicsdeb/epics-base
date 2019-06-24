@@ -1,7 +1,7 @@
 /*************************************************************************\
 * Copyright (c) 2002 The University of Saskatchewan
 * EPICS BASE is distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 /*
  * Author: Eric Norum
@@ -31,6 +31,7 @@ typedef int                     SOCKET;
 #define socket_ioctl(A,B,C)     ioctl(A,B,C)
 typedef int osiSockIoctl_t;
 typedef socklen_t osiSocklen_t;
+typedef int osiSockOptMcastLoop_t;
 
 #define FD_IN_FDSET(FD) ((FD)<FD_SETSIZE)
 
@@ -38,6 +39,7 @@ typedef socklen_t osiSocklen_t;
 #define SOCK_ENOBUFS ENOBUFS
 #define SOCK_ECONNRESET ECONNRESET
 #define SOCK_ETIMEDOUT ETIMEDOUT
+#define SOCK_EACCES EACCES
 #define SOCK_EADDRINUSE EADDRINUSE
 #define SOCK_EADDRNOTAVAIL EADDRNOTAVAIL
 #define SOCK_ECONNREFUSED ECONNREFUSED
