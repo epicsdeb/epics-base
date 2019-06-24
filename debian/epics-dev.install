@@ -22,9 +22,8 @@ usr/share/epics-dev/configure
 etc/epics/configure
 usr/lib/epics/lib/perl/DBD.pm
 usr/lib/epics/lib/perl/DBD
+usr/lib/epics/lib/perl/EpicsHostArch.pl
 
 configure/Sample.Makefile usr/lib/epics/configure
 
 startup/EpicsHostArch usr/lib/epics/startup
-startup/EpicsHostArch.pl usr/lib/epics/startup
-startup/Site.profile usr/lib/epics/startup

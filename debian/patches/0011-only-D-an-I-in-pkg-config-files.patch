@@ -7,10 +7,10 @@ Subject: only -D an -I in pkg-config files
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/src/tools/Makefile b/src/tools/Makefile
-index e15e935..6d22065 100644
+index c1606c8..a5954a4 100644
 --- a/src/tools/Makefile
 +++ b/src/tools/Makefile
-@@ -60,8 +60,9 @@ HTMLS = style.css
+@@ -64,8 +64,9 @@ HTMLS = style.css
  # Build Package Config Files
  
  FINAL_LOCATION ?= $(shell $(PERL) $(TOOLS)/fullPathName.pl $(INSTALL_LOCATION))

@@ -1,0 +1,113 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Tue, 4 Dec 2018 16:53:47 -0500
+Subject: Test expansion of empty patterns with MSI
+
+This was subject to a regression in 3.15.6. See lp:1810946.
+---
+ src/ioc/dbtemplate/test/msi.plt            |  8 +++++++-
+ src/ioc/dbtemplate/test/t10-result.txt     |  4 ++++
+ src/ioc/dbtemplate/test/t10-substitute.txt |  8 ++++++++
+ src/ioc/dbtemplate/test/t10-template.txt   |  2 ++
+ src/ioc/dbtemplate/test/t11-result.txt     |  4 ++++
+ src/ioc/dbtemplate/test/t11-substitute.txt | 10 ++++++++++
+ src/ioc/dbtemplate/test/t11-template.txt   |  2 ++
+ 7 files changed, 37 insertions(+), 1 deletion(-)
+ create mode 100644 src/ioc/dbtemplate/test/t10-result.txt
+ create mode 100644 src/ioc/dbtemplate/test/t10-substitute.txt
+ create mode 100644 src/ioc/dbtemplate/test/t10-template.txt
+ create mode 100644 src/ioc/dbtemplate/test/t11-result.txt
+ create mode 100644 src/ioc/dbtemplate/test/t11-substitute.txt
+ create mode 100644 src/ioc/dbtemplate/test/t11-template.txt
+
+diff --git a/src/ioc/dbtemplate/test/msi.plt b/src/ioc/dbtemplate/test/msi.plt
+index 4149125..332defb 100644
+--- a/src/ioc/dbtemplate/test/msi.plt
++++ b/src/ioc/dbtemplate/test/msi.plt
+@@ -11,7 +11,7 @@
+ use strict;
+ use Test;
+ 
+-BEGIN {plan tests => 9}
++BEGIN {plan tests => 11}
+ 
+ # Check include/substitute command model
+ ok(msi('-I .. ../t1-template.txt'),             slurp('../t1-result.txt'));
+@@ -50,6 +50,12 @@ ok(msi('-I.. -D -o t8.txt ../t1-template.txt'), slurp('../t8-result.txt'));
+ # Dependency generation, dbLoadTemplate format
+ ok(msi('-I.. -D -ot9.txt -S ../t2-substitution.txt'), slurp('../t9-result.txt'));
+ 
++# Substitution file, variable format, with 0 variable definitions
++ok(msi('-I. -I.. -S ../t10-substitute.txt'), slurp('../t10-result.txt'));
++
++# Substitution file, pattern format, with 0 pattern definitions
++ok(msi('-I. -I.. -S ../t11-substitute.txt'), slurp('../t11-result.txt'));
++
+ 
+ # Test support routines
+ 
+diff --git a/src/ioc/dbtemplate/test/t10-result.txt b/src/ioc/dbtemplate/test/t10-result.txt
+new file mode 100644
+index 0000000..47b594e
+--- /dev/null
++++ b/src/ioc/dbtemplate/test/t10-result.txt
+@@ -0,0 +1,4 @@
++# comment line
++a=$(a)
++# comment line
++a=gbl
+diff --git a/src/ioc/dbtemplate/test/t10-substitute.txt b/src/ioc/dbtemplate/test/t10-substitute.txt
+new file mode 100644
+index 0000000..aec88bb
+--- /dev/null
++++ b/src/ioc/dbtemplate/test/t10-substitute.txt
+@@ -0,0 +1,8 @@
++file t10-template.txt {
++    {}
++}
++
++global { a=gbl }
++file t10-template.txt {
++    {}
++}
+diff --git a/src/ioc/dbtemplate/test/t10-template.txt b/src/ioc/dbtemplate/test/t10-template.txt
+new file mode 100644
+index 0000000..7958885
+--- /dev/null
++++ b/src/ioc/dbtemplate/test/t10-template.txt
+@@ -0,0 +1,2 @@
++# comment line
++a=$(a)
+diff --git a/src/ioc/dbtemplate/test/t11-result.txt b/src/ioc/dbtemplate/test/t11-result.txt
+new file mode 100644
+index 0000000..47b594e
+--- /dev/null
++++ b/src/ioc/dbtemplate/test/t11-result.txt
+@@ -0,0 +1,4 @@
++# comment line
++a=$(a)
++# comment line
++a=gbl
+diff --git a/src/ioc/dbtemplate/test/t11-substitute.txt b/src/ioc/dbtemplate/test/t11-substitute.txt
+new file mode 100644
+index 0000000..94dcdbc
+--- /dev/null
++++ b/src/ioc/dbtemplate/test/t11-substitute.txt
+@@ -0,0 +1,10 @@
++file t11-template.txt {
++    pattern {}
++    {}
++}
++
++global { a=gbl }
++file t11-template.txt {
++    pattern {}
++    {}
++}
+diff --git a/src/ioc/dbtemplate/test/t11-template.txt b/src/ioc/dbtemplate/test/t11-template.txt
+new file mode 100644
+index 0000000..7958885
+--- /dev/null
++++ b/src/ioc/dbtemplate/test/t11-template.txt
+@@ -0,0 +1,2 @@
++# comment line
++a=$(a)

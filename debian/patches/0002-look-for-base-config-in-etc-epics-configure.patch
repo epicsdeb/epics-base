@@ -7,18 +7,15 @@ leave EPICS_BASE=/usr/lib/epics, but take configuration from
 /etc/epics/configure.  This gives sysadmins the option to
 modify build config.
 ---
- configure/CONFIG | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ configure/CONFIG | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/configure/CONFIG b/configure/CONFIG
-index 17440a3..68ca9e4 100644
+index e40d3f5..8b7b785 100644
 --- a/configure/CONFIG
 +++ b/configure/CONFIG
-@@ -14,15 +14,21 @@
- ifneq ($(wildcard $(TOP)/configure/CONFIG_BASE_VERSION),)
-   EPICS_BASE = $(INSTALL_LOCATION)
+@@ -16,7 +16,11 @@ ifneq ($(wildcard $(TOP)/configure/CONFIG_BASE_VERSION),)
    CONFIG = $(TOP)/configure
-+  STARTUP = $(TOP)/startup
    BASE_TOP=YES
  else
 -  CONFIG ?= $(EPICS_BASE)/configure
@@ -27,14 +24,6 @@ index 17440a3..68ca9e4 100644
 +  else
 +    CONFIG ?= /etc/epics/configure
 +  endif
-+  STARTUP = $(EPICS_BASE)/startup
  endif
  
  # Provide a default if the user hasn't set EPICS_HOST_ARCH
- ifeq ($(origin EPICS_HOST_ARCH), undefined)
-   # NB: We use a simply expanded variable here for performance:
--  EPICS_HOST_ARCH := $(shell $(CONFIG)/../startup/EpicsHostArch.pl)
-+  EPICS_HOST_ARCH := $(shell $(STARTUP)/EpicsHostArch.pl)
- endif
- #
- 

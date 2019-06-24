@@ -4,7 +4,7 @@
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
 # EPICS BASE is distributed subject to a Software License Agreement found
-# in the file LICENSE that is included with this distribution. 
+# in the file LICENSE that is included with this distribution.
 #*************************************************************************
 #
 #	Rules for making things specified in Makefile
@@ -25,7 +25,6 @@ vpath %.html $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.skel.static $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.y $(USR_VPATH) $(ALL_SRC_DIRS)
 vpath %.l $(USR_VPATH) $(ALL_SRC_DIRS)
-vpath %.pl $(USR_VPATH) $(ALL_SRC_DIRS)
 
 #---------------------------------------------------------------
 
@@ -103,6 +102,7 @@ endif
 #   Products and Object libraries
 #
 PRODTARGETS += $(PRODNAME) $(MUNCHNAME) $(CTDT_SRCS) $(CTDT_OBJS) $(NMS)
+TESTPRODTARGETS += $(TESTPRODNAME) $(TESTMUNCHNAME)
 
 #---------------------------------------------------------------
 #   Test specifications and test result files
@@ -115,10 +115,11 @@ endif
 ifneq (,$(findstring $(T_A),$(EPICS_HOST_ARCH) $(CROSS_COMPILER_RUNTEST_ARCHS)))
 RUNTESTS_ENABLED = YES
 TAPFILES += $(TESTSCRIPTS:.t=.tap)
+JUNITFILES += $(TAPFILES:.tap=.xml)
 endif
 
 #---------------------------------------------------------------
-#   Libraries 
+#   Libraries
 #
 
 LIBTARGETS += $(LIBNAME) $(INSTALL_LIBS) $(TESTLIBNAME) \
@@ -129,18 +130,18 @@ LIBTARGETS += $(LIBNAME) $(INSTALL_LIBS) $(TESTLIBNAME) \
 
 #	Main targets
 
-install: buildInstall 
+install: buildInstall
 
-buildInstall : build 
+buildInstall: build
 
 # Allows rebuild to work with parallel builds option, -j.
 install: $(patsubst rebuild,clean,$(filter rebuild,$(MAKECMDGOALS)))
 
 rebuild: clean install
 
-build : inc 
+build: inc
 
-build: $(OBJSNAME) $(LIBTARGETS) $(PRODTARGETS) $(TESTPRODNAME) \
+build: $(OBJSNAME) $(LIBTARGETS) $(PRODTARGETS) $(TESTPRODTARGETS) \
 	$(TARGETS) $(TESTSCRIPTS) $(INSTALL_LIB_INSTALLS)
 
 inc : $(COMMON_INC) $(INSTALL_INC) $(INSTALL_CONFIGS)
@@ -158,20 +159,21 @@ clean: build_clean
 
 build_clean:
 	$(ECHO) "Cleaning"
-	@$(RM) *.i *$(OBJ) *.a $(TESTPRODNAME) \
+	@$(RM) *.i *$(OBJ) *.a \
 	$(LIBNAME) $(TESTLIBNAME) $(SHRLIBNAME) $(TESTSHRLIBNAME) \
 	$(DLLSTUB_LIBNAME) $(TESTDLLSTUB_LIBNAME) \
 	$(LOADABLE_SHRLIBNAME) \
 	$(INC) $(TARGETS) $(TDS) $(CLEANS) \
 	*.out MakefileInclude *.manifest *.exp \
-	$(COMMON_INC) $(HDEPENDS_FILES) $(PRODTARGETS) \
-	$(TESTSCRIPTS) $(TAPFILES)
+	$(COMMON_INC) $(HDEPENDS_FILES) $(PRODTARGETS) $(TESTPRODTARGETS) \
+	$(TESTSCRIPTS) $(TAPFILES) $(JUNITFILES)
 ifdef RES
 	@$(RM) *$(RES)
 endif
 
-$(DIRECTORY_TARGETS) :
-	$(MKDIR) -p $@
+# Sort mkdir targets to remove duplicates & make parents first
+$(DIRECTORY_TARGETS):
+	$(MKDIR) $(sort $@)
 
 # Install LIB_INSTALLS libraries before linking executables
 $(TESTPRODNAME) $(PRODNAME): | $(INSTALL_LIB_INSTALLS)
@@ -188,7 +190,7 @@ warnRelease:
 	-$(CONVERTRELEASE) checkRelease
 noCheckRelease:
 ifeq ($(EPICS_HOST_ARCH),$(T_A))
-	@echo "Warning: RELEASE file consistency checks have been disabled"
+	$(info Warning: RELEASE file consistency checks have been disabled)
 endif
 
 #---------------------------------------------------------------
@@ -254,15 +256,13 @@ YACCOPT ?= $($*_YACCOPT)
 	$(MV) $*.tab.c $*.c
 	$(if $(findstring -d, $(YACCOPT)),$(MV) $*.tab.h $*.h,)
 
-# must be a seperate rule since when not using '-d' the
+# must be a separate rule since when not using '-d' the
 # prefix for .h will be different then .c
 %.h : %.c %.y
 
 %.c: %.l
-	@$(RM) $*.yy.c
-	$(LEX) $(LEXOPT) -t $< > $*.yy.c
 	@$(RM) $@
-	$(MV) $*.yy.c $@
+	$(LEX) $(LEXOPT) -o$@ $<
 
 #---------------------------------------------------------------
 # Libraries, shared/DLL and stubs
@@ -279,13 +279,17 @@ endif # RANLIB
 $(SHRLIBNAME) $(DLLSTUB_LIBNAME) $(TESTSHRLIBNAME) $(TESTDLLSTUB_LIBNAME): \
     $(LIBRARY_OBJS) $(LIBRARY_RESS) $(SHRLIB_DEPLIBS)
 
-$(DLLSTUB_LIBNAME): $(SHRLIBNAME);
+# Stub library timestamps may be earlier than the DLL itself.
+# This order-only prerequisite resolves any related problems.
+# The $(LINK.shrlib) command must build both library files if
+# the target requires a separate stub library file.
+$(DLLSTUB_LIBNAME): | $(SHRLIBNAME);
 $(SHRLIBNAME): $(SHRLIB_PREFIX)%$(SHRLIB_SUFFIX):
 	@$(RM) $@
 	$(LINK.shrlib)
 	$(MT_DLL_COMMAND)
 
-$(TESTDLLSTUB_LIBNAME): $(TESTSHRLIBNAME);
+$(TESTDLLSTUB_LIBNAME): | $(TESTSHRLIBNAME);
 $(TESTSHRLIBNAME): $(SHRLIB_PREFIX)%$(SHRLIB_SUFFIX):
 	@$(RM) $@
 	$(LINK.shrlib)
@@ -317,6 +321,10 @@ $(MUNCHNAME): %$(MUNCH_SUFFIX): $(MUNCH_DEPENDS) %$(EXE)
 	@$(RM) $@
 	$(MUNCH_CMD)
 
+$(TESTMUNCHNAME): %$(MUNCH_SUFFIX): $(MUNCH_DEPENDS) %$(EXE)
+	@$(RM) $@
+	$(MUNCH_CMD)
+
 #---------------------------------------------------------------
 # GeSys modules for RTEMS
 $(MODNAME): %$(MODEXT): %$(EXE)
@@ -340,13 +348,32 @@ testspec: $(TESTSCRIPTS)
 	$(if $(TESTFILES), @echo Files: $(TESTFILES) >> $@)
 	$(if $(TESTSPEC_$(OS_CLASS)), @echo "Harness: $(TESTSPEC_$(OS_CLASS))" >> $@)
 
+test-results: tapfiles
+ifneq ($(TAPFILES),)
+ifdef RUNTESTS_ENABLED
+	prove --failures --ext .tap --exec "$(CAT)" --color $(TAPFILES)
+endif
+endif
+
+clean-tests:
+ifneq ($(TAPFILES),)
+	$(RM) $(TAPFILES)
+endif
+ifneq ($(JUNITFILES),)
+	$(RM) $(JUNITFILES)
+endif
+
 tapfiles: $(TESTSCRIPTS) $(TAPFILES)
+junitfiles: $(JUNITFILES)
 
 # A .tap file is the output from running the associated test script
 %.tap: %.t
 ifdef RUNTESTS_ENABLED
 	-$(PERL) $< -tap > $@
 endif
+
+%.xml: %.tap
+	$(TAPTOJUNIT) --puretap --output $@ --input $< $*
 
 # If there's a perl test script (.plt) available, use it
 %.t: ../%.plt
@@ -492,7 +519,8 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
 .PRECIOUS: $(COMMON_INC)
 
 .PHONY: all host inc build install clean rebuild buildInstall build_clean
-.PHONY: runtests tapfiles checkRelease warnRelease noCheckRelease
+.PHONY: runtests tapfiles clean-tests test-results junitfiles
+.PHONY: checkRelease warnRelease noCheckRelease
 
 endif # BASE_RULES_BUILD
 #	EOF RULES_BUILD

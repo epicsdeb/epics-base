@@ -10,7 +10,7 @@ Avoid need to play games as install location is known.
  3 files changed, 4 insertions(+), 9 deletions(-)
 
 diff --git a/src/ca/client/perl/CA.pm b/src/ca/client/perl/CA.pm
-index 2294417..d80c358 100644
+index d79cdd3..de230e9 100644
 --- a/src/ca/client/perl/CA.pm
 +++ b/src/ca/client/perl/CA.pm
 @@ -6,7 +6,6 @@ use warnings;

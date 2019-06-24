@@ -9,7 +9,7 @@
 <BODY>
 <CENTER>
 <H1>Installation Instructions</H1>
-<H2>EPICS Base Release 3.15.5</H2><BR>
+<H2>EPICS Base Release 3.15.6</H2><BR>
 </CENTER>
 <HR>
 <H3> Table of Contents</H3>
@@ -98,8 +98,8 @@
  base/configure/os/CONFIG_SITE.Common.vxWorksCommon file or in one of its
  target-specific overrides.</P>
 
-<P>Consult the <a href="http://www.aps.anl.gov/epics/base/tornado.php">vxWorks
- 5.x</a> or <a href="http://www.aps.anl.gov/epics/base/vxWorks6.php">vxWorks
+<P>Consult the <a href="https://epics.anl.gov/base/tornado.php">vxWorks
+ 5.x</a> or <a href="https://epics.anl.gov/base/vxWorks6.php">vxWorks
  6.x</a> EPICS web pages about and the vxWorks documentation for information
  about configuring your vxWorks operating system for use with EPICS.</P>
 
@@ -129,7 +129,7 @@
 
 <H3><A NAME="0_0_8"> Documentation</A></H3>
 <BLOCKQUOTE>EPICS documentation is available through the
- <a href="http://www.aps.anl.gov/epics/">EPICS website</a> at Argonne.
+ <a href="https://epics.anl.gov/">EPICS website</a> at Argonne.
  <P>Release specific documentation can also be found in the base/documentation
  directory of the distribution.</BLOCKQUOTE>
 
@@ -177,12 +177,11 @@
 
 <H4>base/startup directory - contains scripts to set environment and path</H4>
 <PRE>
-        EpicsHostArch       C shell script to set EPICS_HOST_ARCH env variable
-        EpicsHostArch.pl    Perl script to set EPICS_HOST_ARCH env variable
-        Site.profile        bourne shell script to set path and env variables
-        Site.cshrc          c shell script to set path and env variables
-        cygwin.bat          WIN32 bat file to set cygwin path and env variables
-        win32.bat           WIN32 bat file to set path and env variables
+        EpicsHostArch       Shell script to set EPICS_HOST_ARCH env variable
+        unix.csh            C shell script to set path and env variables
+        unix.sh             Bourne shell script to set path and env variables
+        win32.bat           Bat file example to configure win32-x86 target
+        windows.bat         Bat file example to configure windows-x64 target
 </PRE>
 
 <H4>base/configure directory - contains build definitions and rules</H4>
