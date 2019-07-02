@@ -27,19 +27,6 @@ Description: EPICS Base libraries for clients and servers
  .
  This package contains host system shared libraries for clients and IOCs.
 
-Package: libepics3.15.6-dbg
-Section: debug
-Architecture: any
-Multi-Arch: same
-Depends: libepics3.15.6 (= ${binary:Version}), ${misc:Depends},
-Provides: libepics-dbg
-Description: Files needed to develop new EPICS applications
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Debug symbols for EPICS shared libraries and utilities.
-
 Package: ioclogserver
 Section: admin
 Architecture: any

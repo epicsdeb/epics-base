@@ -151,9 +151,6 @@ endif
 override_dh_installdocs:
 	dh_installdocs -A README
 
-override_dh_strip_rtems:
-	dh_strip_rtems --dbg-package=libepics$(SOV)-dbg
-
 override_dh_makeshlibs:
 	dh_makeshlibs -Nepics-dev -a
 	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
