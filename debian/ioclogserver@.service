@@ -1,0 +1,18 @@
+[Unit]
+Description=EPICS IOC Log Server (instance %I)
+Requires=network.target
+After=network.target
+PartOf=ioclogserver.target
+
+[Service]
+Environment="EPICS_IOC_LOG_FILE_NAME=/var/log/epics/ioc-%i"
+Environment="EPICS_IOC_LOG_PORT=7004"
+Environment="EPICS_IOC_LOG_FILE_LIMIT=100000000"
+EnvironmentFile=-/etc/default/ioclogserver-%i
+ExecStart=/usr/bin/iocLogServer
+Restart=always
+User=ioclogserver
+
+[Install]
+DefaultInstance=default
+WantedBy=ioclogserver.target

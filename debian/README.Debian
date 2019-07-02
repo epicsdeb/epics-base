@@ -2,10 +2,30 @@ EPICS Base on Debian
 
 = Packaging "features"
 
-== Init script for iocLogServer
+== Init scripts for iocLogServers
 
-When the 'ioclogserver' package is installed, the logger
-automatically runs and begins writing /var/log/epics/epics.log
+When the 'ioclogserver' package is installed, systemd unit files are created automatically. However, due to a bug in debhelper the logger doesn't automatically start. You can start it manually by running
+
+  sudo systemctl enable ioclogserver@.service
+  sudo systemctl start ioclogserver@default.service
+
+Running multiple log-servers instance is supported. Each instance has its own
+name (e.g. "vacuum"). Settings can be overridden on a per-instance basis:
+
+  sudo nano /etc/default/ioclogserver-vacuum
+
+  EPICS_IOC_LOG_PORT=7005
+  EPICS_IOC_LOG_FILE_LIMIT=1000000
+
+Start the new log-server instance:
+
+  sudo systemctl enable ioclogserver@vacuum.service
+  sudo systemctl start ioclogserver@vacuum.service
+
+For convenience all ioclogserver instances can be started/stopped together:
+
+  sudo systemctl stop ioclogserver.target
+  sudo systemctl start ioclogserver.target
 
 == epics-win32
 
