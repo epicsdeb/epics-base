@@ -132,7 +132,7 @@ override_dh_install:
 	# This path is used by CA.pm
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
-	dh_install --fail-missing
+	dh_install
 
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)-debug
@@ -150,6 +150,9 @@ endif
 
 override_dh_installdocs:
 	dh_installdocs -A README
+
+override_dh_missing:
+	dh_missing --fail-missing
 
 override_dh_makeshlibs:
 	dh_makeshlibs -Nepics-dev -a
