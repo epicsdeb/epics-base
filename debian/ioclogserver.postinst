@@ -26,6 +26,18 @@ case "$1" in
             echo "Could not create log directory!  Service will not start."
         fi
     fi
+
+    # Explicitly enable and start the default instance of the service. This is
+    # required to work around Debian bug #889635.
+    if [ -x "$(command -v systemctl)" ]
+    then
+        echo 'Enabling default instance of ioclogserver service.'
+        systemctl enable ioclogserver@.service
+    else
+        echo 'Warning: systemctl is not installed - cannot enable default' \
+             'instance of ioclogserver service.'
+    fi
+    deb-systemd-invoke start ioclogserver@default.service
     ;;
 esac
 

@@ -8,6 +8,18 @@ LOGDIR=/var/log/epics
 
 case "$1" in
   purge)
+    # Explicitly disable the default instance of the service. This is required
+    # to work around Debian bug #889635.
+    if [ -x "$(command -v systemctl)" ]
+    then
+        echo 'Disabling default instance of ioclogserver service.'
+        systemctl disable ioclogserver@default.service
+    else
+        echo 'systemctl is not installed - removing unit files related to ' \
+        'ioclogserver'
+        rm /etc/systemd/system/ioclogserver.target.wants/ioclogserver@default.service
+    fi
+
     echo "Removing: $LOGDIR"
     rm -rf "$LOGDIR" || true
     echo "Account '$ACCT' will not be removed automatically."
