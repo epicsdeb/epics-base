@@ -3,11 +3,6 @@
 
 export DH_VERBOSE=1
 
-ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-BMAKEFLAGS += -j$(NUMJOBS)
-endif
-
 ifeq "$(DEB_BUILD_ARCH)" "i386"
 EPICS_HOST_ARCH:=linux-x86
 else ifeq "$(DEB_BUILD_ARCH)" "amd64"
