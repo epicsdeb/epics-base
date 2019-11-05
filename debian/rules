@@ -15,10 +15,16 @@ export EPICS_HOST_ARCH
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 # Link only --as-needed
-# EPICS uses -O3, let's not lower the standards
 export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
-export DEB_CFLAGS_STRIP = -g -O2
-export DEB_CXXFLAGS_STRIP = -g -O2
+
+# EPICS uses -O3, let's not lower the standards
+export DEB_CFLAGS_STRIP = -O2
+export DEB_CXXFLAGS_STRIP = -O2
+
+# Compile everything with debugging symbols - they will be stripped off and
+# put into the debug package automatically
+export DEB_CFLAGS_MAINT_APPEND = -g
+export DEB_CXXFLAGS_MAINT_APPEND = -g
 
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
