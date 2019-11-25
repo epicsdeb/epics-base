@@ -10,6 +10,7 @@ This is required by the Debian policy.
  src/ca/client/perl/capr.pl              | 2 +-
  src/ca/client/perl/caput.pl             | 2 +-
  src/ca/client/perl/perlConfig.pl        | 2 +-
+ src/std/softIoc/makeInstallDir.pl       | 2 +-
  src/template/base/makeBaseApp.pl        | 2 +-
  src/template/ext/makeBaseExt.pl         | 2 +-
  src/tools/EpicsHostArch.pl              | 1 -
@@ -17,6 +18,7 @@ This is required by the Debian policy.
  src/tools/convertRelease.pl             | 2 +-
  src/tools/cvsclean.pl                   | 2 +-
  src/tools/dos2unix.pl                   | 2 +-
+ src/tools/epicsProve.pl                 | 2 +-
  src/tools/expandVars.pl                 | 2 +-
  src/tools/fullPathName.pl               | 2 +-
  src/tools/installEpics.pl               | 2 +-
@@ -29,8 +31,9 @@ This is required by the Debian policy.
  src/tools/podToHtml.pl                  | 2 +-
  src/tools/registerRecordDeviceDriver.pl | 2 +-
  src/tools/replaceVAR.pl                 | 2 +-
+ src/tools/tap-to-junit-xml.pl           | 2 +-
  src/tools/useManifestTool.pl            | 2 +-
- 26 files changed, 25 insertions(+), 26 deletions(-)
+ 29 files changed, 28 insertions(+), 29 deletions(-)
 
 diff --git a/src/ca/client/perl/caget.pl b/src/ca/client/perl/caget.pl
 index 0ee407a..9031d8a 100644
@@ -92,6 +95,16 @@ index 5292041..4ea3fb7 100644
  
  # This script is used to extract information about the Perl build
  # configuration, so the EPICS build system uses the same settings.
+diff --git a/src/std/softIoc/makeInstallDir.pl b/src/std/softIoc/makeInstallDir.pl
+index b090280..d5eb8a0 100644
+--- a/src/std/softIoc/makeInstallDir.pl
++++ b/src/std/softIoc/makeInstallDir.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ #*************************************************************************
+ # Copyright (c) 2010 UChicago Argonne LLC, as Operator of Argonne
+ #     National Laboratory.
 diff --git a/src/template/base/makeBaseApp.pl b/src/template/base/makeBaseApp.pl
 index a8f404e..4009b6b 100644
 --- a/src/template/base/makeBaseApp.pl
@@ -161,6 +174,16 @@ index 35163ac..801babd 100644
  #*************************************************************************
  # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
  #     National Laboratory.
+diff --git a/src/tools/epicsProve.pl b/src/tools/epicsProve.pl
+index a1b0c14..ef7f8b7 100644
+--- a/src/tools/epicsProve.pl
++++ b/src/tools/epicsProve.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ 
+ # Some Windows Perl installations provide a prove.bat file which
+ # doesn't work properly.
 diff --git a/src/tools/expandVars.pl b/src/tools/expandVars.pl
 index d5e26ea..e2fadb3 100644
 --- a/src/tools/expandVars.pl
@@ -281,6 +304,16 @@ index 82c76bb..fdf3fe1 100644
  #*************************************************************************
  # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
  #     National Laboratory.
+diff --git a/src/tools/tap-to-junit-xml.pl b/src/tools/tap-to-junit-xml.pl
+index 76f9721..fdcfcf9 100644
+--- a/src/tools/tap-to-junit-xml.pl
++++ b/src/tools/tap-to-junit-xml.pl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env perl
++#!/usr/bin/perl
+ =head1 NAME
+ 
+ tap-to-junit-xml - convert perl-style TAP test output to JUnit-style XML
 diff --git a/src/tools/useManifestTool.pl b/src/tools/useManifestTool.pl
 index 9e59e9f..c01e62a 100644
 --- a/src/tools/useManifestTool.pl

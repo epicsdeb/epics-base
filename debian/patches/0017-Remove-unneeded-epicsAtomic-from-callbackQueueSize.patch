@@ -7,7 +7,7 @@ Subject: Remove unneeded epicsAtomic from callbackQueueSize
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/ioc/db/callback.c b/src/ioc/db/callback.c
-index 077f1f3..3a64edb 100644
+index 73b874f..f324194 100644
 --- a/src/ioc/db/callback.c
 +++ b/src/ioc/db/callback.c
 @@ -101,7 +101,7 @@ int callbackSetQueueSize(int size)

@@ -9,7 +9,7 @@ Subject: Make code compatible with ISO C90
  3 files changed, 21 insertions(+), 21 deletions(-)
 
 diff --git a/src/ioc/db/callback.c b/src/ioc/db/callback.c
-index a39ba26..077f1f3 100644
+index f7fefba..73b874f 100644
 --- a/src/ioc/db/callback.c
 +++ b/src/ioc/db/callback.c
 @@ -107,11 +107,11 @@ int callbackSetQueueSize(int size)
@@ -54,7 +54,7 @@ index a39ba26..077f1f3 100644
  }
  
 diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
-index 6f22b09..4ad9447 100644
+index 7aad214..05681c5 100644
 --- a/src/ioc/db/dbScan.c
 +++ b/src/ioc/db/dbScan.c
 @@ -706,8 +706,8 @@ int scanOnceSetQueueSize(int size)

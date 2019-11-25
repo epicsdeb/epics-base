@@ -17,7 +17,7 @@ the callback queues. This fixes lp:1786540.
  9 files changed, 205 insertions(+), 7 deletions(-)
 
 diff --git a/src/ioc/db/callback.c b/src/ioc/db/callback.c
-index b805c1c..a39ba26 100644
+index 4c0f5ee..f7fefba 100644
 --- a/src/ioc/db/callback.c
 +++ b/src/ioc/db/callback.c
 @@ -55,6 +55,7 @@ typedef struct cbQueueSet {
@@ -94,7 +94,7 @@ index b805c1c..a39ba26 100644
          if (callbackQueue[i].queue == 0)
              cantProceed("epicsRingPointerLockedCreate failed for %s\n",
                  threadNamePrefix[i]);
-@@ -291,6 +337,7 @@ int callbackRequest(CALLBACK *pcallback)
+@@ -291,6 +337,7 @@ int callbackRequest(epicsCallback *pcallback)
      if (!pushOK) {
          epicsInterruptContextMessage(fullMessage[priority]);
          mySet->queueOverflow = TRUE;
@@ -103,10 +103,10 @@ index b805c1c..a39ba26 100644
      }
      epicsEventSignal(mySet->semWakeUp);
 diff --git a/src/ioc/db/callback.h b/src/ioc/db/callback.h
-index 9011446..408f4fc 100644
+index 0a212ad..fc7ae24 100644
 --- a/src/ioc/db/callback.h
 +++ b/src/ioc/db/callback.h
-@@ -48,6 +48,13 @@ typedef epicsCallback CALLBACK;
+@@ -50,6 +50,13 @@ typedef epicsCallback CALLBACK;
  
  typedef void    (*CALLBACKFUNC)(struct callbackPvt*);
  
@@ -120,9 +120,9 @@ index 9011446..408f4fc 100644
  #define callbackSetCallback(PFUN,PCALLBACK)\
  ( (PCALLBACK)->callback = (PFUN) )
  #define callbackSetPriority(PRIORITY,PCALLBACK)\
-@@ -71,6 +78,8 @@ epicsShareFunc void callbackCancelDelayed(CALLBACK *pcallback);
+@@ -73,6 +80,8 @@ epicsShareFunc void callbackCancelDelayed(epicsCallback *pcallback);
  epicsShareFunc void callbackRequestProcessCallbackDelayed(
-     CALLBACK *pCallback, int Priority, void *pRec, double seconds);
+     epicsCallback *pCallback, int Priority, void *pRec, double seconds);
  epicsShareFunc int callbackSetQueueSize(int size);
 +epicsShareFunc int callbackQueueStatus(const int reset, callbackQueueStats *result);
 +void callbackQueuePrintStatus(const int reset);
@@ -185,7 +185,7 @@ index 1a1aafb..943cd32 100644
  
      /* Needed before callback system is initialized */
 diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
-index c54a16e..6f22b09 100644
+index 8a347e8..7aad214 100644
 --- a/src/ioc/db/dbScan.c
 +++ b/src/ioc/db/dbScan.c
 @@ -24,6 +24,7 @@
