@@ -1,0 +1,30 @@
+From: Dirk Zimoch <dirk.zimoch@psi.ch>
+Date: Wed, 18 Sep 2019 09:58:28 +0200
+Subject: sending 0 bytes helps to detect broken connections on some systems
+ (but is undefined behavior on Linux,
+ fails on vxWorks and is a documented no-op on Windows)
+
+---
+ src/libCom/log/logClient.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/libCom/log/logClient.c b/src/libCom/log/logClient.c
+index 7627034..6671d27 100644
+--- a/src/libCom/log/logClient.c
++++ b/src/libCom/log/logClient.c
+@@ -272,6 +272,15 @@ void epicsShareAPI logClientFlush ( logClientId id )
+         nSent += status;
+     }
+ 
++    if ( pClient->backlog > 0 && status >= 0 )
++    {
++        /* On Linux send 0 bytes can detect EPIPE */
++        /* NOOP on Windows, fails on vxWorks */
++        errno = 0;
++        status = send ( pClient->sock, NULL, 0, 0 );
++        if (!(errno == ECONNRESET || errno == EPIPE)) status = 0;
++    }
++
+     if ( status < 0 ) {
+         if ( ! pClient->shutdown ) {
+             char sockErrBuf[128];

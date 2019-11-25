@@ -1,0 +1,69 @@
+From: Dirk Zimoch <dirk.zimoch@psi.ch>
+Date: Thu, 19 Sep 2019 10:44:36 +0200
+Subject: moved logClientSendMessage and made it static
+
+---
+ src/libCom/log/iocLog.c    | 11 +++++++++++
+ src/libCom/log/logClient.c | 10 ----------
+ src/libCom/log/logClient.h |  1 -
+ 3 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/src/libCom/log/iocLog.c b/src/libCom/log/iocLog.c
+index c0fa33f..ba78041 100644
+--- a/src/libCom/log/iocLog.c
++++ b/src/libCom/log/iocLog.c
+@@ -76,6 +76,16 @@ void epicsShareAPI epicsShareAPI iocLogFlush (void)
+     }
+ }
+ 
++/*
++ * logClientSendMessage ()
++ */
++static void logClientSendMessage ( logClientId id, const char * message )
++{
++    if ( !iocLogDisable ) {
++        logClientSend (id, message);
++    }
++}
++
+ /*
+  * iocLogClientDestroy()
+  */
+@@ -149,3 +159,4 @@ logClientId epicsShareAPI logClientInit (void)
+ {
+     return iocLogClientInit ();
+ }
++
+diff --git a/src/libCom/log/logClient.c b/src/libCom/log/logClient.c
+index 6671d27..cd832b6 100644
+--- a/src/libCom/log/logClient.c
++++ b/src/libCom/log/logClient.c
+@@ -569,16 +569,6 @@ void epicsShareAPI logClientShow (logClientId id, unsigned level)
+     }
+ }
+ 
+-/*
+- * logClientSendMessage (); deprecated
+- */
+-void logClientSendMessage ( logClientId id, const char * message )
+-{
+-    if ( !iocLogDisable ) {
+-        logClientSend (id, message);
+-    }
+-}
+-
+ /*
+  * iocLogPrefix()
+  */
+diff --git a/src/libCom/log/logClient.h b/src/libCom/log/logClient.h
+index 1797bbb..3b3f63a 100644
+--- a/src/libCom/log/logClient.h
++++ b/src/libCom/log/logClient.h
+@@ -38,7 +38,6 @@ epicsShareFunc void epicsShareAPI iocLogPrefix(const char* prefix);
+ /* deprecated interface; retained for backward compatibility */
+ /* note: implementations are in iocLog.c, not logClient.c */
+ epicsShareFunc logClientId epicsShareAPI logClientInit (void);
+-epicsShareFunc void logClientSendMessage (logClientId id, const char *message);
+ 
+ #ifdef __cplusplus
+ }
