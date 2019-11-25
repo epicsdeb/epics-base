@@ -1,3 +1,9 @@
+epics-base (3.15.7-2) unstable; urgency=medium
+
+  * Backport Dirk's log patches from EPICS 7.0
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Mon, 25 Nov 2019 11:25:02 -0500
+
 epics-base (3.15.7-1) unstable; urgency=medium
 
   * New upstream version 3.15.7
