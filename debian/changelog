@@ -1,3 +1,17 @@
+epics-base (3.15.7-1) unstable; urgency=medium
+
+  * New upstream version 3.15.7
+  * Bump up version number in library/package names
+  * Remove unneeded code for parallel build
+  * Update uploaders
+  * Rebase patch queue
+  * Debug packages are now generated automatically
+  * Turn tests back on
+  * Fix permissions of some auto-generated files
+  * Remove an unneeded comment
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Mon, 25 Nov 2019 10:21:14 -0500
+
 epics-base (3.15.6-3) unstable; urgency=medium
 
   [ Martin Konrad ]
