@@ -1,13 +1,13 @@
 Source: epics-base
 Section: devel
-Priority: extra
+Priority: optional
 Maintainer: Martin Konrad <konrad@frib.msu.edu>
 Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
            Ralph Lange <Ralph.Lange@gmx.de>
-Build-Depends: debhelper (>= 9), epics-debhelper (>= 8.18),
+Build-Depends: debhelper (>= 10), epics-debhelper (>= 8.18),
                libreadline6-dev | libreadline-dev, libncurses5-dev, perl,
                mingw32 | g++-mingw-w64,
-Standards-Version: 3.9.6
+Standards-Version: 4.3.0
 Vcs-Git: https://github.com/epicsdeb/epics-base.git
 Vcs-Browser: https://github.com/epicsdeb/epics-base
 Homepage: http://www.aps.anl.gov/epics/
@@ -27,25 +27,12 @@ Description: EPICS Base libraries for clients and servers
  .
  This package contains host system shared libraries for clients and IOCs.
 
-Package: libepics3.15.6-dbg
-Section: debug
-Architecture: any
-Multi-Arch: same
-Depends: libepics3.15.6 (= ${binary:Version}), ${misc:Depends},
-Provides: libepics-dbg
-Description: Files needed to develop new EPICS applications
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Debug symbols for EPICS shared libraries and utilities.
-
 Package: ioclogserver
 Section: admin
 Architecture: any
 Depends: libepics3.15.6 (= ${binary:Version}),
          epics-dev (= ${binary:Version}), lsb-base,
-         ${misc:Depends}, ${shlibs:Depends}, adduser,
+         ${misc:Depends}, ${shlibs:Depends}, adduser, systemd
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time

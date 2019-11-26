@@ -1,0 +1,113 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Tue, 27 Nov 2018 10:30:35 -0500
+Subject: Make code compatible with ISO C90
+
+---
+ src/ioc/db/callback.c            | 24 ++++++++++++------------
+ src/ioc/db/dbScan.c              | 14 +++++++-------
+ src/libCom/ring/epicsRingBytes.c |  4 ++--
+ 3 files changed, 21 insertions(+), 21 deletions(-)
+
+diff --git a/src/ioc/db/callback.c b/src/ioc/db/callback.c
+index a39ba26..077f1f3 100644
+--- a/src/ioc/db/callback.c
++++ b/src/ioc/db/callback.c
+@@ -107,11 +107,11 @@ int callbackSetQueueSize(int size)
+ 
+ int callbackQueueStatus(const int reset, callbackQueueStats *result)
+ {
+-    if (!callbackIsInit) return -1;
+     int ret;
++    if (!callbackIsInit) return -1;
+     if (result) {
+-        result->size = epicsAtomicGetIntT(&callbackQueueSize);
+         int prio;
++        result->size = epicsAtomicGetIntT(&callbackQueueSize);
+         for(prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
+             epicsRingPointerId qId = callbackQueue[prio].queue;
+             result->numUsed[prio] = epicsRingPointerGetUsed(qId);
+@@ -137,16 +137,16 @@ void callbackQueuePrintStatus(const int reset)
+     if (callbackQueueStatus(reset, &stats) == -1) {
+         fprintf(stderr, "Callback system not initialized, yet. Please run "
+             "iocInit before using this command.\n");
+-        return;
+-    }
+-
+-    printf("PRIORITY  HIGH-WATER MARK  ITEMS IN Q  Q SIZE  %% USED  Q OVERFLOWS\n");
+-    int prio;
+-    for (prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
+-        double qusage = 100.0 * stats.numUsed[prio] / stats.size;
+-        printf("%8s  %15d  %10d  %6d  %6.1f  %11d\n", threadNamePrefix[prio],
+-               stats.maxUsed[prio], stats.numUsed[prio], stats.size,
+-               qusage, stats.numOverflow[prio]);
++    } else {
++        int prio;
++        printf("PRIORITY  HIGH-WATER MARK  ITEMS IN Q  Q SIZE  %% USED  Q OVERFLOWS\n");
++        for (prio = 0; prio < NUM_CALLBACK_PRIORITIES; prio++) {
++            double qusage = 100.0 * stats.numUsed[prio] / stats.size;
++            printf("%8s  %15d  %10d  %6d  %6.1f  %11d\n",
++                   threadNamePrefix[prio], stats.maxUsed[prio],
++                   stats.numUsed[prio], stats.size, qusage,
++                   stats.numOverflow[prio]);
++        }
+     }
+ }
+ 
+diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
+index 6f22b09..4ad9447 100644
+--- a/src/ioc/db/dbScan.c
++++ b/src/ioc/db/dbScan.c
+@@ -706,8 +706,8 @@ int scanOnceSetQueueSize(int size)
+ 
+ int scanOnceQueueStatus(const int reset, scanOnceQueueStats *result)
+ {
+-    if (!onceQ) return -1;
+     int ret;
++    if (!onceQ) return -1;
+     if (result) {
+         result->size = epicsRingBytesSize(onceQ) / sizeof(onceEntry);
+         result->numUsed = epicsRingBytesUsedBytes(onceQ) / sizeof(onceEntry);
+@@ -729,13 +729,13 @@ void scanOnceQueuePrintStatus(const int reset)
+     if (scanOnceQueueStatus(reset, &stats) == -1) {
+         fprintf(stderr, "scanOnce system not initialized, yet. Please run "
+             "iocInit before using this command.\n");
+-        return;
++    } else {
++        double qusage = 100.0 * stats.numUsed / stats.size;
++        printf("PRIORITY  HIGH-WATER MARK  ITEMS IN Q  Q SIZE  %% USED  Q OVERFLOWS\n");
++        printf("%8s  %15d  %10d  %6d  %6.1f  %11d\n", "scanOnce", stats.maxUsed,
++               stats.numUsed, stats.size, qusage,
++               epicsAtomicGetIntT(&onceQOverruns));
+     }
+-
+-    printf("PRIORITY  HIGH-WATER MARK  ITEMS IN Q  Q SIZE  %% USED  Q OVERFLOWS\n");
+-    double qusage = 100.0 * stats.numUsed / stats.size;
+-    printf("%8s  %15d  %10d  %6d  %6.1f  %11d\n", "scanOnce", stats.maxUsed, stats.numUsed, stats.size, qusage,
+-           epicsAtomicGetIntT(&onceQOverruns));
+ }
+ 
+ static void initOnce(void)
+diff --git a/src/libCom/ring/epicsRingBytes.c b/src/libCom/ring/epicsRingBytes.c
+index a976d84..c38e32b 100644
+--- a/src/libCom/ring/epicsRingBytes.c
++++ b/src/libCom/ring/epicsRingBytes.c
+@@ -135,8 +135,8 @@ epicsShareFunc int epicsShareAPI epicsRingBytesPut(
+             return 0;
+         }
+         if (nbytes) {
+-            memcpy ((void *)&pring->buffer[nextPut], value, nbytes);
+             int curUsed = pring->size - SLOP - freeCount;
++            memcpy ((void *)&pring->buffer[nextPut], value, nbytes);
+             if (curUsed > epicsAtomicGetIntT(&pring->highWaterMark)) {
+                 epicsAtomicSetIntT(&pring->highWaterMark, curUsed);
+             }
+@@ -152,8 +152,8 @@ epicsShareFunc int epicsShareAPI epicsRingBytesPut(
+         topCount = size - nextPut;
+         copyCount = (nbytes > topCount) ?  topCount : nbytes;
+         if (copyCount) {
+-            memcpy ((void *)&pring->buffer[nextPut], value, copyCount);
+             int curUsed = pring->size - SLOP - freeCount;
++            memcpy ((void *)&pring->buffer[nextPut], value, copyCount);
+             if (curUsed > epicsAtomicGetIntT(&pring->highWaterMark)) {
+                 epicsAtomicSetIntT(&pring->highWaterMark, curUsed);
+             }

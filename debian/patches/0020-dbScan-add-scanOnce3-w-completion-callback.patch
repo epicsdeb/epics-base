@@ -1,0 +1,153 @@
+From: Michael Davidsaver <mdavidsaver@bnl.gov>
+Date: Mon, 5 Jan 2015 16:26:47 -0500
+Subject: dbScan: add scanOnce3() w/ completion callback
+
+---
+ src/ioc/db/dbScan.c | 55 +++++++++++++++++++++++++++++++++++++----------------
+ src/ioc/db/dbScan.h |  8 +++++---
+ 2 files changed, 44 insertions(+), 19 deletions(-)
+
+diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
+index 3112974..c54a16e 100644
+--- a/src/ioc/db/dbScan.c
++++ b/src/ioc/db/dbScan.c
+@@ -26,10 +26,9 @@
+ #include "ellLib.h"
+ #include "epicsEvent.h"
+ #include "epicsExit.h"
+-#include "epicsInterrupt.h"
+ #include "epicsMutex.h"
+ #include "epicsPrint.h"
+-#include "epicsRingPointer.h"
++#include "epicsRingBytes.h"
+ #include "epicsStdio.h"
+ #include "epicsStdlib.h"
+ #include "epicsString.h"
+@@ -64,7 +63,7 @@ static volatile enum ctl scanCtl;
+ 
+ static int onceQueueSize = 1000;
+ static epicsEventId onceSem;
+-static epicsRingPointerId onceQ;
++static epicsRingBytesId onceQ;
+ static epicsThreadId onceTaskId;
+ static void *exitOnce;
+ 
+@@ -179,7 +178,7 @@ void scanCleanup(void)
+     deletePeriodic();
+     ioscanDestroy();
+ 
+-    epicsRingPointerDelete(onceQ);
++    epicsRingBytesDelete(onceQ);
+ 
+     free(periodicTaskId);
+     papPeriodic = NULL;
+@@ -631,15 +630,27 @@ void scanIoSetComplete(IOSCANPVT piosh, io_scan_complete cb, void *arg)
+     piosh->arg = arg;
+ }
+ 
+-void scanOnce(struct dbCommon *precord)
++int scanOnce(struct dbCommon *precord) {
++    return scanOnce3(precord, NULL, NULL);
++}
++
++typedef struct {
++    struct dbCommon *prec;
++    once_complete cb;
++    void *usr;
++} onceEntry;
++
++int scanOnce3(struct dbCommon *precord, once_complete cb, void *usr)
+ {
+     static int newOverflow = TRUE;
+-    int lockKey;
++    onceEntry ent;
+     int pushOK;
+ 
+-    lockKey = epicsInterruptLock();
+-    pushOK = epicsRingPointerPush(onceQ, precord);
+-    epicsInterruptUnlock(lockKey);
++    ent.prec = precord;
++    ent.cb = cb;
++    ent.usr = usr;
++
++    pushOK = epicsRingBytesPut(onceQ, (void*)&ent, sizeof(ent));
+ 
+     if (!pushOK) {
+         if (newOverflow) errlogPrintf("scanOnce: Ring buffer overflow\n");
+@@ -648,6 +659,8 @@ void scanOnce(struct dbCommon *precord)
+         newOverflow = TRUE;
+     }
+     epicsEventSignal(onceSem);
++
++    return !pushOK;
+ }
+ 
+ static void onceTask(void *arg)
+@@ -656,14 +669,24 @@ static void onceTask(void *arg)
+     epicsEventSignal(startStopEvent);
+ 
+     while (TRUE) {
+-        void *precord;
+ 
+         epicsEventMustWait(onceSem);
+-        while ((precord = epicsRingPointerPop(onceQ))) {
+-            if (precord == &exitOnce) goto shutdown;
+-            dbScanLock(precord);
+-            dbProcess(precord);
+-            dbScanUnlock(precord);
++        while(1) {
++            onceEntry ent;
++            int bytes = epicsRingBytesGet(onceQ, (void*)&ent, sizeof(ent));
++            if(bytes==0)
++                break;
++            if(bytes!=sizeof(ent)) {
++                errlogPrintf("onceTask: received incomplete %d of %u\n",
++                             bytes, (unsigned)sizeof(ent));
++                continue; /* what to do? */
++            } else if (ent.prec == (void*)&exitOnce) goto shutdown;
++
++            dbScanLock(ent.prec);
++            dbProcess(ent.prec);
++            dbScanUnlock(ent.prec);
++            if(ent.cb)
++                ent.cb(ent.usr, ent.prec);
+         }
+     }
+ 
+@@ -680,7 +703,7 @@ int scanOnceSetQueueSize(int size)
+ 
+ static void initOnce(void)
+ {
+-    if ((onceQ = epicsRingPointerCreate(onceQueueSize)) == NULL) {
++    if ((onceQ = epicsRingBytesLockedCreate(sizeof(onceEntry)*onceQueueSize)) == NULL) {
+         cantProceed("initOnce: Ring buffer create failed\n");
+     }
+     if(!onceSem)
+diff --git a/src/ioc/db/dbScan.h b/src/ioc/db/dbScan.h
+index d310271..dff432e 100644
+--- a/src/ioc/db/dbScan.h
++++ b/src/ioc/db/dbScan.h
+@@ -38,10 +38,11 @@ struct ioscan_head;
+ typedef struct ioscan_head *IOSCANPVT;
+ typedef struct event_list *EVENTPVT;
+ 
+-typedef void (*io_scan_complete)(void *usr, IOSCANPVT, int prio);
+-
+ struct dbCommon;
+ 
++typedef void (*io_scan_complete)(void *usr, IOSCANPVT, int prio);
++typedef void (*once_complete)(void *usr, struct dbCommon*);
++
+ epicsShareFunc long scanInit(void);
+ epicsShareFunc void scanRun(void);
+ epicsShareFunc void scanPause(void);
+@@ -54,7 +55,8 @@ epicsShareFunc void post_event(int event);
+ epicsShareFunc void scanAdd(struct dbCommon *);
+ epicsShareFunc void scanDelete(struct dbCommon *);
+ epicsShareFunc double scanPeriod(int scan);
+-epicsShareFunc void scanOnce(struct dbCommon *);
++epicsShareFunc int scanOnce(struct dbCommon *);
++epicsShareFunc int scanOnce3(struct dbCommon *, once_complete cb, void *usr);
+ epicsShareFunc int scanOnceSetQueueSize(int size);
+ 
+ /*print periodic lists*/

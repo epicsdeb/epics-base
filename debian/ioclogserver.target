@@ -1,0 +1,5 @@
+[Unit]
+Description=EPICS IOC Log Server (multi-instance-master)
+
+[Install]
+WantedBy=multi-user.target

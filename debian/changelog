@@ -1,3 +1,22 @@
+epics-base (3.15.6-3) unstable; urgency=medium
+
+  [ Martin Konrad ]
+  * Apply patches that add callback queue status functionality
+
+  [ Bruno Martins ]
+  * libca: don't set thread local storage handle to zero on cleanup
+
+  [ Martin Konrad ]
+  * Apply patch that removes cacExitHandler()
+  * Bump up standards version to 4.3.0
+  * Add patch for shebang lines of Perl scripts
+  * Remove debug package (nowadays built automatically)
+  * Avoid deprecated dh_install --fail-missing
+  * Improve systemd support, remove legacy init scripts
+  * Start default instance of ioclogserver service
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Thu, 11 Jul 2019 16:26:59 -0400
+
 epics-base (3.15.6-2) unstable; urgency=medium
 
   * Add patches for MSI bugs lp:1810946 and lp:1810949

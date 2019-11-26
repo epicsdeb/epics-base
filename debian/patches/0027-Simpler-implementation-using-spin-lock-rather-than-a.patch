@@ -1,0 +1,101 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Tue, 4 Dec 2018 12:00:26 -0500
+Subject: Simpler implementation using spin lock rather than atomics
+
+---
+ src/libCom/ring/epicsRingBytes.c   | 16 +++++++++-------
+ src/libCom/ring/epicsRingPointer.h | 11 +++++------
+ 2 files changed, 14 insertions(+), 13 deletions(-)
+
+diff --git a/src/libCom/ring/epicsRingBytes.c b/src/libCom/ring/epicsRingBytes.c
+index ec9e509..ab048e4 100644
+--- a/src/libCom/ring/epicsRingBytes.c
++++ b/src/libCom/ring/epicsRingBytes.c
+@@ -21,7 +21,6 @@
+ #include <stdio.h>
+ 
+ #define epicsExportSharedSymbols
+-#include "epicsAtomic.h"
+ #include "epicsSpin.h"
+ #include "dbDefs.h"
+ #include "epicsRingBytes.h"
+@@ -121,7 +120,7 @@ epicsShareFunc int epicsShareAPI epicsRingBytesPut(
+ {
+     ringPvt *pring = (ringPvt *)id;
+     int nextGet, nextPut, size;
+-    int freeCount, copyCount, topCount, used, oldHWM;
++    int freeCount, copyCount, topCount, used;
+ 
+     if (pring->lock) epicsSpinLock(pring->lock);
+     nextGet = pring->nextGet;
+@@ -162,9 +161,7 @@ epicsShareFunc int epicsShareAPI epicsRingBytesPut(
+ 
+     used = nextPut - nextGet;
+     if (used < 0) used += pring->size;
+-    while(oldHWM = epicsAtomicGetIntT(&pring->highWaterMark), oldHWM < used) {
+-        epicsAtomicCmpAndSwapIntT(&pring->highWaterMark, oldHWM, used);
+-    }
++    if (used > pring->highWaterMark) pring->highWaterMark = used;
+ 
+     if (pring->lock) epicsSpinUnlock(pring->lock);
+     return nbytes;
+@@ -239,11 +236,16 @@ epicsShareFunc int epicsShareAPI epicsRingBytesIsFull(epicsRingBytesId id)
+ epicsShareFunc int epicsShareAPI epicsRingBytesHighWaterMark(epicsRingBytesIdConst id)
+ {
+     ringPvt *pring = (ringPvt *)id;
+-    return epicsAtomicGetIntT(&pring->highWaterMark);
++    return pring->highWaterMark;
+ }
+ 
+ epicsShareFunc void epicsShareAPI epicsRingBytesResetHighWaterMark(epicsRingBytesId id)
+ {
+     ringPvt *pring = (ringPvt *)id;
+-    epicsAtomicSetIntT(&pring->highWaterMark, epicsRingBytesUsedBytes(id));
++    int used;
++    if (pring->lock) epicsSpinLock(pring->lock);
++    used = pring->nextGet - pring->nextPut;
++    if (used < 0) used += pring->size;
++    pring->highWaterMark = used;
++    if (pring->lock) epicsSpinUnlock(pring->lock);
+ }
+diff --git a/src/libCom/ring/epicsRingPointer.h b/src/libCom/ring/epicsRingPointer.h
+index 2b4f1b1..68bf8f5 100644
+--- a/src/libCom/ring/epicsRingPointer.h
++++ b/src/libCom/ring/epicsRingPointer.h
+@@ -23,7 +23,6 @@
+  *   epicsRingPointerLocked uses a spinlock.
+  */
+ 
+-#include "epicsAtomic.h"
+ #include "epicsSpin.h"
+ #include "shareLib.h"
+ 
+@@ -131,9 +130,7 @@ inline bool epicsRingPointer<T>::push(T *p)
+     buffer[next] = p;
+     nextPush = newNext;
+     int used = getUsedNoLock();
+-    while(int oldHWM = epicsAtomicGetIntT(&highWaterMark), oldHWM < used) {
+-        epicsAtomicCmpAndSwapIntT(&highWaterMark, oldHWM, used);
+-    }
++    if (used > highWaterMark) highWaterMark = used;
+     if (lock) epicsSpinUnlock(lock);
+     return(true);
+ }
+@@ -219,13 +216,15 @@ inline bool epicsRingPointer<T>::isFull() const
+ template <class T>
+ inline int epicsRingPointer<T>::getHighWaterMark() const
+ {
+-    return epicsAtomicGetIntT(&highWaterMark);
++    return highWaterMark;
+ }
+ 
+ template <class T>
+ inline void epicsRingPointer<T>::resetHighWaterMark()
+ {
+-    epicsAtomicSetIntT(&highWaterMark, getUsed());
++    if (lock) epicsSpinLock(lock);
++    highWaterMark = getUsedNoLock();
++    if (lock) epicsSpinUnlock(lock);
+ }
+ 
+ #endif /* __cplusplus */

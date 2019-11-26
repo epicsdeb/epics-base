@@ -1,0 +1,161 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Thu, 29 Nov 2018 19:12:48 -0500
+Subject: Add tests for highWaterMark feature
+
+---
+ src/libCom/test/ringBytesTest.c   | 34 +++++++++++++++++++++-------------
+ src/libCom/test/ringPointerTest.c |  9 ++++++++-
+ 2 files changed, 29 insertions(+), 14 deletions(-)
+
+diff --git a/src/libCom/test/ringBytesTest.c b/src/libCom/test/ringBytesTest.c
+index 6cef933..bb91d02 100644
+--- a/src/libCom/test/ringBytesTest.c
++++ b/src/libCom/test/ringBytesTest.c
+@@ -30,7 +30,8 @@ typedef struct info {
+     epicsRingBytesId	ring;
+ }info;
+ 
+-static void check(epicsRingBytesId ring, int expectedFree)
++static void check(epicsRingBytesId ring, int expectedFree,
++                  int expectedHighWaterMark)
+ {
+     int expectedUsed = RINGSIZE - expectedFree;
+     int expectedEmpty = (expectedUsed == 0);
+@@ -39,11 +40,14 @@ static void check(epicsRingBytesId ring, int expectedFree)
+     int nUsed = epicsRingBytesUsedBytes(ring);
+     int isEmpty = epicsRingBytesIsEmpty(ring);
+     int isFull = epicsRingBytesIsFull(ring);
++    int highWaterMark = epicsRingBytesHighWaterMark(ring);
+     
+     testOk(nFree == expectedFree, "Free: %d == %d", nFree, expectedFree);
+     testOk(nUsed == expectedUsed, "Used: %d == %d", nUsed, expectedUsed);
+     testOk(isEmpty == expectedEmpty, "Empty: %d == %d", isEmpty, expectedEmpty);
+     testOk(isFull == expectedFull, "Full: %d == %d", isFull, expectedFull);
++    testOk(highWaterMark == expectedHighWaterMark, "HighWaterMark: %d == %d",
++           highWaterMark, expectedHighWaterMark);
+ }
+     
+ MAIN(ringBytesTest)
+@@ -55,7 +59,7 @@ MAIN(ringBytesTest)
+     char get[RINGSIZE+1];
+     epicsRingBytesId ring;
+ 
+-    testPlan(245);
++    testPlan(292);
+ 
+     pinfo = calloc(1,sizeof(info));
+     if (!pinfo) {
+@@ -70,50 +74,54 @@ MAIN(ringBytesTest)
+     if (!ring) {
+         testAbort("epicsRingBytesCreate failed");
+     }
+-    check(ring, RINGSIZE);
++    check(ring, RINGSIZE, 0);
+ 
+     for (i = 0 ; i < sizeof(put) ; i++)
+         put[i] = i;
+     for(i = 0 ; i < RINGSIZE ; i++) {
+         n = epicsRingBytesPut(ring, put, i);
+         testOk(n==i, "ring put %d", i);
+-        check(ring, RINGSIZE-i);
++        check(ring, RINGSIZE-i, i);
+         n = epicsRingBytesGet(ring, get, i);
+         testOk(n==i, "ring get %d", i);
+-        check(ring, RINGSIZE);
++        check(ring, RINGSIZE, i);
+         testOk(memcmp(put,get,i)==0, "get matches write");
+     }
+ 
++    epicsRingBytesResetHighWaterMark(ring);
++
+     for(i = 0 ; i < RINGSIZE ; i++) {
+         n = epicsRingBytesPut(ring, put+i, 1);
+         testOk(n==1, "ring put 1, %d", i);
+-        check(ring, RINGSIZE-1-i);
++        check(ring, RINGSIZE-1-i, i + 1);
+     }
+     n = epicsRingBytesPut(ring, put+RINGSIZE, 1);
+     testOk(n==0, "put to full ring");
+-    check(ring, 0);
++    check(ring, 0, RINGSIZE);
+     for(i = 0 ; i < RINGSIZE ; i++) {
+         n = epicsRingBytesGet(ring, get+i, 1);
+         testOk(n==1, "ring get 1, %d", i);
+-        check(ring, 1+i);
++        check(ring, 1+i, RINGSIZE);
+     }
+     testOk(memcmp(put,get,RINGSIZE)==0, "get matches write");
+     n = epicsRingBytesGet(ring, get+RINGSIZE, 1);
+     testOk(n==0, "get from empty ring");
+-    check(ring, RINGSIZE);
++    check(ring, RINGSIZE, RINGSIZE);
++
++    epicsRingBytesResetHighWaterMark(ring);
+ 
+     n = epicsRingBytesPut(ring, put, RINGSIZE+1);
+     testOk(n==0, "ring put beyond ring capacity (%d, expected 0)",n);
+-    check(ring, RINGSIZE);
++    check(ring, RINGSIZE, 0);
+     n = epicsRingBytesPut(ring, put, 1);
+     testOk(n==1, "ring put %d", 1);
+-    check(ring, RINGSIZE-1);
++    check(ring, RINGSIZE-1, 1);
+     n = epicsRingBytesPut(ring, put, RINGSIZE);
+     testOk(n==0, "ring put beyond ring capacity (%d, expected 0)",n);
+-    check(ring, RINGSIZE-1);
++    check(ring, RINGSIZE-1, 1);
+     n = epicsRingBytesGet(ring, get, 1);
+     testOk(n==1, "ring get %d", 1);
+-    check(ring, RINGSIZE);
++    check(ring, RINGSIZE, 1);
+ 
+     epicsRingBytesDelete(ring);
+     epicsEventDestroy(consumerEvent);
+diff --git a/src/libCom/test/ringPointerTest.c b/src/libCom/test/ringPointerTest.c
+index 92401d1..b32b364 100644
+--- a/src/libCom/test/ringPointerTest.c
++++ b/src/libCom/test/ringPointerTest.c
+@@ -64,6 +64,7 @@ static void testSingle(void)
+     testOk1(epicsRingPointerGetFree(ring)==rsize);
+     testOk1(epicsRingPointerGetSize(ring)==rsize);
+     testOk1(epicsRingPointerGetUsed(ring)==0);
++    testOk1(epicsRingPointerGetHighWaterMark(ring)==0);
+ 
+     testOk1(epicsRingPointerPop(ring)==NULL);
+ 
+@@ -75,6 +76,10 @@ static void testSingle(void)
+     testOk1(epicsRingPointerGetFree(ring)==rsize-1);
+     testOk1(epicsRingPointerGetSize(ring)==rsize);
+     testOk1(epicsRingPointerGetUsed(ring)==1);
++    testOk1(epicsRingPointerGetHighWaterMark(ring)==1);
++
++    epicsRingPointerResetHighWaterMark(ring);
++    testOk1(epicsRingPointerGetHighWaterMark(ring)==1);
+ 
+     testDiag("Fill it up");
+     for(i=2; i<2*rsize; i++) {
+@@ -92,6 +97,7 @@ static void testSingle(void)
+     testOk1(epicsRingPointerGetFree(ring)==0);
+     testOk1(epicsRingPointerGetSize(ring)==rsize);
+     testOk1(epicsRingPointerGetUsed(ring)==rsize);
++    testOk1(epicsRingPointerGetHighWaterMark(ring)==rsize);
+ 
+     testDiag("Drain it out");
+     for(i=1; i<2*rsize; i++) {
+@@ -108,6 +114,7 @@ static void testSingle(void)
+     testOk1(epicsRingPointerGetFree(ring)==rsize);
+     testOk1(epicsRingPointerGetSize(ring)==rsize);
+     testOk1(epicsRingPointerGetUsed(ring)==0);
++    testOk1(epicsRingPointerGetHighWaterMark(ring)==rsize);
+ 
+     testDiag("Fill it up again");
+     for(i=2; i<2*rsize; i++) {
+@@ -236,7 +243,7 @@ MAIN(ringPointerTest)
+ {
+     int prio = epicsThreadGetPrioritySelf();
+ 
+-    testPlan(37);
++    testPlan(42);
+     testSingle();
+     epicsThreadSetPriority(epicsThreadGetIdSelf(), epicsThreadPriorityScanLow);
+     testPair(0);
