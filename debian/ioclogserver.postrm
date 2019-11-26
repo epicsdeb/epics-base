@@ -17,7 +17,7 @@ case "$1" in
     else
         echo 'systemctl is not installed - removing unit files related to ' \
         'ioclogserver'
-        rm /etc/systemd/system/ioclogserver.target.wants/ioclogserver@default.service
+        rm -f /etc/systemd/system/ioclogserver.target.wants/ioclogserver@default.service
     fi
 
     echo "Removing: $LOGDIR"
