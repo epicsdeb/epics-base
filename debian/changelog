@@ -1,3 +1,9 @@
+epics-base (3.15.7-4) unstable; urgency=medium
+
+  * Move systemd caRepeater system file to catools package
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Fri, 20 Mar 2020 15:41:37 -0400
+
 epics-base (3.15.7-3) unstable; urgency=medium
 
   * Do not fail during uninstall if systemd isn't installed
