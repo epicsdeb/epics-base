@@ -42,3 +42,4 @@
 0042-fix-bug-from-commit-f85454.-Apparently-epicsExportSh.patch
 0043-renamed-epicsSocketCountUnsentBytes-to-epicsSocketUn.patch
 0044-use-EPICS_PRIVATE_API-macro-and-fix-bug-with-darwin-.patch
+0045-Fix-caRepeater-path-in-systemd-service-file.patch
