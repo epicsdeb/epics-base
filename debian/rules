@@ -135,14 +135,14 @@ override_dh_install:
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
 	# Install systemd unit files into the right location
-	install -d debian/epics-dev/lib/systemd/system
+	install -d debian/epics-catools/lib/systemd/system
 	for arch in $(EPICS_HOST_ARCH); do \
-	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-dev/lib/systemd/system/; \
+	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-catools/lib/systemd/system/; \
 	  rm debian/tmp/usr/lib/epics/bin/$$arch-debug/caRepeater.service; \
 	done
 
 	# Unit files shouldn't be marked executable
-	chmod -x debian/epics-dev/lib/systemd/system/*.service
+	chmod -x debian/epics-catools/lib/systemd/system/*.service
 
 	# Remove legacy init scripts
 	rm -f debian/tmp/usr/lib/epics/bin/*/S99caRepeater
