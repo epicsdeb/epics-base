@@ -1,0 +1,40 @@
+From: Dirk Zimoch <dirk.zimoch@psi.ch>
+Date: Tue, 17 Sep 2019 14:39:03 +0200
+Subject: improve logClientShow to show unsent bytes on level 2 (and fix level
+ 1)
+
+---
+ src/libCom/log/logClient.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/src/libCom/log/logClient.c b/src/libCom/log/logClient.c
+index 723f5d4..9b9e039 100644
+--- a/src/libCom/log/logClient.c
++++ b/src/libCom/log/logClient.c
+@@ -507,14 +507,21 @@ void epicsShareAPI logClientShow (logClientId id, unsigned level)
+         printf ("log client: disconnected from log server at \"%s\"\n", pClient->name);
+     }
+ 
+-    if (level>1) {
+-        printf ("log client: sock=%s, connect cycles = %u\n",
++    if (logClientPrefix) {
++        printf ("log client: prefix is \"%s\"\n", logClientPrefix);
++    }
++
++    if (level>0) {
++        printf ("log client: sock %s, connect cycles = %u\n",
+             pClient->sock==INVALID_SOCKET?"INVALID":"OK",
+             pClient->connectCount);
+     }
+-
+-    if (logClientPrefix) {
+-        printf ("log client: prefix is \"%s\"\n", logClientPrefix);
++    if (level>1) {
++        printf ("log client: %u bytes in buffer\n", pClient->nextMsgIndex);
++        if (pClient->nextMsgIndex)
++            printf("-------------------------\n"
++                "%.*s-------------------------\n",
++                (int)(pClient->nextMsgIndex), pClient->msgBuf);
+     }
+ }
+ 

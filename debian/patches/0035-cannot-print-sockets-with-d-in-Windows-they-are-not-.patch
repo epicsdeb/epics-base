@@ -1,0 +1,24 @@
+From: Dirk Zimoch <dirk.zimoch@psi.ch>
+Date: Tue, 17 Sep 2019 17:45:33 +0200
+Subject: cannot print sockets with %d in Windows,
+ they are not small ints but maybe pointers.
+
+---
+ src/libCom/log/logClient.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/libCom/log/logClient.c b/src/libCom/log/logClient.c
+index 44eaf7d..7627034 100644
+--- a/src/libCom/log/logClient.c
++++ b/src/libCom/log/logClient.c
+@@ -402,8 +402,8 @@ static void logClientConnect (logClient *pClient)
+         char sockErrBuf[128];
+         epicsSocketConvertErrnoToString ( 
+             sockErrBuf, sizeof ( sockErrBuf ) );
+-        fprintf (stderr, "%s:%d shutdown(%d,SHUT_RD) error was \"%s\"\n", 
+-            __FILE__, __LINE__, pClient->sock, sockErrBuf);
++        fprintf (stderr, "%s:%d shutdown(sock,SHUT_RD) error was \"%s\"\n", 
++            __FILE__, __LINE__, sockErrBuf);
+         /* not fatal (although it shouldn't happen) */
+     }
+ 

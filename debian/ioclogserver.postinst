@@ -32,7 +32,7 @@ case "$1" in
     if [ -x "$(command -v systemctl)" ]
     then
         echo 'Enabling default instance of ioclogserver service.'
-        systemctl enable ioclogserver@.service
+        deb-systemd-invoke enable ioclogserver@.service
     else
         echo 'Warning: systemctl is not installed - cannot enable default' \
              'instance of ioclogserver service.'
