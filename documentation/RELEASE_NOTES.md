@@ -1,4 +1,110 @@
-# EPICS Base Release 3.15.7
+# EPICS Base Release 3.15.8
+
+## Changes made between 3.15.7 and 3.15.8
+
+### Bug fixes
+
+The following launchpad bugs have fixes included in this release:
+
+- [lp: 1812084](https://bugs.launchpad.net/epics-base/+bug/1812084), Build
+  failure on RTEMS 4.10.2
+- [lp: 1829770](https://bugs.launchpad.net/epics-base/+bug/1829770), event
+  record device support broken with constant INP
+- [lp: 1829919](https://bugs.launchpad.net/epics-base/+bug/1829919), IOC
+  segfaults when calling dbLoadRecords after iocInit
+- [lp: 1838792](https://bugs.launchpad.net/epics-base/+bug/1838792), epicsCalc
+  bit-wise operators on aarch64
+- [lp: 1841608](https://bugs.launchpad.net/epics-base/+bug/1841608), logClient
+  falsely sends error logs on all connections
+- [lp: 1853168](https://bugs.launchpad.net/epics-base/+bug/1853168), undefined
+  reference to `clock_gettime()`
+- [lp: 1862328](https://bugs.launchpad.net/epics-base/+bug/1862328), Race
+  condition on IOC start leaves rsrv unresponsive
+- [lp: 1868486](https://bugs.launchpad.net/epics-base/+bug/1868486),
+  epicsMessageQueue lost messages
+
+
+### Improvements to the self-test build targets
+
+This release contains changes that make it possible to integrate another test
+running and reporting system (such as Google's gtest) into the EPICS build
+system. The built-in test-runner and reporting system will continue to be used
+by the test programs inside Base however.
+
+These GNUmake `tapfiles` and `test-results` build targets now collect a list of
+the directories that experienced test failures and display those at the end of
+running and/or reporting all of the tests. The GNUmake process will also only
+exit with an error status after running and/or reporting all of the test
+results; previously the `-k` flag to make was needed and even that didn't always
+work.
+
+Continuous Integration systems are recommended to run `make tapfiles` (or if
+they can read junittest output instead of TAP `make junitests`) followed by
+`make -s test-results` to display the results of the tests. If multiple CPUs are
+available the `-j` flag can be used to run tests in parallel, giving the maximum
+jobs that should be allowed so `make -j4 tapfiles` for a system with 4 CPUs say.
+Running many more jobs than you have CPUs is likely to be slower and is not
+recommended.
+
+### Calc Engine Fixes and Enhancements
+
+The code that implements bit operations for Calc expressions has been reworked
+to better handle some CPU architectures and compilers. As part of this work a
+new operator has been added: `>>>` performs a logical right-shift, inserting
+zero bits into the most significant bits (the operator `>>` is an arithmetic
+right-shift which copies the sign bit as it shifts the value rightwards).
+
+### IOC logClient Changes
+
+The IOC's error logging system has been updated significantly to fix a number
+of issues including:
+
+  - Only send errlog messages to iocLogClient listeners
+  - Try to minimize lost messages while the log server is down:
+    + Detect disconnects sooner
+    + Don't discard the buffer on disconnect
+    + Flush the buffer immediately after a server reconnects
+
+### epicsThread: Main thread defaults to allow blocking I/O
+
+VxWorks IOCs (and potentially RTEMS IOCs running GeSys) have had problems with
+garbled error messages from dbStaticLib routines for some time &mdash; messages
+printed before `iocInit` were being queued through the errlog thread instead of
+being output immediately. This has been fixed by initializing the main thread
+with its `OkToBlock` flag set instead of cleared. IOCs running on other
+operating systems that use iocsh to execute the startup script previously had
+that set anyway in iocsh so were not affected, but this change might cause other
+programs that don't use iocsh to change their behavior slightly if they use
+`errlogPrintf()`, `epicsPrintf()` or `errPrintf()`.
+
+### catools: Handle data type changes in camonitor
+
+The camonitor program didn't properly cope if subscribed to a channel whose data
+type changed when its IOC was rebooted without restarting the camonitor program.
+This has now been fixed.
+
+### More Record Reference Documentation
+
+The remaining record types have had their reference pages moved from the Wiki,
+and some new reference pages have been written to cover the analog array and
+long string input and output record types plus the printf record type, none of
+which were previously documented. The wiki reference pages covering the fields
+common to all, input, and output record types have also been added, thanks to
+Rolf Keitel. The POD conversion scripts have also been improved and they now
+properly support linking to subsections in a different document, although the
+POD changes to add the cross-links that appeared in the original wiki pages
+still needs to be done in most cases.
+
+### Fix build issues with newer MinGW versions
+
+The `clock_gettime()` routine is no longer used under MinGW since newer versions
+don't provide it any more.
+
+### Fix race for port in RSRV when multiple IOCs start simultaneously
+
+If multiple IOCs were started at the same time, by systemd say, they could race
+to obtain the Channel Access TCP port number 5064. This issue has been fixed.
+
 
 ## Changes made between 3.15.6 and 3.15.7
 
