@@ -9,8 +9,15 @@
 use strict;
 use warnings;
 
+# To find the EPICS::PodHtml module used below we need to add our lib/perl to
+# the lib search path. If the script is running from the src/tools directory
+# before everything has been installed though, the search path must include
+# our source directory (i.e. $Bin), so we add both here.
+use FindBin qw($Bin);
+use lib ("$Bin/../../lib/perl", $Bin);
+
 use Getopt::Std;
-use Pod::Simple::HTML;
+use EPICS::PodHtml;
 
 our ($opt_o);
 
@@ -27,11 +34,9 @@ if (!$opt_o) {
 open my $out, '>', $opt_o or
     die "Can't create $opt_o: $!\n";
 
-my $podHtml = Pod::Simple::HTML->new();
+my $podHtml = EPICS::PodHtml->new();
 
 $podHtml->html_css('style.css');
-$podHtml->perldoc_url_prefix('');
-$podHtml->perldoc_url_postfix('.html');
 $podHtml->set_source($infile);
 $podHtml->output_string(\my $html);
 $podHtml->run;

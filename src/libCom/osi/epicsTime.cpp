@@ -205,9 +205,6 @@ epicsTime::epicsTime (const epicsTimeStamp &ts)
 epicsTime::epicsTime () :
     secPastEpoch(0u), nSec(0u) {}
 
-epicsTime::epicsTime (const epicsTime &t) :
-    secPastEpoch (t.secPastEpoch), nSec (t.nSec) {}
-
 epicsTime epicsTime::getCurrent ()
 {
     epicsTimeStamp current;
@@ -955,7 +952,8 @@ extern "C" {
         try {
             local_tm_nano_sec tmns = epicsTime (*pSrc);
             *pDest = tmns.ansi_tm;
-            *pNSecDest = tmns.nSec;
+            if (pNSecDest)
+                *pNSecDest = tmns.nSec;
         }
         catch (...) {
             return epicsTimeERROR;
@@ -967,7 +965,8 @@ extern "C" {
         try {
             gm_tm_nano_sec gmtmns = epicsTime (*pSrc);
             *pDest = gmtmns.ansi_tm;
-            *pNSecDest = gmtmns.nSec;
+            if (pNSecDest)
+                *pNSecDest = gmtmns.nSec;
         }
         catch (...) {
             return epicsTimeERROR;

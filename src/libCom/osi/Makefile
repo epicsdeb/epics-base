@@ -77,7 +77,7 @@ Com_SRCS += epicsGeneralTime.c
 
 # Time providers
 Com_SRCS += osiClockTime.c
-Com_SRCS_vxWorks += osiNTPTime.c
+Com_SRCS_vxWorks += osiNTPTime.c tz2timezone.c
 Com_SRCS_RTEMS += osiNTPTime.c
 
 ifeq ($(OS_CLASS),vxWorks)
@@ -86,6 +86,7 @@ endif
 
 Com_SRCS += osdSock.c
 Com_SRCS += osdSockAddrReuse.cpp
+Com_SRCS += osdSockUnsentCount.c
 Com_SRCS += osiSock.c
 Com_SRCS += systemCallIntMech.cpp
 Com_SRCS += epicsSocketConvertErrnoToString.cpp
