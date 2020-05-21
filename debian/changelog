@@ -1,3 +1,11 @@
+epics-base (3.15.8-1) unstable; urgency=medium
+
+  * New upstream version 3.15.8
+  * Bump up version number in library/package names
+  * Rebase patch queue
+
+ -- Martin Konrad <konrad@frib.msu.edu>  Thu, 21 May 2020 13:32:26 -0400
+
 epics-base (3.15.7-4) unstable; urgency=medium
 
   * Move systemd caRepeater system file to catools package
