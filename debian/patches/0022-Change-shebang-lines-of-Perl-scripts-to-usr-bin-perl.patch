@@ -145,7 +145,7 @@ index e6f0c77..5f72e0a 100644
  # Copyright (c) 2015 ITER Organization.
  # EPICS BASE is distributed subject to a Software License Agreement found
 diff --git a/src/tools/convertRelease.pl b/src/tools/convertRelease.pl
-index b80ae6f..7846ddb 100644
+index 97fbc18..805643a 100644
 --- a/src/tools/convertRelease.pl
 +++ b/src/tools/convertRelease.pl
 @@ -1,4 +1,4 @@
@@ -275,7 +275,7 @@ index 4afde3c..7a2ab9b 100644
  # Copyright (c) 2015 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
 diff --git a/src/tools/podToHtml.pl b/src/tools/podToHtml.pl
-index 99ee5b4..7e11fbe 100644
+index f661ad3..1aaace2 100644
 --- a/src/tools/podToHtml.pl
 +++ b/src/tools/podToHtml.pl
 @@ -1,4 +1,4 @@
