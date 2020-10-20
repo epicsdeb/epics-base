@@ -13,11 +13,11 @@ case "$1" in
     if [ -x "$(command -v systemctl)" ]
     then
         echo 'Disabling default instance of ioclogserver service.'
-        systemctl disable ioclogserver@default.service
+        deb-systemd-invoke disable ioclogserver@default.service
     else
         echo 'systemctl is not installed - removing unit files related to ' \
         'ioclogserver'
-        rm /etc/systemd/system/ioclogserver.target.wants/ioclogserver@default.service
+        rm -f /etc/systemd/system/ioclogserver.target.wants/ioclogserver@default.service
     fi
 
     echo "Removing: $LOGDIR"

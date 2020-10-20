@@ -28,6 +28,10 @@ static volatile int recvExit = 0;
 static epicsEventId finished;
 static unsigned int mediumStack;
 
+#define SLEEPY_TESTS 500
+static int numSent, numReceived;
+static epicsEventId complete;
+
 /*
  * In Numerical Recipes in C: The Art of Scientific Computing (William  H.
  * Press, Brian P. Flannery, Saul A. Teukolsky, William T. Vetterling; New
@@ -113,6 +117,106 @@ receiver(void *arg)
         testDiag("Error count was %d", errors);
     testDiag("%s exiting", myName);
     epicsEventSignal(finished);
+}
+
+extern "C" void
+fastReceiver(void *arg)
+{
+    epicsMessageQueue *q = (epicsMessageQueue *)arg;
+    char cbuf[80];
+    int len;
+    numReceived = 0;
+    while (!recvExit) {
+        len = q->receive(cbuf, sizeof cbuf, 0.010);
+        if (len > 0) {
+            numReceived++;
+        }
+    }
+    recvExit = 0;
+    epicsEventSignal(complete);
+}
+
+void sleepySender(double delay)
+{
+    testDiag("sleepySender: sending every %.3f seconds", delay);
+    epicsMessageQueue q(4, 20);
+    epicsThreadCreate("Fast Receiver", epicsThreadPriorityMedium,
+        mediumStack, fastReceiver, &q);
+
+    numSent = 0;
+    for (int i = 0 ; i < SLEEPY_TESTS ; i++) {
+        if (q.send((void *)msg1, 4) == 0) {
+            numSent++;
+        }
+        epicsThreadSleep(delay);
+    }
+    epicsThreadSleep(1.0);
+    testOk(numSent == SLEEPY_TESTS, "Sent %d (should be %d)",
+        numSent, SLEEPY_TESTS);
+    testOk(numReceived == SLEEPY_TESTS, "Received %d (should be %d)",
+        numReceived, SLEEPY_TESTS);
+
+    recvExit = 1;
+    while (q.send((void *)msg1, 4) != 0)
+        epicsThreadSleep(0.01);
+    epicsEventMustWait(complete);
+}
+
+extern "C" void
+fastSender(void *arg)
+{
+    epicsMessageQueue *q = (epicsMessageQueue *)arg;
+    numSent = 0;
+
+    // Send first withough timeout
+    q->send((void *)msg1, 4);
+    numSent++;
+
+    // The rest have a timeout
+    while (!sendExit) {
+        if (q->send((void *)msg1, 4, 0.010) == 0) {
+            numSent++;
+        }
+    }
+    sendExit = 0;
+    epicsEventSignal(complete);
+}
+
+void sleepyReceiver(double delay)
+{
+    testDiag("sleepyReceiver: acquiring every %.3f seconds", delay);
+    epicsMessageQueue q(4, 20);
+
+    // Fill the queue
+    for (int i = q.pending(); i < 4 ;i++) {
+        q.send((void *)msg1, 4);
+    }
+
+    epicsThreadCreate("Fast Sender", epicsThreadPriorityMedium,
+        mediumStack, fastSender, &q);
+    epicsThreadSleep(0.5);
+
+    char cbuf[80];
+    int len;
+    numReceived = 0;
+
+    for (int i = 0 ; i < SLEEPY_TESTS ; i++) {
+        len = q.receive(cbuf, sizeof cbuf);
+        if (len > 0) {
+            numReceived++;
+        }
+        epicsThreadSleep(delay);
+    }
+
+    testOk(numSent == SLEEPY_TESTS, "Sent %d (should be %d)",
+        numSent, SLEEPY_TESTS);
+    testOk(numReceived == SLEEPY_TESTS, "Received %d (should be %d)",
+        numReceived, SLEEPY_TESTS);
+
+    sendExit = 1;
+    while (q.receive(cbuf, sizeof cbuf) <= 0)
+        epicsThreadSleep(0.01);
+    epicsEventMustWait(complete);
 }
 
 extern "C" void
@@ -251,6 +355,18 @@ extern "C" void messageQueueTest(void *parm)
     testOk(q1->send((void *)msg1, 10) == 0, "Send with no receiver");
     epicsThreadSleep(2.0);
 
+    testDiag("6 Single receiver single sender 'Sleepy timeout' tests,");
+    testDiag("    these should take about %.2f seconds each:",
+        SLEEPY_TESTS * 0.010);
+
+    complete = epicsEventMustCreate(epicsEventEmpty);
+    sleepySender(0.009);
+    sleepySender(0.010);
+    sleepySender(0.011);
+    sleepyReceiver(0.009);
+    sleepyReceiver(0.010);
+    sleepyReceiver(0.011);
+
     testDiag("Single receiver, single sender tests:");
     epicsThreadSetPriority(myThreadId, epicsThreadPriorityHigh);
     epicsThreadCreate("Receiver one", epicsThreadPriorityMedium,
@@ -285,7 +401,7 @@ extern "C" void messageQueueTest(void *parm)
      * Single receiver, multiple sender tests
      */
     testDiag("Single receiver, multiple sender tests:");
-    testDiag("This test lasts 60 seconds...");
+    testDiag("This test lasts 30 seconds...");
     testOk(!!epicsThreadCreate("Sender 1", epicsThreadPriorityLow,
         mediumStack, sender, q1),
         "Created Sender 1");
@@ -299,9 +415,9 @@ extern "C" void messageQueueTest(void *parm)
         mediumStack, sender, q1),
         "Created Sender 4");
 
-    for (i = 0; i < 10; i++) {
-        testDiag("... %2d", 10 - i);
-        epicsThreadSleep(6.0);
+    for (i = 0; i < 6; i++) {
+        testDiag("... %2d", 6 - i);
+        epicsThreadSleep(5.0);
     }
 
     sendExit = 1;
@@ -312,7 +428,7 @@ extern "C" void messageQueueTest(void *parm)
 
 MAIN(epicsMessageQueueTest)
 {
-    testPlan(62);
+    testPlan(74);
 
     finished = epicsEventMustCreate(epicsEventEmpty);
     mediumStack = epicsThreadGetStackSize(epicsThreadStackMedium);

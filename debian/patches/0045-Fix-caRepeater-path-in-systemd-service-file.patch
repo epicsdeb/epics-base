@@ -1,0 +1,21 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Fri, 20 Mar 2020 18:11:06 -0400
+Subject: Fix caRepeater path in systemd service file
+
+---
+ src/ca/client/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ca/client/Makefile b/src/ca/client/Makefile
+index 36c763d..6c4dc0c 100644
+--- a/src/ca/client/Makefile
++++ b/src/ca/client/Makefile
+@@ -105,7 +105,7 @@ SCRIPTS_Linux = caRepeater.service
+ 
+ EXPAND += S99caRepeater@
+ EXPAND += caRepeater.service@
+-EXPAND_VARS = INSTALL_BIN=$(abspath $(INSTALL_BIN))
++EXPAND_VARS = INSTALL_BIN=/usr/bin
+ 
+ SRC_DIRS += $(TOP)/src/ca/client/test
+ PROD_HOST += ca_test

@@ -70,9 +70,7 @@
 #include "registryRecordType.h"
 #include "rsrv.h"
 
-static enum {
-    iocVirgin, iocBuilding, iocBuilt, iocRunning, iocPaused, iocStopped
-} iocState = iocVirgin;
+static enum iocStateEnum iocState = iocVoid;
 static enum {
     buildRSRV, buildIsolated
 } iocBuildMode;
@@ -91,6 +89,11 @@ static void exitDatabase(void *dummy);
 int dbThreadRealtimeLock = 1;
 epicsExportAddress(int, dbThreadRealtimeLock);
 
+enum iocStateEnum getIocState(void)
+{
+    return iocState;
+}
+
 /*
  *  Initialize EPICS on the IOC.
  */
@@ -101,7 +104,7 @@ int iocInit(void)
 
 static int iocBuild_1(void)
 {
-    if (iocState != iocVirgin && iocState != iocStopped) {
+    if (iocState != iocVoid) {
         errlogPrintf("iocBuild: IOC can only be initialized from uninitialized or stopped state\n");
         return -1;
     }
@@ -701,7 +704,7 @@ static void doFreeRecord(dbRecordType *pdbRecordType, dbCommon *precord,
 
 int iocShutdown(void)
 {
-    if (iocState == iocVirgin || iocState == iocStopped) return 0;
+    if (iocState == iocVoid) return 0;
     iterateRecords(doCloseLinks, NULL);
     if (iocBuildMode==buildIsolated) {
         /* stop and "join" threads */
@@ -720,7 +723,7 @@ int iocShutdown(void)
         dbProcessNotifyExit();
         iocshFree();
     }
-    iocState = iocStopped;
+    iocState = iocVoid;
     iocBuildMode = buildRSRV;
     return 0;
 }
