@@ -8,7 +8,7 @@ Subject: dbScan: add scanOnce3() w/ completion callback
  2 files changed, 44 insertions(+), 19 deletions(-)
 
 diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
-index dd283f7..8a347e8 100644
+index 5fc264d..30ca974 100644
 --- a/src/ioc/db/dbScan.c
 +++ b/src/ioc/db/dbScan.c
 @@ -26,10 +26,9 @@

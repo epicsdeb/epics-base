@@ -185,7 +185,7 @@ index 1a1aafb..943cd32 100644
  
      /* Needed before callback system is initialized */
 diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
-index 8a347e8..7aad214 100644
+index 30ca974..b929488 100644
 --- a/src/ioc/db/dbScan.c
 +++ b/src/ioc/db/dbScan.c
 @@ -24,6 +24,7 @@

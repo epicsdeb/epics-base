@@ -26,10 +26,10 @@ index 8b7b785..2d1f486 100644
  #
  -include $(HOME)/configure/CONFIG_USER
 diff --git a/configure/RULES_BUILD b/configure/RULES_BUILD
-index c7f3ba7..c321617 100644
+index 4594fa8..5e47960 100644
 --- a/configure/RULES_BUILD
 +++ b/configure/RULES_BUILD
-@@ -514,6 +514,11 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
+@@ -520,6 +520,11 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
  
  -include $(CONFIG)/RULES_EXPAND
  

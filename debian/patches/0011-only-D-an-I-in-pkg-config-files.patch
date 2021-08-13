@@ -7,7 +7,7 @@ Subject: only -D an -I in pkg-config files
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/src/tools/Makefile b/src/tools/Makefile
-index faa08ab..607ba99 100644
+index 1d9991d..da72b99 100644
 --- a/src/tools/Makefile
 +++ b/src/tools/Makefile
 @@ -68,8 +68,9 @@ HTMLS = style.css

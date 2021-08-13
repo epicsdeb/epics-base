@@ -54,7 +54,7 @@ index f7fefba..73b874f 100644
  }
  
 diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
-index 7aad214..05681c5 100644
+index b929488..984ba8a 100644
 --- a/src/ioc/db/dbScan.c
 +++ b/src/ioc/db/dbScan.c
 @@ -706,8 +706,8 @@ int scanOnceSetQueueSize(int size)
