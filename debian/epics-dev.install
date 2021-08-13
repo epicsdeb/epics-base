@@ -26,4 +26,3 @@ usr/lib/epics/lib/perl/EpicsHostArch.pl
 
 configure/Sample.Makefile usr/lib/epics/configure
 
-startup/EpicsHostArch usr/lib/epics/startup
