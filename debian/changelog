@@ -1,3 +1,18 @@
+epics-base (3.15.9-1) unstable; urgency=medium
+
+  [ Priller, John ]
+  * do not install startup/EpicsHostArch
+  * replace outdated startup/EpicsHostArch
+  * update patch series
+  * New upstream version 3.15.9
+  * rebased for v3.15.9
+  * updated control version for v3.15.9
+  * change hard-coded file name to libepics3.15.9.install
+  * change hard-coded file name to libepics3.15.9.lintian-overrides
+  * updated version to 3.15.9 in libepics3.15.9.lintian-overrides
+
+ -- epics <priller@frib.msu.edu>  Fri, 13 Aug 2021 13:28:08 -0400
+
 epics-base (3.15.8-2) unstable; urgency=medium
 
   * Add patch fixing SCAN order when PHAS field is used (LP: #1899697)
