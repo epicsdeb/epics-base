@@ -8,7 +8,7 @@ EPICS_HOST_ARCH:=linux-x86
 else ifeq "$(DEB_BUILD_ARCH)" "amd64"
 EPICS_HOST_ARCH:=linux-x86_64
 else
-EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+EPICS_HOST_ARCH:=$(shell perl ./src/tools/EpicsHostArch.pl)
 endif
 export EPICS_HOST_ARCH
 
