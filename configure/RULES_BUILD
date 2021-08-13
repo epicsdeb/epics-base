@@ -86,16 +86,19 @@ endif
 #---------------------------------------------------------------
 # Include defines and rules for prod, library and test* targets
 
-#ifneq (,$(strip $(PROD) $(TESTPROD) $(LIBRARY) $(TESTLIBRARY) $(LOADABLE_LIBRARY) ))
+ifneq (,$(strip $(PROD) $(TESTPROD) $(LIBRARY) $(TESTLIBRARY) \
+        $(LOADABLE_LIBRARY)))
 include $(CONFIG)/RULES_TARGET
-#endif
+endif
 
 #---------------------------------------------------------------
 # Read dependency files
 
+ifneq (inc,$(strip $(MAKECMDGOALS)))
 ifneq (,$(strip $(HDEPENDS_FILES)))
 $(filter-out $(wildcard *$(DEP)), $(HDEPENDS_FILES)): | $(COMMON_INC)
 -include $(HDEPENDS_FILES)
+endif
 endif
 
 #---------------------------------------------------------------
@@ -113,7 +116,7 @@ ifneq (,$(filter $(T_A), $(EPICS_HOST_ARCH) $(CROSS_COMPILER_RUNTEST_ARCHS)))
 RUNTESTS_ENABLED = YES
 TESTSCRIPTS.t = $(filter %.t, $(TESTSCRIPTS))
 TAPFILES.t += $(TESTSCRIPTS.t:.t=.tap)
-JUNITFILES.t += $(TESTSCRIPTS.t:.t=.xml)
+JUNITFILES.t += $(TESTSCRIPTS.t:.t=-results.xml)
 TAPFILES += $(TAPFILES.t)
 JUNITFILES += $(JUNITFILES.t)
 endif
@@ -144,14 +147,14 @@ build: inc
 build: $(OBJSNAME) $(LIBTARGETS) $(PRODTARGETS) $(TESTPRODTARGETS) \
 	$(TARGETS) $(TESTSCRIPTS) $(INSTALL_LIB_INSTALLS)
 
-inc : $(COMMON_INC) $(INSTALL_INC) $(INSTALL_CONFIGS)
+inc : $(COMMON_INC) $(INSTALL_INC) $(INSTALL_CONFIGS) \
+	$(INSTALL_HTMLS)
 
 buildInstall : \
 	$(INSTALL_SCRIPTS) $(INSTALL_PROD) $(INSTALL_MUNCHS) \
 	$(INSTALL_TCLLIBS) $(INSTALL_TCLINDEX) \
 	$(INSTALL_OBJS) \
 	$(INSTALL_DOCS) \
-	$(INSTALL_HTMLS) \
 	$(INSTALL_TEMPLATE) \
 	$(INSTALL_BIN_INSTALLS)
 
@@ -339,7 +342,8 @@ runtests: run-tap-tests
 run-tap-tests: $(TESTSCRIPTS.t)
 ifneq ($(TESTSCRIPTS.t),)
 ifdef RUNTESTS_ENABLED
-	$(PROVE) --failures --color $^ || $(PROVE_FAILURE)
+	$(ECHO) "$(PROVE) $^"
+	@$(PROVE) $^ || $(PROVE_FAILURE)
 endif
 endif
 
@@ -350,7 +354,8 @@ test-results: tap-results
 tap-results: $(TAPFILES)
 ifneq ($(strip $(TAPFILES)),)
 ifdef RUNTESTS_ENABLED
-	$(PROVE.tap) --failures --color $^ || $(PROVE_FAILURE)
+	$(ECHO) "$(PROVE.tap) $^"
+	@$(PROVE.tap) $^ || $(PROVE_FAILURE)
 endif
 
 CURRENT_TAPFILES := $(wildcard $(TAPFILES))
@@ -358,8 +363,8 @@ CURRENT_JUNITFILES := $(wildcard $(JUNITFILES))
 endif
 
 clean-tests:
-ifneq ($(CURRENT_TAPFILES),)
-	$(RM) $(CURRENT_TAPFILES)
+ifneq ($(CURRENT_TAPFILES)$(TAPS_FAILED_LOG),)
+	$(RM) $(CURRENT_TAPFILES) $(TAPS_FAILED_LOG)
 endif
 ifneq ($(CURRENT_JUNITFILES),)
 	$(RM) $(CURRENT_JUNITFILES)
@@ -368,10 +373,11 @@ endif
 # A .tap file is the output from running the associated test script
 $(TAPFILES.t): %.tap: %.t
 ifdef RUNTESTS_ENABLED
-	-$(PERL) $< -tap > $@
+	$(ECHO) "$(PERL) $< -tap > $@"
+	@$(PERL) $< -tap > $@ || $(TAPFILE_FAILURE)
 endif
 
-$(JUNITFILES.t): %.xml: %.tap
+$(JUNITFILES.t): %-results.xml: %.tap
 	$(TAPTOJUNIT) --puretap --output $@ --input $< $*
 
 # If there's a perl test script (.plt) available, use it
