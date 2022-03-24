@@ -36,302 +36,192 @@ This is required by the Debian policy.
  src/tools/useManifestTool.pl            | 2 +-
  30 files changed, 29 insertions(+), 30 deletions(-)
 
-diff --git a/src/ca/client/perl/caget.pl b/src/ca/client/perl/caget.pl
-index 0ee407a..9031d8a 100644
---- a/src/ca/client/perl/caget.pl
-+++ b/src/ca/client/perl/caget.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- use strict;
- 
-diff --git a/src/ca/client/perl/cainfo.pl b/src/ca/client/perl/cainfo.pl
-index ee6b6d0..a7fa7aa 100644
---- a/src/ca/client/perl/cainfo.pl
-+++ b/src/ca/client/perl/cainfo.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- use strict;
- 
-diff --git a/src/ca/client/perl/camonitor.pl b/src/ca/client/perl/camonitor.pl
-index d49c85d..bcbc070 100644
---- a/src/ca/client/perl/camonitor.pl
-+++ b/src/ca/client/perl/camonitor.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- use strict;
- 
-diff --git a/src/ca/client/perl/capr.pl b/src/ca/client/perl/capr.pl
-index cf0c4d3..f7577ad 100644
---- a/src/ca/client/perl/capr.pl
-+++ b/src/ca/client/perl/capr.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- #######################################################################
- #
-diff --git a/src/ca/client/perl/caput.pl b/src/ca/client/perl/caput.pl
-index 468c3ad..129875b 100644
---- a/src/ca/client/perl/caput.pl
-+++ b/src/ca/client/perl/caput.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- use strict;
- 
-diff --git a/src/ca/client/perl/perlConfig.pl b/src/ca/client/perl/perlConfig.pl
-index 5292041..4ea3fb7 100644
---- a/src/ca/client/perl/perlConfig.pl
-+++ b/src/ca/client/perl/perlConfig.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- # This script is used to extract information about the Perl build
- # configuration, so the EPICS build system uses the same settings.
-diff --git a/src/std/softIoc/makeInstallDir.pl b/src/std/softIoc/makeInstallDir.pl
-index b090280..d5eb8a0 100644
---- a/src/std/softIoc/makeInstallDir.pl
-+++ b/src/std/softIoc/makeInstallDir.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- #*************************************************************************
- # Copyright (c) 2010 UChicago Argonne LLC, as Operator of Argonne
- #     National Laboratory.
-diff --git a/src/template/base/makeBaseApp.pl b/src/template/base/makeBaseApp.pl
-index a8f404e..4009b6b 100644
---- a/src/template/base/makeBaseApp.pl
-+++ b/src/template/base/makeBaseApp.pl
+Index: epics-base/src/template/base/makeBaseApp.pl
+===================================================================
+--- epics-base.orig/src/template/base/makeBaseApp.pl
++++ epics-base/src/template/base/makeBaseApp.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
  # Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
  
-diff --git a/src/template/ext/makeBaseExt.pl b/src/template/ext/makeBaseExt.pl
-index da3e23d..1daca74 100644
---- a/src/template/ext/makeBaseExt.pl
-+++ b/src/template/ext/makeBaseExt.pl
+Index: epics-base/src/template/ext/makeBaseExt.pl
+===================================================================
+--- epics-base.orig/src/template/ext/makeBaseExt.pl
++++ epics-base/src/template/ext/makeBaseExt.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
  # Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
  
-diff --git a/src/tools/EpicsHostArch.pl b/src/tools/EpicsHostArch.pl
-index e8e49bc..66321e2 100644
---- a/src/tools/EpicsHostArch.pl
-+++ b/src/tools/EpicsHostArch.pl
+Index: epics-base/src/tools/EpicsHostArch.pl
+===================================================================
+--- epics-base.orig/src/tools/EpicsHostArch.pl
++++ epics-base/src/tools/EpicsHostArch.pl
 @@ -1,4 +1,3 @@
 -#!/usr/bin/env perl
  #*************************************************************************
  # Copyright (c) 2018 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/assembleSnippets.pl b/src/tools/assembleSnippets.pl
-index e6f0c77..5f72e0a 100644
---- a/src/tools/assembleSnippets.pl
-+++ b/src/tools/assembleSnippets.pl
+Index: epics-base/src/tools/assembleSnippets.pl
+===================================================================
+--- epics-base.orig/src/tools/assembleSnippets.pl
++++ epics-base/src/tools/assembleSnippets.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2015 ITER Organization.
- # EPICS BASE is distributed subject to a Software License Agreement found
-diff --git a/src/tools/convertRelease.pl b/src/tools/convertRelease.pl
-index 97fbc18..805643a 100644
---- a/src/tools/convertRelease.pl
-+++ b/src/tools/convertRelease.pl
+ # SPDX-License-Identifier: EPICS
+Index: epics-base/src/tools/convertRelease.pl
+===================================================================
+--- epics-base.orig/src/tools/convertRelease.pl
++++ epics-base/src/tools/convertRelease.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/cvsclean.pl b/src/tools/cvsclean.pl
-index 8dac418..81665ab 100644
---- a/src/tools/cvsclean.pl
-+++ b/src/tools/cvsclean.pl
+Index: epics-base/src/tools/cvsclean.pl
+===================================================================
+--- epics-base.orig/src/tools/cvsclean.pl
++++ epics-base/src/tools/cvsclean.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
  # National Laboratory.
-diff --git a/src/tools/dos2unix.pl b/src/tools/dos2unix.pl
-index 35163ac..801babd 100644
---- a/src/tools/dos2unix.pl
-+++ b/src/tools/dos2unix.pl
+Index: epics-base/src/tools/dos2unix.pl
+===================================================================
+--- epics-base.orig/src/tools/dos2unix.pl
++++ epics-base/src/tools/dos2unix.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/epicsProve.pl b/src/tools/epicsProve.pl
-index a1b0c14..ef7f8b7 100644
---- a/src/tools/epicsProve.pl
-+++ b/src/tools/epicsProve.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- 
- # Some Windows Perl installations provide a prove.bat file which
- # doesn't work properly.
-diff --git a/src/tools/expandVars.pl b/src/tools/expandVars.pl
-index d5e26ea..e2fadb3 100644
---- a/src/tools/expandVars.pl
-+++ b/src/tools/expandVars.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- #
- # Tool to expand @VAR@ variables while copying a file.
- # The file will *not* be copied if it already exists.
-diff --git a/src/tools/fullPathName.pl b/src/tools/fullPathName.pl
-index 32e4d89..7720591 100644
---- a/src/tools/fullPathName.pl
-+++ b/src/tools/fullPathName.pl
+Index: epics-base/src/tools/fullPathName.pl
+===================================================================
+--- epics-base.orig/src/tools/fullPathName.pl
++++ epics-base/src/tools/fullPathName.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2009 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/installEpics.pl b/src/tools/installEpics.pl
-index c64324f..08afb93 100644
---- a/src/tools/installEpics.pl
-+++ b/src/tools/installEpics.pl
+Index: epics-base/src/tools/installEpics.pl
+===================================================================
+--- epics-base.orig/src/tools/installEpics.pl
++++ epics-base/src/tools/installEpics.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2012 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/makeIncludeDbd.pl b/src/tools/makeIncludeDbd.pl
-index f4ab8be..7ce7ae3 100644
---- a/src/tools/makeIncludeDbd.pl
-+++ b/src/tools/makeIncludeDbd.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- #*************************************************************************
- # Copyright (c) 2014 UChicago Argonne LLC, as Operator of Argonne
- #     National Laboratory.
-diff --git a/src/tools/makeMakefile.pl b/src/tools/makeMakefile.pl
-index ea48d1c..80383ab 100644
---- a/src/tools/makeMakefile.pl
-+++ b/src/tools/makeMakefile.pl
+Index: epics-base/src/tools/makeMakefile.pl
+===================================================================
+--- epics-base.orig/src/tools/makeMakefile.pl
++++ epics-base/src/tools/makeMakefile.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/makeTestfile.pl b/src/tools/makeTestfile.pl
-index 942b562..31d6b4e 100644
---- a/src/tools/makeTestfile.pl
-+++ b/src/tools/makeTestfile.pl
+Index: epics-base/src/tools/makeTestfile.pl
+===================================================================
+--- epics-base.orig/src/tools/makeTestfile.pl
++++ epics-base/src/tools/makeTestfile.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/mkmf.pl b/src/tools/mkmf.pl
-index b066ede..b134abe 100644
---- a/src/tools/mkmf.pl
-+++ b/src/tools/mkmf.pl
+Index: epics-base/src/tools/mkmf.pl
+===================================================================
+--- epics-base.orig/src/tools/mkmf.pl
++++ epics-base/src/tools/mkmf.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2009 Helmholtz-Zentrum Berlin fuer Materialien und Energie.
  # Copyright (c) 2012 UChicago Argonne LLC, as Operator of Argonne
-diff --git a/src/tools/munch.pl b/src/tools/munch.pl
-index b8c2673..da041fe 100644
---- a/src/tools/munch.pl
-+++ b/src/tools/munch.pl
+Index: epics-base/src/tools/munch.pl
+===================================================================
+--- epics-base.orig/src/tools/munch.pl
++++ epics-base/src/tools/munch.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2013 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/podRemove.pl b/src/tools/podRemove.pl
-index 4afde3c..7a2ab9b 100644
---- a/src/tools/podRemove.pl
-+++ b/src/tools/podRemove.pl
+Index: epics-base/src/tools/podRemove.pl
+===================================================================
+--- epics-base.orig/src/tools/podRemove.pl
++++ epics-base/src/tools/podRemove.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2015 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/podToHtml.pl b/src/tools/podToHtml.pl
-index f661ad3..1aaace2 100644
---- a/src/tools/podToHtml.pl
-+++ b/src/tools/podToHtml.pl
+Index: epics-base/src/tools/podToHtml.pl
+===================================================================
+--- epics-base.orig/src/tools/podToHtml.pl
++++ epics-base/src/tools/podToHtml.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2013 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/registerRecordDeviceDriver.pl b/src/tools/registerRecordDeviceDriver.pl
-index 78335e4..eb75320 100644
---- a/src/tools/registerRecordDeviceDriver.pl
-+++ b/src/tools/registerRecordDeviceDriver.pl
-@@ -1,4 +1,4 @@
--#!/usr/bin/env perl
-+#!/usr/bin/perl
- #*************************************************************************
- # Copyright (c) 2012 UChicago Argonne LLC, as Operator of Argonne
- #     National Laboratory.
-diff --git a/src/tools/replaceVAR.pl b/src/tools/replaceVAR.pl
-index 82c76bb..fdf3fe1 100644
---- a/src/tools/replaceVAR.pl
-+++ b/src/tools/replaceVAR.pl
+Index: epics-base/src/tools/replaceVAR.pl
+===================================================================
+--- epics-base.orig/src/tools/replaceVAR.pl
++++ epics-base/src/tools/replaceVAR.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
  # Copyright (c) 2002 The University of Chicago, as Operator of Argonne
  #     National Laboratory.
-diff --git a/src/tools/tap-to-junit-xml.pl b/src/tools/tap-to-junit-xml.pl
-index 76f9721..fdcfcf9 100644
---- a/src/tools/tap-to-junit-xml.pl
-+++ b/src/tools/tap-to-junit-xml.pl
+Index: epics-base/src/tools/tap-to-junit-xml.pl
+===================================================================
+--- epics-base.orig/src/tools/tap-to-junit-xml.pl
++++ epics-base/src/tools/tap-to-junit-xml.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  =head1 NAME
  
  tap-to-junit-xml - convert perl-style TAP test output to JUnit-style XML
-diff --git a/src/tools/testFailures.pl b/src/tools/testFailures.pl
-index d861776..7430e6e 100644
---- a/src/tools/testFailures.pl
-+++ b/src/tools/testFailures.pl
+Index: epics-base/src/tools/testFailures.pl
+===================================================================
+--- epics-base.orig/src/tools/testFailures.pl
++++ epics-base/src/tools/testFailures.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
+ # SPDX-License-Identifier: EPICS
  # EPICS BASE is distributed subject to a Software License Agreement found
- # in the file LICENSE that is included with this distribution.
-diff --git a/src/tools/useManifestTool.pl b/src/tools/useManifestTool.pl
-index 9e59e9f..c01e62a 100644
---- a/src/tools/useManifestTool.pl
-+++ b/src/tools/useManifestTool.pl
+Index: epics-base/src/tools/useManifestTool.pl
+===================================================================
+--- epics-base.orig/src/tools/useManifestTool.pl
++++ epics-base/src/tools/useManifestTool.pl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
- #
- # Use MS Visual C++ compiler version number to determine if
- # we want to use the Manifest Tool (status=1) or not (status=0)
+ #*************************************************************************
+ # SPDX-License-Identifier: EPICS
+ # EPICS BASE is distributed subject to a Software License Agreement found

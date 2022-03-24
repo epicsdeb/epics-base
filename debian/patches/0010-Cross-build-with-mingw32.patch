@@ -7,10 +7,10 @@ Subject: Cross-build with mingw32
  configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw |  4 ++--
  2 files changed, 17 insertions(+), 2 deletions(-)
 
-diff --git a/configure/os/CONFIG_SITE.Common.win32-x86-mingw b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-index ba19ac6..d2f74bb 100644
---- a/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-+++ b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
+Index: epics-base/configure/os/CONFIG_SITE.Common.win32-x86-mingw
+===================================================================
+--- epics-base.orig/configure/os/CONFIG_SITE.Common.win32-x86-mingw
++++ epics-base/configure/os/CONFIG_SITE.Common.win32-x86-mingw
 @@ -5,3 +5,18 @@
  # If readline is available uncomment the following line
  # to enable command-line editing and history support
@@ -30,19 +30,3 @@ index ba19ac6..d2f74bb 100644
 +GNU_LDLIBS_YES =
 +
 +OP_SYS_LDLIBS = -lws2_32
-diff --git a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-index dfc947e..cad5db1 100644
---- a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-+++ b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-@@ -15,9 +15,9 @@
- 
- # Different distribution cross-build packages use different prefixes:
- # Ubuntu:
--#CMPLR_PREFIX = i686-w64-mingw32-
-+CMPLR_PREFIX = i686-w64-mingw32-
- # RHEL:
--CMPLR_PREFIX = i686-pc-mingw32-
-+#CMPLR_PREFIX = i686-pc-mingw32-
- # Debian?
- #CMPLR_PREFIX = i586-mingw32msvc-
- 
