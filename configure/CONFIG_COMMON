@@ -4,7 +4,7 @@
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
 # EPICS BASE is distributed subject to a Software License Agreement found
-# in file LICENSE that is included with this distribution. 
+# in file LICENSE that is included with this distribution.
 #*************************************************************************
 #
 #  CONFIG_COMMON
@@ -38,9 +38,7 @@ BUILD_ARCHS = $(EPICS_HOST_ARCH) $(CROSS1) $(CROSS2)
 # otherwise override this in os/CONFIG_SITE.<host_arch>.Common
 PERL = perl -CSD
 
-#-------------------------------------------------------
-# dbst based database optimization default
-DB_OPT = NO
+PYTHON = python
 
 #-------------------------------------------------------
 # Check configure/RELEASE file for consistency
@@ -73,6 +71,8 @@ INSTALL_DBD                 = $(INSTALL_LOCATION)/dbd
 INSTALL_DB                  = $(INSTALL_LOCATION)/db
 INSTALL_CONFIG              = $(INSTALL_LOCATION)/configure
 
+FINAL_LOCATION = $(shell $(PERL) $(TOOLS)/fullPathName.pl $(INSTALL_LOCATION))
+
 # Directory for OS independant build created files
 COMMON_DIR = ../O.Common
 
@@ -80,9 +80,14 @@ COMMON_DIR = ../O.Common
 IOCS_APPL_TOP               = $(shell $(FULLPATHNAME) $(INSTALL_LOCATION))
 
 #-------------------------------------------------------
-# Make echo output - suppress echoing if '-s' flag was given
+# Silencing the build - suppress messages during 'make -s'
 NOP = :
 ECHO = @$(if $(filter -s,$(MFLAGS)),$(NOP),echo)
+QUIET_FLAG := $(if $(filter -s,$(MFLAGS)),-q,)
+
+#-------------------------------------------------------
+# Convert 'make -q' flag into '-i' for genVersionHeader.pl
+QUESTION_FLAG := $(if $(filter -q,$(MFLAGS)),-i,)
 
 #-------------------------------------------------------
 ifdef T_A
@@ -92,7 +97,7 @@ INSTALL_SHRLIB              = $(INSTALL_LOCATION_LIB)/$(T_A)
 INSTALL_TCLLIB              = $(INSTALL_LOCATION_LIB)/$(T_A)
 INSTALL_BIN                 = $(INSTALL_LOCATION_BIN)/$(T_A)
 
-#Directories for libraries
+# Directories for libraries
 SHRLIB_SEARCH_DIRS          = $(INSTALL_LIB)
 
 #-------------------------------------------------------
@@ -139,9 +144,10 @@ BUILDLIB_SUFFIX = $(BUILDLIB_SUFFIX_$(SHARED_LIBRARIES))
 #--------------------------------------------------
 # vpath directories
 POSIX_YES = os/posix
+OS_IMPL_DIRS = $(if $(OS_API),os/$(OS_CLASS)-$(OS_API),) os/$(OS_CLASS)
 GENERIC_SRC_DIRS = .. $(SRC_DIRS)
 OS_SRC_DIRS += . $(foreach dir, .. $(SRC_DIRS), \
-       $(addprefix $(dir)/, os/$(OS_CLASS) $(POSIX_$(POSIX)) os/default ))
+       $(addprefix $(dir)/, $(OS_IMPL_DIRS) $(POSIX_$(POSIX)) os/default ))
 CMPLR_SRC_DIRS += . $(foreach dir, .. $(SRC_DIRS), \
        $(addprefix $(dir)/, compiler/$(CMPLR_CLASS) compiler/default ))
 ALL_SRC_DIRS = $(CMPLR_SRC_DIRS) $(OS_SRC_DIRS) $(GENERIC_SRC_DIRS)
@@ -166,13 +172,13 @@ TESTSHRLIBNAME = $(TESTSHRLIBNAME_$(SHARED_LIBRARIES))
 #--------------------------------------------------
 # obj files
 
-TARGET_OBJS =  $($*_OBJLIBS) $($*_LDOBJS) $(addsuffix $(OBJ),$(basename $($*_OBJS) $($*_SRCS)))
+TARGET_OBJS =  $($*_LDOBJS) $(addsuffix $(OBJ),$(basename $($*_OBJS) $($*_SRCS)))
 
 PRODUCT_OBJS = $(addsuffix $(OBJ),$(basename $(SRCS) $(USR_SRCS) $(PROD_SRCS) $(USR_OBJS) $(PROD_OBJS)))
-PROD_LD_OBJS = $(USR_OBJLIBS) $(PROD_OBJLIBS) $(TARGET_OBJS) $(PRODUCT_OBJS)
+PROD_LD_OBJS = $(TARGET_OBJS) $(PRODUCT_OBJS)
 
 LIBRARY_OBJS = $(addsuffix $(OBJ),$(basename $(SRCS) $(USR_SRCS) $(LIB_SRCS) $(LIBSRCS) $(USR_OBJS) $(LIB_OBJS)))
-LIBRARY_LD_OBJS = $(USR_OBJLIBS) $(LIB_OBJLIBS) $(TARGET_OBJS) $(LIBRARY_OBJS)
+LIBRARY_LD_OBJS = $(TARGET_OBJS) $(LIBRARY_OBJS)
 
 #--------------------------------------------------
 # Windows resource files
@@ -254,7 +260,7 @@ OPT_CXXFLAGS = $(OPT_CXXFLAGS_$($(BUILD_CLASS)_OPT))
 
 # Static build flags
 STATIC_CFLAGS = $(STATIC_CFLAGS_$(STATIC_BUILD))
-STATIC_CXXCFLAGS = $(STATIC_CXXFLAGS_$(STATIC_BUILD))
+STATIC_CXXFLAGS = $(STATIC_CXXFLAGS_$(STATIC_BUILD))
 STATIC_LDFLAGS = $(STATIC_LDFLAGS_$(STATIC_BUILD))
 STATIC_LDLIBS = $(STATIC_LDLIBS_$(STATIC_BUILD))
 
@@ -264,7 +270,7 @@ LIBRARY_SRCS=$(basename $(foreach lib,$(LIBRARY) $(TESTLIBRARY) $(LOADABLE_LIBRA
 LIBRARY_SRC_CFLAGS=$($(patsubst $*,SHRLIB,$(findstring $*,$(LIBRARY_SRCS)))_CFLAGS)
 
 #--------------------------------------------------
-# prefix, suffix, and ldflags for loadable shared libraries 
+# prefix, suffix, and ldflags for loadable shared libraries
 TARGET_LIB_LDFLAGS=$($(patsubst $*,LOADABLE_,$(findstring $*,$(LOADABLE_LIBRARY)))SHRLIB_LDFLAGS)
 LOADABLE_SHRLIB_PREFIX=$(SHRLIB_PREFIX)
 LOADABLE_SHRLIB_SUFFIX=$(SHRLIB_SUFFIX)
@@ -291,7 +297,7 @@ CFLAGS = $($(BUILD_CLASS)_CFLAGS) $(POSIX_CFLAGS) $(OPT_CFLAGS)\
 CXXFLAGS = $($(BUILD_CLASS)_CXXFLAGS) $(POSIX_CXXFLAGS) $(OPT_CXXFLAGS)\
  $(DEBUG_CXXFLAGS) $(PIPE_CFLAGS) $(WARN_CXXFLAGS) $(TARGET_CXXFLAGS)\
  $(USR_CXXFLAGS) $(CMD_CXXFLAGS) $(ARCH_DEP_CXXFLAGS) $(CODE_CXXFLAGS)\
- $(STATIC_CXXCFLAGS) $(OP_SYS_CXXFLAGS) $(LIBRARY_SRC_CFLAGS)
+ $(STATIC_CXXFLAGS) $(OP_SYS_CXXFLAGS) $(LIBRARY_SRC_CFLAGS)
 
 LDFLAGS = $(OPT_LDFLAGS) $(TARGET_LDFLAGS) $(USR_LDFLAGS) $(CMD_LDFLAGS)\
  $(POSIX_LDFLAGS) $(ARCH_DEP_LDFLAGS) $(DEBUG_LDFLAGS) $(OP_SYS_LDFLAGS)\
@@ -303,7 +309,7 @@ LDLIBS = $(POSIX_LDLIBS) $(ARCH_DEP_LDLIBS) $(DEBUG_LDLIBS) $(OP_SYS_LDLIBS)\
 CPPFLAGS = $($(BUILD_CLASS)_CPPFLAGS) $(POSIX_CPPFLAGS) $(OPT_CPPFLAGS)\
  $(DEBUG_CPPFLAGS) $(WARN_CPPFLAGS) $(BASE_CPPFLAGS) $(TARGET_CPPFLAGS)\
  $(USR_CPPFLAGS) $(CMD_CPPFLAGS) $(ARCH_DEP_CPPFLAGS) $(OP_SYS_CPPFLAGS)\
- $(OP_SYS_INCLUDE_CPPFLAGS) $(CODE_CPPFLAGS)
+ $(OP_SYS_INCLUDE_CPPFLAGS) $(CODE_CPPFLAGS) $(API_CPPFLAGS)
 
 #--------------------------------------------------
 # ar definition default
@@ -331,6 +337,14 @@ COMPILE.cpp = $(CCC) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES)
 #--------------------------------------------------
 # C preprocessor command
 PREPROCESS.cpp = $(CPP) $(CPPFLAGS) $(INCLUDES) $< > $@
+
+#--------------------------------------------------
+# genVersion header defaults
+
+# C macro name
+GENVERSIONMACRO = VCSVERSION
+# C macro default value (empty to use date+time)
+GENVERSIONDEFAULT =
 
 #--------------------------------------------------
 # Header dependency file generation
@@ -367,14 +381,14 @@ PATH_FILTER = $(1)$(warning PATH_FILTER is deprecated; used for $(1))
 #	each list starts with the destination directory name(s)
 #	to make sure it's there
 
-INSTALL_PROD= $(PRODNAME:%= $(INSTALL_BIN)/%)
-INSTALL_LIBS= $(LIBNAME:%=$(INSTALL_LIB)/%)
-INSTALL_MUNCHS= $(MUNCHNAME:%=$(INSTALL_BIN)/%)
-INSTALL_SHRLIBS= $(SHRLIBNAME:%=$(INSTALL_SHRLIB)/%)
-INSTALL_LOADABLE_SHRLIBS= $(LOADABLE_SHRLIBNAME:%=$(INSTALL_SHRLIB)/%)
-INSTALL_DLLSTUB_LIBS=$(DLLSTUB_LIBNAME:%=$(INSTALL_LIB)/%)
-INSTALL_TCLLIBS=$(TCLLIBNAME:%=$(INSTALL_TCLLIB)/%)
-INSTALL_TCLINDEX=$(TCLINDEX:%=$(INSTALL_TCLLIB)/%)
+INSTALL_PROD = $(PRODNAME:%= $(INSTALL_BIN)/%)
+INSTALL_LIBS = $(LIBNAME:%=$(INSTALL_LIB)/%)
+INSTALL_MUNCHS = $(MUNCHNAME:%=$(INSTALL_BIN)/%)
+INSTALL_SHRLIBS = $(SHRLIBNAME:%=$(INSTALL_SHRLIB)/%)
+INSTALL_LOADABLE_SHRLIBS = $(LOADABLE_SHRLIBNAME:%=$(INSTALL_SHRLIB)/%)
+INSTALL_DLLSTUB_LIBS = $(DLLSTUB_LIBNAME:%=$(INSTALL_LIB)/%)
+INSTALL_TCLLIBS = $(TCLLIBNAME:%=$(INSTALL_TCLLIB)/%)
+INSTALL_TCLINDEX = $(TCLINDEX:%=$(INSTALL_TCLLIB)/%)
 INSTALL_SCRIPTS = $(SCRIPTS:%= $(INSTALL_BIN)/%)
 INSTALL_OBJS = $(OBJSNAME:%= $(INSTALL_BIN)/%)
 
@@ -454,5 +468,5 @@ COMMON_INC += $(filter $(COMMON_DIR)/%, $(foreach file, $(INC), \
 SOURCE_INC = $(wildcard $(file) $(SOURCE_INC_bbb) )
 SOURCE_INC_bbb = $(foreach dir, $(ALL_SRC_DIRS), $(SOURCE_INC_aaa)  )
 SOURCE_INC_aaa = $(addsuffix /$(file), $(dir) )
- 
+
 endif

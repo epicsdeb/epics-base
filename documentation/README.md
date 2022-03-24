@@ -1,6 +1,6 @@
-# Installation Instructions
+# Installation Instructions {#install}
 
-## EPICS Base Release 3.15.x
+## EPICS Base Release 7.0.5
 
 -----
 
@@ -69,11 +69,12 @@ path to do EPICS builds; check the definitions of CC and CCC in
 #### GNU make
 
 You must use the GNU version of `make` for EPICS builds. Set your path
-so that version 3.81 or later is available (4.0 or later on Windows).
+so that version 4.1 or later is available. The macOS version of `make`
+is older but does still work.
 
 #### Perl
 
-You must have Perl version 5.8.1 or later installed. The EPICS
+You must have Perl version 5.10 or later installed. The EPICS
 configuration files do not specify the perl full pathname, so the perl
 executable must be found through your normal search path.
 
@@ -90,26 +91,24 @@ running as processes on the host platform.
 
 #### vxWorks
 
-You must have vxWorks 5.5.x or 6.x installed if any of your target
-systems are vxWorks systems; the C++ compiler for vxWorks 5.4 is now
-too old to support. The vxWorks installation provides the
+You must have vxWorks 6.8 or later installed if any of your target
+systems are vxWorks systems; the C++ compiler from older versions cannot
+compile recently developed code. The vxWorks installation provides the
 cross-compiler and header files needed to build for these targets. The
 absolute path to and the version number of the vxWorks installation
 must be set in the `base/configure/os/CONFIG_SITE.Common.vxWorksCommon`
 file or in one of its target-specific overrides.
 
-Consult the [vxWorks 5.x](https://epics.anl.gov/base/tornado.php) or
-[vxWorks 6.x](https://epics.anl.gov/base/vxWorks6.php) EPICS web pages
-about and the vxWorks documentation for information about configuring
-your vxWorks operating system for use with EPICS.
+Consult the [vxWorks 6.x](https://epics.anl.gov/base/vxWorks6.php) EPICS
+web pages about and the vxWorks documentation for information about
+configuring your vxWorks operating system for use with EPICS.
 
 #### RTEMS
 
-For RTEMS targets, you need RTEMS core and toolset version 4.9.2 or
-4.10.x. RTEMS 5 and above are only supported in EPICS 7.0.6 or later.
+For RTEMS targets, you need RTEMS core and toolset version 4.9.x or
+4.10.x. RTEMS 5 is experimental in EPICS 7.0.6.
 
 #### Command Line Editing
-
 
 GNU readline and other similar libraries can be used by the IOC shell
 to provide command line editing and command line history recall. The
@@ -123,15 +122,14 @@ ledLib line-editing library is normally used.
 
 ### Host system storage requirements
 
-The compressed tar file is approximately 1.7 MB in size. The
-distribution source tree takes up approximately 12 MB. Each host
-target will need around 50 MB for build files, and each cross-compiled
-target around 30 MB.
+The compressed tar file is approximately 3 MB in size. The
+distribution source tree takes up approximately 21 MB. A 64-bit host
+architecture may need around 610 MB to compile, while cross-compiled
+targets are somewhat smaller.
 
 ### Documentation
 
-EPICS documentation is available through the [EPICS
-website](https://epics.anl.gov/) at Argonne.
+EPICS documentation is available through the [EPICS website](https://epics.anl.gov/) at Argonne.
 
 Release specific documentation can also be found in the
 `base/documentation` directory of the distribution.
@@ -257,17 +255,16 @@ Files in the base/startup directory have been provided to help set
 required path and other environment variables.
 
 * **`EPICS_HOST_ARCH`**
-Before you can build or use EPICS R3.15, the environment variable
-`EPICS_HOST_ARCH` must be defined. A perl script EpicsHostArch.pl in
-the base/startup directory has been provided to help set
-`EPICS_HOST_ARCH.` You should have `EPICS_HOST_ARCH` set to your
-host operating system followed by a dash and then your host
-architecture, e.g. solaris-sparc. If you are not using the OS
-vendor's c/c++ compiler for host builds, you will need another dash
-followed by the alternate compiler name (e.g. "-gnu" for GNU c/c++
-compilers on a solaris host or "-mingw" for MinGW c/c++ compilers on
-a WIN32 host). See `configure/CONFIG_SITE` for a list of supported
-`EPICS_HOST_ARCH` values.
+
+Some host builds of EPICS require that the environment variable
+`EPICS_HOST_ARCH` be defined. The perl script `EpicsHostArch.pl` in the
+`base/startup` directory prints the value which the build will use if
+the variable is not set before the build starts. Architecture names
+start with the operating system followed by a dash and the host CPU
+architecture, e.g. `linux-x86_64`. Some architecture names have another
+dash followed by another keyword, for example when building for Windows
+but using the MinGW compiler the name must be `windows-x64-mingw`. See
+`configure/CONFIG_SITE` for a list of supported host architecture names.
 
 * **`PATH`**
 As already mentioned, you must have the `perl` executable and you may
@@ -279,7 +276,7 @@ require `as` and `ld` in your path. On Solaris systems you need
 `uname` in your path.
 
 * **`LD_LIBRARY_PATH`**
-R3.15 shared libraries and executables normally contain the full path
+EPICS shared libraries and executables normally contain the full path
 to any libraries they require, so setting this variable is not usually
 necessary. However, if you move the EPICS installation to a new
 location after building it then in order for the shared libraries to
@@ -293,6 +290,7 @@ Shared libraries are now built by default on all Unix type hosts.
 
 To configure EPICS, you may want to modify some values set in the
 following files:
+>>>>>>> mirror/3.15
 
 ```
     configure/CONFIG_SITE      Build settings. Specify target archs.
@@ -362,10 +360,10 @@ included in the distribution. This script instantiates the selected
 template into an empty directory to provide an example application
 that can be built and then executed to try out this release of base.
 
-Instructions for building and executing the 3.15 example application
+Instructions for building and executing the EPICS example application
 can be found in the section "Example Application" of Chapter 2,
-"Getting Started", in the "IOC Application Developer's Guide" for this
-release. The "Example IOC Application" section briefly explains how to
+"Getting Started", in the "EPICS Application Developer's Guide". 
+The "Example IOC Application" section briefly explains how to
 create and build an example application in a user created &lt;top>
 directory. It also explains how to run the example application on a
 vxWorks ioc or as a process on the host system. By running the example

@@ -1,18 +1,13 @@
 #*************************************************************************
-# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+# Copyright (c) 2011 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
-# EPICS BASE Versions 3.13.7
-# and higher are distributed subject to a Software License Agreement found
-# in file LICENSE that is included with this distribution.
+# EPICS BASE is distributed subject to a Software License Agreement found
+# in the file LICENSE that is included with this distribution.
 #*************************************************************************
-#
-#  RULES_TARGET
-#
-#  This file is to be maintained by the community.
-#
-#-----------------------------------------------------------------------
+
+# RULES_TARGET
 
 define TARGET_template
 $(1)_$(2) += $$(if $$(strip $$($(1)_$(2)_$$(OS_CLASS))), \
@@ -20,7 +15,7 @@ $(1)_$(2) += $$(if $$(strip $$($(1)_$(2)_$$(OS_CLASS))), \
              $$($(1)_$(2)_DEFAULT))
 endef
 
-$(foreach type, SRCS RCS OBJS LDFLAGS OBJLIBS LDOBJS SYS_LIBS , \
+$(foreach type, SRCS RCS OBJS LDFLAGS LDOBJS SYS_LIBS , \
 $(foreach target, $(PROD) $(TESTPROD) $(LIBRARY) $(TESTLIBRARY) $(LOADABLE_LIBRARY) , \
     $(eval $(call TARGET_template,$(strip $(target)),$(type)))))
 
@@ -99,12 +94,20 @@ $(1)_DLL_DEPLIBS=$$(foreach lib, $$($(1)_DLL_LIBS), \
 $$(LIB_PREFIX)$(1)$$(LIB_SUFFIX):$$($(1)_OBJSNAME) $$($(1)_RESS)
 $$(LIB_PREFIX)$(1)$$(LIB_SUFFIX):$$($(1)_DEPLIBS)
 
+ifneq ($$($(1)_API),)
+$$(LIB_PREFIX)$(1)$$(LIB_SUFFIX): API_CPPFLAGS += -DBUILDING_$$($(1)_API)_API
+endif
+
 ifeq ($$(SHARED_LIBRARIES),YES)
 
 ifdef SHRLIB_SUFFIX
 $$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_OBJSNAME) $$($(1)_RESS)
 $$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_DEPLIBS)
 $$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX):$$($(1)_DLL_DEPLIBS)
+
+ifneq ($$($(1)_API),)
+$$(SHRLIB_PREFIX)$(1)$$(SHRLIB_SUFFIX): API_CPPFLAGS += -DBUILDING_$$($(1)_API)_API
+endif
 endif
 
 endif
@@ -145,10 +148,14 @@ $(1)_DLL_DEPLIBS=$$(foreach lib, $$($(1)_DLL_LIBS),\
 $$(LOADABLE_SHRLIB_PREFIX)$(1)$$(LOADABLE_SHRLIB_SUFFIX):$$($(1)_OBJSNAME) $$($(1)_RESS)
 $$(LOADABLE_SHRLIB_PREFIX)$(1)$$(LOADABLE_SHRLIB_SUFFIX):$$($(1)_DEPLIBS)
 $$(LOADABLE_SHRLIB_PREFIX)$(1)$$(LOADABLE_SHRLIB_SUFFIX):$$($(1)_DLL_DEPLIBS)
+
+ifneq ($$($(1)_API),)
+$$(LOADABLE_SHRLIB_PREFIX)$(1)$$(LOADABLE_SHRLIB_SUFFIX): \
+    API_CPPFLAGS += -DBUILDING_$$($(1)_API)_API
+endif
 endef
 
 $(foreach target, $(LOADABLE_LIBRARY), \
     $(eval $(call LOADABLE_LIBRARY_template,$(strip $(target)))))
 
 #-----------------------------------------------------------------------
-

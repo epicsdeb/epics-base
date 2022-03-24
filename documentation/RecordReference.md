@@ -1,4 +1,4 @@
-# Record Reference Documentation
+# Record Reference Documentation  {#recordrefmanual}
 
 The documentation below for the record types and menus included with Base was
 converted from the old EPICS Wiki pages and updated. This list only includes the
@@ -27,6 +27,8 @@ website where these original reference chapters are now being published.
 * [Event Record (event)](eventRecord.html)
 * [Fanout Record (fanout)](fanoutRecord.html)
 * [Histogram Record (histogram)](histogramRecord.html)
+* [64bit Integer Input Record (int64in)](int64inRecord.html)
+* [64bit Integer Output Record (int64out)](int64outRecord.html)
 * [Long Input Record (longin)](longinRecord.html)
 * [Long Output Record (longout)](longoutRecord.html)
 * [Long String Input Record (lsi)](lsiRecord.html)
@@ -64,8 +66,9 @@ website where these original reference chapters are now being published.
 ## Corrections and Updates
 
 Corrections to these documents can be submitted as patch files to the EPICS core
-developers, or as merge requests or pull requests to the 3.15 branch of Base.
-The document sources can be found in the `src/std/rec` and `src/ioc/db`
-directories in files with extension `.dbd.pod`. The documentation source format
-is a combination of the EPICS DBD file format with an extended version of Perl's
-POD (plain old documentation); run `perldoc pod` for details of POD.
+developers, or as merge requests or pull requests to the 7.0 branch of Base.
+The document sources can be found in the `modules/database/src/std/rec` and
+`modules/database/src/ioc/db` directories in files with extension `.dbd.pod`.
+The documentation source format is a combination of the EPICS DBD file format
+with an extended version of Perl's POD (plain old documentation); run `perldoc
+pod` for details of POD.

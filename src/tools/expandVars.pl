@@ -1,5 +1,12 @@
 #!/usr/bin/env perl
-#
+#*************************************************************************
+# Copyright (c) 2005 UChicago Argonne LLC, as Operator of Argonne
+#     National Laboratory.
+# SPDX-License-Identifier: EPICS
+# EPICS BASE is distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution.
+#*************************************************************************
+
 # Tool to expand @VAR@ variables while copying a file.
 # The file will *not* be copied if it already exists.
 #
@@ -10,7 +17,7 @@
 use strict;
 
 use FindBin qw($Bin);
-use lib ("$Bin/../../lib/perl", $Bin);
+use lib ("$Bin/../../lib/perl");
 
 use EPICS::Getopts;
 use EPICS::Path;
@@ -20,10 +27,10 @@ use EPICS::Copy;
 # Process command line options
 our ($opt_a, $opt_d, @opt_D, $opt_h, $opt_t);
 getopts('a:dD@ht:')
-    or &HELP_MESSAGE;
+    or HELP_MESSAGE();
 
 # Handle the -h command
-&HELP_MESSAGE if $opt_h;
+HELP_MESSAGE() if $opt_h;
 
 die "Path to TOP not set, use -t option\n"
     unless $opt_t;

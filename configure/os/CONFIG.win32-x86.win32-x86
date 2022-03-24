@@ -6,7 +6,7 @@
 
 # Win32 valid build types and include directory suffixes
 
-VALID_BUILDS = Host Ioc
+VALID_BUILDS = Host Ioc Command
 
 CMPLR_CLASS = msvc
 
@@ -107,6 +107,9 @@ CODE_CPPFLAGS += -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 WARN_CXXFLAGS_YES = -W3 -w44355 -w44344 -w44251
 WARN_CXXFLAGS_NO  = -W1
 
+# Silence tr1 namespace deprecation warnings
+WARN_CXXFLAGS += -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
+
 #
 # -Ox maximum optimizations
 # -GL whole program optimization
@@ -135,7 +138,7 @@ OBJ_CXXFLAG = -Fo
 STATIC_CXXFLAGS_YES= -MT$(VISC_CFLAGS_DEBUG) $(BUILD_DLL_CFLAGS)
 STATIC_CXXFLAGS_NO= -MD$(VISC_CFLAGS_DEBUG) $(BUILD_DLL_CFLAGS) -DEPICS_CALL_DLL
 
-STATIC_LDLIBS_YES=ws2_32.lib advapi32.lib user32.lib kernel32.lib winmm.lib
+STATIC_LDLIBS_YES=ws2_32.lib advapi32.lib user32.lib kernel32.lib winmm.lib dbghelp.lib
 STATIC_LDLIBS_NO=
 STATIC_LDFLAGS=
 RANLIB=
