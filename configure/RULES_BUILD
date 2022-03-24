@@ -6,11 +6,12 @@
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in the file LICENSE that is included with this distribution.
 #*************************************************************************
+
+# RULES_BUILD
+
+# Rules for making things specified in a Makefile
 #
-#	Rules for making things specified in Makefile
-#
-#	we are in O.$(T_A), but most sources are elsewhere
-#
+# CWD is O.$(T_A), but most sources are elsewhere
 
 ifndef BASE_RULES_BUILD
 BASE_RULES_BUILD=1
@@ -31,28 +32,44 @@ vpath %.l $(USR_VPATH) $(ALL_SRC_DIRS)
 include $(CONFIG)/CONFIG_ADDONS
 
 #---------------------------------------------------------------
-# Set PROD, TESTPROD, OBJS, and LIBRARY
 
 SCRIPTS_HOST += $(PERL_SCRIPTS)
 # PERL_SCRIPTS are installed into existing $(INSTALL_BIN) for Host systems
 
-ifeq ($(findstring Host,$(VALID_BUILDS)),Host)
+# Host targets can compile and run programs
+ifneq (,$(findstring Host,$(VALID_BUILDS)))
 LIBRARY += $(LIBRARY_HOST)
 LOADABLE_LIBRARY += $(LOADABLE_LIBRARY_HOST)
 OBJS += $(OBJS_HOST)
 PROD += $(PROD_HOST)
 SCRIPTS += $(SCRIPTS_HOST)
+TARGETS += $(TARGETS_HOST)
 TESTLIBRARY += $(TESTLIBRARY_HOST)
 TESTSCRIPTS += $(TESTSCRIPTS_HOST)
 TESTPROD += $(TESTPROD_HOST)
 endif
 
-ifeq ($(findstring Ioc,$(VALID_BUILDS)),Ioc)
+# Command targets have a command line and support main()
+ifneq (,$(findstring Command,$(VALID_BUILDS)))
+LIBRARY += $(LIBRARY_CMD)
+LOADABLE_LIBRARY += $(LOADABLE_LIBRARY_CMD)
+OBJS += $(OBJS_CMD)
+PROD += $(PROD_CMD)
+SCRIPTS += $(SCRIPTS_CMD)
+TARGETS += $(TARGETS_CMD)
+TESTLIBRARY += $(TESTLIBRARY_CMD)
+TESTSCRIPTS += $(TESTSCRIPTS_CMD)
+TESTPROD += $(TESTPROD_CMD)
+endif
+
+# Ioc targets can run IOCs
+ifneq (,$(findstring Ioc,$(VALID_BUILDS)))
 LIBRARY += $(LIBRARY_IOC)
 LOADABLE_LIBRARY += $(LOADABLE_LIBRARY_IOC)
 OBJS += $(OBJS_IOC)
 PROD += $(PROD_IOC)
 SCRIPTS += $(SCRIPTS_IOC)
+TARGETS += $(TARGETS_IOC)
 TESTLIBRARY += $(TESTLIBRARY_IOC)
 TESTSCRIPTS += $(TESTSCRIPTS_IOC)
 TESTPROD += $(TESTPROD_IOC)
@@ -72,30 +89,33 @@ HTMLS_DIR ?= .
 #	First target
 
 all: install
-ifeq ($(EPICS_HOST_ARCH),$T_A)
+ifeq ($(EPICS_HOST_ARCH),$(T_A))
 host: install
 else
 # Do nothing
 host:
 endif
 
--include $(CONFIG)/RULES_FILE_TYPE
+include $(CONFIG)/RULES_FILE_TYPE
 
--include $(CONFIG)/RULES.Db
+include $(CONFIG)/RULES.Db
 
 #---------------------------------------------------------------
 # Include defines and rules for prod, library and test* targets
 
-#ifneq (,$(strip $(PROD) $(TESTPROD) $(LIBRARY) $(TESTLIBRARY) $(LOADABLE_LIBRARY) ))
+ifneq (,$(strip $(PROD) $(TESTPROD) $(LIBRARY) $(TESTLIBRARY) \
+        $(LOADABLE_LIBRARY)))
 include $(CONFIG)/RULES_TARGET
-#endif
+endif
 
 #---------------------------------------------------------------
 # Read dependency files
 
+ifneq (inc,$(strip $(MAKECMDGOALS)))
 ifneq (,$(strip $(HDEPENDS_FILES)))
 $(filter-out $(wildcard *$(DEP)), $(HDEPENDS_FILES)): | $(COMMON_INC)
 -include $(HDEPENDS_FILES)
+endif
 endif
 
 #---------------------------------------------------------------
@@ -113,7 +133,7 @@ ifneq (,$(filter $(T_A), $(EPICS_HOST_ARCH) $(CROSS_COMPILER_RUNTEST_ARCHS)))
 RUNTESTS_ENABLED = YES
 TESTSCRIPTS.t = $(filter %.t, $(TESTSCRIPTS))
 TAPFILES.t += $(TESTSCRIPTS.t:.t=.tap)
-JUNITFILES.t += $(TESTSCRIPTS.t:.t=.xml)
+JUNITFILES.t += $(TESTSCRIPTS.t:.t=-results.xml)
 TAPFILES += $(TAPFILES.t)
 JUNITFILES += $(JUNITFILES.t)
 endif
@@ -144,14 +164,14 @@ build: inc
 build: $(OBJSNAME) $(LIBTARGETS) $(PRODTARGETS) $(TESTPRODTARGETS) \
 	$(TARGETS) $(TESTSCRIPTS) $(INSTALL_LIB_INSTALLS)
 
-inc : $(COMMON_INC) $(INSTALL_INC) $(INSTALL_CONFIGS)
+inc: $(COMMON_INC) $(INSTALL_INC) $(INSTALL_CONFIGS) $(INSTALLS_CFG) \
+	$(INSTALL_HTMLS) $(INSTALLS_PERL_MODULES) $(INSTALL_SCRIPTS)
 
-buildInstall : \
-	$(INSTALL_SCRIPTS) $(INSTALL_PROD) $(INSTALL_MUNCHS) \
+buildInstall: \
+	$(INSTALL_PROD) $(INSTALL_MUNCHS) \
 	$(INSTALL_TCLLIBS) $(INSTALL_TCLINDEX) \
-	$(INSTALL_OBJS) \
 	$(INSTALL_DOCS) \
-	$(INSTALL_HTMLS) \
+	$(INSTALL_OBJS) \
 	$(INSTALL_TEMPLATE) \
 	$(INSTALL_BIN_INSTALLS)
 
@@ -171,9 +191,9 @@ ifdef RES
 	@$(RM) *$(RES)
 endif
 
-# Sort mkdir targets to remove duplicates & make parents first
-$(DIRECTORY_TARGETS):
-	$(MKDIR) $(sort $@)
+# Sort directories to remove duplicates & make parents first
+$(sort $(DIRECTORY_TARGETS)):
+	$(MKDIR) $@
 
 # Install LIB_INSTALLS libraries before linking executables
 $(TESTPRODNAME) $(PRODNAME): | $(INSTALL_LIB_INSTALLS)
@@ -185,13 +205,20 @@ endif
 
 # RELEASE file consistency checking
 checkRelease:
-	$(CONVERTRELEASE) checkRelease
+	+$(CONVERTRELEASE) checkRelease
 warnRelease:
-	-$(CONVERTRELEASE) checkRelease
+	$(CONVERTRELEASE) checkRelease
 noCheckRelease:
 ifeq ($(EPICS_HOST_ARCH),$(T_A))
 	$(info Warning: RELEASE file consistency checks have been disabled)
 endif
+
+# $(FINAL_DIR) signals eventual install locations to makeRPath script
+$(TESTPRODNAME): FINAL_DIR=.
+$(PRODNAME): FINAL_DIR=$(INSTALL_BIN)
+$(TESTSHRLIBNAME): FINAL_DIR=.
+$(SHRLIBNAME): FINAL_DIR=$(INSTALL_SHRLIB)
+$(LOADABLE_SHRLIBNAME): FINAL_DIR=$(INSTALL_SHRLIB)
 
 #---------------------------------------------------------------
 #  The order of the following rules is
@@ -199,12 +226,12 @@ endif
 
 $(TESTPRODNAME) $(PRODNAME): $(PRODUCT_OBJS) $(PROD_RESS) $(PROD_DEPLIBS)
 
-$(TESTPRODNAME) $(PRODNAME): %$(EXE):
+$(TESTPRODNAME) $(PRODNAME): %$(EXE): | $(INSTALL_LIB)
 	@$(RM) $@
-	$(DEBUGCMD) $(LINK.cpp)
+	$(LINK.cpp)
 	$(MT_EXE_COMMAND)
 
-%_ctdt$(OBJ) : %_ctdt.c
+%_ctdt$(OBJ): %_ctdt.c
 	@$(RM) $@
 	$(COMPILE.ctdt) $<
 
@@ -222,9 +249,9 @@ $(TESTPRODNAME) $(PRODNAME): %$(EXE):
 
 # Cancel GNUMake's built-in rules, which don't have our _INC
 # dependencies so could get used in some circumstances (gdd)
-%.o : %.c
-%.o : %.cc
-%.o : %.cpp
+%.o: %.c
+%.o: %.cc
+%.o: %.cpp
 
 # Include files are order-only prerequisites for compilation:
 %$(OBJ): %.c | $(COMMON_INC) $(INSTALL_INC)
@@ -258,7 +285,7 @@ YACCOPT ?= $($*_YACCOPT)
 
 # must be a separate rule since when not using '-d' the
 # prefix for .h will be different then .c
-%.h : %.c %.y
+%.h: %.c %.y
 
 %.c: %.l
 	@$(RM) $@
@@ -302,6 +329,10 @@ $(LOADABLE_SHRLIBNAME): $(LOADABLE_SHRLIB_PREFIX)%$(LOADABLE_SHRLIB_SUFFIX):
 	$(LINK.shrlib)
 	$(MT_DLL_COMMAND)
 
+$(LIBNAME) $(SHRLIBNAME) $(LOADABLE_SHRLIBNAME): | $(INSTALL_LIB)
+$(INSTALL_LIB):
+	@$(MKDIR) $@
+
 #---------------------------------------------------------------
 # C++ munching for VxWorks
 
@@ -333,13 +364,20 @@ $(MODNAME): %$(MODEXT): %$(EXE)
 	$(LINK.mod)
 
 #---------------------------------------------------------------
+# Generate Perl include path module
+%ModuleDirs.pm: $(wildcard $(TOP)/configure/RELEASE*)
+	@$(MKDIR) $(dir $@)
+	$(CONVERTRELEASE) -T $(TOP) $@
+
+#---------------------------------------------------------------
 # Automated testing
 
 runtests: run-tap-tests
 run-tap-tests: $(TESTSCRIPTS.t)
 ifneq ($(TESTSCRIPTS.t),)
 ifdef RUNTESTS_ENABLED
-	$(PROVE) --failures --color $^ || $(PROVE_FAILURE)
+	$(ECHO) "$(PROVE) $^"
+	@$(PROVE) $^ || $(PROVE_FAILURE)
 endif
 endif
 
@@ -350,7 +388,8 @@ test-results: tap-results
 tap-results: $(TAPFILES)
 ifneq ($(strip $(TAPFILES)),)
 ifdef RUNTESTS_ENABLED
-	$(PROVE.tap) --failures --color $^ || $(PROVE_FAILURE)
+	$(ECHO) "$(PROVE.tap) $^"
+	@$(PROVE.tap) $^ || $(PROVE_FAILURE)
 endif
 
 CURRENT_TAPFILES := $(wildcard $(TAPFILES))
@@ -358,8 +397,8 @@ CURRENT_JUNITFILES := $(wildcard $(JUNITFILES))
 endif
 
 clean-tests:
-ifneq ($(CURRENT_TAPFILES),)
-	$(RM) $(CURRENT_TAPFILES)
+ifneq ($(CURRENT_TAPFILES)$(TAPS_FAILED_LOG),)
+	$(RM) $(CURRENT_TAPFILES) $(TAPS_FAILED_LOG)
 endif
 ifneq ($(CURRENT_JUNITFILES),)
 	$(RM) $(CURRENT_JUNITFILES)
@@ -368,35 +407,61 @@ endif
 # A .tap file is the output from running the associated test script
 $(TAPFILES.t): %.tap: %.t
 ifdef RUNTESTS_ENABLED
-	-$(PERL) $< -tap > $@
+	$(ECHO) "$(PERL) $< -tap > $@"
+	@$(PERL) $< -tap > $@ || $(TAPFILE_FAILURE)
 endif
 
-$(JUNITFILES.t): %.xml: %.tap
+$(JUNITFILES.t): %-results.xml: %.tap
 	$(TAPTOJUNIT) --puretap --output $@ --input $< $*
 
 # If there's a perl test script (.plt) available, use it
 %.t: ../%.plt
 	@$(RM) $@
-	$(CP) $< $@
+	$(EXPAND_TOOL) -t $(INSTALL_LOCATION) -a $(T_A) $< $@
 
 # Test programs (.t files) must be written in Perl.
 # Generate a perl program to exec the real test binary.
 %.t: %$(EXE) $(TOOLS)/makeTestfile.pl
 	@$(RM) $@
-	$(PERL) $(TOOLS)/makeTestfile.pl $@ $<
+	$(PERL) $(TOOLS)/makeTestfile.pl $(T_A) $(EPICS_HOST_ARCH) $@ $<
+
+#---------------------------------------------------------------
+# Generate $(API_HEADER) files on request (%API.h)
+
+ifdef API_HEADER
+# Install them
+INC += $(API_HEADER)
+
+# Ensure we generate them early enough
+INSTALL_API_HEADERS = $(addprefix $(INSTALL_INCLUDE)/,$(API_HEADER))
+$(filter-out $(INSTALL_API_HEADERS), $(INSTALL_INC)) $(HDEPENDS_FILES): \
+    | $(INSTALL_API_HEADERS)
+
+# How to make one
+$(COMMON_DIR)/%API.h: $(TOOLS)/makeAPIheader.pl
+	@$(RM) $@
+	$(PERL) $(TOOLS)/makeAPIheader.pl -o $@ $(@:$(COMMON_DIR)/%API.h=%)
+endif
+
+# Generate header with version number from VCS
+
+ifneq ($(GENVERSION),)
+$(COMMON_DIR)/$(GENVERSION): FORCE
+	$(GENVERSIONHEADER) -t $(TOP) -N $(GENVERSIONMACRO) -V "$(GENVERSIONDEFAULT)" $@
+endif
 
 #---------------------------------------------------------------
 # Install rules for BIN_INSTALLS and LIB_INSTALLS
 
 define  BIN_INSTALLS_template
-$$(INSTALL_BIN)/$$(notdir $(1)) : $(1)
+$$(INSTALL_BIN)/$$(notdir $(1)): $(1)
 	$(ECHO) "Installing $$(<F)"
 	@$$(INSTALL) -d -m $$(BIN_PERMISSIONS) $$^ $$(INSTALL_BIN)
 endef
 $(foreach file, $(BIN_INSTALLS), $(eval $(call BIN_INSTALLS_template, $(file))))
 
 define  LIB_INSTALLS_template
-$$(INSTALL_LIB)/$$(notdir $(1)) : $(1)
+$$(INSTALL_LIB)/$$(notdir $(1)): $(1)
 	$(ECHO) "Installing $$(<F)"
 	@$$(INSTALL) -d -m $$(LIB_PERMISSIONS) $$^ $$(INSTALL_LIB)
 endef
@@ -446,9 +511,11 @@ $(INSTALL_TCLLIB)/%: ../%
 	@$(INSTALL) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_TCLLIB)
 endif
 
+ifneq ($(TCLINDEX),)
 $(INSTALL_TCLLIB)/$(TCLINDEX): $(INSTALL_TCLLIBS)
 	$(ECHO) "Updating $@"
 	$(ECHO) eval auto_mkindex $(INSTALL_TCLLIB) "$(TCLLIBNAME)" | tclsh
+endif
 
 $(INSTALL_LOADABLE_SHRLIBS): $(INSTALL_SHRLIB)/%: %
 	$(ECHO) "Installing loadable shared library $@"
@@ -460,6 +527,7 @@ ifneq (,$(strip $(LOADABLE_SHRLIB_VERSION)))
 endif # LOADABLE_SHRLIB_VERSION
 endif # LOADABLE_SHRLIB_SUFFIX
 
+ifneq ($(INSTALL_CONFIGS),)
 $(INSTALL_CONFIG)/%: %
 	$(ECHO) "Installing config file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
@@ -467,20 +535,21 @@ $(INSTALL_CONFIG)/%: %
 $(INSTALL_CONFIG)/%: ../%
 	$(ECHO) "Installing config file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
+endif
 
-$(INSTALL_INCLUDE)/% : $(COMMON_DIR)/%
+$(INSTALL_INCLUDE)/%: $(COMMON_DIR)/%
 	$(ECHO) "Installing generated generic include file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
-$(INSTALL_INCLUDE)/% : %
+$(INSTALL_INCLUDE)/%: %
 	$(ECHO) "Installing generic include file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
-$(INSTALL_INCLUDE)/os/$(OS_CLASS)/% : %
+$(INSTALL_INCLUDE)/os/$(OS_CLASS)/%: %
 	$(ECHO) "Installing OS dependent include file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
-$(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS)/% : %
+$(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS)/%: %
 	$(ECHO) "Installing compiler dependent include file $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
@@ -512,14 +581,18 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
 	$(ECHO) "Installing $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
--include $(CONFIG)/RULES_EXPAND
+include $(CONFIG)/RULES_EXPAND
 
 .PRECIOUS: %.i %.o %.c %.nm %.cpp %.cc
 .PRECIOUS: $(COMMON_INC)
 
 .PHONY: all host inc build install clean rebuild buildInstall build_clean
 .PHONY: runtests run-tap-tests tapfiles junitfiles test-results tap-results
-.PHONY: clean-tests checkRelease warnRelease noCheckRelease
+.PHONY: clean-tests checkRelease warnRelease noCheckRelease FORCE
 
+include $(CONFIG)/RULES_COMMON
+
+else
+    $(warning Warning: Base configure/RULES_BUILD file included more than once. \
+        Does configure/RELEASE have multiple pointers to $(EPICS_BASE)?)
 endif # BASE_RULES_BUILD
-#	EOF RULES_BUILD
