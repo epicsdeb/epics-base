@@ -11,22 +11,10 @@ Index: epics-base/configure/os/CONFIG_SITE.Common.win32-x86-mingw
 ===================================================================
 --- epics-base.orig/configure/os/CONFIG_SITE.Common.win32-x86-mingw
 +++ epics-base/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-@@ -5,3 +5,18 @@
+@@ -5,3 +5,6 @@
  # If readline is available uncomment the following line
  # to enable command-line editing and history support
  #COMMANDLINE_LIBRARY = READLINE
 +
-+CMPLR_PREFIX=i686-w64-mingw32-
-+
 +SHARED_LIBRARIES=NO
 +STATIC_BUILD=YES
-+
-+# No -fPIC avoids "-fPIC ignored for target (all code is position independent)"
-+SHRLIB_CFLAGS =
-+SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
-+LOADABLE_SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
-+
-+# Override linking with gcc library from CONFIG.gnuCommon
-+GNU_LDLIBS_YES =
-+
-+OP_SYS_LDLIBS = -lws2_32
