@@ -1,4 +1,6 @@
 usr/lib/epics/bin/linux-*
+usr/lib/epics/cfg/CONFIG*
+usr/lib/epics/cfg/TOOLCHAIN.linux-x86_64.linux*
 usr/lib/epics/configure
 usr/lib/epics/db
 usr/lib/epics/dbd
