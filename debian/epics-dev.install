@@ -6,8 +6,6 @@ usr/lib/epics/include
 usr/lib/epics/templates
 usr/lib/epics/lib/linux-*/libCom*
 usr/lib/epics/lib/linux-*/libca*
-usr/lib/epics/lib/linux-*/libgdd*
-usr/lib/epics/lib/linux-*/libcas*
 usr/lib/epics/lib/linux-*/libdbCore*
 usr/lib/epics/lib/linux-*/libdbRecStd*
 usr/lib/epics/lib/host
