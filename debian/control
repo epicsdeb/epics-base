@@ -49,7 +49,7 @@ Depends: libepics7.0.6 (= ${binary:Version}), epics-catools (= ${binary:Version}
         ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc        (= ${binary:Version}),
           epics-perl       (= ${binary:Version}),
-          epics-pcas-dev   (= ${binary:Version}),
+          epics-pcas-dev   (>= 4.13.3),
           ioclogserver     (= ${binary:Version}),
 Conflicts: epics-catools   (<= 3.14.11-6),
            epics-perl      (<= 3.14.12.3-1),
