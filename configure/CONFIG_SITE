@@ -178,5 +178,8 @@ LINKER_USE_RPATH = YES
 # All root directories are considered to be the same.
 LINKER_ORIGIN_ROOT = $(INSTALL_LOCATION)
 
+# Compile in absolute path to softIoc.dbd as default, instead of relative
+ABSOLUTE_DBD = YES
+
 # Overrides for the settings above may appear in a CONFIG_SITE.local file
 -include $(CONFIG)/CONFIG_SITE.local

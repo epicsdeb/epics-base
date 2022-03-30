@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 #*************************************************************************
 # Copyright (c) 2010 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
@@ -10,19 +10,34 @@
 use strict;
 
 die "$0: Argument missing, INSTALL_LOCATION\n" if @ARGV == 0;
-die "$0: Too many arguments, expecting one\n" unless @ARGV == 1;
+die "$0: Too many arguments, expecting one or two\n" unless @ARGV <= 2;
 
 my $path = shift;
+my $abs  = "";
+$abs     = shift unless @ARGV==0;
 
 $path =~ s/\\/\\\\/gx;
 $path =~ s/^'//;
 $path =~ s/'$//;
 
-print "/* THIS IS A GENERATED FILE. DO NOT EDIT! */\n",
-      "\n",
-      "#ifndef INC_epicsInstallDir_H\n",
-      "#define INC_epicsInstallDir_H\n",
-      "\n",
-      "#define EPICS_BASE \"$path\"\n",
-      "\n",
-      "#endif /* INC_epicsInstallDir_H */\n";
+if($abs eq "YES" ) {
+    print "/* THIS IS A GENERATED FILE. DO NOT EDIT! */\n",
+        "\n",
+        "#ifndef INC_epicsInstallDir_H\n",
+        "#define INC_epicsInstallDir_H\n",
+        "\n",
+        "#define EPICS_BASE \"$path\"\n",
+        "#define ABSOLUTE_DBD \"YES\"\n",
+        "\n",
+        "#endif /* INC_epicsInstallDir_H */\n";
+}
+else {
+    print "/* THIS IS A GENERATED FILE. DO NOT EDIT! */\n",
+        "\n",
+        "#ifndef INC_epicsInstallDir_H\n",
+        "#define INC_epicsInstallDir_H\n",
+        "\n",
+        "#define EPICS_BASE \"$path\"\n",
+        "\n",
+        "#endif /* INC_epicsInstallDir_H */\n";
+}
