@@ -1,4 +1,4 @@
-Source: epics-base
+Source: epics7-base
 Section: devel
 Priority: optional
 Maintainer: John Priller <priller@frib.msu.edu>
@@ -18,7 +18,8 @@ Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-catools
-Conflicts: epics-perl (<= 3.14.10-7)
+Conflicts: epics-perl (< 7.0.6 ), libepics3.15.9
+Replaces: libepics3.15.9
 Description: EPICS Base libraries for clients and servers
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -26,12 +27,13 @@ Description: EPICS Base libraries for clients and servers
  .
  This package contains host system shared libraries for clients and IOCs.
 
-Package: ioclogserver
+Package: ioclogserver7
 Section: admin
 Architecture: any
 Depends: libepics7.0.6 (= ${binary:Version}),
-         epics-dev (= ${binary:Version}), lsb-base,
+         epics7-dev (= ${binary:Version}), lsb-base,
          ${misc:Depends}, ${shlibs:Depends}, adduser, systemd
+Replaces: ioclogserver
 Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -41,7 +43,7 @@ Description: Log recording daemon for EPICS IOCS
  IOC.  This is used by the caputlog support module to collect
  messages relating to PV value changes.
 
-Package: epics-dev
+Package: epics7-dev
 Architecture: any
 Depends: libepics7.0.6 (= ${binary:Version}), epics-catools (= ${binary:Version}),
          perl (>= 5.10.0~),
@@ -51,11 +53,11 @@ Suggests: epics-doc        (= ${binary:Version}),
           epics-perl       (= ${binary:Version}),
           epics-pcas-dev   (>= 4.13.3),
           ioclogserver     (= ${binary:Version}),
-Conflicts: epics-catools   (<= 3.14.11-6),
-           epics-perl      (<= 3.14.12.3-1),
-           ioclogserver    (<< 3.15.3-9),
-Replaces:  epics-msi (<< 3.15.3-8~),
-Breaks:    epics-msi (<< 3.15.3-8~),
+Conflicts: epics-catools   (<< 7.0.6),
+           epics-perl      (<< 7.0.6),
+           ioclogserver    (<< 7.0.6),
+Replaces:  epics-msi,
+Breaks:    epics-msi,
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -73,11 +75,13 @@ Description: EPICS Macro Substitution and Include tool
  .
  This is a dummy package which can be removed.
 
-Package: epics-catools
+Package: epics7-catools
 Section: admin
 Architecture: any
 Depends: libepics7.0.6 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
+Conflicts: epics-catools,
+Replaces: epics-catools,
 Description: Command line utilities for EPICS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -85,11 +89,11 @@ Description: Command line utilities for EPICS
  .
  EPICS utilities such as caget and caput as well as the caRepeater daemon.
 
-Package: epics-perl
+Package: epics7-perl
 Architecture: any
 Depends: libepics7.0.6 (= ${binary:Version}),
          ${shlibs:Depends}, ${perl:Depends}, ${misc:Depends}
-Conflicts: epics-libs (<= 3.14.10-7),  epics-dev (<= 3.14.12.3-2),
+Conflicts: epics-libs (<< 7.0.6~),  epics-dev,
 Description: Perl bindings for EPICS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -97,12 +101,12 @@ Description: Perl bindings for EPICS
  .
  Perl bindings for EPICS
 
-Package: epics-doc
+Package: epics7-doc
 Architecture: all
 Depends: ${misc:Depends}
 Section: doc
-Replaces:  epics-msi (<< 3.15.3-8~),
-Breaks:    epics-msi (<< 3.15.3-8~),
+Replaces:  epics-msi (<< 7.0.6~),
+Breaks:    epics-msi (<< 7.0.6~),
 Description: EPICS documentation
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -110,7 +114,7 @@ Description: EPICS documentation
  .
  Documentation for EPICS Base
 
-Package: epics-win32
+Package: epics7-win32
 Architecture: all
 Depends: ${misc:Depends},
          epics-dev (>= ${source:Version}), epics-dev (<< ${source:Version}.1~),
