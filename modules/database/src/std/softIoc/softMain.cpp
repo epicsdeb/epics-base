@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <string>
-#include <cstring>
 #include <list>
 #include <stdexcept>
 
@@ -37,10 +36,6 @@ extern "C" int softIoc_registerRecordDeviceDriver(struct dbBase *pdbbase);
 // so IDEs knows EPICS_BASE is a string constant
 #  define EPICS_BASE "/"
 #  error -DEPICS_BASE required
-#endif
-
-#ifndef ABSOLUTE_DBD
-#  define ABSOLUTE_DBD "NO"
 #endif
 
 #define DBD_BASE "dbd" OSI_PATH_SEPARATOR "softIoc.dbd"
@@ -130,8 +125,6 @@ int main(int argc, char *argv[])
     try {
         std::string dbd_file(DBD_FILE),
                     exit_file(EXIT_FILE),
-                    absolute_dbd(ABSOLUTE_DBD),
-                    epics_base(EPICS_BASE),
                     macros, // scratch space for macros (may be given more than once)
                     xmacro;
         bool interactive = true;
@@ -141,11 +134,7 @@ int main(int argc, char *argv[])
         // attempt to compute relative paths
         {
             std::string prefix;
-            
             char *cprefix = epicsGetExecDir();
-            if(absolute_dbd == "YES"){
-                std::strcpy(cprefix, epics_base.c_str());
-            }
             if(cprefix) {
                 try {
                     prefix = cprefix;
@@ -155,15 +144,9 @@ int main(int argc, char *argv[])
                     throw;
                 }
             }
-            if(absolute_dbd == "YES"){
-                dbd_file = prefix + OSI_PATH_SEPARATOR + DBD_BASE;
-                exit_file = prefix + OSI_PATH_SEPARATOR + EXIT_BASE;
 
-            }
-            else{
-                dbd_file = prefix + DBD_FILE_REL;
-                exit_file = prefix + EXIT_FILE_REL;
-            }
+            dbd_file = prefix + DBD_FILE_REL;
+            exit_file = prefix + EXIT_FILE_REL;
         }
 
         int opt;
