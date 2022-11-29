@@ -1,9 +1,9 @@
-epics-base (7.0.6-1) UNRELEASED; urgency=medium
+epics-base (7.0.7-1) UNRELEASED; urgency=medium
 
-  * Upgrade base to EPICS 7.
-  * 
+  * Upstream version 7.0.7
+  * Find softIoc.dbd with zero arguments in EPICS_BASE 
 
- -- Evan Daykin <daykin@frib.msu.edu>  Mon, 28 Nov 2022 15:07:15 -0500
+ -- Evan Daykin <daykin@frib.msu.edu>  Tue, 29 Nov 2022 17:07:51 -0500
 
 epics-base (3.15.9-1) unstable; urgency=medium
 
