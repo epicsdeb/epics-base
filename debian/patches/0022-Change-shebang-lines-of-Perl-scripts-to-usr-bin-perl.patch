@@ -160,7 +160,7 @@ Index: epics-base/src/tools/makeTestfile.pl
  #*************************************************************************
  # Copyright (c) 2008 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
-@@ -74,7 +74,7 @@ open(my $OUT, '>', $target)
+@@ -75,7 +75,7 @@ open(my $OUT, '>', $target)
      or die "$tool: Can't create $target: $!\n";
  
  print $OUT <<__EOT__;
@@ -257,7 +257,7 @@ Index: epics-base/modules/ca/src/perl/capr.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  #*************************************************************************
- # Copyright (c) 2005 UChicago Argonne LLC, as Operator of Argonne
+ # Copyright (c) 2022 UChicago Argonne LLC, as Operator of Argonne
  #     National Laboratory.
 Index: epics-base/modules/ca/src/perl/perlConfig.pl
 ===================================================================
