@@ -34,7 +34,7 @@
 #include "special.h"
 #include "menuIvoa.h"
 #include "menuOmsl.h"
-#include "menuYesNo.h"
+#include "menuSimm.h"
 
 #define GEN_SIZE_OFFSET
 #include "boRecord.h"
@@ -211,7 +211,7 @@ static long process(struct dbCommon *pcommon)
         } else prec->rval = (epicsUInt32)prec->val;
 
         /* Update the timestamp before writing output values so it
-         * will be uptodate if any downstream records fetch it via TSEL */
+         * will be up to date if any downstream records fetch it via TSEL */
         recGblGetTimeStampSimm(prec, prec->simm, NULL);
     }
 
@@ -427,14 +427,18 @@ static long writeValue(boRecord *prec)
     }
 
     switch (prec->simm) {
-    case menuYesNoNO:
+    case menuSimmNO:
         status = pdset->write_bo(prec);
         break;
 
-    case menuYesNoYES: {
+    case menuSimmYES:
+    case menuSimmRAW:
         recGblSetSevr(prec, SIMM_ALARM, prec->sims);
         if (prec->pact || (prec->sdly < 0.)) {
-            status = dbPutLink(&prec->siol, DBR_USHORT, &prec->val, 1);
+            if (prec->simm == menuSimmYES)
+                status = dbPutLink(&prec->siol, DBR_USHORT, &prec->val, 1);
+            else /* prec->simm == menuSimmRAW */
+                status = dbPutLink(&prec->siol, DBR_ULONG, &prec->rval, 1);
             prec->pact = FALSE;
         } else { /* !prec->pact && delay >= 0. */
             epicsCallback *pvt = prec->simpvt;
@@ -446,7 +450,6 @@ static long writeValue(boRecord *prec)
             prec->pact = TRUE;
         }
         break;
-    }
 
     default:
         recGblSetSevr(prec, SOFT_ALARM, INVALID_ALARM);

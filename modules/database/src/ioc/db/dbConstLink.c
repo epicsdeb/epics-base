@@ -27,6 +27,7 @@
 #include "dbFldTypes.h"
 #include "dbLink.h"
 #include "link.h"
+#include "errlog.h"
 
 /**************************** Convert functions ****************************/
 
@@ -63,7 +64,7 @@ cvt_st_ ## TYPE(const char *from, void *pfield, const dbAddr *paddr) { \
     return epicsParse##TYPE(from, to, 0, &end); \
 }
 
-/* Instanciate for CHAR, UCHAR, SHORT, USHORT and LONG */
+/* Instantiate for CHAR, UCHAR, SHORT, USHORT and LONG */
 cvt_st_int(Int8)
 cvt_st_int(UInt8)
 cvt_st_int(Int16)
@@ -99,7 +100,7 @@ static long cvt_st_UInt32(const char *from, void *pfield, const dbAddr *paddr)
     return status;
 }
 
-/* Instanciate for INT64 and UINT64 */
+/* Instantiate for INT64 and UINT64 */
 cvt_st_int(Int64)
 cvt_st_int(UInt64)
 
@@ -117,7 +118,7 @@ cvt_st_ ## TYPE(const char *from, void *pfield, const dbAddr *paddr) { \
     return epicsParse##TYPE(from, to, &end); \
 }
 
-/* Instanciate for FLOAT32 and FLOAT64 */
+/* Instantiate for FLOAT32 and FLOAT64 */
 cvt_st_float(Float32)
 cvt_st_float(Float64)
 
@@ -178,17 +179,23 @@ static long dbConstLoadLS(struct link *plink, char *pbuffer, epicsUInt32 size,
     epicsUInt32 *plen)
 {
     const char *pstr = plink->value.constantStr;
+    long status;
 
     if (!pstr)
         return S_db_badField;
 
-    return dbLSConvertJSON(pstr, pbuffer, size, plen);
+    status = dbLSConvertJSON(pstr, pbuffer, size, plen);
+    if (status)
+        errlogPrintf("... while parsing link %s.%s\n",
+            plink->precord->name, dbLinkFieldName(plink));
+    return status;
 }
 
 static long dbConstLoadArray(struct link *plink, short dbrType, void *pbuffer,
         long *pnReq)
 {
     const char *pstr = plink->value.constantStr;
+    long status;
 
     if (!pstr)
         return S_db_badField;
@@ -197,7 +204,11 @@ static long dbConstLoadArray(struct link *plink, short dbrType, void *pbuffer,
     if (dbrType == DBF_MENU || dbrType == DBF_ENUM || dbrType == DBF_DEVICE)
         dbrType = DBF_USHORT;
 
-    return dbPutConvertJSON(pstr, dbrType, pbuffer, pnReq);
+    status = dbPutConvertJSON(pstr, dbrType, pbuffer, pnReq);
+    if (status)
+        errlogPrintf("... while parsing link %s.%s\n",
+            plink->precord->name, dbLinkFieldName(plink));
+    return status;
 }
 
 static long dbConstGetNelements(const struct link *plink, long *nelements)

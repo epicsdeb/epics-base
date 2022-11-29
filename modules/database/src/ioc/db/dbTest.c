@@ -996,8 +996,12 @@ static void printBuffer(
                 i = 0;
                 while (len > 0) {
                     int chunk = (len > MAXLINE - 5) ? MAXLINE - 5 : len;
-
-                    sprintf(pmsg, "\"%.*s\"", chunk, (char *)pbuffer + i);
+                    strcpy(pmsg, "\"");
+                    while (epicsStrnEscapedFromRawSize((char *)pbuffer + i, chunk) >= MAXLINE - 5)
+                        chunk--;
+                    epicsStrnEscapedFromRaw(pmsg+1, MAXLINE - 5,
+                        (char *)pbuffer + i, chunk);
+                    strcat(pmsg, "\"");
                     len -= chunk; i += chunk;
                     if (len > 0)
                         strcat(pmsg, " +");
@@ -1300,7 +1304,7 @@ static void dbpr_insert_msg(TAB_BUFFER *pMsgBuff,size_t len,int tab_size)
     current_len = strlen(pMsgBuff->out_buff);
     tot_line = current_len + len;
 
-    /* flush buffer if overflow would occor */
+    /* flush buffer if overflow would occur */
     if (tot_line > MAXLINE)
         dbpr_msg_flush(pMsgBuff, tab_size);
 

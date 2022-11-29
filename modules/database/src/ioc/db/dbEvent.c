@@ -90,7 +90,7 @@ struct event_user {
     void                *extralabor_arg;/* parameter to above */
 
     epicsThreadId       taskid;         /* event handler task id */
-    struct evSubscrip   *pSuicideEvent; /* event that is deleteing itself */
+    struct evSubscrip   *pSuicideEvent; /* event that is deleting itself */
     unsigned            queovr;         /* event que overflow count */
     unsigned char       pendexit;       /* exit pend task */
     unsigned char       extra_labor;    /* if set call extra labor func */
@@ -102,7 +102,7 @@ struct event_user {
 
 /*
  * Reliable intertask communication requires copying the current value of the
- * channel for later queing so 3 stepper motor steps of 10 each do not turn
+ * channel for later queuing so 3 stepper motor steps of 10 each do not turn
  * into only 10 or 20 total steps part of the time.
  */
 
@@ -585,7 +585,7 @@ void db_cancel_event (dbEventSubscription event)
     /*
      * flag the event as canceled by NULLing out the callback handler
      *
-     * make certain that the event isnt being accessed while
+     * make certain that the event isn't being accessed while
      * its call back changes
      */
     LOCKEVQUE (pevent->ev_que);
@@ -731,7 +731,7 @@ static db_field_log* db_create_field_log (struct dbChannel *chan, int use_val)
             /* don't make a copy yet, just reference the field value */
             pLog->u.r.field = dbChannelField(chan);
             /* indicate field value still owned by record */
-            pLog->u.r.dtor = NULL;
+            pLog->dtor = NULL;
             /* no private data yet, may be set by a filter */
             pLog->u.r.pvt = NULL;
         }
@@ -789,6 +789,18 @@ static void db_queue_event_log (evSubscrip *pevent, db_field_log *pLog)
 
     LOCKEVQUE (ev_que);
 
+    /* if we have an event on the queue and both the last
+     * event on the queue and the current event reference
+     * a record field, simply ignore duplicate events.
+     */
+    if (pevent->npend > 0u
+            && !dbfl_has_copy(*pevent->pLastLog)
+            && !dbfl_has_copy(pLog)) {
+        db_delete_field_log(pLog);
+        UNLOCKEVQUE (ev_que);
+        return;
+    }
+
     /*
      * add to task local event que
      */
@@ -811,7 +823,7 @@ static void db_queue_event_log (evSubscrip *pevent, db_field_log *pLog)
         pevent->nreplace++;
         /*
          * the event task has already been notified about
-         * this so we dont need to post the semaphore
+         * this so we don't need to post the semaphore
          */
         firstEventFlag = 0;
     }
@@ -844,7 +856,7 @@ static void db_queue_event_log (evSubscrip *pevent, db_field_log *pLog)
     UNLOCKEVQUE (ev_que);
 
     /*
-     * its more efficent to notify the event handler
+     * its more efficient to notify the event handler
      * only after the event is ready and the lock
      * is off in case it runs at a higher priority
      * than the caller here.
@@ -886,6 +898,8 @@ unsigned int    caEventMask
         if ( (dbChannelField(pevent->chan) == (void *)pField || pField==NULL) &&
             (caEventMask & pevent->select)) {
             db_field_log *pLog = db_create_event_log(pevent);
+            if(pLog)
+                pLog->mask = caEventMask & pevent->select;
             pLog = dbChannelRunPreChain(pevent->chan, pLog);
             if (pLog) db_queue_event_log(pevent, pLog);
         }
@@ -974,7 +988,7 @@ static int event_read ( struct event_que *ev_que )
          * Next event pointer can be used by event tasks to determine
          * if more events are waiting in the queue
          *
-         * Must remove the lock here so that we dont deadlock if
+         * Must remove the lock here so that we don't deadlock if
          * this calls dbGetField() and blocks on the record lock,
          * dbPutField() is in progress in another task, it has the
          * record lock, and it is calling db_post_events() waiting
@@ -1174,9 +1188,6 @@ void db_event_flow_ctrl_mode_on (dbEventCtx ctx)
      * notify the event handler task
      */
     epicsEventSignal(evUser->ppendsem);
-#ifdef DEBUG
-    printf("fc on %lu\n", tickGet());
-#endif
 }
 
 /*
@@ -1193,9 +1204,6 @@ void db_event_flow_ctrl_mode_off (dbEventCtx ctx)
      * notify the event handler task
      */
     epicsEventSignal (evUser->ppendsem);
-#ifdef DEBUG
-    printf("fc off %lu\n", tickGet());
-#endif
 }
 
 /*
@@ -1205,7 +1213,7 @@ void db_delete_field_log (db_field_log *pfl)
 {
     if (pfl) {
         /* Free field if reference type field log and dtor is set */
-        if (pfl->type == dbfl_type_ref && pfl->u.r.dtor) pfl->u.r.dtor(pfl);
+        if (pfl->type == dbfl_type_ref && pfl->dtor) pfl->dtor(pfl);
         /* Free the field log chunk */
         freeListFree(dbevFieldLogFreeList, pfl);
     }

@@ -1,0 +1,18 @@
+Demo IOCs
+
+ioccircle and ioccircle together demonstrate PVA groups and links.
+ioccircle maintains a "phase" counter which counts from 0 to 359
+then rolls over.
+
+From this phase are calculated an X and Y which are points on a circule with radius 1.
+
+A group PVA PV is defined which includes both and X and Y.
+
+ioccircle2 contains two calc records which subscribe to the X and Y
+from ioccircle and multiply each by 2.
+
+A second group PVA PV is defined including the multipled X and Y.
+
+Due to the atomicity of a group PV it is certain that pairs of
+X and Y will not be mixed.  In this example, the magnitude
+sqrt(X*X+Y*Y) will never change by more than floating point epsilon.

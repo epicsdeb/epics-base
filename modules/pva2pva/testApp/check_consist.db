@@ -1,0 +1,40 @@
+record(calc, "cnt:x") {
+  field(INPA, "cnt:x NPP")
+  field(INPB, "999999")
+  field(CALC, "A<B?A+1:0")
+  field(SCAN, "1 second")
+#  field(PINI, "RUNNING")
+  field(HOPR, "1000000")
+  field(HIGH, "5")
+  field(HSV , "MINOR")
+  field(EGU , "arb.")
+  field(PREC, "1")
+  field(FLNK, "cnt:y")
+
+  info(pdbGroup, "grp|a=VAL")
+#  field(TPRO, "1")
+}
+
+record(calc, "cnt:y") {
+  field(INPA, "cnt:y NPP")
+  field(INPB, "cnt:x.B NPP")
+  field(CALC, "A<B?A+1:0")
+  field(HOPR, "10000")
+  field(HIGH, "5")
+  field(HSV , "MINOR")
+  field(EGU , "arb.")
+  field(PREC, "1")
+  field(TSEL, "cnt:x.TIME")
+
+  field(FLNK, "cnt:x.PROC CA")
+
+  info(pdbGroup, "grp|b=VAL")
+  info(pdbTrigger, "grp|b>*")
+}
+
+record(calc, "cnt:rate") {
+  field(INPA, "cnt:x NPP")
+  field(CALC, "C:=A-B;B:=A;C/10")
+  field(SCAN, ".1 second")
+  field(EGU , "cnt/s")
+}

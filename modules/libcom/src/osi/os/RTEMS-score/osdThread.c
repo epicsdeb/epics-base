@@ -219,8 +219,7 @@ threadWrapper (rtems_task_argument arg)
  */
 void epicsThreadExitMain (void)
 {
-    cantProceed("epicsThreadExitMain() has been deprecated for lack of usage."
-                "  Please report if you see this message.");
+    cantProceed("epicsThreadExitMain() must no longer be used.\n");
 }
 
 static rtems_status_code
@@ -386,7 +385,7 @@ void epicsThreadMustJoin(epicsThreadId id)
             errlogPrintf("Warning: %s thread self-join of unjoinable\n", v ? v->name : "non-EPICS thread");
 
         } else {
-            /* try to error nicely, however in all likelyhood de-ref of
+            /* try to error nicely, however in all likelihood de-ref of
              * 'id' has already caused SIGSEGV as we are racing thread exit,
              * which free's 'id'.
              */

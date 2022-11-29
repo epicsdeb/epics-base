@@ -161,9 +161,9 @@ The analog output record sends its desired output to the address in the
 OUT field. For analog outputs that write their values to devices, the
 OUT field must specify the address of the I/O card. In addition, the
 DTYP field must contain the name of the device support module. Be aware
-that the address format differs according to the I/O bus used. See
-Address Specification for information on the format of hardware
-addresses.
+that the address format differs according to the I/O bus used. See L<Address
+Specification|https://docs.epics-controls.org/en/latest/guides/EPICS_Process_Database_Concepts.html#address-specification>
+for information on the format of hardware addresses.
 
 For soft records the output link can be a database link, a channel
 access link, or a constant value. If the link is a constant, no output
@@ -263,8 +263,9 @@ processing.
 
 The following fields are used to operate the record in simulation mode.
 
-If SIMM (fetched through SIML) is YES, the record is put in SIMS
+If SIMM (fetched through SIML, if populated) is YES, the record is put in SIMS
 severity and the value is written through SIOL, without conversion.
+If SIMM is RAW, the value is converted and RVAL is written.
 SSCN sets a different SCAN mechanism to use in simulation mode.
 SDLY sets a delay (in sec) that is used for asynchronous simulation
 processing.
@@ -307,7 +308,7 @@ for more information on simulation mode and its fields.
         interest(1)
     }
     field(DOL,DBF_INLINK) {
-        prompt("Desired Output Loc")
+        prompt("Desired Output Link")
         promptgroup("40 - Input")
         interest(1)
     }
@@ -557,7 +558,7 @@ for more information on simulation mode and its fields.
         prompt("Simulation Mode")
         special(SPC_MOD)
         interest(1)
-        menu(menuYesNo)
+        menu(menuSimm)
     }
     field(SIMS,DBF_MENU) {
         prompt("Simulation Mode Severity")
