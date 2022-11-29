@@ -207,7 +207,7 @@ endif
 checkRelease:
 	+$(CONVERTRELEASE) checkRelease
 warnRelease:
-	$(CONVERTRELEASE) checkRelease
+	-$(CONVERTRELEASE) checkRelease
 noCheckRelease:
 ifeq ($(EPICS_HOST_ARCH),$(T_A))
 	$(info Warning: RELEASE file consistency checks have been disabled)
@@ -373,23 +373,25 @@ $(MODNAME): %$(MODEXT): %$(EXE)
 # Automated testing
 
 runtests: run-tap-tests
-run-tap-tests: $(TESTSCRIPTS.t)
+run-tap-tests: | build
 ifneq ($(TESTSCRIPTS.t),)
 ifdef RUNTESTS_ENABLED
-	$(ECHO) "$(PROVE) $^"
-	@$(PROVE) $^ || $(PROVE_FAILURE)
+	$(ECHO) "$(PROVE) $(TESTSCRIPTS.t)"
+	@$(PROVE) $(TESTSCRIPTS.t) || $(PROVE_FAILURE)
 endif
 endif
 
 tapfiles: $(TAPFILES)
 junitfiles: $(JUNITFILES)
+# prevent deletion of partial output from failing tests
+.PRECIOUS: $(TAPFILES) $(JUNITFILES)
 
 test-results: tap-results
 tap-results: $(TAPFILES)
 ifneq ($(strip $(TAPFILES)),)
 ifdef RUNTESTS_ENABLED
-	$(ECHO) "$(PROVE.tap) $^"
-	@$(PROVE.tap) $^ || $(PROVE_FAILURE)
+	$(ECHO) "$(PROVE.tap) $(TAPFILES)"
+	@$(PROVE.tap) $(TAPFILES) || $(PROVE_FAILURE)
 endif
 
 CURRENT_TAPFILES := $(wildcard $(TAPFILES))
@@ -405,7 +407,7 @@ ifneq ($(CURRENT_JUNITFILES),)
 endif
 
 # A .tap file is the output from running the associated test script
-$(TAPFILES.t): %.tap: %.t
+$(TAPFILES.t): %.tap: %.t | build
 ifdef RUNTESTS_ENABLED
 	$(ECHO) "$(PERL) $< -tap > $@"
 	@$(PERL) $< -tap > $@ || $(TAPFILE_FAILURE)
@@ -561,16 +563,16 @@ $(INSTALL_DOC)/%: ../%
 	$(ECHO) "Installing doc $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(INSTALL_DOC)
 
+$(INSTALL_HTML)/$(HTMLS_DIR)/%: $(COMMON_DIR)/%
+	$(ECHO) "Installing generated html $@"
+	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
+
 $(INSTALL_HTML)/$(HTMLS_DIR)/%: %
 	$(ECHO) "Installing html $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_HTML)/$(HTMLS_DIR)/%: ../%
 	$(ECHO) "Installing html $@"
-	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
-
-$(INSTALL_HTML)/$(HTMLS_DIR)/%: $(COMMON_DIR)/%
-	$(ECHO) "Installing generated html $@"
 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_TEMPLATES_SUBDIR)/%: ../%

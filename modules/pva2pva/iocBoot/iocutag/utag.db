@@ -1,0 +1,23 @@
+
+record(calc, "$(N)Cnt-I") {
+    field(SCAN, "1 second")
+    field(CALC, "(VAL+1)%10")
+    field(FLNK, "$(N)Cnt:T-I")
+}
+
+record(calc, "$(N)Cnt:T-I") {
+    field(INPA, "$(N)Cnt-I NPP")
+    field(CALC, "A%2")
+    field(FLNK, "$(N)UTag-I")
+}
+
+record(longin, "$(N)UTag-I") {
+    field(DTYP, "QSRV Set UTag")
+    field(INP , "$(N)Cnt:T-I")
+    field(FLNK, "$(N)Val-I")
+}
+
+record(longin, "$(N)Val-I") {
+    field(INP , "$(N)Cnt-I")
+    field(TSEL, "$(N)UTag-I.TIME")
+}

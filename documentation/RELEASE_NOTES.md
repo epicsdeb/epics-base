@@ -2,14 +2,305 @@
 
 These release notes describe changes that have been made since the previous
 release of this series of EPICS Base. **Note that changes which were merged up
-from commits to the 3.15 branch are not described at the top of this file but
-lower down, under the 3.15 release to which they were originally committed.**
-Thus it is important to read more than just the first section to understand
-everything that has changed in each release.
+from commits to the 3.15 branch are described
+[further down this file](#changes-incorporated-from-the-315-branch)
+under the 3.15 release to which they were originally committed.** Thus it is
+important to read more than just the first section to understand everything that
+has changed in each release.
 
 The PVA submodules each have their own individual sets of release notes which
 should also be read to understand what has changed since earlier releases.
 
+
+## EPICS Release 7.0.7
+
+### Doxygen Annotations
+
+Thanks to several attendees at the 2022 EPICS Codeathon the number of header
+files with Doxygen annotations in the EPICS Core has again increased.
+
+### Build System updates
+
+The top-level make targets `uninstall`, `archuninstall` and similar no
+longer trigger the `clean` target which empties build directories, this
+was a bug introduced in 7.0.5.
+
+The `make distclean` target now properly deletes the generated file(s)
+`modules/RELEASE.<host>.local` which are essential to build the external
+submodules under the `modules` directory, and should not crash if the
+build is configured with `INSTALL_LOCATION` pointing to an empty external directory (i.e. if you run `make distclean` twice in succession). When
+`INSTALL_LOCATION` is set in the files `configure/CONFIG_SITE` or
+`configure/CONFIG_SITE.local` the `modules/RELEASE.<host>.local` file
+will now be regenerated in case the install path has been modified.
+
+Note that passing `INSTALL_LOCATION=<path>` on the make command-line will
+only work if you have run `make distclean` immediately beforehand, as the
+`modules/RELEASE.<host>.local` file must be recreated using the new path.
+
+### Enhancements to `capr.pl`
+
+The `capr.pl` script can now display records from older Base versions to
+which fields have since been added, and shows long strings and array data
+up to 10 elements, use the new `-n` option to increase that number.
+The script is fully event-driven and prints all the field data received by
+the end of the CA wait time (`-w` option which defaults to 2 seconds).
+The interest level can now be specified using the `-l` option before the
+PV name, and the new `-D` flag outputs debugging information.
+
+### Time Synchronization on VxWorks
+
+VxWorks 6.9 can do its own OS clock time synchronization, if it has been
+configured by setting `SNTPC_PRIMARY_IPV4_ADDR`. Since EPICS 3.15.3 the
+IOC time support code has checked for the existence of the VxWorks time
+synchronization task and avoided starting the EPICS one if the OS task
+exists and the OS clock gives a "recent" time (i.e. after when EPICS was
+compiled), unless the environment variable `EPICS_TS_FORCE_NTPTIME` is
+also set. However a logic error in that code required the environment
+variable to be set in more cases than it should have.
+
+This error has been fixed and the IOC should work normally if the VxWorks
+task is configured and running. The `TIMEZONE` value for the year is also
+now calculated at initialization in this configuration, previously it was
+only done when the IOC synchronzation task was used. Setting the above
+environment variable will now cause the IOC support code to shut down the
+VxWorks synchronization thread (if running) before starting the EPICS one.
+
+Running the iocsh command `ClockTime_Report` now shows whether the VxWorks
+task is running as well as giving the state of the IOC synchronization task.
+The `ClockTime_Init` command can also be used to stop or restart the IOC
+time synchronization task while the IOC is running, depending on the `0` or
+`1` parameter passed to it. This last change also applies to RTEMS IOCs.
+
+### Incompatible change to `struct db_field_log`
+
+This change may cause channel filters which manipulate array updates
+to fail to compile.
+
+To avoid potential speculation issues arising from overlapping code pointers
+with data values, `union dbfl_ref` is modified to remove the `dtor` member.
+`dtor` is moved out into the enclosing `struct db_field_log`.
+
+So eg. using a `db_field_log* p`, the expression `p->u.r.dtor` must be
+changed to `(p)->dtor`.
+
+### Fix undef ts on first camonitor update of NORD from waveformRecord
+
+The order over operations when processing a waveformRecord is adjusted
+so that updates to NORD is posted with the correct timestamp.
+
+### Automatic COMMANDLINE_LIBRARY w/ newer compilers
+
+When built with a compiler supporting `__has_include<>`, the presence
+of the `<readline/readline.h>` will be used to automatically determine
+a default value for `COMMANDLINE_LIBRARY`.
+
+Mingw builds with readline support now link `-ltermcap` instead of `-lcurses`.
+
+This should not effect sites which set explicitly set `COMMANDLINE_LIBRARY`
+as the only definition in Base now has the form `COMMANDLINE_LIBRARY ?= ...`.
+
+### Perl CA support for empty long strings
+
+The Perl CA bindings have been fixed to handle zero-length long string data
+properly.
+
+### `aao` gains `OMSL` and `DOL`
+
+The `aao` record types gains the same `DOL` functionality found
+in other output record types (`ao`, `longout`, etc.)
+
+### Server exports `RSRV_SERVER_PORT`
+
+During `iocInit()`, the environment variable `RSRV_SERVER_PORT` is set
+with the TCP port number selected.
+
+### `dbdExpand.pl` sorts all items by name
+
+DBD files generated by the `dbdExpand.pl` script are now sorted within each
+item type by the primary name of the item. The result should resolve any
+issues with reproducable builds. No option is provided to prevent the sorting,
+previously the order was essentially random and varied each time.
+
+### `dbExpand.pl` sorts records by name
+
+Records are now output by this program in order, sorted by name. The new flag
+`-s` can be given to output the records in the same order they were read in,
+instead of sorting them.
+
+Note that there are currently no build rules provided with Base which make use
+of this program.
+
+### Simulation Mode RAW Support for Output Record Types
+
+SIMM=RAW support has been added for the relevant output record types
+(ao, bo, mbbo, mbboDirect).
+RAW simulation mode will have those records do the appropriate conversion
+and write RVAL to the location pointed to by SIOL.
+
+### Fixed leak from a non-EPICS thread
+
+On some targets, if a thread not created by `epicsThreadCreate*()` directly
+or indirectly calls an `epicsThread*()` function, a specific tracking struct
+is allocated.
+
+Prior to this release, on POSIX and WIN32 targets, this
+struct would not be `free()`d, resulting in a memory leak.
+
+This release fixed the leak on POSIX targets.
+
+See the associated github [issue 241](https://github.com/epics-base/epics-base/issues/241)
+for WIN32 status.
+
+### Fix `CHECK_RELEASE = WARN`
+
+This now works again, it was broken in 2019 (7.0.3.1) by an errant commit.
+
+### Document `DISP` as design-time field
+
+The DISP field can be set to a non-zero value to prevent records being changed
+from outside the IOC (this is ancient behavior), but has never been documented
+as being usable at design-time (DCT=Yes in the Record Reference tables). This
+has now been changed.
+
+### Make `epicsInt8` signed on all architectures
+
+The `epicsInt8` and thus `DBF_CHAR` types have always been unsigned on
+architectures where `char` is unsigned, for example on many PowerPC CPU
+architectures. This was counter-intuitive, and resulted in IOC behavior
+differing between architectures when converting `DBF_CHAR` values into a
+signed integer or floating point type.
+
+**WARNING**: This fix may change behavior of existing databases on target
+architectures with unsigned `char` (mainly PowerPC) when using input links to
+read from `CHAR` arrays. Architectures with signed `char` (usually x86) should
+be unaffected, although some compilers might generate new warnings.
+
+### Allow hexadecimal and octal numbers in hardware links
+
+[GH:213](https://github.com/epics-base/epics-base/pull/213)
+
+Several types of hardware links (`VME_IO`, `CAMAC_IO`, etc) now accept
+hexadecimal and octal numbers. (Hexadecimal numbers had already been valid
+up to EPICS R3.15.) This change may introduce incompatibilities when using
+numbers with leading `0` as they will now be parsed as octal.
+
+### Fix embedded implementations of `epicsEvent`
+
+[GH:202](https://github.com/epics-base/epics-base/issues/202) and
+[GH:206](https://github.com/epics-base/epics-base/pull/206)
+
+Heinz Junkes provided a new implementation of the `epicsEvent` API suitable for
+RTEMS Posix targets (RTEMS 5.1 and later). In review a few issues related to
+overflow of timeout values surfaced in this and other embedded implementations,
+and these were also been fixed in this Pull Request. The API documentation for
+this and some other routines has also been updated.
+
+### Breakpoint Table Names
+
+The names of breakpoint tables were made unnecessarily strict when DBD file
+processing was moved to Perl for the 3.15 release series. Table names may now
+contain the special characters `_` `-` `:` `;` `.` `[` `]` `<` `>` in addition
+to letters and digits.
+
+### Fix for `undefined` in configure/RELEASE files
+
+Prevents `Use of uninitialized value` warnings from convertRelease.pl.
+
+### Colorized Messages for errlog
+
+Many internal error messages now emit ANSI escape sequences to highlight the
+words "ERROR" and "WARNING" in an attempt to make occurrences more noticeable
+during IOC startup.
+
+The macros `ERL_ERROR` and `ERL_WARNING` are defined for external usage,
+and expand as string constants.  eg.
+
+```c
+#include <errlog.h>
+#ifndef ERL_ERROR
+#  define ERL_ERROR "ERROR"
+#endif
+void fn() {
+   ...
+   errlogPrintf(ERL_ERROR ": something bad happens :(\n");
+```
+
+ANSI escapes are automatically removed from errlog output not destined
+for a terminal.  For example, for logClient, if stderr is redirected,
+or if unsupported (`$TERM` not set, or Windows < 10).
+
+### `dbnd` filter pass through `DBE_ALARM|DBE_PROPERTY`
+
+The `dbnd` server side filter now passes through alarm and property
+change events, even when not exceeding the deadband.
+
+-----
+
+## EPICS Release 7.0.6.1
+
+### `mbboDirectRecord` enhancements
+
+The bit fields `B0` - `B1F` of this record are now always updated and have a
+monitor posted when the `VAL` field is set and the record processed. It is now
+possible to initialize the record's value by setting the bit fields inside a
+database file as long as no other method was used to initialize it (suc as
+setting `VAL` directly, using `DOL`, or by an initial readback from device
+support). A new internal field `OBIT` was added to store information about
+monitors posted on the bit fields.
+
+### Minimum Perl Version is now 5.10.1
+
+Some scripts now make use of features that were introduced to this Perl version
+that was released in 2009.
+
+### DB Links to `DBF_MENU` fields fixed
+
+[GH:183](https://github.com/epics-base/epics-base/issues/183)
+These were broken in a previous release, but now work again.
+
+### Long String access to CALC fields fixed
+
+[GH:194](https://github.com/epics-base/epics-base/issues/194)
+This was broken in a previous release, but now works again.
+
+### Minor Changes
+
++ Many code comments have been spell-checked and corrected.
++ Passing a `-DDEBUG` compiler flag no longer breaks the build.
++ Parallel builds of RTEMS-mvme2100 and RTEMS-mvme2700 targets now work.
++ Illegal characters seen in JSON strings in a database file should now get a
+better error message.
+
+### Other Launchpad Bugs and GitHub Issues Fixed
+
++ [lp:1938459](https://bugs.launchpad.net/epics-base/+bug/1938459)
+  [GH:191](https://github.com/epics-base/epics-base/pull/191) int64in only
+  checks lower 32 bits for change
++ [lp:1941875](https://bugs.launchpad.net/epics-base/+bug/1941875) Buggy
+  warning message "Record/Alias name '...' should not contain non-printable ...
++ [GH:187](https://github.com/epics-base/epics-base/issues/187) waveformRecord
+  missing PACT=true?
++ [GH:189](https://github.com/epics-base/epics-base/pull/189) Fix a couple
+  memory leaks and a segfault
++ [GH:200](https://github.com/epics-base/epics-base/pull/200) and
+  [GH:201](https://github.com/epics-base/epics-base/pull/201) Fix timers on MS
+  Windows for non-EPICS threads
+
+### Compiler interface for epicsAtomic tidied up
+
+[GH:192](https://github.com/epics-base/epics-base/pull/192)
+Both GCC and CLANG compiler intrisics used for the epicsAtomic APIs have been revised; implementations using CLANG should now run faster as they now use the compiler's built-in atomic functions instead of taking a mutex.
+
+### The epicsTime code has been reimplemented
+
+[GH:185](https://github.com/epics-base/epics-base/pull/185)
+This was done to simplify the code and may have improved performance slightly for some uses. Support for the old NTP-specific `struct l_fp` has been dropped but all other routines and methods of the `class epicsTime` function as before.
+
+### Updates to Record Reference documentation
+
+Many of the built-in record types have had improvements to their documentation with additional fields added to the tables, rewrites of descriptions and links to other documents added or fixed.
+
+-----
 
 ## EPICS Release 7.0.6
 
@@ -304,10 +595,10 @@ broken.
 
 This fixes [lauchpad bug #1896295](https://bugs.launchpad.net/bugs/1896295).
 
-### Support for Apple M1 (arm64) Processors
+### Support for Apple M1/M2 (arm64) Processors
 
 Thanks to Jeong Han Lee this release comes with build support for Apple's new
-M1 CPUs running macOS, using the target name `darwin-aarch64`.
+M1/M2 CPUs running macOS, using the target name `darwin-aarch64`.
 
 It should also be possible to build universal binaries containing code for
 both the Intel and arm64 processors under either target name: In the
@@ -1323,7 +1614,7 @@ editing and history. This functionality has now been restored, see Launchpad
 ### Constant link types
 
 Constant links can now hold 64-bit integer values, either as scalars or
-arrays. Only base 10 is supported by the JSON parser though, the JSON standard
+    arrays. Only base 10 is supported by the JSON parser though, the JSON standard
 doesn't allow for hexadecimal numbers.
 
 ### Upgraded the YAJL JSON Library
@@ -1921,6 +2212,24 @@ header and removed the need for dbScan.c to reach into the internals of its
 
 ## Changes from the 3.15 branch since 3.15.9
 
+### Support for Apple M1/M2 (arm64) Processors
+
+Thanks to Jeong Han Lee this release comes with build support for Apple's new
+M1/M2 CPUs running macOS, using the target name `darwin-aarch64`.
+
+### Set thread names on Windows
+
+On MS Windows, epicsThread names are made available to the OS and debugger
+using `SetThreadDescription()` if available as well as using the older
+exception mechanism.
+
+### Fix timers on MS Windows for non-EPICS threads
+
+The waitable timer changes in 3.15.9 broke calls to `epicsThreadSleep()` and
+similar routines that used timers (including `ca_pend_event()`) when made from
+threads that were not started using the epicsThread APIs.
+[This problem](https://github.com/epics-base/epics-base/pull/200)
+[has now been fixed](https://github.com/epics-base/epics-base/pull/201).
 
 ## Changes made between 3.15.8 and 3.15.9
 

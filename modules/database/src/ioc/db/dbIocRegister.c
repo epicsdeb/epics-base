@@ -35,8 +35,14 @@ static const iocshArg * const dbLoadDatabaseArgs[3] =
 {
     &dbLoadDatabaseArg0,&dbLoadDatabaseArg1,&dbLoadDatabaseArg2
 };
-static const iocshFuncDef dbLoadDatabaseFuncDef =
-    {"dbLoadDatabase",3,dbLoadDatabaseArgs};
+static const iocshFuncDef dbLoadDatabaseFuncDef = {
+    "dbLoadDatabase",
+    3,
+    dbLoadDatabaseArgs,
+    "Load the given .dbd file, with 'path' added as a search path, with the given substitutions.\n\n"
+    "Substitutions are usually not needed for .dbd files.\n\n"
+    "Example: dbLoadDatabase dbd/my.dbd\n",
+};
 static void dbLoadDatabaseCallFunc(const iocshArgBuf *args)
 {
     iocshSetError(dbLoadDatabase(args[0].sval,args[1].sval,args[2].sval));
@@ -46,7 +52,14 @@ static void dbLoadDatabaseCallFunc(const iocshArgBuf *args)
 static const iocshArg dbLoadRecordsArg0 = { "file name",iocshArgString};
 static const iocshArg dbLoadRecordsArg1 = { "substitutions",iocshArgString};
 static const iocshArg * const dbLoadRecordsArgs[2] = {&dbLoadRecordsArg0,&dbLoadRecordsArg1};
-static const iocshFuncDef dbLoadRecordsFuncDef = {"dbLoadRecords",2,dbLoadRecordsArgs};
+static const iocshFuncDef dbLoadRecordsFuncDef = {
+    "dbLoadRecords",
+    2,
+    dbLoadRecordsArgs,
+    "Load the given .db file, with the given substitutions.\n\n"
+    "Substitutions should be given in the format 'var1=value1,var2=value2'.\n\n"
+    "Example: dbLoadRecords db/myRecords.db 'user=myself,host=myhost'\n",
+};
 static void dbLoadRecordsCallFunc(const iocshArgBuf *args)
 {
     iocshSetError(dbLoadRecords(args[0].sval,args[1].sval));
@@ -234,7 +247,7 @@ static const iocshArg dbtgfArg0 = { "record name",iocshArgString};
 static const iocshArg * const dbtgfArgs[1] = {&dbtgfArg0};
 static const iocshFuncDef dbtgfFuncDef = {"dbtgf",1,dbtgfArgs,
                                           "Database Test Get Field.\n"
-                                          "Get field with different DBR_* types"};
+                                          "Get field with different DBR_* types\n"};
 static void dbtgfCallFunc(const iocshArgBuf *args) { dbtgf(args[0].sval);}
 
 /* dbtpf */
@@ -283,7 +296,7 @@ static const iocshArg * const dbtpnArgs[2] = {&dbtpnArg0,&dbtpnArg1};
 static const iocshFuncDef dbtpnFuncDef = {"dbtpn",2,dbtpnArgs,
                                           "Database Put Notify\n"
                                           "Without value, begin async. processing and get\n"
-                                          "With value, begin put, process, and get"};
+                                          "With value, begin put, process, and get\n"};
 static void dbtpnCallFunc(const iocshArgBuf *args)
 { dbtpn(args[0].sval,args[1].sval);}
 

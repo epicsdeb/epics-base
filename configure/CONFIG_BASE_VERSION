@@ -48,7 +48,7 @@ EPICS_VERSION = 7
 EPICS_REVISION = 0
 
 # EPICS_MODIFICATION must be a number >=0 and <256
-EPICS_MODIFICATION = 6
+EPICS_MODIFICATION = 7
 
 # EPICS_PATCH_LEVEL must be a number (win32 resource file requirement)
 # Not included in the official EPICS version number if zero

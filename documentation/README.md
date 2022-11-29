@@ -1,6 +1,6 @@
 # Installation Instructions {#install}
 
-## EPICS Base Release 7.0.5
+## EPICS Base Release 7.0.x
 
 -----
 
@@ -74,7 +74,7 @@ is older but does still work.
 
 #### Perl
 
-You must have Perl version 5.10 or later installed. The EPICS
+You must have Perl version 5.10.1 or later installed. The EPICS
 configuration files do not specify the perl full pathname, so the perl
 executable must be found through your normal search path.
 
@@ -387,7 +387,7 @@ install directories.
 
 EPICS executables and perl scripts are installed into the
 `$(INSTALL_LOCATION)/bin/<arch>` directories. Libraries are installed
-into $`(INSTALL_LOCATION)/lib/<arch>`. The default definition for
+into `$(INSTALL_LOCATION)/lib/<arch>`. The default definition for
 `$(INSTALL_LOCATION)` is `$(TOP)` which is the root directory in the
 distribution directory structure, `base`. Intermediate object files
 are stored in `O.<arch>` source subdirectories during the build
