@@ -5,7 +5,7 @@ Maintainer: John Priller <priller@frib.msu.edu>
 Uploaders: Anton Derbenev <aderbenev@bnl.gov>
 Build-Depends: debhelper (>= 10), epics-debhelper (>= 8.18),
                libreadline6-dev | libreadline-dev, libncurses5-dev, perl,
-               mingw32 | g++-mingw-w64,
+               mingw32 | g++-mingw-w64, python3
 Standards-Version: 4.3.0
 Vcs-Git: https://github.com/epicsdeb/epics-base.git
 Vcs-Browser: https://github.com/epicsdeb/epics-base
@@ -16,7 +16,7 @@ Section: libs
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: python3, ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-catools
 Conflicts: epics-perl (<= 3.14.10-7)
 Description: EPICS Base libraries for clients and servers
@@ -43,7 +43,7 @@ Description: Log recording daemon for EPICS IOCS
 
 Package: epics-dev
 Architecture: any
-Depends: libepics7.0.6 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+Depends: python3, libepics7.0.6 (= ${binary:Version}), epics-catools (= ${binary:Version}),
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
@@ -112,7 +112,7 @@ Description: EPICS documentation
 
 Package: epics-win32
 Architecture: all
-Depends: ${misc:Depends},
+Depends: python3, ${misc:Depends},
          epics-dev (>= ${source:Version}), epics-dev (<< ${source:Version}.1~),
 Suggests: wine
 Section: libdevel

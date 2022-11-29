@@ -52,6 +52,7 @@ export SHRLIB_VERSION=$(SOV)
 override_dh_auto_clean:
 	dh_auto_clean
 	rm -rf configure/conf.d
+	rm -f modules/RELEASE.*
 
 override_dh_auto_build:
 	install -d configure/conf.d
