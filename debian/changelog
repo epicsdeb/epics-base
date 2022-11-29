@@ -1,6 +1,5 @@
-epics-base (7.0.6-2) UNRELEASED; urgency=medium
+epics-base (7.0.6-1) UNRELEASED; urgency=medium
 
-  * Non-maintainer upload.
   * Upgrade base to EPICS 7.
   * 
 

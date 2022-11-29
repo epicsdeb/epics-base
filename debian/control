@@ -1,7 +1,7 @@
 Source: epics-base
 Section: devel
 Priority: optional
-Maintainer: John Priller <priller@frib.msu.edu>
+Maintainer: Evan Daykin <daykin@frib.msu.edu>
 Uploaders: Anton Derbenev <aderbenev@bnl.gov>
 Build-Depends: debhelper (>= 10), epics-debhelper (>= 8.18),
                libreadline6-dev | libreadline-dev, libncurses5-dev, perl,
