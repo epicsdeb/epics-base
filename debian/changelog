@@ -2,8 +2,11 @@ epics-base (7.0.7-1) UNRELEASED; urgency=medium
 
   * Upstream version 7.0.7
   * Find softIoc.dbd with zero arguments in EPICS_BASE 
+  * modify dbStaticTest for our dbd lookup workaround
+  * EPICS 7 now comes with pvdata,pvaccess,pvaclient,nt,database
+  * update libepics version
 
- -- Evan Daykin <daykin@frib.msu.edu>  Tue, 29 Nov 2022 17:07:51 -0500
+ -- Evan Daykin <daykin@frib.msu.edu>  Wed, 30 Nov 2022 16:01:31 -0500
 
 epics-base (3.15.9-1) unstable; urgency=medium
 
