@@ -58,7 +58,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
  }
  
  void errIf(int ret, const std::string& msg)
-@@ -103,17 +110,33 @@ void errIf(int ret, const std::string& m
+@@ -103,17 +110,29 @@ void errIf(int ret, const std::string& m
  
  bool lazy_dbd_loaded;
  
@@ -79,11 +79,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
 +    dbOpenFile(&pdbbase, dbd_file.c_str(), &fp);
 +    if((!fp) && dbd_file==prefix+DBD_FILE_REL){
 +        loaded_file=dbd_relative_to_epics_base;
-+        std::cerr<<"Failed to open DBD file: "<<dbd_file<<std::endl;
-+        std::cerr<<"Trying to open it relative to EPICS_BASE instead..."<<std::endl;
 +        dbOpenFile(&pdbbase,dbd_relative_to_epics_base.c_str(),&fp);
-+        if(fp)
-+            std::cout<<"Found softIoc.dbd in"<<dbd_relative_to_epics_base<<"."<<std::endl;
 +    }
 +    if(!fp){
 +        std::cerr<<"Failed to open DBD file from "<<dbd_file;
@@ -100,7 +96,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
      errIf(softIoc_registerRecordDeviceDriver(pdbbase),
            "Failed to initialize database");
      registryFunctionAdd("exit", (REGISTRYFUNCTION) exitSubroutine);
-@@ -133,38 +156,36 @@ int main(int argc, char *argv[])
+@@ -133,38 +152,36 @@ int main(int argc, char *argv[])
          bool ranScript = false;
  
          // attempt to compute relative paths
@@ -154,7 +150,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
                  if (!macros.empty()) {
                      if (verbose)
                          std::cout<<"asSetSubstitutions(\""<<macros<<"\")\n";
-@@ -183,7 +204,7 @@ int main(int argc, char *argv[])
+@@ -183,7 +200,7 @@ int main(int argc, char *argv[])
                  dbd_file = optarg;
                  break;
              case 'd':
@@ -163,7 +159,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
                  if (verbose) {
                      std::cout<<"dbLoadRecords(\""<<optarg<<"\"";
                      if(!macros.empty())
-@@ -206,17 +227,26 @@ int main(int argc, char *argv[])
+@@ -206,17 +223,26 @@ int main(int argc, char *argv[])
                  verbose = true;
                  break;
              case 'x':
@@ -194,7 +190,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
  
          if(optind<argc)  {
              // run script
-@@ -256,7 +286,7 @@ int main(int argc, char *argv[])
+@@ -256,7 +282,7 @@ int main(int argc, char *argv[])
                  }
  
              } else {
@@ -207,7 +203,7 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
 ===================================================================
 --- epics-base.orig/modules/database/src/ioc/dbStatic/dbLexRoutines.c
 +++ epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
-@@ -159,9 +159,10 @@ static void *getLastTemp(void)
+@@ -159,9 +159,11 @@ static void *getLastTemp(void)
      return(ptempListNode->item);
  }
  
@@ -215,12 +211,13 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
 +const char *dbOpenFile(DBBASE **ppdbbase,const char *filename,FILE **fp)
  {
 -    ELLLIST     *ppathList = (ELLLIST *)pdbbase->pathPvt;
++    ELLLIST     *ppathList;
 +    if (*ppdbbase == 0) *ppdbbase = dbAllocBase();
-+    ELLLIST     *ppathList = (ELLLIST *)(*ppdbbase)->pathPvt;
++    ppathList = (ELLLIST *)(*ppdbbase)->pathPvt;
      dbPathNode  *pdbPathNode;
      char        *fullfilename;
  
-@@ -271,7 +272,7 @@ static long dbReadCOM(DBBASE **ppdbbase,
+@@ -271,7 +273,7 @@ static long dbReadCOM(DBBASE **ppdbbase,
          FILE *fp1 = 0;
  
          if (pinputFile->filename)
@@ -229,7 +226,7 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
          if (!pinputFile->filename || !fp1) {
              errPrintf(0, __FILE__, __LINE__,
                  "dbRead opening file %s\n",pinputFile->filename);
-@@ -431,7 +432,7 @@ static void dbIncludeNew(char *filename)
+@@ -431,7 +433,7 @@ static void dbIncludeNew(char *filename)
  
      pinputFile = dbCalloc(1,sizeof(inputFile));
      pinputFile->filename = macEnvExpand(filename);
@@ -251,3 +248,16 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbStaticPvt.h
  
  struct jlink;
  
+Index: epics-base/modules/database/test/ioc/db/dbStaticTest.c
+===================================================================
+--- epics-base.orig/modules/database/test/ioc/db/dbStaticTest.c
++++ epics-base/modules/database/test/ioc/db/dbStaticTest.c
+@@ -304,7 +304,7 @@ MAIN(dbStaticTest)
+     testdbReadDatabase("dbTestIoc.dbd", NULL, NULL);
+     dbTestIoc_registerRecordDeviceDriver(pdbbase);
+     dbPath(pdbbase,"." OSI_PATH_LIST_SEPARATOR "..");
+-    if(!(ldir = dbOpenFile(pdbbase, "dbStaticTest.db", &fp))) {
++    if(!(ldir = dbOpenFile(&pdbbase, "dbStaticTest.db", &fp))) {
+         testAbort("Unable to read dbStaticTest.db");
+     }
+     if(dbReadDatabaseFP(&pdbbase, fp, NULL, NULL)) {
