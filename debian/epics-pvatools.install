@@ -1,0 +1,5 @@
+usr/bin/pvlist
+usr/bin/pvinfo
+usr/bin/pvget
+usr/bin/pvput
+usr/bin/pvmonitor

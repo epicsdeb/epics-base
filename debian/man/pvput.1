@@ -1,0 +1,13 @@
+.TH "PVPUT" "1" "April 17, 2006" "" ""
+.SH "NAME"
+pvput \- write to channel access process variables
+.SH "SYNOPSIS"
+.B pvput
+.RI [ options ] " PV value"
+.br 
+.B pvput
+.RI [ options "] \-a" " PV array_size value0 value1" ...
+.SH "DESCRIPTION"
+.B pvput
+writes the specified value to a PVAccess Process Variable (PV).  The PV's values are read before and after writing and printed to
+stdout.

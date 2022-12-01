@@ -44,6 +44,7 @@ Description: Log recording daemon for EPICS IOCS
 Package: epics-dev
 Architecture: any
 Depends: python3, libepics7.0.7 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+         epics-pvatools (= ${binary:Version}),
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
@@ -74,6 +75,18 @@ Description: EPICS Macro Substitution and Include tool
  This is a dummy package which can be removed.
 
 Package: epics-catools
+Section: admin
+Architecture: any
+Depends: libepics7.0.7 (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Description: Command line utilities for EPICS
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS utilities such as caget and caput as well as the caRepeater daemon.
+
+Package: epics-pvatools
 Section: admin
 Architecture: any
 Depends: libepics7.0.7 (= ${binary:Version}),

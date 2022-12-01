@@ -21,6 +21,7 @@ usr/bin/ascheck
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
+usr/bin/softIocPVA
 usr/bin/iocLogServer
 usr/bin/msi
 usr/share/epics-dev/configure
