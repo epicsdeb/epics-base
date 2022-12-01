@@ -3,3 +3,4 @@ usr/bin/pvinfo
 usr/bin/pvget
 usr/bin/pvput
 usr/bin/pvmonitor
+usr/bin/pvcall

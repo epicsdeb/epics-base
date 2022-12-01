@@ -70,7 +70,7 @@ override_dh_epics_postinstall:
 override_dh_auto_test:
 	LD_LIBRARY_PATH=$(shell pwd)/lib/$(EPICS_HOST_ARCH) make runtests
 
-USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer softIocPVA ascheck pvget pvput pvmonitor pvlist pvinfo
+USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer softIocPVA ascheck pvget pvput pvmonitor pvlist pvinfo pvcall
 
 PERLBINS=caget.pl caput.pl camonitor.pl cainfo.pl capr.pl
 
