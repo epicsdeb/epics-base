@@ -7,8 +7,9 @@ epics-base (7.0.7-1) UNRELEASED; urgency=medium
   * update libepics version
   * Manpages for PVA cmdline tools
   * add pvcall to command line tools
+  * rename hardcoded libepics*.install/lintian-overrides
 
- -- Evan Daykin <daykin@frib.msu.edu>  Thu, 01 Dec 2022 16:46:19 -0500
+ -- Evan Daykin <daykin@frib.msu.edu>  Wed, 07 Dec 2022 10:07:35 -0500
 
 epics-base (3.15.9-1) unstable; urgency=medium
 
