@@ -56,7 +56,13 @@ Conflicts: epics-catools   (<= 3.14.11-6),
            epics-perl      (<= 3.14.12.3-1),
            ioclogserver    (<< 3.15.3-9),
 Replaces:  epics-msi (<< 3.15.3-8~),
+           epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
 Breaks:    epics-msi (<< 3.15.3-8~),
+           epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -96,7 +102,7 @@ Description: Command line utilities for EPICS
  tools, libraries and applications for creating a distributed soft real-time
  control systems.
  .
- EPICS utilities such as caget and caput as well as the caRepeater daemon.
+ EPICS utilities such as pvget and pvput as well as the (deprecated) p2p daemon.
 
 Package: epics-perl
 Architecture: any
