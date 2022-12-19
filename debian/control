@@ -55,14 +55,18 @@ Suggests: epics-doc        (= ${binary:Version}),
 Conflicts: epics-catools   (<= 3.14.11-6),
            epics-perl      (<= 3.14.12.3-1),
            ioclogserver    (<< 3.15.3-9),
+           epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
+Provides:  epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
 Replaces:  epics-msi (<< 3.15.3-8~),
            epics-pva-dev,
            epics-pvd-dev,
            epics-nt-dev
 Breaks:    epics-msi (<< 3.15.3-8~),
-           epics-pva-dev,
-           epics-pvd-dev,
-           epics-nt-dev
+           epics-sscan-dev(<< 2.11.5)
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
