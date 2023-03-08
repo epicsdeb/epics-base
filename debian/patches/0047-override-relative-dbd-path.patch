@@ -159,7 +159,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
                  if (verbose) {
                      std::cout<<"dbLoadRecords(\""<<optarg<<"\"";
                      if(!macros.empty())
-@@ -206,17 +223,26 @@ int main(int argc, char *argv[])
+@@ -206,17 +223,24 @@ int main(int argc, char *argv[])
                  verbose = true;
                  break;
              case 'x':
@@ -170,13 +170,11 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
 -                errIf(dbLoadRecords(exit_file.c_str(), xmacro.c_str()),
 -                      std::string("Failed to load: ")+exit_file);
 +                FILE *fp;
++                if(verbose)
++                    std::cout<<"dbLoadRecords(\""<<exit_file<<"\", \""<<xmacro<<"\")\n";
 +                dbOpenFile(&pdbbase, exit_file.c_str(), &fp);
 +                if(!fp){
-+                    std::cerr<<"Failed to open exit file "<<exit_file<<"."<<std::endl;
-+                    std::cerr<<"Trying to open it relative to EPICS_BASE instead..."<<std::endl;
-+                    dbOpenFile(&pdbbase, EXIT_FILE, &fp);
-+                    if(fp)
-+                        std::cerr<<"Found exit file "<<EXIT_FILE<<"."<<std::endl;
++                  dbOpenFile(&pdbbase, EXIT_FILE, &fp);
 +                }
 +                errIf(!fp && dbLoadRecords(exit_file.c_str(), xmacro.c_str()),
 +                      std::string("Failed to read: ")+exit_file+"\n");
@@ -190,7 +188,7 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
  
          if(optind<argc)  {
              // run script
-@@ -256,7 +282,7 @@ int main(int argc, char *argv[])
+@@ -256,7 +280,7 @@ int main(int argc, char *argv[])
                  }
  
              } else {
@@ -203,7 +201,7 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
 ===================================================================
 --- epics-base.orig/modules/database/src/ioc/dbStatic/dbLexRoutines.c
 +++ epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
-@@ -159,9 +159,11 @@ static void *getLastTemp(void)
+@@ -159,12 +159,13 @@ static void *getLastTemp(void)
      return(ptempListNode->item);
  }
  
@@ -212,12 +210,15 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
  {
 -    ELLLIST     *ppathList = (ELLLIST *)pdbbase->pathPvt;
 +    ELLLIST     *ppathList;
-+    if (*ppdbbase == 0) *ppdbbase = dbAllocBase();
-+    ppathList = (ELLLIST *)(*ppdbbase)->pathPvt;
      dbPathNode  *pdbPathNode;
      char        *fullfilename;
- 
-@@ -271,7 +273,7 @@ static long dbReadCOM(DBBASE **ppdbbase,
+-
++    if (*ppdbbase == 0) *ppdbbase = dbAllocBase();
++    ppathList = (ELLLIST *)(*ppdbbase)->pathPvt;
+     *fp = 0;
+     if (!filename) return 0;
+     if (!ppathList || ellCount(ppathList) == 0 ||
+@@ -271,7 +272,7 @@ static long dbReadCOM(DBBASE **ppdbbase,
          FILE *fp1 = 0;
  
          if (pinputFile->filename)
@@ -226,7 +227,7 @@ Index: epics-base/modules/database/src/ioc/dbStatic/dbLexRoutines.c
          if (!pinputFile->filename || !fp1) {
              errPrintf(0, __FILE__, __LINE__,
                  "dbRead opening file %s\n",pinputFile->filename);
-@@ -431,7 +433,7 @@ static void dbIncludeNew(char *filename)
+@@ -431,7 +432,7 @@ static void dbIncludeNew(char *filename)
  
      pinputFile = dbCalloc(1,sizeof(inputFile));
      pinputFile->filename = macEnvExpand(filename);
