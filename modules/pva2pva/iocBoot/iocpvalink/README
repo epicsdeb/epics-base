@@ -1,0 +1,5 @@
+IOC for testing PVA links
+
+Primary test is st.cmd.  st2.cmd is run/stopped concurrently
+to test remote connect/disconnect.  st2a.cmd to test type
+change.

@@ -1,0 +1,8 @@
+record(int64in, "test:i64") {
+  field(VAL, "0x7fffffffffffffff")
+  field(SEVR, "1")
+  field(STAT, "1")
+  field(EGU, "arb")
+  field(HOPR, "100")
+  field(LOPR, "10")
+}
