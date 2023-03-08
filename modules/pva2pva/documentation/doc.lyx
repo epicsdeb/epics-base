@@ -1,0 +1,986 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman lmodern
+\font_sans lmss
+\font_typewriter lmtt
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf2
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue,citecolor=blue"
+\papersize letterpaper
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+PVAccess Gateway Prototype (pva2pva)
+\end_layout
+
+\begin_layout Author
+Michael Davidsaver
+\end_layout
+
+\begin_layout Date
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+today
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Standard
+In a distributed control system, there are hundreds of nodes that are part
+ of the plant.
+ These nodes make up the controllers and the operator consoles.
+ There are many clients that may want to view the state of equipment outside
+ of the control network.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+gateway
+\begin_inset Quotes erd
+\end_inset
+
+ allows clients outside of the control system to view the equipment while
+ limiting the additional traffic on the control network.
+ The gateway marshals all external requests and makes only one request into
+ the control system.
+ This limits the effect of external requests on the control system, thus
+ maintaining the determinism required for robust operation of a facility.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename parts.dia
+	height 1in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gateway Components
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:parts"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Terms
+\end_layout
+
+\begin_layout Description
+IP Internet Protocol (v4 and/or v6)
+\end_layout
+
+\begin_layout Description
+PV Process Variable.
+ Addressable unit in PVA.
+ A character string 
+\begin_inset Quotes eld
+\end_inset
+
+PV name
+\begin_inset Quotes erd
+\end_inset
+
+ is this address.
+\end_layout
+
+\begin_layout Description
+PVA PVAccess network protocol
+\end_layout
+
+\begin_layout Description
+GW Gateway
+\end_layout
+
+\begin_layout Description
+CLI An arbitrary PVAccess client (end user or another gateway)
+\end_layout
+
+\begin_layout Description
+GWS Gateway server side (CLI communicates with this)
+\end_layout
+
+\begin_layout Description
+GWC Gateway client side (SRV communicates with this)
+\end_layout
+
+\begin_layout Description
+SRV An arbitrary PVAccess server (may be another gateway)
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:parts"
+
+\end_inset
+
+ shows the relationships between the CLI, GWS, GWC, and SRV actors.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+Gateway
+\begin_inset Quotes erd
+\end_inset
+
+ consists of the GWS, GWC, and the logic which sits between them.
+ 
+\end_layout
+
+\begin_layout Section
+Prototype Status
+\end_layout
+
+\begin_layout Itemize
+De-duplication of Channel and Monitor is implemented as described in section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:ToO"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+The queuing algorithm in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:queue"
+
+\end_inset
+
+ is implemented and verified.
+ Verified using simulated camera image.
+\end_layout
+
+\begin_layout Itemize
+Access Control described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:acl"
+
+\end_inset
+
+ is not implemented.
+ As a placeholder a global flag enables/disables write operations.
+\end_layout
+
+\begin_layout Section
+Test Results
+\end_layout
+
+\begin_layout Subsection
+High speed counter
+\end_layout
+
+\begin_layout Standard
+This test involves a scalar PV incrementing at a rate greater than 1 kHz.
+ The goal is to stress the gateway in an attempt to provoke incorrect actions.
+ Several mutex ordering bugs were discovered and corrected.
+\end_layout
+
+\begin_layout Subsection
+Disconnect/reconnect
+\end_layout
+
+\begin_layout Standard
+Restart various combinations of CLI, GW, and SRV to see that disconnection
+ notices are sent to CLI and that connections are restored properly when
+ all components resume running.
+\end_layout
+
+\begin_layout Subsection
+Image queuing contention
+\end_layout
+
+\begin_layout Standard
+An IOC is created with areaDetector and QSRV.
+ This IOC servers a simulated image and a 10 Hz scalar counter PV.
+ A comparison is made between viewing these two PVs through CA gateway and
+ through pva2pva gateway.
+ Through CA gateway the scalar PV is observed to 
+\begin_inset Quotes eld
+\end_inset
+
+stutter
+\begin_inset Quotes erd
+\end_inset
+
+ when the image update rate is as low as 1 Hz.
+ Through pva2pva this is not observed.
+\end_layout
+
+\begin_layout Section
+Goals/Features
+\end_layout
+
+\begin_layout Standard
+Identified features and design goals.
+\end_layout
+
+\begin_layout Paragraph
+De-duplication
+\end_layout
+
+\begin_layout Standard
+of sockets and data to reduce SRV resource use.
+\end_layout
+
+\begin_layout Paragraph
+Policies
+\end_layout
+
+\begin_layout Standard
+to permit or deny individual requests.
+ This include access control policy (ie.
+ client 
+\begin_inset Quotes eld
+\end_inset
+
+X
+\begin_inset Quotes erd
+\end_inset
+
+ may not access resource 
+\begin_inset Quotes eld
+\end_inset
+
+Y
+\begin_inset Quotes erd
+\end_inset
+
+) and administrative limits to bound per-client resource usage (ie.
+ a client may have only 15 concurrent 
+\begin_inset Quotes eld
+\end_inset
+
+gets
+\begin_inset Quotes erd
+\end_inset
+
+ in progress).
+\end_layout
+
+\begin_layout Section
+Theory of Operation
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:ToO"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Name resolution/socket setup
+\end_layout
+
+\begin_layout Standard
+Use of periodically re-sent UDP messages by PVA for name search permits
+ an asynchronous mode of operation for name resolution and socket (circuit)
+ setup.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language={C++}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+struct ChannelCacheEntry {
+\end_layout
+
+\begin_layout Plain Layout
+
+	string name;  // key
+\end_layout
+
+\begin_layout Plain Layout
+
+	int priority; // key
+\end_layout
+
+\begin_layout Plain Layout
+
+	unsigned refcount; // implicily via.
+ shared_ptr
+\end_layout
+
+\begin_layout Plain Layout
+
+	bool searched;
+\end_layout
+
+\begin_layout Plain Layout
+
+	shared_ptr<Channel> chanGWC;
+\end_layout
+
+\begin_layout Plain Layout
+
+};
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+A cache of GWC Channels
+\end_layout
+
+\begin_layout Standard
+index by name and priority (the parameters of the createChannel message)
+ is maintained.
+ Entries in this ChannelCache have an associated GWC Channel, and a garbage
+ cleanup flag.
+\end_layout
+
+\begin_layout Standard
+When GWS receives a new CLI search request message a lookup is made to the
+ ChannelCache which has three possible outcomes (see figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:name-search"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename name-search.msc
+	width 3in
+	height 2in
+	keepAspectRatio
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+CLI name search outcomes
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:name-search"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Miss There is no entry in the cache.
+ A new entry is created.
+ The new GWC Channel begins the search/connect process.
+ No reply to CLI is made.
+\end_layout
+
+\begin_layout Description
+Not
+\begin_inset space ~
+\end_inset
+
+Conn An entry exists, but the associated GWC Channel is not yet connected.
+ No further action is taken.
+ No reply to CLI is made.
+\end_layout
+
+\begin_layout Description
+Hit An entry exists with a connected GWC Channel.
+ A positive search reply is sent to CLI.
+\end_layout
+
+\begin_layout Standard
+Handling of TCP channelCreate messages by GWS is similar except that a negative
+ reply is sent for Miss and Not Conn outcomes.
+ A negative reply to a channelCreate message by CLI will cause it to restart
+ the name search phase.
+\end_layout
+
+\begin_layout Paragraph
+A reference count
+\end_layout
+
+\begin_layout Standard
+is maintained by each ChannelCache entry for the GWS channels using the
+ associated GWC channel.
+ However, an entry should not be immediately removed when its ref.
+ count drops to zero.
+ Instead it should be kept for some time so that it may be found by future
+ CLI search requests.
+\end_layout
+
+\begin_layout Standard
+Each ChannelCache entry will have a boolean flag which is set on creation,
+ and re-set whenever it is found by a name lookup (Miss or Not Conn).
+ A periodic cleanup task runs to remove all entries with this flag cleared
+ and a zero ref.
+ count.
+ Each time it run, the cleanup task also clears the flag of any entry not
+ removed.
+\end_layout
+
+\begin_layout Standard
+This should ensure that unused entries are eventually removed when no client
+ is searching for them.
+\end_layout
+
+\begin_layout Paragraph
+Ownership of an active GWC Channel
+\end_layout
+
+\begin_layout Standard
+is shared by several active GWS channels, and a ChannelCache entry as shown
+ in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:clichanown"
+
+\end_inset
+
+.
+ Red arrows represent strong ownership and blue weak ownership.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename structs.dot
+	width 95col%
+	height 3in
+	keepAspectRatio
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+GW Channel ownership
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:clichanown"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Notification of loss of a GWC Channel
+\end_layout
+
+\begin_layout Standard
+results in the disconnection of any associated GWS Channels, and the immediate
+ removal of the associated ChannelCache entry.
+ This allows the ref.
+ count for an entry to fall to zero once all GWS Channels close.
+\end_layout
+
+\begin_layout Standard
+All pending operations associated with this channel are canceled.
+\end_layout
+
+\begin_layout Subsection
+Get/Put/RPC/...
+ operations
+\end_layout
+
+\begin_layout Standard
+For operations other than Monitor, the timing of the client request can
+ effect the results.
+ No caching or de-duplication can be done without special knowledge about
+ the intended behavior of CLI and SRV.
+ Therefore, these operations pass through the GW without de-duplication.
+\end_layout
+
+\begin_layout Subsection
+Monitor operations
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:monitor"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each ChannelCache entry includes a MonitorCache.
+ This cache is indexed by the pvrequest given with the corresponding monitorCrea
+te operation.
+ As a pvrequest may contain arbitrary data, two pvrequests may not be compared
+ for anything other than exact equality without special knowledge.
+ Therefore, MonitorCache hits are only generated when the CLI provides a
+ pvrequest which exactly matches a MonitorCache entry.
+\end_layout
+
+\begin_layout Standard
+For efficient lookup, the monitor cache is keyed using the serialized byte
+ string of a pvrequest.
+\end_layout
+
+\begin_layout Standard
+Each MonitorCache entry keeps the most recent value received by the GWC
+ which is returned immediately for new GWS subscriptions.
+\end_layout
+
+\begin_layout Standard
+A list of GWS consumers (interested in event data) will also be maintained.
+ Each new event data value is passed into the MonitorRequester of each consumer.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language={C++}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+struct MonitorCacheEntry {
+\end_layout
+
+\begin_layout Plain Layout
+
+	PVField request; // key
+\end_layout
+
+\begin_layout Plain Layout
+
+	weak_ptr<ChannelCacheEntry> chan;
+\end_layout
+
+\begin_layout Plain Layout
+
+	unsigned refcount; // implicily via.
+ shared_ptr
+\end_layout
+
+\begin_layout Plain Layout
+
+	shared_ptr<Monitor> mon;
+\end_layout
+
+\begin_layout Plain Layout
+
+	PVField lastval;
+\end_layout
+
+\begin_layout Plain Layout
+
+	list<MonitorConsumer*> consumers;
+\end_layout
+
+\begin_layout Plain Layout
+
+};
+\end_layout
+
+\begin_layout Plain Layout
+
+struct MonitorConsumer {
+\end_layout
+
+\begin_layout Plain Layout
+
+	shared_ptr<MonitorRequester> queueGWS;
+\end_layout
+
+\begin_layout Plain Layout
+
+	shared_ptr<MonitorCacheEntry> entry;
+\end_layout
+
+\begin_layout Plain Layout
+
+	bool GC;
+\end_layout
+
+\begin_layout Plain Layout
+
+};
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+A reference count
+\end_layout
+
+\begin_layout Standard
+is maintained for each MonitorCacheEntry, which will be closed as soon as
+ its ref.
+ count falls to zero.
+\end_layout
+
+\begin_layout Section
+Channel Transmit Queuing
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:queue"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A major potential pitfall of connection/socket sharing for distinct sub-channels
+ (PVA Channels) is the handling of prioritization (or lack thereof) of traffic
+ for different sub-channels.
+ For example, monitoring a single high data rate PV can cause other PVA
+ Channels to experience higher latency.
+ One way to mitigate this, in part, is to introduce some 
+\begin_inset Quotes eld
+\end_inset
+
+fairness
+\begin_inset Quotes erd
+\end_inset
+
+ to the circuit/Transport transmit message queue.
+ 
+\end_layout
+
+\begin_layout Standard
+Instead of a simple FIFO fed by all Channels, each channel is give a FIFO.
+ The task which dequeues does so by taking from each FIFO in turn in a round
+ robin fashion.
+ This prevents the overall latency through the queue from being dominated
+ by one fast PV.
+\end_layout
+
+\begin_layout Standard
+However, this is only a partial solution as PVs with a large data size can
+ still introduce latency in proportion to this size.
+\end_layout
+
+\begin_layout Standard
+For example, data updates from three source (A, B, and C) are added in one
+ order (line 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "line:queue1"
+
+\end_inset
+
+).
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+fair
+\begin_inset Quotes erd
+\end_inset
+
+ queuing algorithm internally maintains a list of lists (line 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "line:queue2"
+
+\end_inset
+
+).
+ Round robin dequeuing from this list of lists gives the a different ordering
+ as seen on line 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "line:queue3"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Python,numbers=left,escapechar={|}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+queue = [A, A, B, A, B, C, C, A, A, B]|
+\backslash
+label{line:queue1}|
+\end_layout
+
+\begin_layout Plain Layout
+
+sort_fair(queue) # [[A, A, A, A, A], [B, B, B], [C, C]]|
+\backslash
+label{line:queue2}|
+\end_layout
+
+\begin_layout Plain Layout
+
+queue == [A, B, C, A, B, C, A, B, A, A]|
+\backslash
+label{line:queue3}|
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Policies
+\end_layout
+
+\begin_layout Standard
+Along with de-duplication, enforcement of administrative policies is a major
+ function of a GW.
+ Areas of policy include: access control, resource limits, and queuing behavior.
+\end_layout
+
+\begin_layout Subsection
+Access Control
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:acl"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In order to share GWC channels, the GW will make all access control decisions.
+ Authentication information provided by CLI is 
+\series bold
+never
+\series default
+ forwarded to SRV.
+ Instead, the GW's own authentication information is sent to SRV.
+\end_layout
+
+\begin_layout Standard
+Access control needs to be configurable on a per-PV and per-operation basis.
+ In similar contexts this typically takes the form of an Access Control
+ List, where rules are traversed in some order.
+ Each rule makes a decision to Allow, Deny, or Pass to the next rule.
+\end_layout
+
+\begin_layout Standard
+To allow dynamic policies, a rule may itself subscribe to several PVs and
+ use the values obtained, in addition to client provided information and
+ static configuration, to make a decision.
+\end_layout
+
+\begin_layout Subsection
+Administrative Limits
+\end_layout
+
+\begin_layout Standard
+A number of configurable administrative limits should also be provided to
+ limit the resource usage of potentially misbehaving clients including:
+\end_layout
+
+\begin_layout Itemize
+Max # of clients for GWS
+\end_layout
+
+\begin_layout Itemize
+Max # of channels per client
+\end_layout
+
+\begin_layout Itemize
+Max # of concurrent operations, for each operation type
+\end_layout
+
+\begin_layout Itemize
+Max # monitor queue depth
+\end_layout
+
+\begin_layout Standard
+Such limits could be made hard (fail further requests) or soft (log and
+ allow).
+\end_layout
+
+\begin_layout Subsection
+Queuing
+\end_layout
+
+\begin_layout Standard
+At a minimum, the default and max queue sizes should be settable by policy.
+ Additionally, a choice of algorithms could be provided to decide which
+ entries to drop when a queue overflows.
+\end_layout
+
+\end_body
+\end_document

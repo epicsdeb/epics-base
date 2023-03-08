@@ -1,0 +1,2428 @@
+#*************************************************************************
+# Copyright (c) 2012 The University of Chicago, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE is distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution.
+#*************************************************************************
+
+=title Array Subroutine Record (aSub)
+
+The aSub record is an advanced variant of the 'sub' (subroutine) record which
+has a number of additional features:
+
+=over
+
+=item *
+
+It provides 20 different input and output fields which can hold array or
+scalar values.
+The types and array capacities of these are user configurable, and they all
+have an associated input or output link.
+
+=item *
+
+The name of the C or C++ subroutine to be called when the record processes
+can be changed dynamically while the IOC is running.
+The name can either be fetched from another record using an input link, or
+written directly into the SNAM field.
+
+=item *
+
+The user can choose whether monitor events should be posted for the output
+fields.
+
+=item *
+
+The VAL field is set to the return value from the user subroutine, which is
+treated as a status value and controls whether the output links will be used
+or not. The record can also raise an alarm with a chosen severity if the status
+value is non-zero.
+
+=back
+
+=head2 Record-specific Menus
+
+=head3 Menu aSubLFLG
+
+The LFLG menu field controls whether the SUBL link will be read to update
+the name of the subroutine to be called when the record processes.
+
+=menu aSubLFLG
+
+=cut
+
+menu(aSubLFLG) {
+	choice(aSubLFLG_IGNORE,"IGNORE")
+	choice(aSubLFLG_READ,"READ")
+}
+
+=head3 Menu aSubEFLG
+
+The EFLG menu field indicates whether monitor events should be posted for the
+VALA..VALU output value fields.
+
+=menu aSubEFLG
+
+=cut
+
+menu(aSubEFLG) {
+	choice(aSubEFLG_NEVER,"NEVER")
+	choice(aSubEFLG_ON_CHANGE,"ON CHANGE")
+	choice(aSubEFLG_ALWAYS,"ALWAYS")
+}
+
+=head2 Parameter Fields
+
+The record-specific fields are described below.
+
+=recordtype aSub
+
+=cut
+
+recordtype(aSub) {
+	include "dbCommon.dbd"
+
+=head3 Subroutine Fields
+
+The VAL field is set to the value returned by the user subroutine.
+The value is treated as an error status value where zero mean success.
+The output links OUTA ... OUTU will only be used to forward the associated
+output value fields when the subroutine has returned a zero status.
+If the return status was less than zero, the record will be put into C<SOFT_ALARM>
+state with severity given by the BRSV field.
+
+The INAM field may be used to name a subroutine that will be called once at
+IOC initialization time.
+
+LFLG tells the record whether to read or ignore the SUBL link.
+If the value is C<READ>, then the name of the subroutine to be called at
+process time is read from SUBL.
+If the value is C<IGNORE>, the name of the subroutine is that currently held
+in SNAM.
+
+A string is read from the SUBL link to fetch the name of the subroutine to
+be run during record processing.
+
+SNAM holds the name of the subroutine to be called when the record processes.
+The value in this field can be overwritten by the SUBL link if LFLG is set
+to C<READ>.
+
+The SADR field is only accessible from C code; it points to the subroutine
+to be called.
+
+The CADR field may be set by the user subroutine to point to another function
+that will be called immediately before setting the SADR field to some other
+routine. This allows the main user subroutine to allocate resources when it is
+first called and be able to release them again when they are no longer needed.
+
+=fields VAL, OVAL, INAM, LFLG, SUBL, SNAM, ONAM, SADR, CADR, BRSV
+
+=cut
+
+	field(VAL,DBF_LONG) {
+		prompt("Subr. return value")
+		asl(ASL0)
+	}
+	field(OVAL,DBF_LONG) {
+		prompt("Old return value")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(INAM,DBF_STRING) {
+		prompt("Initialize Subr. Name")
+		promptgroup("30 - Action")
+		special(SPC_NOMOD)
+		interest(1)
+		size(41)
+	}
+	field(LFLG,DBF_MENU) {
+		prompt("Subr. Input Enable")
+		promptgroup("30 - Action")
+		interest(1)
+		menu(aSubLFLG)
+	}
+	field(SUBL,DBF_INLINK) {
+		prompt("Subroutine Name Link")
+		promptgroup("30 - Action")
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(SNAM,DBF_STRING) {
+		prompt("Process Subr. Name")
+		promptgroup("30 - Action")
+		special(SPC_MOD)
+		interest(1)
+		size(41)
+	}
+	field(ONAM,DBF_STRING) {
+		prompt("Old Subr. Name")
+		promptgroup("30 - Action")
+		special(SPC_NOMOD)
+		interest(3)
+		size(41)
+	}
+	%struct aSubRecord;
+	field(SADR,DBF_NOACCESS) {
+		prompt("Subroutine Address")
+		special(SPC_NOMOD)
+		interest(2)
+		extra("long (*sadr)(struct aSubRecord *)")
+	}
+	field(CADR,DBF_NOACCESS) {
+		prompt("Subroutine Cleanup Address")
+		special(SPC_NOMOD)
+		interest(2)
+		extra("void (*cadr)(struct aSubRecord *)")
+	}
+	field(BRSV,DBF_MENU) {
+		prompt("Bad Return Severity")
+		promptgroup("70 - Alarm")
+		pp(TRUE)
+		interest(1)
+		menu(menuAlarmSevr)
+	}
+
+=head3 Operator Display Parameters
+
+The PREC field specifies the number of decimal places with which to display
+the values of the value fields A ... U and VALA ... VALU.
+Except when it doesn't.
+
+=cut
+
+	field(PREC,DBF_SHORT) {
+		prompt("Display Precision")
+		promptgroup("80 - Display")
+		interest(1)
+		prop(YES)
+	}
+
+=head3 Output Event Flag
+
+This field tells the record when to post change events on the output fields
+VALA ... VALU. If the value is C<NEVER>, events are never posted. If the value
+is C<ALWAYS>, events are posted every time the record processes. If the value
+is C<ON CHANGE>, events are posted when any element of an array changes value.
+This flag controls value, log (archive) and alarm change events.
+
+=fields EFLG
+
+=cut
+
+	field(EFLG,DBF_MENU) {
+		prompt("Output Event Flag")
+		promptgroup("50 - Output")
+		interest(1)
+		menu(aSubEFLG)
+		initial("1")
+	}
+
+=head3 Input Link Fields
+
+The input links from where the values of A,...,U are fetched
+during record processing.
+
+=fields INPA, INPB, INPC, INPD, INPE, INPF, INPG, INPH, INPI, INPJ, INPK, INPL, INPM, INPN, INPO, INPP, INPQ, INPR, INPS, INPT, INPU
+
+=cut
+
+	field(INPA,DBF_INLINK) {
+		prompt("Input Link A")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPB,DBF_INLINK) {
+		prompt("Input Link B")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPC,DBF_INLINK) {
+		prompt("Input Link C")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPD,DBF_INLINK) {
+		prompt("Input Link D")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPE,DBF_INLINK) {
+		prompt("Input Link E")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPF,DBF_INLINK) {
+		prompt("Input Link F")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPG,DBF_INLINK) {
+		prompt("Input Link G")
+		promptgroup("41 - Input A-G")
+		interest(1)
+	}
+	field(INPH,DBF_INLINK) {
+		prompt("Input Link H")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPI,DBF_INLINK) {
+		prompt("Input Link I")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPJ,DBF_INLINK) {
+		prompt("Input Link J")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPK,DBF_INLINK) {
+		prompt("Input Link K")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPL,DBF_INLINK) {
+		prompt("Input Link L")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPM,DBF_INLINK) {
+		prompt("Input Link M")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPN,DBF_INLINK) {
+		prompt("Input Link N")
+		promptgroup("42 - Input H-N")
+		interest(1)
+	}
+	field(INPO,DBF_INLINK) {
+		prompt("Input Link O")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+	field(INPP,DBF_INLINK) {
+		prompt("Input Link P")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+	field(INPQ,DBF_INLINK) {
+		prompt("Input Link Q")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+	field(INPR,DBF_INLINK) {
+		prompt("Input Link R")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+	field(INPS,DBF_INLINK) {
+		prompt("Input Link S")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+	field(INPT,DBF_INLINK) {
+		prompt("Input Link T")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+	field(INPU,DBF_INLINK) {
+		prompt("Input Link U")
+		promptgroup("43 - Input O-U")
+		interest(1)
+	}
+
+=head3 Input Value Fields
+
+Thse fields hold the scalar or array values fetched through the input links
+INPA,...,INPU.
+
+=fields A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U
+
+=cut
+
+	field(A,DBF_NOACCESS) {
+		prompt("Input value A")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *a")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTA
+	}
+	field(B,DBF_NOACCESS) {
+		prompt("Input value B")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *b")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTB
+	}
+	field(C,DBF_NOACCESS) {
+		prompt("Input value C")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *c")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTC
+	}
+	field(D,DBF_NOACCESS) {
+		prompt("Input value D")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *d")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTD
+	}
+	field(E,DBF_NOACCESS) {
+		prompt("Input value E")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *e")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTE
+	}
+	field(F,DBF_NOACCESS) {
+		prompt("Input value F")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *f")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTF
+	}
+	field(G,DBF_NOACCESS) {
+		prompt("Input value G")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *g")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTG
+	}
+	field(H,DBF_NOACCESS) {
+		prompt("Input value H")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *h")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTH
+	}
+	field(I,DBF_NOACCESS) {
+		prompt("Input value I")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *i")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTI
+	}
+	field(J,DBF_NOACCESS) {
+		prompt("Input value J")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *j")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTJ
+	}
+	field(K,DBF_NOACCESS) {
+		prompt("Input value K")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *k")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTK
+	}
+	field(L,DBF_NOACCESS) {
+		prompt("Input value L")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *l")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTL
+	}
+	field(M,DBF_NOACCESS) {
+		prompt("Input value M")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *m")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTM
+	}
+	field(N,DBF_NOACCESS) {
+		prompt("Input value N")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *n")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTN
+	}
+	field(O,DBF_NOACCESS) {
+		prompt("Input value O")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *o")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTO
+	}
+	field(P,DBF_NOACCESS) {
+		prompt("Input value P")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *p")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTP
+	}
+	field(Q,DBF_NOACCESS) {
+		prompt("Input value Q")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *q")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTQ
+	}
+	field(R,DBF_NOACCESS) {
+		prompt("Input value R")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *r")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTR
+	}
+	field(S,DBF_NOACCESS) {
+		prompt("Input value S")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *s")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTS
+	}
+	field(T,DBF_NOACCESS) {
+		prompt("Input value T")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *t")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTT
+	}
+	field(U,DBF_NOACCESS) {
+		prompt("Input value U")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *u")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTU
+	}
+
+=head3 Input Value Data Types
+
+Field types of the input value fields.
+The choices can be found by following the link to the menuFtype definition.
+
+=fields FTA, FTB, FTC, FTD, FTE, FTF, FTG, FTH, FTI, FTJ, FTK, FTL, FTM, FTN, FTO, FTP, FTQ, FTR, FTS, FTT, FTU
+
+=cut
+
+	field(FTA,DBF_MENU) {
+		prompt("Type of A")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTB,DBF_MENU) {
+		prompt("Type of B")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTC,DBF_MENU) {
+		prompt("Type of C")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTD,DBF_MENU) {
+		prompt("Type of D")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTE,DBF_MENU) {
+		prompt("Type of E")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTF,DBF_MENU) {
+		prompt("Type of F")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTG,DBF_MENU) {
+		prompt("Type of G")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTH,DBF_MENU) {
+		prompt("Type of H")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTI,DBF_MENU) {
+		prompt("Type of I")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTJ,DBF_MENU) {
+		prompt("Type of J")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTK,DBF_MENU) {
+		prompt("Type of K")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTL,DBF_MENU) {
+		prompt("Type of L")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTM,DBF_MENU) {
+		prompt("Type of M")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTN,DBF_MENU) {
+		prompt("Type of N")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTO,DBF_MENU) {
+		prompt("Type of O")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTP,DBF_MENU) {
+		prompt("Type of P")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTQ,DBF_MENU) {
+		prompt("Type of Q")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTR,DBF_MENU) {
+		prompt("Type of R")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTS,DBF_MENU) {
+		prompt("Type of S")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTT,DBF_MENU) {
+		prompt("Type of T")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTU,DBF_MENU) {
+		prompt("Type of U")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+
+=head3 Input Value Array Capacity
+
+These fields specify how many array elements the input value fields may hold.
+
+Note that access to the C<NOT> field from C code must use the field name in
+upper case, e.g. C<< prec->NOT >> since the lower-case C<not> is a reserved
+word in C++ and cannot be used as an identifier.
+
+=fields NOA, NOB, NOC, NOD, NOE, NOF, NOG, NOH, NOI, NOJ, NOK, NOL, NOM, NON, NOO, NOP, NOQ, NOR, NOS, NOT, NOU
+
+=cut
+
+	field(NOA,DBF_ULONG) {
+		prompt("Max. elements in A")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOB,DBF_ULONG) {
+		prompt("Max. elements in B")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOC,DBF_ULONG) {
+		prompt("Max. elements in C")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOD,DBF_ULONG) {
+		prompt("Max. elements in D")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOE,DBF_ULONG) {
+		prompt("Max. elements in E")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOF,DBF_ULONG) {
+		prompt("Max. elements in F")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOG,DBF_ULONG) {
+		prompt("Max. elements in G")
+		promptgroup("41 - Input A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOH,DBF_ULONG) {
+		prompt("Max. elements in H")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOI,DBF_ULONG) {
+		prompt("Max. elements in I")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOJ,DBF_ULONG) {
+		prompt("Max. elements in J")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOK,DBF_ULONG) {
+		prompt("Max. elements in K")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOL,DBF_ULONG) {
+		prompt("Max. elements in L")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOM,DBF_ULONG) {
+		prompt("Max. elements in M")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NON,DBF_ULONG) {
+		prompt("Max. elements in N")
+		promptgroup("42 - Input H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOO,DBF_ULONG) {
+		prompt("Max. elements in O")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOP,DBF_ULONG) {
+		prompt("Max. elements in P")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOQ,DBF_ULONG) {
+		prompt("Max. elements in Q")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOR,DBF_ULONG) {
+		prompt("Max. elements in R")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOS,DBF_ULONG) {
+		prompt("Max. elements in S")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOT,DBF_ULONG) {
+		prompt("Max. elements in T")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOU,DBF_ULONG) {
+		prompt("Max. elements in U")
+		promptgroup("43 - Input O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+
+=head3 Input Value Array Size
+
+These fields specify how many array elements the input value fields currently
+contain.
+
+=fields NEA, NEB, NEC, NED, NEE, NEF, NEG, NEH, NEI, NEJ, NEK, NEL, NEM, NEN, NEO, NEP, NEQ, NER, NES, NET, NEU
+
+=cut
+
+	field(NEA,DBF_ULONG) {
+		prompt("Num. elements in A")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEB,DBF_ULONG) {
+		prompt("Num. elements in B")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEC,DBF_ULONG) {
+		prompt("Num. elements in C")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NED,DBF_ULONG) {
+		prompt("Num. elements in D")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEE,DBF_ULONG) {
+		prompt("Num. elements in E")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEF,DBF_ULONG) {
+		prompt("Num. elements in F")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEG,DBF_ULONG) {
+		prompt("Num. elements in G")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEH,DBF_ULONG) {
+		prompt("Num. elements in H")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEI,DBF_ULONG) {
+		prompt("Num. elements in I")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEJ,DBF_ULONG) {
+		prompt("Num. elements in J")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEK,DBF_ULONG) {
+		prompt("Num. elements in K")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEL,DBF_ULONG) {
+		prompt("Num. elements in L")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEM,DBF_ULONG) {
+		prompt("Num. elements in M")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEN,DBF_ULONG) {
+		prompt("Num. elements in N")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEO,DBF_ULONG) {
+		prompt("Num. elements in O")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEP,DBF_ULONG) {
+		prompt("Num. elements in P")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEQ,DBF_ULONG) {
+		prompt("Num. elements in Q")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NER,DBF_ULONG) {
+		prompt("Num. elements in R")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NES,DBF_ULONG) {
+		prompt("Num. elements in S")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NET,DBF_ULONG) {
+		prompt("Num. elements in T")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEU,DBF_ULONG) {
+		prompt("Num. elements in U")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+
+=head3 Output Link Fields
+
+The output links through which the VALA ... VALU field values are sent
+during record processing, provided the subroutine returned 0.
+
+=fields OUTA, OUTB, OUTC, OUTD, OUTE, OUTF, OUTG, OUTH, OUTI, OUTJ, OUTK, OUTL, OUTM, OUTN, OUTO, OUTP, OUTQ, OUTR, OUTS, OUTT, OUTU
+
+=cut
+	field(OUTA,DBF_OUTLINK) {
+		prompt("Output Link A")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTB,DBF_OUTLINK) {
+		prompt("Output Link B")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTC,DBF_OUTLINK) {
+		prompt("Output Link C")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTD,DBF_OUTLINK) {
+		prompt("Output Link D")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTE,DBF_OUTLINK) {
+		prompt("Output Link E")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTF,DBF_OUTLINK) {
+		prompt("Output Link F")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTG,DBF_OUTLINK) {
+		prompt("Output Link G")
+		promptgroup("51 - Output A-G")
+		interest(1)
+	}
+	field(OUTH,DBF_OUTLINK) {
+		prompt("Output Link H")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTI,DBF_OUTLINK) {
+		prompt("Output Link I")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTJ,DBF_OUTLINK) {
+		prompt("Output Link J")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTK,DBF_OUTLINK) {
+		prompt("Output Link K")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTL,DBF_OUTLINK) {
+		prompt("Output Link L")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTM,DBF_OUTLINK) {
+		prompt("Output Link M")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTN,DBF_OUTLINK) {
+		prompt("Output Link N")
+		promptgroup("52 - Output H-N")
+		interest(1)
+	}
+	field(OUTO,DBF_OUTLINK) {
+		prompt("Output Link O")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+	field(OUTP,DBF_OUTLINK) {
+		prompt("Output Link P")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+	field(OUTQ,DBF_OUTLINK) {
+		prompt("Output Link Q")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+	field(OUTR,DBF_OUTLINK) {
+		prompt("Output Link R")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+	field(OUTS,DBF_OUTLINK) {
+		prompt("Output Link S")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+	field(OUTT,DBF_OUTLINK) {
+		prompt("Output Link T")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+	field(OUTU,DBF_OUTLINK) {
+		prompt("Output Link U")
+		promptgroup("53 - Output O-U")
+		interest(1)
+	}
+
+=head3 Output Value Fields
+
+These fields hold scalar or array data generated by the subroutine which will
+be sent through the OUTA ... OUTU links during record processing.
+
+=fields VALA, VALB, VALC, VALD, VALE, VALF, VALG, VALH, VALI, VALJ, VALK, VALL, VALM, VALN, VALO, VALP, VALQ, VALR, VALS, VALT, VALU
+
+=cut
+
+	field(VALA,DBF_NOACCESS) {
+		prompt("Output value A")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *vala")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVA
+	}
+	field(VALB,DBF_NOACCESS) {
+		prompt("Output value B")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valb")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVB
+	}
+	field(VALC,DBF_NOACCESS) {
+		prompt("Output value C")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valc")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVC
+	}
+	field(VALD,DBF_NOACCESS) {
+		prompt("Output value D")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *vald")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVD
+	}
+	field(VALE,DBF_NOACCESS) {
+		prompt("Output value E")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *vale")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVE
+	}
+	field(VALF,DBF_NOACCESS) {
+		prompt("Output value F")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valf")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVF
+	}
+	field(VALG,DBF_NOACCESS) {
+		prompt("Output value G")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valg")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVG
+	}
+	field(VALH,DBF_NOACCESS) {
+		prompt("Output value H")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valh")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVH
+	}
+	field(VALI,DBF_NOACCESS) {
+		prompt("Output value I")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *vali")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVI
+	}
+	field(VALJ,DBF_NOACCESS) {
+		prompt("Output value J")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valj")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVJ
+	}
+	field(VALK,DBF_NOACCESS) {
+		prompt("Output value K")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valk")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVK
+	}
+	field(VALL,DBF_NOACCESS) {
+		prompt("Output value L")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *vall")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVL
+	}
+	field(VALM,DBF_NOACCESS) {
+		prompt("Output value M")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valm")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVM
+	}
+	field(VALN,DBF_NOACCESS) {
+		prompt("Output value N")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valn")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVN
+	}
+	field(VALO,DBF_NOACCESS) {
+		prompt("Output value O")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valo")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVO
+	}
+	field(VALP,DBF_NOACCESS) {
+		prompt("Output value P")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valp")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVP
+	}
+	field(VALQ,DBF_NOACCESS) {
+		prompt("Output value Q")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valq")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVQ
+	}
+	field(VALR,DBF_NOACCESS) {
+		prompt("Output value R")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valr")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVR
+	}
+	field(VALS,DBF_NOACCESS) {
+		prompt("Output value S")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *vals")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVS
+	}
+	field(VALT,DBF_NOACCESS) {
+		prompt("Output value T")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valt")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVT
+	}
+	field(VALU,DBF_NOACCESS) {
+		prompt("Output value U")
+		asl(ASL0)
+		special(SPC_DBADDR)
+		interest(2)
+		extra("void *valu")
+		#=read Yes
+		#=write Yes
+		#=type Set by FTVU
+	}
+
+=head3 Old Value Fields
+
+The previous values of the output fields.
+These are used to determine when to post events if EFLG is set to C<ON CHANGE>.
+
+=fields OVLA, OVLB, OVLC, OVLD, OVLE, OVLF, OVLG, OVLH, OVLI, OVLJ, OVLK, OVLL, OVLM, OVLN, OVLO, OVLP, OVLQ, OVLR, OVLS, OVLT, OVLU
+
+=cut
+
+	field(OVLA,DBF_NOACCESS) {
+		prompt("Old Output A")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovla")
+	}
+	field(OVLB,DBF_NOACCESS) {
+		prompt("Old Output B")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlb")
+	}
+	field(OVLC,DBF_NOACCESS) {
+		prompt("Old Output C")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlc")
+	}
+	field(OVLD,DBF_NOACCESS) {
+		prompt("Old Output D")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovld")
+	}
+	field(OVLE,DBF_NOACCESS) {
+		prompt("Old Output E")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovle")
+	}
+	field(OVLF,DBF_NOACCESS) {
+		prompt("Old Output F")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlf")
+	}
+	field(OVLG,DBF_NOACCESS) {
+		prompt("Old Output G")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlg")
+	}
+	field(OVLH,DBF_NOACCESS) {
+		prompt("Old Output H")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlh")
+	}
+	field(OVLI,DBF_NOACCESS) {
+		prompt("Old Output I")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovli")
+	}
+	field(OVLJ,DBF_NOACCESS) {
+		prompt("Old Output J")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlj")
+	}
+	field(OVLK,DBF_NOACCESS) {
+		prompt("Old Output K")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlk")
+	}
+	field(OVLL,DBF_NOACCESS) {
+		prompt("Old Output L")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovll")
+	}
+	field(OVLM,DBF_NOACCESS) {
+		prompt("Old Output M")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlm")
+	}
+	field(OVLN,DBF_NOACCESS) {
+		prompt("Old Output N")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovln")
+	}
+	field(OVLO,DBF_NOACCESS) {
+		prompt("Old Output O")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlo")
+	}
+	field(OVLP,DBF_NOACCESS) {
+		prompt("Old Output P")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlp")
+	}
+	field(OVLQ,DBF_NOACCESS) {
+		prompt("Old Output Q")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlq")
+	}
+	field(OVLR,DBF_NOACCESS) {
+		prompt("Old Output R")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlr")
+	}
+	field(OVLS,DBF_NOACCESS) {
+		prompt("Old Output S")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovls")
+	}
+	field(OVLT,DBF_NOACCESS) {
+		prompt("Old Output T")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlt")
+	}
+	field(OVLU,DBF_NOACCESS) {
+		prompt("Old Output U")
+		asl(ASL0)
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void *ovlu")
+	}
+
+=head3 Output Value Data Types
+
+Field types of the output value fields.
+The choices can be found by following a link to the menuFtype definition.
+
+=fields FTVA, FTVB, FTVC, FTVD, FTVE, FTVF, FTVG, FTVH, FTVI, FTVJ, FTVK, FTVL, FTVM, FTVN, FTVO, FTVP, FTVQ, FTVR, FTVS, FTVT, FTVU
+
+=cut
+
+	field(FTVA,DBF_MENU) {
+		prompt("Type of VALA")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVB,DBF_MENU) {
+		prompt("Type of VALB")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVC,DBF_MENU) {
+		prompt("Type of VALC")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVD,DBF_MENU) {
+		prompt("Type of VALD")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVE,DBF_MENU) {
+		prompt("Type of VALE")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVF,DBF_MENU) {
+		prompt("Type of VALF")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVG,DBF_MENU) {
+		prompt("Type of VALG")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVH,DBF_MENU) {
+		prompt("Type of VALH")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVI,DBF_MENU) {
+		prompt("Type of VALI")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVJ,DBF_MENU) {
+		prompt("Type of VALJ")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVK,DBF_MENU) {
+		prompt("Type of VALK")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVL,DBF_MENU) {
+		prompt("Type of VALL")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVM,DBF_MENU) {
+		prompt("Type of VALM")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVN,DBF_MENU) {
+		prompt("Type of VALN")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVO,DBF_MENU) {
+		prompt("Type of VALO")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVP,DBF_MENU) {
+		prompt("Type of VALP")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVQ,DBF_MENU) {
+		prompt("Type of VALQ")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVR,DBF_MENU) {
+		prompt("Type of VALR")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVS,DBF_MENU) {
+		prompt("Type of VALS")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVT,DBF_MENU) {
+		prompt("Type of VALT")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+	field(FTVU,DBF_MENU) {
+		prompt("Type of VALU")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("DOUBLE")
+		menu(menuFtype)
+	}
+
+=head3 Output Value Array Capacity
+
+These fields specify how many array elements the output value fields may hold.
+
+=fields NOVA, NOVB, NOVC, NOVD, NOVE, NOVF, NOVG, NOVH, NOVI, NOVJ, NOVK, NOVL, NOVM, NOVN, NOVO, NOVP, NOVQ, NOVR, NOVS, NOVT, NOVU
+
+=cut
+
+	field(NOVA,DBF_ULONG) {
+		prompt("Max. elements in VALA")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVB,DBF_ULONG) {
+		prompt("Max. elements in VALB")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVC,DBF_ULONG) {
+		prompt("Max. elements in VALC")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVD,DBF_ULONG) {
+		prompt("Max. elements in VALD")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVE,DBF_ULONG) {
+		prompt("Max. elements in VALE")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVF,DBF_ULONG) {
+		prompt("Max. elements in VALF")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVG,DBF_ULONG) {
+		prompt("Max. elements in VALG")
+		promptgroup("51 - Output A-G")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVH,DBF_ULONG) {
+		prompt("Max. elements in VAlH")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVI,DBF_ULONG) {
+		prompt("Max. elements in VALI")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVJ,DBF_ULONG) {
+		prompt("Max. elements in VALJ")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVK,DBF_ULONG) {
+		prompt("Max. elements in VALK")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVL,DBF_ULONG) {
+		prompt("Max. elements in VALL")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVM,DBF_ULONG) {
+		prompt("Max. elements in VALM")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVN,DBF_ULONG) {
+		prompt("Max. elements in VALN")
+		promptgroup("52 - Output H-N")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVO,DBF_ULONG) {
+		prompt("Max. elements in VALO")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVP,DBF_ULONG) {
+		prompt("Max. elements in VALP")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVQ,DBF_ULONG) {
+		prompt("Max. elements in VALQ")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVR,DBF_ULONG) {
+		prompt("Max. elements in VALR")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVS,DBF_ULONG) {
+		prompt("Max. elements in VALS")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVT,DBF_ULONG) {
+		prompt("Max. elements in VALT")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+	field(NOVU,DBF_ULONG) {
+		prompt("Max. elements in VALU")
+		promptgroup("53 - Output O-U")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("1")
+	}
+
+=head3 Output Value Array Size
+
+These fields specify how many array elements the output value fields currently
+contain.
+
+=fields NEVA, NEVB, NEVC, NEVD, NEVE, NEVF, NEVG, NEVH, NEVI, NEVJ, NEVK, NEVL, NEVM, NEVN, NEVO, NEVP, NEVQ, NEVR, NEVS, NEVT, NEVU
+
+=cut
+
+	field(NEVA,DBF_ULONG) {
+		prompt("Num. elements in VALA")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVB,DBF_ULONG) {
+		prompt("Num. elements in VALB")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVC,DBF_ULONG) {
+		prompt("Num. elements in VALC")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVD,DBF_ULONG) {
+		prompt("Num. elements in VALD")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVE,DBF_ULONG) {
+		prompt("Num. elements in VALE")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVF,DBF_ULONG) {
+		prompt("Num. elements in VALF")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVG,DBF_ULONG) {
+		prompt("Num. elements in VALG")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVH,DBF_ULONG) {
+		prompt("Num. elements in VAlH")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVI,DBF_ULONG) {
+		prompt("Num. elements in VALI")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVJ,DBF_ULONG) {
+		prompt("Num. elements in VALJ")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVK,DBF_ULONG) {
+		prompt("Num. elements in VALK")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVL,DBF_ULONG) {
+		prompt("Num. elements in VALL")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVM,DBF_ULONG) {
+		prompt("Num. elements in VALM")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVN,DBF_ULONG) {
+		prompt("Num. elements in VALN")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVO,DBF_ULONG) {
+		prompt("Num. elements in VALO")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVP,DBF_ULONG) {
+		prompt("Num. elements in VALP")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVQ,DBF_ULONG) {
+		prompt("Num. elements in VALQ")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVR,DBF_ULONG) {
+		prompt("Num. elements in VALR")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVS,DBF_ULONG) {
+		prompt("Num. elements in VALS")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVT,DBF_ULONG) {
+		prompt("Num. elements in VALT")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+	field(NEVU,DBF_ULONG) {
+		prompt("Num. elements in VALU")
+		special(SPC_NOMOD)
+		interest(3)
+		initial("1")
+	}
+
+=head3 Old Value Array Size
+
+These fields specify how many array elements the old value fields currently
+contain.
+
+=fields ONVA, ONVB, ONVC, ONVD, ONVE, ONVF, ONVG, ONVH, ONVI, ONVJ, ONVK, ONVL, ONVM, ONVN, ONVO, ONVP, ONVQ, ONVR, ONVS, ONVT, ONVU
+
+=cut
+
+	field(ONVA,DBF_ULONG) {
+		prompt("Num. elements in OVLA")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVB,DBF_ULONG) {
+		prompt("Num. elements in OVLB")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVC,DBF_ULONG) {
+		prompt("Num. elements in OVLC")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVD,DBF_ULONG) {
+		prompt("Num. elements in OVLD")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVE,DBF_ULONG) {
+		prompt("Num. elements in OVLE")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVF,DBF_ULONG) {
+		prompt("Num. elements in OVLF")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVG,DBF_ULONG) {
+		prompt("Num. elements in OVLG")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVH,DBF_ULONG) {
+		prompt("Num. elements in VAlH")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVI,DBF_ULONG) {
+		prompt("Num. elements in OVLI")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVJ,DBF_ULONG) {
+		prompt("Num. elements in OVLJ")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVK,DBF_ULONG) {
+		prompt("Num. elements in OVLK")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVL,DBF_ULONG) {
+		prompt("Num. elements in OVLL")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVM,DBF_ULONG) {
+		prompt("Num. elements in OVLM")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVN,DBF_ULONG) {
+		prompt("Num. elements in OVLN")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVO,DBF_ULONG) {
+		prompt("Num. elements in OVLO")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVP,DBF_ULONG) {
+		prompt("Num. elements in OVLP")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVQ,DBF_ULONG) {
+		prompt("Num. elements in OVLQ")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVR,DBF_ULONG) {
+		prompt("Num. elements in OVLR")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVS,DBF_ULONG) {
+		prompt("Num. elements in OVLS")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVT,DBF_ULONG) {
+		prompt("Num. elements in OVLT")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+	field(ONVU,DBF_ULONG) {
+		prompt("Num. elements in OVLU")
+		special(SPC_NOMOD)
+		interest(4)
+		initial("1")
+	}
+
+=begin html
+
+<br>
+<hr>
+<br>
+
+=end html
+
+=head2 Record Support Routines
+
+=head3 init_record
+
+  long (*init_record)(struct dbCommon *precord, int pass)
+
+This routine is called twice at iocInit. On the first call it does the
+following:
+
+=over
+
+=item *
+
+Calloc sufficient space to hold the number of input scalars and/or arrays
+defined by the settings of the fields FTA-FTU and NOA-NOU. Initialize fields
+NE* to the values of the associated NO* field values.
+
+=item *
+
+Calloc sufficient space to hold the number of output scalars and/or arrays
+defined by  the settings of the fields FTVA-FTVU and NOVA-NOVU. For the output
+fields, also calloc space to  hold the previous value of a field. This is
+required when the decision is made on whether or not to post events.
+
+=back
+
+On the second call, it does the following:
+
+=over
+
+=item *
+
+Initializes SUBL if it is a constant link.
+
+=item *
+
+Initializes each constant input link.
+
+=item *
+
+If the field INAM is set, look-up the address of the routine and call it.
+
+=item *
+
+If the field LFLG is set to IGNORE and SNAM is defined, look up the address of
+the process routine.
+
+=back
+
+=head3 process
+
+  long (*process)(struct dbCommon *precord)
+
+This routine implements the following algorithm:
+
+=over
+
+=item *
+
+If PACT is FALSE, perform normal processing
+
+=item *
+
+If PACT is TRUE, perform asynchronous-completion processing
+
+=back
+
+Normal processing:
+
+=over
+
+=item *
+
+Set PACT to TRUE.
+
+=item *
+
+If the field LFLG is set to READ, get the subroutine name from the SUBL link.
+If the name is not NULL and it is not the same as the previous subroutine name,
+look up the subroutine address. Set the old subroutine name, ONAM, equal to the
+current name, SNAM.
+
+=item *
+
+Fetch the values from the input links.
+
+=item *
+
+Set PACT to FALSE
+
+=item *
+
+If all input-link fetches succeeded, call the routine specified by SNAM.
+
+=item *
+
+Set VAL equal to the return value from the routine specified by SNAM.
+
+=item *
+
+If the SNAM routine set PACT to TRUE, then return.  In this case, we presume
+the routine has arranged that process will be called at some later time for
+asynchronous completion.
+
+=item *
+
+Set PACT to TRUE.
+
+=item *
+
+If VAL is zero, write the output values using the output links.
+
+=item *
+
+Get the time of processing and put it into the timestamp field.
+
+=item *
+
+If VAL has changed, post a change-of value and log event for  this field.
+If EFLG is set to ALWAYS, post change-of-value and log events for every output
+field. If EFLG is set to ON CHANGE, post change-of-value and log events for
+every output field which has changed. In the case of an array, an event will be
+posted if any single element of the array has changed. If EFLG is set to NEVER,
+no change-of-value or log events are posted for the output fields.
+
+=item *
+
+Process the record on the end of the forward link, if one exists.
+
+=item *
+
+Set PACT to FALSE.
+
+=back
+
+Asynchronous-completion processing:
+
+=over
+
+=item *
+
+Call the routine specified by SNAM (again).
+
+=item *
+
+Set VAL equal to the return value from the routine specified by SNAM.
+
+=item *
+
+Set PACT to TRUE.
+
+=item *
+
+If VAL is zero, write the output values using the output links.
+
+=item *
+
+Get the time of processing and put it into the timestamp field.
+
+=item *
+
+If VAL has changed, post a change-of value and log event for this field. If
+EFLG is set to ALWAYS, post change-of-value and log events for every output
+field. If EFLG is set to ON CHANGE, post change-of-value and log events for
+every output field which has changed. In the case of an array, an event will
+be posted if any single element of the array has changed. If EFLG is set to
+NEVER, no  change-of-value or log events are posted for the output fields.
+
+=item *
+
+Process the record on the end of the forward link, if one exists.
+
+=item *
+
+Set PACT to FALSE.
+
+=back
+
+
+=begin html
+
+<br>
+<hr>
+<br>
+
+=end html
+
+=head2 Use of the aSub Record
+
+The aSub record has input-value fields (A-U) and output-value fields
+(VALA-VALU), which are completely independent.  The input-value fields have
+associated input links (INPA-INPU), and the output-value fields have associated
+output links (OUTA-OUTU).  Both inputs and outputs have type fields (FTA-FTU,
+FTVA-FTVU, which default to 'DOUBLE') and number-of-element fields (NOA-NOU,
+NOVA-NOVU, which default to '1'). The output links OUTA-OUTU will only be
+processed if the subroutine returns a zero (OK) status value.
+
+=head3 Example database fragment
+
+To use the A field to read an array from some other record, then, you would
+need a database fragment that might look something like this:
+
+    record(aSub,"my_asub_record") {
+        field(SNAM,"my_asub_routine")
+        ...
+        field(FTA, "LONG")
+        field(NOA, "100")
+        field(INPA, "myWaveform_1 NPP NMS")
+        ...
+    }
+
+If you wanted some other record to be able to write to the A field, then you
+would delete the input link above.  If you wanted the A field to hold a scalar
+value, you would either delete the NOA specification, or specify it as "1".
+
+=head3 Example subroutine fragment
+
+The associated subroutine code that uses the A field might look like this:
+
+    static long my_asub_routine(aSubRecord *prec) {
+        long i, *a;
+        double sum=0;
+        ...
+        a = (long *)prec->a;
+        for (i=0; i<prec->noa; i++) {
+            sum += a[i];
+        }
+        ...
+        return 0; /* process output links */
+    }
+
+Note that the subroutine code must always handle the value fields (A-U,
+VALA-VALU) as arrays, even if they contain only a single element.
+
+=head3 Required export code
+
+Aside from your own code, you must export and register your subroutines so the
+record can locate them.  The simplest way is as follows:
+
+    #include <registryFunction.h>
+    #include <epicsExport.h>
+    
+    static long my_asub_routine(aSubRecord *prec) {
+        ...
+    }
+    epicsRegisterFunction(my_asub_routine);
+
+=head3 Required database-definition code
+
+The .dbd file loaded by the ioc must then contain the following line, which
+tells the linker to include your object file in the IOC binary:
+
+    function(my_asub_routine)
+
+=head3 Device support, writing to hardware
+
+The aSub record does not call any device support routines. If you want to write
+to hardware, you might use your output fields and links to write to some other
+record that can write to hardware.
+
+=head3 Dynamically Changing the User Routine called during Record Processing
+
+The aSub record allows the user to dynamically change which routine is called
+when the record processes. This can be done in two ways:
+
+=over
+
+=item *
+
+The LFLG field can be set to READ so that the name of the routine is read from
+the SUBL link. Thus, whatever is feeding this link can change the name of the
+routine before the aSub record is processed. In this case, the record looks in
+the symbol table for the symbol name whenever the name of routine fetched from
+the link changes.
+
+=item *
+
+The LFLG field can be set to IGNORE. In this case, the routine called during
+record processing is that specified in the SNAM field. Under these conditions,
+the SNAM field can be changed by a Channel Access write to that field. During
+development when trying several versions of the routine, it is not necessary
+to reboot the IOC and reload the database. A new routine can be loaded with
+the vxWorks ld command, and Channel Access or the dbpf command used to put the
+name of the routine into the record's SNAM field. The record will look up the
+symbol name in the symbol table whenever the SNAM field gets modified. The
+same routine name can even be used as the vxWorks symbol lookup returns the
+latest version of the code to have been loaded.
+
+=back
+
+=cut
+
+}

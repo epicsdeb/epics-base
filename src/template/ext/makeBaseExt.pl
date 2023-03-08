@@ -14,7 +14,7 @@ $eEXTTYPE = $ENV{EPICS_MBE_DEF_EXT_TYPE};
 $eTOP     = $ENV{EPICS_MBE_TEMPLATE_TOP};
 $eBASE    = $ENV{EPICS_MBE_BASE};
 
-&get_commandline_opts;		# Read and check options
+get_commandline_opts();		# Read and check options
 
 $extname = "@ARGV";
 
@@ -42,7 +42,7 @@ sub ReplaceFilename { # (filename)
     $file =~ s|_EXTTYPE_|$exttype|;
 				# We don't want the Replace overrides
     $file =~ s|.*/$extdir/Replace.pl$||;
-    $file = &ReplaceFilenameHook($file); # Call the user-defineable hook
+    $file = ReplaceFilenameHook($file); # Call the user-defineable hook
     return $file;
 }
 
@@ -57,7 +57,7 @@ sub ReplaceLine { # (line)
     $line =~ s/_EXTNAME_/$extname/o;
     $line =~ s/_EXTTYPE_/$exttype/o;
     $line =~ s/_TEMPLATE_TOP_/$top/o;
-    $line = &ReplaceLineHook($line); # Call the user-defineable hook
+    $line = ReplaceLineHook($line); # Call the user-defineable hook
     return $line;
 }
 
@@ -72,7 +72,7 @@ if (-r "$top/$exttypename/Replace.pl") {
 opendir TOPDIR, "$top" or die "Can't open $top: $!";
 foreach $f ( grep !/^\.\.?$|^[^\/]*(Ext)/, readdir TOPDIR ) {
     if (-f "$f") {
-	&CopyFile("$top/$f") unless (-e "$f");
+	CopyFile("$top/$f") unless (-e "$f");
     } else {
 	$note = yes  if ("$f" eq "src" && -e "$f");
 	find(\&FCopyTree, "$top/$f") unless (-e "$f");
@@ -153,7 +153,7 @@ sub get_commandline_opts { #no args
 
 # Print extension type list?
     if ($opt_l) {
-	&ListExtTypes;
+	ListExtTypes();
 	exit 0;			# finished for -l command
     }
 
@@ -174,7 +174,7 @@ sub get_commandline_opts { #no args
 # Valid $exttypename?
     unless (-r "$top/$exttypename") {
 	print "Template for extension type '$exttype' is unreadable or does not exist.\n";
-	&ListExtTypes;
+	ListExtTypes();
 	exit 1;
     }
 
@@ -203,7 +203,7 @@ sub ListExtTypes { # no args
 #
 sub CopyFile { # (source)
     $source = $_[0];
-    $target = &ReplaceFilename($source);
+    $target = ReplaceFilename($source);
 
     if ($target) {
 	$target =~ s|$top/||;
@@ -212,7 +212,7 @@ sub CopyFile { # (source)
 
 	print "Copying file $source -> $target\n" if $Debug;
 	while (<INP>) {
-	    print OUT &ReplaceLine($_);
+	    print OUT ReplaceLine($_);
 	}
 	close INP; close OUT;
     }
@@ -224,12 +224,12 @@ sub CopyFile { # (source)
 sub FCopyTree {
     chdir $cwd;			# Sigh
     if (-d $File::Find::name
-	and ($dir = &ReplaceFilename($File::Find::name))) {
+	and ($dir = ReplaceFilename($File::Find::name))) {
 	$dir =~ s|$top/||;
 	print "Creating directory $dir\n" if $Debug;
-	&mkpath($dir);
+	mkpath($dir);
     } else {
-	&CopyFile($File::Find::name);
+	CopyFile($File::Find::name);
     }
     chdir $File::Find::dir;
 }
