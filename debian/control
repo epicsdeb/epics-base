@@ -1,23 +1,22 @@
 Source: epics-base
 Section: devel
 Priority: optional
-Maintainer: Martin Konrad <konrad@frib.msu.edu>
-Uploaders: Michael Davidsaver <mdavidsaver@gmail.com>,
-           Ralph Lange <Ralph.Lange@gmx.de>
+Maintainer: Evan Daykin <daykin@frib.msu.edu>
+Uploaders: Anton Derbenev <aderbenev@bnl.gov>
 Build-Depends: debhelper (>= 10), epics-debhelper (>= 8.18),
                libreadline6-dev | libreadline-dev, libncurses5-dev, perl,
-               mingw32 | g++-mingw-w64,
+               mingw32 | g++-mingw-w64, python3
 Standards-Version: 4.3.0
 Vcs-Git: https://github.com/epicsdeb/epics-base.git
 Vcs-Browser: https://github.com/epicsdeb/epics-base
 Homepage: http://www.aps.anl.gov/epics/
 
-Package: libepics3.15.6
+Package: libepics7.0.7
 Section: libs
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: python3, ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-catools
 Conflicts: epics-perl (<= 3.14.10-7)
 Description: EPICS Base libraries for clients and servers
@@ -30,7 +29,7 @@ Description: EPICS Base libraries for clients and servers
 Package: ioclogserver
 Section: admin
 Architecture: any
-Depends: libepics3.15.6 (= ${binary:Version}),
+Depends: libepics7.0.7 (= ${binary:Version}),
          epics-dev (= ${binary:Version}), lsb-base,
          ${misc:Depends}, ${shlibs:Depends}, adduser, systemd
 Description: Log recording daemon for EPICS IOCS
@@ -44,19 +43,30 @@ Description: Log recording daemon for EPICS IOCS
 
 Package: epics-dev
 Architecture: any
-Depends: libepics3.15.6 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+Depends: python3, libepics7.0.7 (= ${binary:Version}), epics-catools (= ${binary:Version}),
+         epics-pvatools (= ${binary:Version}),
          perl (>= 5.10.0~),
          libreadline6-dev,
         ${shlibs:Depends}, ${misc:Depends}
 Suggests: epics-doc        (= ${binary:Version}),
           epics-perl       (= ${binary:Version}),
-          epics-pcas-dev   (= ${binary:Version}),
+          epics-pcas-dev   (>= 4.13.3),
           ioclogserver     (= ${binary:Version}),
 Conflicts: epics-catools   (<= 3.14.11-6),
            epics-perl      (<= 3.14.12.3-1),
            ioclogserver    (<< 3.15.3-9),
+           epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
+Provides:  epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
 Replaces:  epics-msi (<< 3.15.3-8~),
+           epics-pva-dev,
+           epics-pvd-dev,
+           epics-nt-dev
 Breaks:    epics-msi (<< 3.15.3-8~),
+           epics-sscan-dev(<< 2.11.5)
 Description: Files needed to develop new EPICS applications
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -64,18 +74,7 @@ Description: Files needed to develop new EPICS applications
  .
  Libraries, headers, and utilities needed to develop applications
  targeted to the host system.
-
-Package: epics-pcas-dev
-Architecture: all
-Depends: epics-dev (>= ${source:Version}), epics-dev (<< ${source:Version}.1~),
-        ${shlibs:Depends}, ${misc:Depends}
-Description: Files needed to develop new EPICS applications
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Private headers for the portable CA server needed by some special applications
-
+ 
 Package: epics-msi
 Architecture: all
 Depends: ${misc:Depends}
@@ -88,7 +87,7 @@ Description: EPICS Macro Substitution and Include tool
 Package: epics-catools
 Section: admin
 Architecture: any
-Depends: libepics3.15.6 (= ${binary:Version}),
+Depends: libepics7.0.7 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
  The Experimental Physics and Industrial Control System is a collection of
@@ -97,9 +96,21 @@ Description: Command line utilities for EPICS
  .
  EPICS utilities such as caget and caput as well as the caRepeater daemon.
 
+Package: epics-pvatools
+Section: admin
+Architecture: any
+Depends: libepics7.0.7 (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Description: Command line utilities for EPICS
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS utilities such as pvget and pvput as well as the (deprecated) p2p daemon.
+
 Package: epics-perl
 Architecture: any
-Depends: libepics3.15.6 (= ${binary:Version}),
+Depends: libepics7.0.7 (= ${binary:Version}),
          ${shlibs:Depends}, ${perl:Depends}, ${misc:Depends}
 Conflicts: epics-libs (<= 3.14.10-7),  epics-dev (<= 3.14.12.3-2),
 Description: Perl bindings for EPICS
@@ -124,7 +135,7 @@ Description: EPICS documentation
 
 Package: epics-win32
 Architecture: all
-Depends: ${misc:Depends},
+Depends: python3, ${misc:Depends},
          epics-dev (>= ${source:Version}), epics-dev (<< ${source:Version}.1~),
 Suggests: wine
 Section: libdevel

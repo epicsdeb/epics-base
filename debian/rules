@@ -3,27 +3,28 @@
 
 export DH_VERBOSE=1
 
-ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-BMAKEFLAGS += -j$(NUMJOBS)
-endif
-
 ifeq "$(DEB_BUILD_ARCH)" "i386"
 EPICS_HOST_ARCH:=linux-x86
 else ifeq "$(DEB_BUILD_ARCH)" "amd64"
 EPICS_HOST_ARCH:=linux-x86_64
 else
-EPICS_HOST_ARCH:=$(shell ./startup/EpicsHostArch)
+EPICS_HOST_ARCH:=$(shell perl ./src/tools/EpicsHostArch.pl)
 endif
 export EPICS_HOST_ARCH
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 # Link only --as-needed
-# EPICS uses -O3, let's not lower the standards
 export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
-export DEB_CFLAGS_STRIP = -g -O2
-export DEB_CXXFLAGS_STRIP = -g -O2
+
+# EPICS uses -O3, let's not lower the standards
+export DEB_CFLAGS_STRIP = -O2
+export DEB_CXXFLAGS_STRIP = -O2
+
+# Compile everything with debugging symbols - they will be stripped off and
+# put into the debug package automatically
+export DEB_CFLAGS_MAINT_APPEND = -g
+export DEB_CXXFLAGS_MAINT_APPEND = -g
 
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
@@ -51,6 +52,7 @@ export SHRLIB_VERSION=$(SOV)
 override_dh_auto_clean:
 	dh_auto_clean
 	rm -rf configure/conf.d
+	rm -f modules/RELEASE.*
 
 override_dh_auto_build:
 	install -d configure/conf.d
@@ -65,9 +67,10 @@ override_dh_auto_install:
 override_dh_epics_postinstall:
 	# no op
 
-override_dh_auto_test: # skip for development
+override_dh_auto_test:
+	LD_LIBRARY_PATH=$(shell pwd)/lib/$(EPICS_HOST_ARCH) make runtests
 
-USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer ascheck
+USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer softIocPVA ascheck pvget pvput pvmonitor pvlist pvinfo pvcall
 
 PERLBINS=caget.pl caput.pl camonitor.pl cainfo.pl capr.pl
 
@@ -133,14 +136,14 @@ override_dh_install:
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
 	# Install systemd unit files into the right location
-	install -d debian/epics-dev/lib/systemd/system
+	install -d debian/epics-catools/lib/systemd/system
 	for arch in $(EPICS_HOST_ARCH); do \
-	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-dev/lib/systemd/system/; \
+	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-catools/lib/systemd/system/; \
 	  rm debian/tmp/usr/lib/epics/bin/$$arch-debug/caRepeater.service; \
 	done
 
 	# Unit files shouldn't be marked executable
-	chmod -x debian/epics-dev/lib/systemd/system/*.service
+	chmod -x debian/epics-catools/lib/systemd/system/*.service
 
 	# Remove legacy init scripts
 	rm -f debian/tmp/usr/lib/epics/bin/*/S99caRepeater

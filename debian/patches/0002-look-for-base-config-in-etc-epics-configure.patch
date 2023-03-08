@@ -10,20 +10,23 @@ modify build config.
  configure/CONFIG | 6 +++++-
  1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/configure/CONFIG b/configure/CONFIG
-index e40d3f5..8b7b785 100644
---- a/configure/CONFIG
-+++ b/configure/CONFIG
-@@ -16,7 +16,11 @@ ifneq ($(wildcard $(TOP)/configure/CONFIG_BASE_VERSION),)
+Index: epics-base/configure/CONFIG
+===================================================================
+--- epics-base.orig/configure/CONFIG
++++ epics-base/configure/CONFIG
+@@ -16,11 +16,11 @@ ifneq ($(wildcard $(TOP)/configure/CONFI
    CONFIG = $(TOP)/configure
    BASE_TOP=YES
  else
--  CONFIG ?= $(EPICS_BASE)/configure
+-  ifneq ($(origin EPICS_BASE),file)
+-    # Essential for the EPICS build system, see convertRelease.pl
+-    $(error EPICS_BASE must be set in a configure/RELEASE file)
 +  ifeq ($(CONFIG),/usr/lib/epics/configure)
 +    CONFIG = /etc/epics/configure
 +  else
 +    CONFIG ?= /etc/epics/configure
-+  endif
+   endif
+-  CONFIG ?= $(EPICS_BASE)/configure
  endif
  
  # Provide a default if the user hasn't set EPICS_HOST_ARCH

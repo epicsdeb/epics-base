@@ -9,56 +9,33 @@ Avoid need to play games as install location is known.
  src/template/ext/makeBaseExt.pl  | 3 +--
  3 files changed, 4 insertions(+), 9 deletions(-)
 
-diff --git a/src/ca/client/perl/CA.pm b/src/ca/client/perl/CA.pm
-index d79cdd3..de230e9 100644
---- a/src/ca/client/perl/CA.pm
-+++ b/src/ca/client/perl/CA.pm
-@@ -6,7 +6,6 @@ use warnings;
- 
- my $version = '0.6';
- 
--
- package CA;
- 
- our $VERSION = $version;
-@@ -31,9 +30,7 @@ my $perl_archname = $Config::Config{archname};
- require DynaLoader;
- 
- # Add our lib/<arch> directory to the shared library search path
--use File::Basename;
--my $Lib = dirname(__FILE__);
--push @DynaLoader::dl_library_path, "$Lib/$perl_version/$perl_archname";
-+push @DynaLoader::dl_library_path, "/usr/lib/perl5/auto";
- 
- bootstrap Cap5 $VERSION;
- 
-diff --git a/src/template/base/makeBaseApp.pl b/src/template/base/makeBaseApp.pl
-index 13d749d..a8f404e 100644
---- a/src/template/base/makeBaseApp.pl
-+++ b/src/template/base/makeBaseApp.pl
+Index: epics-base/src/template/base/makeBaseApp.pl
+===================================================================
+--- epics-base.orig/src/template/base/makeBaseApp.pl
++++ epics-base/src/template/base/makeBaseApp.pl
 @@ -65,7 +65,7 @@ sub ReplaceFilename { # (filename)
- 	    } elsif (-r "$base\@Common") {	# Default version exists
- 		$base = '' unless ($filearch eq "Common" && -s $file);
- 	    } else {			# No default version
--		$base = '';
-+		$base = '/usr/lib/epics';
- 	    }
- 	    $file = $base;	# Strip the @... part from the target name
- 	}
+             } elsif (-r "$base\@Common") {	# Default version exists
+                 $base = '' unless ($filearch eq "Common" && -s $file);
+             } else {			# No default version
+-                $base = '';
++                $base = '/usr/lib/epics';
+             }
+             $file = $base;	# Strip the @... part from the target name
+         }
 @@ -177,8 +177,7 @@ sub get_commandline_opts { #no args
      } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
          $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
      } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
--	$epics_base = $command;
--	$epics_base =~ s|^(.*)/bin/.*makeBaseApp.*|$1|;
-+	$epics_base = "/usr/lib/epics";
+-        $epics_base = $command;
+-        $epics_base =~ s|^(.*)/bin/.*makeBaseApp.*|$1|;
++        $epics_base = '/usr/lib/epics';
      }
      $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
      $app_epics_base = LocalPath($epics_base);
-diff --git a/src/template/ext/makeBaseExt.pl b/src/template/ext/makeBaseExt.pl
-index 45ce948..da3e23d 100644
---- a/src/template/ext/makeBaseExt.pl
-+++ b/src/template/ext/makeBaseExt.pl
+Index: epics-base/src/template/ext/makeBaseExt.pl
+===================================================================
+--- epics-base.orig/src/template/ext/makeBaseExt.pl
++++ epics-base/src/template/ext/makeBaseExt.pl
 @@ -126,8 +126,7 @@ sub get_commandline_opts { #no args
      } elsif ($eBASE) { # third choice is env var EPICS_MBE_BASE
          $epics_base = UnixPath($eBASE);

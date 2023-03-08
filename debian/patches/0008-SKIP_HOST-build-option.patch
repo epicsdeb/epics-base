@@ -12,7 +12,7 @@ make SKIP_HOST=YES EPICS_BASE=/usr/epics/base
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure/CONFIG_COMMON b/configure/CONFIG_COMMON
-index e6e6033..681c5ce 100644
+index 471226d..0460c7d 100644
 --- a/configure/CONFIG_COMMON
 +++ b/configure/CONFIG_COMMON
 @@ -31,7 +31,7 @@ CROSS1 = $(CROSS_COMPILER_TARGET_ARCHS$(word 1,$(CROSS_COMPILER_HOST_ARCHS)))
