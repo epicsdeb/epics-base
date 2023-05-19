@@ -3,4 +3,4 @@ ioclogserver: systemd-service-file-refers-to-unusual-wantedby-target lib/systemd
 # which in turn is wanted by multi-user.target. This allows all IOC log servers
 # to be started/stopped together.
 # added for bookworm build...
-ioclogserver: depends-on-obsolete-package
+# ioclogserver: depends-on-obsolete-package
