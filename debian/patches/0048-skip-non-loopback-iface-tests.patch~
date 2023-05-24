@@ -60,35 +60,3 @@ Index: epics-base/modules/pvAccess/testApp/utils/testInetAddressUtils.cpp
  
      return testDone();
  }
-Index: epics-base/modules/pvAccess/testApp/remote/Makefile
-===================================================================
---- epics-base.orig/modules/pvAccess/testApp/remote/Makefile
-+++ epics-base/modules/pvAccess/testApp/remote/Makefile
-@@ -24,9 +24,11 @@ testRemoteClientImpl_SRCS += testRemoteC
- TESTPROD_HOST += testChannelConnect
- testChannelConnect_SRCS += testChannelConnect.cpp
- 
-+ifneq ($(shell ip addr | grep MULTICAST | wc -l),0)
- TESTPROD_HOST += testServerContext
- testServerContext_SRCS += testServerContext.cpp
- TESTS += testServerContext
-+endif
- 
- TESTPROD_HOST += testmonitorfifo
- testmonitorfifo_SRCS += testmonitorfifo.cpp
-Index: epics-base/modules/pvDatabase/test/src/Makefile
-===================================================================
---- epics-base.orig/modules/pvDatabase/test/src/Makefile
-+++ epics-base/modules/pvDatabase/test/src/Makefile
-@@ -29,7 +29,10 @@ testLocalProvider_SRCS += testLocalProvi
- testHarness_SRCS += testLocalProvider.cpp
- TESTS += testLocalProvider
- 
-+# If there's an available interface to do this on
-+ifneq ($(shell ip addr | grep MULTICAST | wc -l),0)
- TESTPROD_HOST += testPVAServer
- testPVAServer_SRCS += testPVAServer.cpp
- testHarness_SRCS += testPVAServer.cpp
- TESTS += testPVAServer
-+endif
-\ No newline at end of file
