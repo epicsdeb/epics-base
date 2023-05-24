@@ -1,0 +1,62 @@
+Index: epics-base/modules/database/test/std/rec/Makefile
+===================================================================
+--- epics-base.orig/modules/database/test/std/rec/Makefile
++++ epics-base/modules/database/test/std/rec/Makefile
+@@ -176,10 +176,12 @@ TARGET_SRCS += dbHeaderTestxx.cpp
+ ifeq ($(T_A),$(EPICS_HOST_ARCH))
+ # Host-only tests of softIoc/softIocPVA, caget and pvget (if present)
+ # Unfortunately hangs too often on CI systems:
++ifneq ($(shell ip addr | grep MULTICAST | wc -l),0)
+ ifndef CI
+ TESTS += netget
+ endif
+ endif
++endif
+ 
+ # epicsRunRecordTests runs all the test programs in a known working order.
+ testHarness_SRCS += epicsRunRecordTests.c
+Index: epics-base/modules/libcom/test/osiSockTest.c
+===================================================================
+--- epics-base.orig/modules/libcom/test/osiSockTest.c
++++ epics-base/modules/libcom/test/osiSockTest.c
+@@ -411,14 +411,15 @@ void udpSockFanoutTest()
+ MAIN(osiSockTest)
+ {
+     int status;
+-    testPlan(24);
++    testPlan(22);
+ 
+     status = osiSockAttach();
+     testOk(status, "osiSockAttach");
+ 
+     udpSockTest();
+     udpSockFanoutBindTest();
+-    udpSockFanoutTest();
++    //Skip this at FRIB. Jenkins node does not have a non-loopback iface
++    //udpSockFanoutTest();
+     tcpSockReuseBindTest(0);
+     tcpSockReuseBindTest(1);
+ 
+Index: epics-base/modules/pvAccess/testApp/utils/testInetAddressUtils.cpp
+===================================================================
+--- epics-base.orig/modules/pvAccess/testApp/utils/testInetAddressUtils.cpp
++++ epics-base/modules/pvAccess/testApp/utils/testInetAddressUtils.cpp
+@@ -359,7 +359,7 @@ void test_discoverInterfaces()
+ 
+ MAIN(testInetAddressUtils)
+ {
+-    testPlan(65);
++    testPlan(63);
+     testDiag("Tests for InetAddress utils");
+ 
+     test_getSocketAddressList();
+@@ -367,7 +367,8 @@ MAIN(testInetAddressUtils)
+     test_isMulticastAddress();
+ 
+     test_multicastLoopback();
+-    test_discoverInterfaces();
++    //skip this at FRIB - Jenkins build env does not have any accessible ifaces
++    //test_discoverInterfaces();
+ 
+     return testDone();
+ }
