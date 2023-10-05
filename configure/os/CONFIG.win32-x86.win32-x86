@@ -6,7 +6,7 @@
 
 # Win32 valid build types and include directory suffixes
 
-VALID_BUILDS = Host Ioc
+VALID_BUILDS = Host Ioc Command
 
 CMPLR_CLASS = msvc
 
@@ -49,9 +49,9 @@ OPT_CFLAGS_YES_NO = -Ox -Oy-
 OPT_CFLAGS_YES = $(OPT_CFLAGS_YES_$(OPT_WHOLE_PROGRAM))
 
 #
-# -Zi generate program database for debugging information
+# -Z7 generate C7 compatible debugging information (inside .obj)
 # -RTCsu enable run-time error checks
-OPT_CFLAGS_NO = -Zi -RTCsu
+OPT_CFLAGS_NO = -Z7 -RTCsu
 
 # specify object file name and location
 OBJ_CFLAG = -Fo
@@ -107,6 +107,9 @@ CODE_CPPFLAGS += -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 WARN_CXXFLAGS_YES = -W3 -w44355 -w44344 -w44251
 WARN_CXXFLAGS_NO  = -W1
 
+# Silence tr1 namespace deprecation warnings
+WARN_CXXFLAGS += -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
+
 #
 # -Ox maximum optimizations
 # -GL whole program optimization
@@ -116,9 +119,9 @@ OPT_CXXFLAGS_YES_NO = -Ox -Oy-
 OPT_CXXFLAGS_YES = $(OPT_CXXFLAGS_YES_$(OPT_WHOLE_PROGRAM))
 
 #
-# -Zi generate program database for debugging information
+# -Z7 generate C7 compatible debugging information (inside .obj)
 # -RTCsu enable run-time error checks
-OPT_CXXFLAGS_NO = -RTCsu -Zi
+OPT_CXXFLAGS_NO = -RTCsu -Z7
 
 # specify object file name and location
 OBJ_CXXFLAG = -Fo
@@ -135,22 +138,11 @@ OBJ_CXXFLAG = -Fo
 STATIC_CXXFLAGS_YES= -MT$(VISC_CFLAGS_DEBUG) $(BUILD_DLL_CFLAGS)
 STATIC_CXXFLAGS_NO= -MD$(VISC_CFLAGS_DEBUG) $(BUILD_DLL_CFLAGS) -DEPICS_CALL_DLL
 
-STATIC_LDLIBS_YES=ws2_32.lib advapi32.lib user32.lib kernel32.lib winmm.lib
+STATIC_LDLIBS_YES=ws2_32.lib advapi32.lib user32.lib kernel32.lib winmm.lib dbghelp.lib
 STATIC_LDLIBS_NO=
 STATIC_LDFLAGS=
 RANLIB=
 
-#
-# option needed for parallel builds with Visual Studio 2015 onward
-#
-# -FS Force Synchronous PDB Writes
-ifneq ($(VisualStudioVersion),)
-  OPT_CXXFLAGS_NO += -FS
-  OPT_CFLAGS_NO += -FS
-endif
-
-
-#
 # add -profile here to run the ms profiler
 # -LTCG whole program optimization
 # -incremental:no full linking

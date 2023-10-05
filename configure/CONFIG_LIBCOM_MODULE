@@ -1,0 +1,18 @@
+#*************************************************************************
+# Copyright (c) 2017 UChicago Argonne LLC, as Operator of Argonne
+#     National Laboratory.
+# EPICS BASE is distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution.
+#*************************************************************************
+
+# Our locally-built tools
+# Windows can need these paths to be quoted
+YACC = "$(EPICS_BASE_HOST_BIN)/antelope$(HOSTEXE)"
+LEX  = "$(EPICS_BASE_HOST_BIN)/e_flex$(HOSTEXE)" \
+        -S$(EPICS_BASE)/include/flex.skel.static
+
+# Default stack size for osiThread
+OSITHREAD_USE_DEFAULT_STACK = NO
+OSITHREAD_DEFAULT_STACK_FLAGS_YES = -DOSITHREAD_USE_DEFAULT_STACK
+
+BASE_CPPFLAGS += $(OSITHREAD_DEFAULT_STACK_FLAGS_$(OSITHREAD_USE_DEFAULT_STACK))

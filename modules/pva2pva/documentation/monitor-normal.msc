@@ -1,0 +1,26 @@
+msc {
+  CLI [label="User/\nPVA Server"], CREQ [label="ChannelRequester"], MREQ [label="MonitorRequester"],
+  PROV [label="ChannelProvider"], CHAN [label="Channel"], MON [label="Monitor"], SRV [label="PVA Client/\nUser"];
+
+  CLI -> PROV [label="createChannel(name,req)"];
+  CREQ <- PROV [label="channelCreated(chan)"];
+  CREQ <- CHAN [label="channelStateChange()"];
+  CLI <- CREQ [label="Evt: Channel Ready"];
+  CLI -> CHAN [label="createMonitor(mreq)"];
+  MREQ <- CHAN [label="monitorConnect(mon)"];
+  CLI <- MREQ [label="Evt: Monitor Ready"];
+  CLI -> MON [label="start()"];
+  MON -> SRV [label="Evt: New Subscriber"];
+  ...;
+  MON <- SRV [label="Evt: Add to queue"];
+  MREQ <- MON [label="monitorEvent()"];
+  CLI <- MREQ [label="Evt: Queue not empty"];
+  CLI -> MON [label="poll()"];
+  CLI <- MON [label="Return data"];
+  ...;
+  CLI -> MON [label="release(data)"];
+  ...;
+  CLI -> MON [label="stop()"];
+  CLI -> MON [label="destroy()"];
+  CLI -> CHAN [label="destroy()"];
+}

@@ -1,2 +1,3 @@
 usr/lib/epics/bin/win32-*
 usr/lib/epics/lib/win32-*/*.lib
+usr/lib/epics/cfg/TOOLCHAIN.linux-x86_64.win32*
