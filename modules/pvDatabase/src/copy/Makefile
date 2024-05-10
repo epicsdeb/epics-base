@@ -8,5 +8,6 @@ LIBSRCS += pvCopy.cpp
 LIBSRCS += pvArrayPlugin.cpp
 LIBSRCS += pvDeadbandPlugin.cpp
 LIBSRCS += pvTimestampPlugin.cpp
+LIBSRCS += dataDistributorPlugin.cpp
 
 

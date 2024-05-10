@@ -42,6 +42,8 @@ value is non-zero.
 
 =back
 
+This record type was included in base.dbd beginning with epics-base 3.14.10 .
+
 =head2 Record-specific Menus
 
 =head3 Menu aSubLFLG
@@ -2353,10 +2355,12 @@ value, you would either delete the NOA specification, or specify it as "1".
 The associated subroutine code that uses the A field might look like this:
 
     static long my_asub_routine(aSubRecord *prec) {
-        long i, *a;
+        long i;
+        epicsInt32 *a;
+
         double sum=0;
         ...
-        a = (long *)prec->a;
+        a = (epicsInt32 *)prec->a;
         for (i=0; i<prec->noa; i++) {
             sum += a[i];
         }

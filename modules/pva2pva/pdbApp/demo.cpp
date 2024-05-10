@@ -57,6 +57,30 @@ long process_spin(waveformRecord *prec)
     return 0;
 }
 
+long process_repeat(waveformRecord *prec)
+{
+    long ret;
+    if(prec->ftvl!=menuFtypeULONG) {
+        recGblSetSevr(prec, READ_ALARM, INVALID_ALARM);
+        return S_db_badDbrtype;
+    }
+
+    epicsUInt32 iv=0;
+    if(!!(ret = dbGetLink(&prec->inp, DBF_ULONG, &iv, NULL, NULL))) {
+        recGblSetSevr(prec, READ_ALARM, INVALID_ALARM);
+        return ret;
+    }
+
+    epicsUInt32 *val = (epicsUInt32*)prec->bptr;
+    for(size_t i=0, N=prec->nelm; i<N; i++) {
+        val[i] = iv;
+    }
+
+    prec->nord = iv;
+
+    return 0;
+}
+
 long process_utag(longinRecord *prec)
 {
     long status = dbGetLink(&prec->inp, DBR_LONG, &prec->val, 0, 0);
@@ -80,11 +104,13 @@ struct dset5
 };
 
 dset5<waveformRecord> devWfPDBDemo = {5,0,0,&init_spin,0,&process_spin};
+dset5<waveformRecord> devWfPDBDemoRepeat = {5,0,0,0,0,&process_repeat};
 dset5<longinRecord> devLoPDBUTag = {5,0,0,0,0,&process_utag};
 
 } // namespace
 
 extern "C" {
 epicsExportAddress(dset, devWfPDBDemo);
+epicsExportAddress(dset, devWfPDBDemoRepeat);
 epicsExportAddress(dset, devLoPDBUTag);
 }

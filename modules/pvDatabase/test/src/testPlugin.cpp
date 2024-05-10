@@ -332,14 +332,128 @@ static void ignoreTest()
     testOk1(nset==3);
 }
 
+static void debugOutput(const string& what, bool result, uint32 nSet, BitSetPtr bitSet, PVStructurePtr pvStructureCopy)
+{
+    if(debug) {
+        cout << what
+             << " result " << (result ? "true" : "false")
+             << " nSet " << nSet
+             << " bitSet " << *bitSet
+             << "\n pvStructureCopy\n" << pvStructureCopy
+             << "\n";
+    }
+}
+
+static void dataDistributorTest()
+{
+    if(debug) {cout << endl << endl << "****dataDistributorTest****" << endl;}
+    bool result = false;
+    uint32 nSet = 0;
+
+    // Create test structure
+    PVStructurePtr pvRecordStructure(getStandardPVField()->scalar(pvInt,""));
+    PVIntPtr pvValue(pvRecordStructure->getSubField<PVInt>("value"));
+    PVRecordPtr pvRecord(PVRecord::create("intRecord",pvRecordStructure));
+    if(debug) {
+        cout << " pvRecordStructure\n" << pvRecordStructure
+             << "\n";
+    }
+
+    // Request distributor plugin with trigger field value
+    PVStructurePtr pvRequest(CreateRequest::create()->createRequest("_[distributor=trigger:value]"));
+
+    // Create clients
+    PVCopyPtr pvCopy1(PVCopy::create(pvRecordStructure,pvRequest,""));
+    PVStructurePtr pvStructureCopy1(pvCopy1->createPVStructure());
+    BitSetPtr bitSet1(new BitSet(pvStructureCopy1->getNumberFields()));
+
+    PVCopyPtr pvCopy2(PVCopy::create(pvRecordStructure,pvRequest,""));
+    PVStructurePtr pvStructureCopy2(pvCopy2->createPVStructure());
+    BitSetPtr bitSet2(new BitSet(pvStructureCopy2->getNumberFields()));
+
+    // Update 0: both clients get it
+    result = pvCopy1->updateCopySetBitSet(pvStructureCopy1,bitSet1);
+    nSet = bitSet1->cardinality();
+    debugOutput("client 1: update 0", result, nSet, bitSet1, pvStructureCopy1);
+    testOk1(result==true);
+    testOk1(nSet==1);
+
+    result = pvCopy2->updateCopySetBitSet(pvStructureCopy2,bitSet2);
+    nSet = bitSet2->cardinality();
+    debugOutput("client 2: update 0", result, nSet, bitSet2, pvStructureCopy2);
+    testOk1(result==true);
+    testOk1(nSet==1);
+
+    // Update 1: only client 1 gets it
+    pvValue->put(1);
+
+    result = pvCopy1->updateCopySetBitSet(pvStructureCopy1,bitSet1);
+    nSet = bitSet1->cardinality();
+    debugOutput("client 1: update 1", result, nSet, bitSet1, pvStructureCopy1);
+    testOk1(result==true);
+    testOk1(nSet==1);
+
+    result = pvCopy2->updateCopySetBitSet(pvStructureCopy2,bitSet2);
+    nSet = bitSet2->cardinality();
+    debugOutput("client 2: update 1", result, nSet, bitSet2, pvStructureCopy2);
+    testOk1(result==false);
+    testOk1(nSet==0);
+
+    // Update 2: only client 2 gets it
+    pvValue->put(2);
+
+    result = pvCopy1->updateCopySetBitSet(pvStructureCopy1,bitSet1);
+    nSet = bitSet1->cardinality();
+    debugOutput("client 1: update 2", result, nSet, bitSet1, pvStructureCopy1);
+    testOk1(result==false);
+    testOk1(nSet==0);
+
+    result = pvCopy2->updateCopySetBitSet(pvStructureCopy2,bitSet2);
+    nSet = bitSet2->cardinality();
+    debugOutput("client 2: update 2", result, nSet, bitSet2, pvStructureCopy2);
+    testOk1(result==true);
+    testOk1(nSet==1);
+
+    // Update 3: only client 1 gets it
+    pvValue->put(3);
+
+    result = pvCopy1->updateCopySetBitSet(pvStructureCopy1,bitSet1);
+    nSet = bitSet1->cardinality();
+    debugOutput("client 1: update 3", result, nSet, bitSet1, pvStructureCopy1);
+    testOk1(result==true);
+    testOk1(nSet==1);
+
+    result = pvCopy2->updateCopySetBitSet(pvStructureCopy2,bitSet2);
+    nSet = bitSet2->cardinality();
+    debugOutput("client 2: update 3", result, nSet, bitSet2, pvStructureCopy2);
+    testOk1(result==false);
+    testOk1(nSet==0);
+
+    // Update 4: only client 2 gets it
+    pvValue->put(4);
+
+    result = pvCopy1->updateCopySetBitSet(pvStructureCopy1,bitSet1);
+    nSet = bitSet1->cardinality();
+    debugOutput("client 1: update 4", result, nSet, bitSet1, pvStructureCopy1);
+    testOk1(result==false);
+    testOk1(nSet==0);
+
+    result = pvCopy2->updateCopySetBitSet(pvStructureCopy2,bitSet2);
+    nSet = bitSet2->cardinality();
+    debugOutput("client 2: update 4", result, nSet, bitSet2, pvStructureCopy2);
+    testOk1(result==true);
+    testOk1(nSet==1);
+}
+
 MAIN(testPlugin)
 {
-    testPlan(26);
+    testPlan(46);
     PVDatabasePtr pvDatabase(PVDatabase::getMaster());
     deadbandTest();
     arrayTest();
     unionArrayTest();
     timeStampTest();
     ignoreTest();
+    dataDistributorTest();
     return 0;
 }

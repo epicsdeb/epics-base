@@ -33,7 +33,7 @@ MAIN(testOperators)
     PVDoublePtr pvValue = pvStructure->getSubField<PVDouble>("value");
     *pvValue <<= testDV;
 
-    double dv;
+    double dv = 0.;
     *pvValue >>= dv;
     testOk1(testDV == dv);
 

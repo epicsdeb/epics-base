@@ -6,6 +6,7 @@ registrar(installPVAAddLinkHook)
 
 # from demo.cpp
 device(waveform, CONSTANT, devWfPDBDemo, "QSRV Demo")
+device(waveform, CONSTANT, devWfPDBDemoRepeat, "QSRV Demo Replicate")
 device(longin, CONSTANT, devLoPDBUTag, "QSRV Set UTag")
 # from imagedemo.c
 function(QSRV_image_demo)

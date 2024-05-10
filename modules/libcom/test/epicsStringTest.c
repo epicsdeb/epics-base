@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include "epicsUnitTest.h"
 #include "epicsString.h"
@@ -195,6 +196,54 @@ void testStrTok(void)
     testTok(NULL, " \t", "bbb ", "bbb", "");
 }
 
+static
+void testEpicsStrPrintEscaped(void)
+{   
+    const char *filename;
+    FILE *testFile;
+    FILE *readOnly;
+
+    #ifdef __rtems__
+        /* ensure there is a writable area */
+	    mkdir( "/tmp", S_IRWXU );
+	    filename = "/tmp/testEpicsStrPrintEscaped";
+    #else
+	    filename = "testEpicsStrPrintEscaped";
+    #endif
+
+
+    // Avoid printing to stdout by redirecting everything to a file
+    testFile = fopen(filename, "a");
+    readOnly = fopen(filename, "r");
+
+    testDiag("testEpicsStrPrintEscaped()");
+
+    // Passing cases
+    testOk1(epicsStrPrintEscaped(testFile, "1234", 4) == 4);
+    testOk1(epicsStrPrintEscaped(testFile, "\a\b\f\n\r\t\v\\\'\"", 10) == 20);
+
+    // Failing cases
+    testOk1(epicsStrPrintEscaped(NULL, "1234", 4) == -1);
+    // On some platforms (specifially certain versions of MinGW-w64), fprintf
+    // is broken and does not return -1 when the write operation fails. On
+    // those platforms, epicsStrPrintEscaped cannot detect failure either, so
+    // testing that it reports failure does not make sense on those platforms.
+    // For this reason, we only test this behavior of epcisStrPrintEscaped when
+    // after checking that fprintf behaves correctly.
+    if (fprintf(readOnly, "test") == -1) {
+        testOk1(epicsStrPrintEscaped(readOnly, "1234", 4) == -1);
+    } else {
+        testSkip(1, "fprintf is broken on this system");
+    }
+    testOk1(epicsStrPrintEscaped(testFile, NULL, 4) == 0);
+    testOk1(epicsStrPrintEscaped(testFile, "", 4) == 0);
+    testOk1(epicsStrPrintEscaped(testFile, "1234", 0) == 0);
+
+    fclose(testFile);
+    fclose(readOnly);
+    remove(filename);
+}
+
 MAIN(epicsStringTest)
 {
     const char * const empty = "";
@@ -209,7 +258,7 @@ MAIN(epicsStringTest)
     char *s;
     int status;
 
-    testPlan(439);
+    testPlan(446);
 
     testChars();
 
@@ -407,6 +456,7 @@ MAIN(epicsStringTest)
 
     testDistance();
     testStrTok();
+    testEpicsStrPrintEscaped();
 
     return testDone();
 }

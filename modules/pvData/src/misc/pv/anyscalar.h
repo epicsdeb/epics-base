@@ -123,7 +123,7 @@ public:
     AnyScalar(const AnyScalar& o);
 
 #if __cplusplus>=201103L
-    AnyScalar(AnyScalar&& o);
+    AnyScalar(AnyScalar&& o) noexcept;
 #endif
 
     inline ~AnyScalar() {clear();}
@@ -140,7 +140,7 @@ public:
     }
 
 #if __cplusplus>=201103L
-    inline AnyScalar& operator=(AnyScalar&& o) {
+    inline AnyScalar& operator=(AnyScalar&& o) noexcept {
         clear();
         swap(o);
         return *this;

@@ -40,19 +40,23 @@ namespace pva = epics::pvAccess;
 
 DBCH::DBCH(dbChannel *ch) :chan(ch)
 {
+    if(!chan)
+        throw std::invalid_argument("NULL channel");
     prepare();
 }
 
 DBCH::DBCH(const std::string& name)
     :chan(dbChannelCreate(name.c_str()))
 {
+    if(!chan)
+        throw std::invalid_argument(SB()<<"invalid channel: "<<name);
     prepare();
 }
 
 void DBCH::prepare()
 {
     if(!chan)
-        throw std::invalid_argument("NULL channel");
+        throw std::invalid_argument(SB()<<"NULL channel");
     if(dbChannelOpen(chan)) {
         dbChannelDelete(chan);
         throw std::invalid_argument(SB()<<"Failed to open channel "<<dbChannelName(chan));

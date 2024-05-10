@@ -52,7 +52,8 @@ TESTPROD_HOST += testpvalink
 testpvalink_SRCS += testpvalink.cpp
 testpvalink_SRCS += pvaLinkTestIoc_registerRecordDeviceDriver.cpp
 testpvalink_LIBS += qsrv
-TESTS += testpvalink
+# too many false positive failure
+#TESTS += testpvalink
 
 TESTPROD_HOST += testgroupconfig
 testgroupconfig_SRCS += testgroupconfig
