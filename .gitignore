@@ -11,8 +11,10 @@
 /modules/Makefile.local
 O.*/
 /QtC-*
+/.qtc_*
 /.vscode/
 *.orig
 *.log
 .*.swp
 .DS_Store
+.iocsh_history

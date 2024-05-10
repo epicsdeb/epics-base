@@ -37,7 +37,7 @@ int epicsNtpGetTime(char *ntpIp, struct timespec *now)
   sockfd = socket( AF_INET, SOCK_DGRAM, IPPROTO_UDP ); // Create a UDP socket.
 
   if ( sockfd < 0 ) {
-    perror( "epicsNtpGetTime" );
+    perror( "epicsNtpGetTime creating socket" );
     return -1;
   }
 
@@ -51,23 +51,28 @@ int epicsNtpGetTime(char *ntpIp, struct timespec *now)
 
   // Call up the server using its IP address and port number.
   if ( connect( sockfd, ( struct sockaddr * ) &serv_addr, sizeof( serv_addr) ) < 0 ) {
-    perror( "epicsNtpGetTime" );
+    perror( "epicsNtpGetTime connecting socket" );
+    close( sockfd );
     return -1;
   }
 
   // Send it the NTP packet it wants. If n == -1, it failed.
   n = write( sockfd, ( char* ) &packet, sizeof( ntp_packet ) );
   if ( n < 0 ) {
-    perror( "epicsNtpGetTime" );
+    perror( "epicsNtpGetTime sending NTP request" );
+    close( sockfd );
     return -1;
   }
 
-// Wait and receive the packet back from the server. If n == -1, it failed.
+  // Wait and receive the packet back from the server. If n == -1, it failed.
   n = read( sockfd, ( char* ) &packet, sizeof( ntp_packet ) );
   if ( n < 0 ) {
-    perror( "epicsNtpGetTime" );
+    perror( "epicsNtpGetTime reading NTP reply" );
+    close( sockfd );
     return -1;
   }
+
+  close( sockfd );
 
   // These two fields contain the time-stamp seconds as the packet left the NTP server.
   // The number of seconds correspond to the seconds passed since 1900.

@@ -2,6 +2,14 @@
 
 @page release_notes Release Notes
 
+Release 1.4.1 (December 2023)
+==========================
+
+- Bug Fixes
+  - dbLoadGroup was fixed
+- Additions
+  - Support for "meta" member at top of array of structs
+
 Release 1.4.0 (September 2022)
 ==============================
 

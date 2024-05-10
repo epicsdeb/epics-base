@@ -20,6 +20,9 @@ use POSIX qw(strftime);
 
 use strict;
 
+# Make sure that chomp removes all trailing newlines
+$/='';
+
 # RFC 8601 date+time w/ zone (eg "2014-08-29T09:42-0700")
 my $tfmt = '%Y-%m-%dT%H:%M';
 $tfmt .= '%z' unless $^O eq 'MSWin32'; # %z returns zone name on Windows
@@ -52,7 +55,7 @@ if (-d '_darcs') { # Darcs
     # v1-4-dirty
     # is tag 'v1' plus 4 patches
     # with uncommited modifications
-    my @tags = `darcs show tags`;
+    my @tags = split('\n', `darcs show tags`);
     my $count = `darcs changes --count --from-tag .` - 1;
     my $result = $tags[0] . '-' . $count;
     print "== darcs show tags, changes:\n$result\n==\n" if $opt_v;

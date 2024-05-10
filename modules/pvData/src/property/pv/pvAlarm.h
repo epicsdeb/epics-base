@@ -49,11 +49,6 @@ public:
      * @param pvField The pvField.
      * @return (false,true) if the pvField (is not, is) an alarm structure.
      */
-    /*
-     * Attach to a field of a PVData object.
-     * @param pvField The pvField.
-     * @return (false,true) if the pvField (is not, is) an alarm structure.
-     */
     bool attach(PVFieldPtr const & pvField);
     /**
      * Detach for pvField.

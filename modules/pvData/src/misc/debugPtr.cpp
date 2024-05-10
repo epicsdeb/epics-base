@@ -35,7 +35,7 @@ void shared_ptr_base::track_new()
 }
 
 // create new tracker if ptr!=nullptr, otherwise clear
-void shared_ptr_base::track_new(void* ptr)
+void shared_ptr_base::track_new(const void* ptr)
 {
     track_clear();
     if(ptr){

@@ -78,7 +78,7 @@ protected:
     // add ourselves to tracker
     void track_new();
     // create new tracker if ptr!=nullptr, otherwise clear
-    void track_new(void* ptr);
+    void track_new(const void* ptr);
     // copy tracker and add ourself
     void track_assign(const shared_ptr_base& o);
     void track_clear();
@@ -286,6 +286,7 @@ public:
 
     long use_count() const noexcept { return real.use_count(); }
     bool unique() const noexcept { return real.unique(); }
+    bool expired() const noexcept { return real.expired(); }
 };
 
 template<class Base>
@@ -316,13 +317,12 @@ do_enable_shared_from_this(const shared_ptr<Store>& dest,
     self->xxInternalSelf = actual;
 }
 
-}} // namespace epics::debug
-
 template<typename T>
-inline std::ostream& operator<<(std::ostream& strm, const epics::debug::shared_ptr<T>& ptr)
+inline std::ostream& operator<<(std::ostream& strm, const shared_ptr<T>& ptr)
 {
     strm<<ptr.get();
     return strm;
 }
 
+}} // namespace epics::debug
 #endif // DEBUGPTR_H

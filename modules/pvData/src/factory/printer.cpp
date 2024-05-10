@@ -404,6 +404,9 @@ std::ostream& operator<<(std::ostream& strm, const PVStructure::Formatter& forma
     if(format.xfmt==PVStructure::Formatter::JSON) {
         JSONPrintOptions opts;
         opts.multiLine = false;
+#if EPICS_VERSION_INT>=VERSION_INT(7,0,6,1)
+        opts.json5 = true;
+#endif
         printJSON(strm, format.xtop, format.xshow ? *format.xshow : BitSet().set(0), opts);
         strm<<'\n';
         return strm;
@@ -497,7 +500,7 @@ std::ostream& operator<<(std::ostream& strm, const escape& Q)
         case '\'': next = '\''; break;
         case '\"': next = '\"'; if(Q.S==escape::CSV) quote = '"'; break;
         default:
-            if(!isprint(C)) {
+            if(!isprint((unsigned char)C)) {
                 // print three charator escape
                 strm<<"\\x"<<hexdigit(C>>4)<<hexdigit(C);
             } else {
@@ -534,7 +537,7 @@ std::ostream& operator<<(std::ostream& strm, const maybeQuote& q)
             esc = true;
             break;
         default:
-            if(!isprint(q.s[i])) {
+            if(!isprint((unsigned char)q.s[i])) {
                 esc = true;
             }
             break;

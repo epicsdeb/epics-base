@@ -2,6 +2,13 @@
 
 @page release_notes Release Notes
 
+Release 8.0.6 (Dec 2023)
+========================
+
+- Compatible changes
+  - Actually enable JSON-5 output in PVStructure::Formatter::JSON when available.
+  - Fix unaligned access issues for some ARM/Linux targets.
+
 Release 8.0.5 (Sep 2022)
 ========================
 
