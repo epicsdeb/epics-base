@@ -10,5 +10,4 @@
 0022-Change-shebang-lines-of-Perl-scripts-to-usr-bin-perl.patch
 0045-Fix-caRepeater-path-in-systemd-service-file.patch
 0046-numbered-python-for-makeRPath
-0047-softioc-workaround.patch
 0048-skip-non-loopback-iface-tests.patch
