@@ -139,9 +139,13 @@ const char *initHookName(int state)
         "initHookBeforeFree",
         "initHookAfterShutdown",
 
+        "initHookAfterPrepareDatabase",
+        "initHookBeforeCleanupDatabase",
+
         "initHookAfterInterruptAccept",
         "initHookAtEnd"
     };
+    STATIC_ASSERT(NELEMENTS(stateName)==initHookAtEnd+1);
     if (state < 0 || state >= NELEMENTS(stateName)) {
         return "Not an initHookState";
     }

@@ -73,7 +73,7 @@ epicsExportAddress(int, dbAccessDebugPUTF);
 
 DB_LOAD_RECORDS_HOOK_ROUTINE dbLoadRecordsHook = NULL;
 
-static short mapDBFToDBR[DBF_NTYPES] = {
+static const short mapDBFToDBR[DBF_NTYPES] = {
     /* DBF_STRING   => */    DBR_STRING,
     /* DBF_CHAR     => */    DBR_CHAR,
     /* DBF_UCHAR    => */    DBR_UCHAR,
@@ -798,18 +798,13 @@ int dbLoadRecords(const char* file, const char* subs)
         return -1;
     }
     status = dbReadDatabase(&pdbbase, file, 0, subs);
-    switch(status)
-    {
-    case 0:
+    if(status==0) {
         if(dbLoadRecordsHook)
             dbLoadRecordsHook(file, subs);
-        break;
-    case -2:
-        errlogPrintf("dbLoadRecords: failed to load '%s'\n"
-            "    Records cannot be loaded after iocInit!\n", file);
-        break;
-    default:
-        errlogPrintf("dbLoadRecords: failed to load '%s'\n", file);
+    } else {
+        fprintf(stderr, ERL_ERROR " failed to load '%s'\n", file);
+        if(status==-2)
+            fprintf(stderr, "    Records cannot be loaded after iocInit!\n");
     }
     return status;
 }

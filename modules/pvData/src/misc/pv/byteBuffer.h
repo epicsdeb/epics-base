@@ -150,14 +150,17 @@ struct swap<8> {
 #undef _PVA_swap64
 
 /* PVD serialization doesn't pay attention to alignement,
- * which some targets really care about and treat unaligned
+ * which some targets (ARM and powerpc) really care about and treat unaligned
  * access as a fault, or with a heavy penalty (~= to a syscall).
  *
  * For those targets,, we will have to live with the increase
  * in execution time and/or object code size of byte-wise copy.
+ *
+ * Treat x86 32/64 as an outlier, and assume all other targets
+ * need, or greatly benefit, from aligned access.
  */
 
-#ifdef _ARCH_PPC
+#if !(defined(__x86_64__) || defined(_M_AMD64) || defined(__i386__) || defined(_M_IX86))
 
 template<typename T>
 union alignu {

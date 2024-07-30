@@ -173,6 +173,7 @@ static epicsThreadOSD * create_threadInfo(const char *name)
     pthreadInfo = calloc(1,sizeof(*pthreadInfo) + strlen(name));
     if(!pthreadInfo)
         return NULL;
+    pthreadInfo->isRunning = 1;
     pthreadInfo->suspendEvent = epicsEventCreate(epicsEventEmpty);
     if(!pthreadInfo->suspendEvent){
         free(pthreadInfo);
@@ -441,6 +442,8 @@ static void * start_routine(void *arg)
     (*pthreadInfo->createFunc)(pthreadInfo->createArg);
 
     epicsExitCallAtThreadExits ();
+
+    epicsAtomicSetIntT(&pthreadInfo->isRunning, 0);
     return(0);
 }
 
@@ -523,11 +526,16 @@ LIBCOM_API unsigned int epicsStdCall epicsThreadGetStackSize (epicsThreadStackSi
 
 LIBCOM_API void epicsStdCall epicsThreadOnce(epicsThreadOnceId *id, void (*func)(void *), void *arg)
 {
-    static struct epicsThreadOSD threadOnceComplete;
-    #define EPICS_THREAD_ONCE_DONE &threadOnceComplete
+    static const struct epicsThreadOSD threadOnceComplete;
+    #define EPICS_THREAD_ONCE_DONE (void*)&threadOnceComplete
     int status;
+    void *prev, *self;
 
-    epicsThreadInit();
+    if(epicsAtomicGetPtrT((void**)id) == EPICS_THREAD_ONCE_DONE) {
+        return; /* fast path.  global init already done.  No need to lock */
+    }
+
+    self = epicsThreadGetIdSelf();
     status = mutexLock(&onceLock);
     if(status) {
         fprintf(stderr,"epicsThreadOnce: pthread_mutex_lock returned %s.\n",
@@ -535,21 +543,25 @@ LIBCOM_API void epicsStdCall epicsThreadOnce(epicsThreadOnceId *id, void (*func)
         exit(-1);
     }
 
-    if (*id != EPICS_THREAD_ONCE_DONE) {
-        if (*id == EPICS_THREAD_ONCE_INIT) { /* first call */
-            *id = epicsThreadGetIdSelf();    /* mark active */
+    /* slow path, check again and attempt to begin */
+    prev = epicsAtomicCmpAndSwapPtrT((void**)id, EPICS_THREAD_ONCE_INIT, self);
+
+    if (prev != EPICS_THREAD_ONCE_DONE) {
+        if (prev == EPICS_THREAD_ONCE_INIT) { /* first call, already marked active */
             status = pthread_mutex_unlock(&onceLock);
             checkStatusQuit(status,"pthread_mutex_unlock", "epicsThreadOnce");
             func(arg);
             status = mutexLock(&onceLock);
             checkStatusQuit(status,"pthread_mutex_lock", "epicsThreadOnce");
-            *id = EPICS_THREAD_ONCE_DONE;    /* mark done */
-        } else if (*id == epicsThreadGetIdSelf()) {
+            epicsAtomicSetPtrT((void**)id, EPICS_THREAD_ONCE_DONE);    /* mark done */
+
+        } else if (prev == self) {
             status = pthread_mutex_unlock(&onceLock);
             checkStatusQuit(status,"pthread_mutex_unlock", "epicsThreadOnce");
             cantProceed("Recursive epicsThreadOnce() initialization\n");
+
         } else
-            while (*id != EPICS_THREAD_ONCE_DONE) {
+            while ((prev = epicsAtomicGetPtrT((void**)id)) != EPICS_THREAD_ONCE_DONE) {
                 /* Another thread is in the above func(arg) call. */
                 status = pthread_mutex_unlock(&onceLock);
                 checkStatusQuit(status,"pthread_mutex_unlock", "epicsThreadOnce");
@@ -758,6 +770,9 @@ LIBCOM_API void epicsStdCall epicsThreadSetPriority(epicsThreadId pthreadInfo,un
     assert(epicsThreadOnceCalled);
     assert(pthreadInfo);
     if(!pthreadInfo->isEpicsThread) {
+        /* not allowed to avoid dealing with (potentially) different scheduling
+         * policies (FIFO vs. RR vs. OTHER vs. ...)
+         */
         fprintf(stderr,"epicsThreadSetPriority called by non epics thread\n");
         return;
     }

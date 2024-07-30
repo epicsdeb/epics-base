@@ -173,7 +173,7 @@ static int iocBuild_2(void)
 
     scanInit();
     if (asInit()) {
-        errlogPrintf("iocBuild: asInit Failed.\n");
+        errlogPrintf(ERL_ERROR " iocBuild: asInit Failed.\n");
         return -1;
     }
     dbProcessNotifyInit();
@@ -716,13 +716,13 @@ int iocShutdown(void)
     iterateRecords(doCloseLinks, NULL);
     initHookAnnounce(initHookAfterCloseLinks);
 
-    if (iocBuildMode == buildIsolated) {
-        /* stop and "join" threads */
-        scanStop();
-        initHookAnnounce(initHookAfterStopScan);
-        callbackStop();
-        initHookAnnounce(initHookAfterStopCallback);
-    } else {
+    /* stop and "join" threads */
+    scanStop();
+    initHookAnnounce(initHookAfterStopScan);
+    callbackStop();
+    initHookAnnounce(initHookAfterStopCallback);
+
+    if (iocBuildMode != buildIsolated) {
         dbStopServers();
     }
 

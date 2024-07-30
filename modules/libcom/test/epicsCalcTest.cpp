@@ -298,7 +298,7 @@ MAIN(epicsCalcTest)
     const double a=1.0, b=2.0, c=3.0, d=4.0, e=5.0, f=6.0,
                  g=7.0, h=8.0, i=9.0, j=10.0, k=11.0, l=12.0;
 
-    testPlan(630);
+    testPlan(637);
 
     /* LITERAL_OPERAND elements */
     testExpr(0);
@@ -370,6 +370,11 @@ MAIN(epicsCalcTest)
     testExpr(cosh(0.5));
     testExpr(exp(1.));
     testExpr(floor(1.5));
+    testExpr(fmod(1.5, 1.0));
+    testExpr(fmod(-1.5, 1.0));
+    testExpr(fmod(1.5, -1.0));
+    testExpr(fmod(-1.5, -1.0));
+    testExpr(fmod(1.5, 0.0));
 
     testExpr(finite(0.));
     testExpr(finite(Inf));
@@ -948,6 +953,8 @@ MAIN(epicsCalcTest)
     testBadExpr("1?", CALC_ERR_CONDITIONAL);
     testBadExpr("1?1", CALC_ERR_CONDITIONAL);
     testBadExpr(":1", CALC_ERR_SYNTAX);
+    testBadExpr("0,", CALC_ERR_BAD_SEPERATOR);
+    testBadExpr("0)", CALC_ERR_PAREN_NOT_OPEN);
 
     // Bit manipulations wrt bit 31 (bug lp:1514520)
     //   using integer literals

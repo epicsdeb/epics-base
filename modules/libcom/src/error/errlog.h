@@ -97,7 +97,7 @@ LIBCOM_API extern int errVerbose;
  * that the output is sent to the errlog task. Unless configured not to, the output
  * will appear on the console as well.
  */
-LIBCOM_API int errlogPrintf(const char *pformat, ...)
+LIBCOM_API int errlogPrintf(EPICS_PRINTF_FMT(const char *pformat), ...)
     EPICS_PRINTF_STYLE(1,2);
 
 /**
@@ -118,7 +118,8 @@ LIBCOM_API int errlogVprintf(const char *pformat, va_list pvar);
  * \return int Consult printf documentation in C standard library
  */
 LIBCOM_API int errlogSevPrintf(const errlogSevEnum severity,
-    const char *pformat, ...) EPICS_PRINTF_STYLE(2,3);
+    EPICS_PRINTF_FMT(const char *pformat), ...
+) EPICS_PRINTF_STYLE(2,3);
 
 /**
  * This function is like ::errlogVprintf except that it adds the severity to the beginning
@@ -178,6 +179,9 @@ LIBCOM_API void errlogAddListener(errlogListener listener, void *pPrivate);
  *
  * \param listener Function pointer of type ::errlogListener
  * \param pPrivate This will be passed as the first argument of listener()
+ *
+ * \since 7.0.8 Safe to call from a listener callback.
+ * \until 7.0.8 Self-removal from a listener callback caused corruption.
  */
 LIBCOM_API int errlogRemoveListeners(errlogListener listener,
     void *pPrivate);
@@ -236,11 +240,14 @@ LIBCOM_API void errlogFlush(void);
  * The remaining arguments are just like the arguments to the C printf routine.
  * ::errVerbose determines if the filename and line number are shown.
  */
-LIBCOM_API void errPrintf(long status, const char *pFileName, int lineno,
-    const char *pformat, ...) EPICS_PRINTF_STYLE(4,5);
+LIBCOM_API void errPrintf(
+    long status, const char *pFileName, int lineno, 
+    EPICS_PRINTF_FMT(const char *pformat), ...
+) EPICS_PRINTF_STYLE(4,5);
 
-LIBCOM_API int errlogPrintfNoConsole(const char *pformat, ...)
-    EPICS_PRINTF_STYLE(1,2);
+LIBCOM_API int errlogPrintfNoConsole(
+    EPICS_PRINTF_FMT(const char *pformat), ...
+) EPICS_PRINTF_STYLE(1,2);
 LIBCOM_API int errlogVprintfNoConsole(const char *pformat,va_list pvar);
 
 /**
@@ -278,14 +285,16 @@ LIBCOM_API void errSymLookup(long status, char *pBuf, size_t bufLength);
 #define ANSI_ESC_MAGENTA "\033[35;1m"
 #define ANSI_ESC_CYAN "\033[36;1m"
 #define ANSI_ESC_BOLD "\033[1m"
+#define ANSI_ESC_UNDERLINE "\033[4m"
 #define ANSI_ESC_RESET "\033[0m"
-#define ANSI_RED(STR)     ANSI_ESC_RED     STR ANSI_ESC_RESET
-#define ANSI_GREEN(STR)   ANSI_ESC_GREEN   STR ANSI_ESC_RESET
-#define ANSI_YELLOW(STR)  ANSI_ESC_YELLOW  STR ANSI_ESC_RESET
-#define ANSI_BLUE(STR)    ANSI_ESC_BLUE    STR ANSI_ESC_RESET
-#define ANSI_MAGENTA(STR) ANSI_ESC_MAGENTA STR ANSI_ESC_RESET
-#define ANSI_CYAN(STR)    ANSI_ESC_CYAN    STR ANSI_ESC_RESET
-#define ANSI_BOLD(STR)    ANSI_ESC_BOLD    STR ANSI_ESC_RESET
+#define ANSI_RED(STR)       ANSI_ESC_RED       STR ANSI_ESC_RESET
+#define ANSI_GREEN(STR)     ANSI_ESC_GREEN     STR ANSI_ESC_RESET
+#define ANSI_YELLOW(STR)    ANSI_ESC_YELLOW    STR ANSI_ESC_RESET
+#define ANSI_BLUE(STR)      ANSI_ESC_BLUE      STR ANSI_ESC_RESET
+#define ANSI_MAGENTA(STR)   ANSI_ESC_MAGENTA   STR ANSI_ESC_RESET
+#define ANSI_CYAN(STR)      ANSI_ESC_CYAN      STR ANSI_ESC_RESET
+#define ANSI_BOLD(STR)      ANSI_ESC_BOLD      STR ANSI_ESC_RESET
+#define ANSI_UNDERLINE(STR) ANSI_ESC_UNDERLINE STR ANSI_ESC_RESET
 #define ERL_ERROR ANSI_RED("ERROR")
 #define ERL_WARNING ANSI_MAGENTA("WARNING")
 /** @} */

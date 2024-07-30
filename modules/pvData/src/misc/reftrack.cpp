@@ -271,10 +271,10 @@ char* epicsRefSnapshotCurrent()
         snap.update();
         std::ostringstream strm;
         strm<<snap;
-        const char *str = strm.str().c_str();
-        char *ret = (char*)malloc(strlen(str)+1);
+        std::string str = strm.str();
+        char *ret = (char*)malloc(str.length()+1);
         if(ret)
-            strcpy(ret, str);
+            strcpy(ret, str.c_str());
         return ret;
     }catch(std::exception& e){
         return epicsStrDup(e.what());

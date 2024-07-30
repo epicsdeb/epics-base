@@ -31,7 +31,7 @@ AnyScalar::AnyScalar(const AnyScalar& o)
 }
 
 #if __cplusplus>=201103L
-AnyScalar::AnyScalar(AnyScalar&& o)
+AnyScalar::AnyScalar(AnyScalar&& o) noexcept
     :_stype(o._stype)
 {
     typedef std::string string;
@@ -136,7 +136,7 @@ void AnyScalar::swap(AnyScalar& o) {
 }
 const void* AnyScalar::bufferUnsafe() const {
     if(_stype==pvString) {
-        return as<std::string>().c_str();
+        return ref<std::string>().c_str();
     } else {
         return _wrap.blob;
     }

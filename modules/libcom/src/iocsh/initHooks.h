@@ -8,42 +8,44 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-/**
- * \file initHooks.h
+/** @page inithooks IOC lifecycle callback hooks.
  *
- * \author Benjamin Franksen (BESSY)
- * \author Marty Kraimer (ANL)
+ * initHookRegister() allows external code to be called at certains points (initHookState)
+ * during IOC startup and shutdown.
  *
- * \brief Facility to call functions during iocInit()
+ * The overall states (see getIocState() ) of an IOC are:
  *
- * The initHooks facility allows application functions to be called at various
- * stages/states during IOC initialization, pausing, restart and shutdown.
- *
- * All registered application functions will be called whenever the IOC
- * initialization, pause/resume or shutdown process reaches a new state.
+ * - Void
+ *   - From process start until iocInit()
+ *   - After iocShutdown()
+ * - Building
+ *   - Transiant state during iocInit()
+ * - Built
+ *   - Transiant state during iocInit()
+ * - Running
+ *   - After iocInit() or iocRun()
+ * - Paused
+ *   - After iocPause()
  *
  * The following C++ example shows how to use this facility:
  *
  * \code{.cpp}
+ * #include <initHooks.h>
+ * #include <epicsExport.h>
  * static void myHookFunction(initHookState state)
  * {
- *     switch (state) {
- *     case initHookAfterInitRecSup:
- *         ...
- *         break;
- *     case initHookAfterDatabaseRunning:
- *         ...
- *         break;
- *     default:
- *         break;
+ *     if(state == initHookAfterDatabaseRunning) {
+ *         // a good point for driver worker threads to be started.
  *     }
  * }
- *
- * // A static constructor registers hook function at startup:
- * static int myHookStatus = initHookRegister(myHookFunction);
+ * static void myRegistrar(void) {
+ *     initHookRegister(&myHookFunction);
+ * }
+ * extern "C" {
+ *     epicsExportRegistrar(myRegistrar);
+ * }
+ * // in some .dbd file add "registrar(myRegistrar)".
  * \endcode
- *
- * An arbitrary number of functions can be registered.
  */
 
 
@@ -69,41 +71,85 @@ extern "C" {
  * if the IOC is later paused and restarted.
  */
 typedef enum {
+
+    // iocInit() begins
     initHookAtIocBuild = 0,         /**< Start of iocBuild() / iocInit() */
     initHookAtBeginning,            /**< Database sanity checks passed */
     initHookAfterCallbackInit,      /**< Callbacks, generalTime & taskwd init */
     initHookAfterCaLinkInit,        /**< CA links init */
     initHookAfterInitDrvSup,        /**< Driver support init */
     initHookAfterInitRecSup,        /**< Record support init */
-    initHookAfterInitDevSup,        /**< Device support init pass 0 */
-    initHookAfterInitDatabase,      /**< Records and locksets init */
+    initHookAfterInitDevSup,        /**< Device support init pass 0 (also autosave pass 0) */
+    initHookAfterInitDatabase,      /**< Records and locksets init  (also autosave pass 1) */
     initHookAfterFinishDevSup,      /**< Device support init pass 1 */
     initHookAfterScanInit,          /**< Scan, AS, ProcessNotify init */
     initHookAfterInitialProcess,    /**< Records with PINI = YES processsed */
     initHookAfterCaServerInit,      /**< RSRV init */
     initHookAfterIocBuilt,          /**< End of iocBuild() */
 
+    // iocInit() continues, and iocRun() begins
     initHookAtIocRun,               /**< Start of iocRun() */
     initHookAfterDatabaseRunning,   /**< Scan tasks and CA links running */
     initHookAfterCaServerRunning,   /**< RSRV running */
     initHookAfterIocRunning,        /**< End of iocRun() / iocInit() */
+    // iocInit() or iocRun() ends
 
+    // iocPause() begins
     initHookAtIocPause,             /**< Start of iocPause() */
     initHookAfterCaServerPaused,    /**< RSRV paused */
     initHookAfterDatabasePaused,    /**< CA links and scan tasks paused */
     initHookAfterIocPaused,         /**< End of iocPause() */
+    // iocPause() ends
 
-    initHookAtShutdown,             /**< Start of iocShutdown() (unit tests only) */
-    initHookAfterCloseLinks,        /**< Links disabled/deleted */
-    initHookAfterStopScan,          /**< Scan tasks stopped */
-    initHookAfterStopCallback,      /**< Callback tasks stopped */
-    initHookAfterStopLinks,         /**< CA links stopped */
-    initHookBeforeFree,             /**< Resource cleanup about to happen */
-    initHookAfterShutdown,          /**< End of iocShutdown() */
+    // iocShutdown() begins
+    /** \brief Start of iocShutdown() (unit tests only)
+     *  \since 7.0.3.1 Added
+     */
+    initHookAtShutdown,
+    /** \brief Links disabled/deleted
+     *  \since 7.0.3.1 Added
+     */
+    initHookAfterCloseLinks,
+    /** \brief Scan tasks stopped.
+     *  \since 7.0.8 Triggered during normal IOC shutdown
+     *  \since 7.0.3.1 Added, triggered only by unittest code.
+     */
+    initHookAfterStopScan,
+    /** \brief Callback tasks stopped
+     *  \since 7.0.3.1 Added
+     */
+    initHookAfterStopCallback,
+    /** \brief CA links stopped.
+     *  \since 7.0.8 Triggered during normal IOC shutdown
+     *  \since 7.0.3.1 Added, triggered only by unittest code.
+     */
+    initHookAfterStopLinks,
+    /** \brief Resource cleanup about to happen
+     *  \since 7.0.3.1 Added
+     */
+    initHookBeforeFree,
+    /** \brief End of iocShutdown()
+     *  \since 7.0.3.1 Added
+     */
+    initHookAfterShutdown,
+    // iocShutdown() ends
+
+    /** \brief Called during testdbPrepare()
+     * Use this hook to repeat actions each time an empty test database is initialized.
+     * \since 7.0.8 Added, triggered only by unittest code.
+     */
+    initHookAfterPrepareDatabase,
+    /** \brief Called during testdbCleanup()
+     * Use this hook to perform cleanup each time before a test database is free()'d.
+     * \since 7.0.8 Added, triggered only by unittest code.
+     */
+    initHookBeforeCleanupDatabase,
 
     /* Deprecated states: */
-    initHookAfterInterruptAccept,   /**< After initHookAfterDatabaseRunning */
-    initHookAtEnd,                  /**< Before initHookAfterIocRunning */
+    /** Only announced once.  Deprecated in favor of initHookAfterDatabaseRunning */
+    initHookAfterInterruptAccept,
+    /** Only announced once.  Deprecated in favor of initHookAfterIocRunning */
+    initHookAtEnd,
 } initHookState;
 
 /** \brief Type for application callback functions

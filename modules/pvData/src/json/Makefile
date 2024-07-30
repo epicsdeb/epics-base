@@ -7,4 +7,4 @@ INC += pv/json.h
 LIBSRCS += parsehelper.cpp
 LIBSRCS += parseany.cpp
 LIBSRCS += parseinto.cpp
-LIBSRCS += print.cpp
+LIBSRCS += jprint.cpp

@@ -23,6 +23,7 @@
 #include "pv/pvArrayPlugin.h"
 #include "pv/pvTimestampPlugin.h"
 #include "pv/pvDeadbandPlugin.h"
+#include "pv/dataDistributorPlugin.h"
 
 using std::tr1::static_pointer_cast;
 using namespace epics::pvData;
@@ -44,6 +45,7 @@ PVDatabasePtr PVDatabase::getMaster()
         PVArrayPlugin::create();
         PVTimestampPlugin::create();
         PVDeadbandPlugin::create();
+        DataDistributorPlugin::create();
     }
     return pvDatabaseMaster;
 }

@@ -2,6 +2,31 @@
 
 This document summarizes the changes to the module between releases.
 
+## Release 4.7.1 (EPICS 7.0.8, Dec 2023)
+
+* Added data distributor plugin which can be used for distributing data between 
+  a group of clients. The plugin is triggered by the request string of the
+  form:
+
+  `_[distributor=group:<group id>;set:<set_id>;trigger:<field_name>;updates:<n_updates>;mode:<update_mode>]`
+
+  The plugin parameters are optional and are described bellow:
+
+  - group: this parameter indicates a group that client application belongs to (default value: "default"); groups of clients are completely independent of each other
+
+  - set: this parameter designates a client set that application belongs to within its group (default value: "default")
+
+  - trigger: this is the PV structure field that distinguishes different channel updates (default value: "timeStamp"); for example, for area detector images one could use the "uniqueId" field of the NTND structure
+
+  - updates: this parameter configures how many sequential updates a client (or a set of clients) will receive before the data distributor starts updating the next one (default value: "1")
+
+  - mode: this parameter configures how channel updates are to be distributed between clients in a set:
+    - one: update goes to one client per set
+    - all: update goes to all clients in a set
+    - default is "one" if client set id is not specified, and "all" if set id is specified
+
+  For more information and examples of usage see the [plugin documentation](dataDistributorPlugin.md).
+
 ## Release 4.7.0 (EPICS 7.0.7, Sep 2022)
 
 * Added support for the whole structure (master field) server side plugins.

@@ -434,11 +434,11 @@ public:
         _E_non_const* temp=new _E_non_const[i];
         try{
             std::copy(begin(), begin()+new_count, temp);
-            this->m_sdata.reset(temp, detail::default_array_deleter<E*>());
         }catch(...){
             delete[] temp;
             throw;
         }
+        this->m_sdata.reset(temp, detail::default_array_deleter<E*>());
         this->m_offset = 0;
         this->m_count = new_count;
         this->m_total = i;
@@ -481,11 +481,11 @@ public:
             std::copy(begin(),
                       begin()+n,
                       temp);
-            this->m_sdata.reset(temp, detail::default_array_deleter<pointer>());
         }catch(...){
             delete[] temp;
             throw;
         }
+        this->m_sdata.reset(temp, detail::default_array_deleter<pointer>());
         this->m_offset= 0;
         this->m_count = i;
         this->m_total = new_total;

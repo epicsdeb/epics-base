@@ -247,7 +247,7 @@ void showNTTable()
     iarr.push_back(42); // will not be shown
     input->getSubFieldT<pvd::PVIntArray>("value.colA")->replace(pvd::freeze(iarr));
 
-    sarr.push_back("one\x7f");
+    sarr.push_back("one\x7f\x80");
     sarr.push_back("two words");
     sarr.push_back("A '\"'");
     input->getSubFieldT<pvd::PVStringArray>("value.colB")->replace(pvd::freeze(sarr));
@@ -255,7 +255,7 @@ void showNTTable()
 
     testDiff("<undefined>                \n"
              "labelA   \"label B\"\n"
-             "     1     one\\x7F\n"
+             "     1 one\\x7F\\x80\n"
              "     2 \"two words\"\n"
              "     3  \"A \\'\"\"\\'\"\n"
              , print(input->stream()),

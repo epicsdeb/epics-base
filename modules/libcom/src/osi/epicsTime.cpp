@@ -44,8 +44,9 @@ void epicsTime::throwError(int code)
 }
 
 
-epicsTime::epicsTime ( const epicsTimeStamp & replace ) {
-    ts = replace;
+epicsTime::epicsTime ( const epicsTimeStamp & replace )
+    :ts(replace)
+{
     if(ts.nsec >= nSecPerSec)
         throw std::logic_error("epicsTimeStamp has overflow in nano-seconds field");
 }
@@ -237,7 +238,7 @@ size_t epicsStdCall epicsTimeToStrftime (char *pBuff, size_t bufLength, const ch
                     // convert nanosecs to integer of correct range
                     frac /= div[fracWid];
                     char fracFormat[32];
-                    sprintf ( fracFormat, "%%0%lulu", fracWid );
+                    epicsSnprintf ( fracFormat, sizeof ( fracFormat ), "%%0%lulu", fracWid );
                     int status = epicsSnprintf ( pBufCur, bufLenLeft, fracFormat, frac );
                     if ( status > 0 ) {
                         unsigned long nChar = static_cast < unsigned long > ( status );

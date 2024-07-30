@@ -2,7 +2,7 @@
 
 EPICS_PVD_MAJOR_VERSION = 8
 EPICS_PVD_MINOR_VERSION = 0
-EPICS_PVD_MAINTENANCE_VERSION = 5
+EPICS_PVD_MAINTENANCE_VERSION = 6
 
 # Development flag, set to zero for release versions
 

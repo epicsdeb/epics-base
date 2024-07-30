@@ -255,7 +255,7 @@ struct LocalFL
         :pfl(pfl)
         ,ours(false)
     {
-        if(!pfl && (ellCount(&pchan->pre_chain)!=0 || ellCount(&pchan->pre_chain)==0)) {
+        if(!pfl && (ellCount(&pchan->pre_chain)!=0 || ellCount(&pchan->post_chain)!=0)) {
             pfl = db_create_read_log(pchan);
             if(pfl) {
                 ours = true;

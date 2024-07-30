@@ -35,6 +35,7 @@
 #include <epicsStdlib.h>
 
 #include <cadef.h>
+#include <errlog.h>
 #include <epicsGetopt.h>
 #include <epicsEvent.h>
 #include <epicsString.h>
@@ -284,6 +285,8 @@ int main (int argc, char *argv[])
     LINE_BUFFER(stdout);        /* Configure stdout buffering */
     putenv("POSIXLY_CORRECT="); /* Behave correct on GNU getopt systems */
 
+    use_ca_timeout_env ( &caTimeout);
+
     while ((opt = getopt(argc, argv, ":cnlhatsVS#:w:p:F:")) != -1) {
         switch (opt) {
         case 'h':               /* Print usage */
@@ -318,11 +321,16 @@ int main (int argc, char *argv[])
             request = callback;
             break;
         case 'w':               /* Set CA timeout value */
+            /*
+             * epicsScanDouble is a macro defined as epicsParseDouble,
+             * (found in modules/libcom/src/misc) which will only
+             * change caTimeout here if it finds an acceptable value.
+             */
             if(epicsScanDouble(optarg, &caTimeout) != 1)
             {
                 fprintf(stderr, "'%s' is not a valid timeout value "
-                        "- ignored. ('caput -h' for help.)\n", optarg);
-                caTimeout = DEFAULT_TIMEOUT;
+                        "- ignored, using '%.1f'. ('caput -h' for help.)\n",
+                        optarg, caTimeout);
             }
             break;
         case '#':               /* Array count */
@@ -337,7 +345,7 @@ int main (int argc, char *argv[])
             if (sscanf(optarg,"%u", &caPriority) != 1)
             {
                 fprintf(stderr, "'%s' is not a valid CA priority "
-                        "- ignored. ('caget -h' for help.)\n", optarg);
+                        "- ignored. ('caput -h' for help.)\n", optarg);
                 caPriority = DEFAULT_CA_PRIORITY;
             }
             if (caPriority > CA_PRIORITY_MAX) caPriority = CA_PRIORITY_MAX;
@@ -542,7 +550,7 @@ int main (int argc, char *argv[])
         result = ca_array_put (dbrType, count, pvs[0].chid, pbuf);
     }
     if (result != ECA_NORMAL) {
-        fprintf(stderr, "Error from put operation: %s\n", ca_message(result));
+        fprintf(stderr, ERL_ERROR " from put operation: %s\n", ca_message(result));
         free(sbuf); free(dbuf); free(ebuf);
         return 1;
     }
@@ -563,7 +571,7 @@ int main (int argc, char *argv[])
     }
 
     if (result != ECA_NORMAL) {
-        fprintf(stderr, "Error occured writing data: %s\n", ca_message(result));
+        fprintf(stderr, ERL_ERROR " occured writing data: %s\n", ca_message(result));
         free(sbuf); free(dbuf); free(ebuf);
         return 1;
     }
