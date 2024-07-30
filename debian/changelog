@@ -1,10 +1,16 @@
-epics-base (7.0.8-1+nmu1) UNRELEASED; urgency=medium
+epics-base (7.0.8.1-1) UNRELEASED; urgency=medium
+
+  * Upstream 7.0.8.1
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Tue, 30 Jul 2024 09:38:52 -0400
+
+epics-base (7.0.8-1+nmu1) unstable; urgency=medium
 
   * Upstream version 7.0.8
 
  -- Conor Farah <farah@frib.msu.edu>  Mon, 13 May 2024 13:56:35 -0500
 
-epics-base (7.0.7-1) UNRELEASED; urgency=medium
+epics-base (7.0.7-1) unstable; urgency=medium
 
   * Upstream version 7.0.7
   * Find softIoc.dbd with zero arguments in EPICS_BASE
