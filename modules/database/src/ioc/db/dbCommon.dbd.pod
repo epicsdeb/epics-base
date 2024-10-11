@@ -1,0 +1,575 @@
+#*************************************************************************
+# Copyright (c) 2007 UChicago Argonne LLC, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE is distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution.
+#*************************************************************************
+
+=head3 Operator Display Parameters
+
+The B<NAME> field contains the record name which must be unique within an
+EPICS Channel Access name space. The name is supplied by the application
+developer and is the means of identifying a specific record. The name has a
+maximum length of 60 characters and should use only this limited set of
+characters:
+
+ a-z A-Z 0-9 _ - : [ ] < > ;
+
+The B<DESC> field may be set to provide a meaningful description of the
+record's purpose. Maximum length is 40 characters.
+
+=fields NAME, DESC
+
+=cut
+
+	%#include "epicsTypes.h"
+	%#include "link.h"
+	field(NAME,DBF_STRING) {
+		prompt("Record Name")
+		special(SPC_NOMOD)
+		size(61)
+	}
+	field(DESC,DBF_STRING) {
+		prompt("Descriptor")
+		promptgroup("10 - Common")
+		size(41)
+	}
+	field(ASG,DBF_STRING) {
+		prompt("Access Security Group")
+		promptgroup("10 - Common")
+		special(SPC_AS)
+		size(29)
+	}
+
+=head3 Scan Fields
+
+These fields contain information related to how and when a record processes. A
+few records have unique fields that also affect how they process. These
+fields, if any, will be listed and explained in the section for each record.
+
+The B<SCAN> field specifies the scanning period for periodic record scans or the
+scan type for non-periodic record scans.  The default set of values for SCAN can
+be found in L<menuScan.dbd|menuScan>.
+
+The choices provided by this menu are:
+
+=over
+
+=item *
+
+C<Passive> for the record scan to be triggered by other records or Channel
+Access
+
+=item *
+
+C<Event> for event-driven scan
+
+=item *
+
+C<I/O Intr> for interrupt-driven scan
+
+=item *
+
+A set of periodic scan intervals
+
+=back
+
+Additional periodic scan rates may be defined for individual IOCs by making a
+local copy of menuScan.dbd and adding more choices as required. Periodic scan
+rates should normally be defined in order following the other scan types, with
+the longest periods appearing first. Scan periods can be specified with a unit
+string of C<second>/C<seconds>, C<minute>/C<minutes>, C<hour>/C<hours> or
+C<Hertz>/C<Hz>. Seconds are used if no unit is included in the choice string.
+For example these rates are all valid:
+
+ 1 hour
+ 0.5 hours
+ 15 minutes
+ 3 seconds
+ 1 second
+ 2 Hertz
+
+The B<PINI> field specifies record processing at initialization. It can have the
+values NO, YES, RUN, RUNNING, PAUSE, and PAUSED. If it is set to YES during
+database configuration, the record is processed once at IOC initialization
+(before the normal scan tasks are started). For the other values see
+L<menuPini.dbd|menuPini> for more details.
+
+The B<PHAS> field orders the records processed within a specific SCAN group or
+PINI processing phase. All records of a specified phase are processed before
+those with higher phase number. It is generally better practice to use linked
+passive records to enforce the order of processing rather than a phase number.
+If the PINI field is set to NO, the PHAS field is not meaningful for passive
+records.
+
+The B<EVNT> field specifies an event name or number. This event identifier is
+used if the SCAN field is set to C<Event>. All records with scan type C<Event>
+and the same EVNT value will be processed when that event is signalled by other
+software running in the IOC, either by calling C<post_event(int event)> for
+numeric events, or by calling C<postEvent()> with an event handle previously
+looked up using C<eventNameToHandle()> for named events.
+
+The B<PRIO> field specifies the scheduling priority for processing records
+with SCAN=C<I/O Event> and asynchronous record completion tasks.
+
+The B<DISV> field specifies a "disable value". Record processing cannot
+begin when the value of this field is equal to the value of the DISA
+field, meaning the record is disabled. Note that field values of a record
+can be changed by database or Channel Access puts, even if the record is
+disabled.
+
+The B<DISA> field contains the value that is compared with DISV to determine if
+the record is disabled. A value is obtained for the DISA field from the B<SDIS>
+link field before the IOC tries to process the record. If SDIS is not set, DISA
+may be set by some other method to enable and disable the record.
+
+The B<DISS> field defines the record's "disable severity". If this field is
+not NO_ALARM and the record is disabled, the record will be put into alarm
+with this severity and a status of DISABLE_ALARM.
+
+If the B<PROC> field of a record is written to, the record is processed.
+
+The B<LSET> field contains the lock set to which this record belongs. All
+records linked in any way via input, output, or forward database links belong
+to the same lock set. Lock sets are determined at IOC initialization time, and
+are updated whenever a database link is added, removed or altered.
+
+The B<LCNT> field counts the number of times dbProcess finds the record active
+during successive scans, i.e. PACT is TRUE. If dbProcess finds the record
+active MAX_LOCK times (currently set to 10) it raises a SCAN_ALARM.
+
+The B<PACT> field is TRUE while the record is active (being processed). For
+asynchronous records PACT can be TRUE from the time record processing is
+started until the asynchronous completion occurs. As long as PACT is TRUE,
+dbProcess will not call the record processing routine. See Application
+Developers Guide for details on usage of PACT.
+
+The B<FLNK> field is a link pointing to another record (the "target" record).
+Processing a record with the FLNK field set will trigger processing of the
+target record towards the end of processing the first record (but before PACT is
+cleared), provided the target record's SCAN field is set to C<Passive>. If the
+FLNK field is a Channel Access link it must point to the PROC field of the
+target record.
+
+The B<SPVT> field is for internal use by the scanning system.
+
+=fields SCAN, PINI, PHAS, EVNT, PRIO, DISV, DISA, SDIS, PROC, DISS, LCNT, PACT, FLNK, SPVT
+
+=cut
+
+	field(SCAN,DBF_MENU) {
+		prompt("Scan Mechanism")
+		promptgroup("20 - Scan")
+		special(SPC_SCAN)
+		interest(1)
+		menu(menuScan)
+	}
+	field(PINI,DBF_MENU) {
+		prompt("Process at iocInit")
+		promptgroup("20 - Scan")
+		interest(1)
+		menu(menuPini)
+	}
+	field(PHAS,DBF_SHORT) {
+		prompt("Scan Phase")
+		promptgroup("20 - Scan")
+		special(SPC_SCAN)
+		interest(1)
+	}
+	field(EVNT,DBF_STRING) {
+		prompt("Event Name")
+		promptgroup("20 - Scan")
+		special(SPC_SCAN)
+		size(40)
+		interest(1)
+	}
+	field(TSE,DBF_SHORT) {
+		prompt("Time Stamp Event")
+		promptgroup("20 - Scan")
+		interest(1)
+	}
+	field(TSEL,DBF_INLINK) {
+		prompt("Time Stamp Link")
+		promptgroup("20 - Scan")
+		interest(1)
+	}
+	field(DTYP,DBF_DEVICE) {
+		prompt("Device Type")
+		promptgroup("10 - Common")
+		interest(1)
+	}
+	field(DISV,DBF_SHORT) {
+		prompt("Disable Value")
+		promptgroup("20 - Scan")
+		initial("1")
+	}
+	field(DISA,DBF_SHORT) {
+		prompt("Disable")
+	}
+	field(SDIS,DBF_INLINK) {
+		prompt("Scanning Disable")
+		promptgroup("20 - Scan")
+		interest(1)
+	}
+	%#include "epicsMutex.h"
+	field(MLOK,DBF_NOACCESS) {
+		prompt("Monitor lock")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("epicsMutexId        mlok")
+	}
+	%#include "ellLib.h"
+	field(MLIS,DBF_NOACCESS) {
+		prompt("Monitor List")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("ELLLIST             mlis")
+	}
+	field(BKLNK,DBF_NOACCESS) {
+		prompt("Backwards link tracking")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("ELLLIST             bklnk")
+	}
+	field(DISP,DBF_UCHAR) {
+		prompt("Disable putField")
+		promptgroup("10 - Common")
+		interest(1)
+	}
+	field(PROC,DBF_UCHAR) {
+		prompt("Force Processing")
+		pp(TRUE)
+		interest(3)
+	}
+
+=head3 Alarm Fields
+
+Alarm fields indicate the status and severity of record alarms, or determine
+how and when alarms are triggered. Of course, many records have alarm-related
+fields not common to all records. Those fields are listed and explained in the
+appropriate section on each record.
+
+The B<STAT> field contains the current alarm status.
+
+The B<SEVR> field contains the current alarm severity.
+
+The B<AMSG> string field may contain more detailed information about the alarm.
+
+The STAT, SEVR and AMSG fields hold alarm information as seen outside of the
+database. The B<NSTA>, B<NSEV> and B<NAMSG> fields are used during record
+processing by the database access, record support, and device support routines
+to set new alarm status and severity values and message text. Whenever any
+software component discovers an alarm condition, it calls one of these routines
+to register the alarm:
+
+ recGblSetSevr(precord, new_status, new_severity);
+ recGblSetSevrMsg(precord, new_status, new_severity, "Message", ...);
+
+These check the current alarm severity and update the NSTA, NSEV and NAMSG
+fields if appropriate so they always relate to the highest severity alarm seen
+so far during record processing. The file alarm.h defines the allowed alarm
+status and severity values. Towards the end of record processing these fields
+are copied into the STAT, SEVR and AMSG fields and alarm monitors triggered.
+
+The B<ACKS> field contains the highest unacknowledged alarm severity.
+
+The B<ACKT> field specifies whether it is necessary to acknowledge transient
+alarms.
+
+The B<UDF> indicates if the record's value is B<U>nB<D>eB<F>ined. Typically this
+is caused by a failure in device support, the fact that the record has never
+been processed, or that the VAL field currently contains a NaN (not a number) or
+Inf (Infinite) value. UDF defaults to TRUE but can be set in a database file.
+Record and device support routines which write to the VAL field are generally
+responsible for setting and clearing UDF.
+
+=fields STAT, SEVR, AMSG, NSTA, NSEV, NAMSG, ACKS, ACKT, UDF
+
+=cut
+
+	field(STAT,DBF_MENU) {
+		prompt("Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("UDF")
+	}
+	field(SEVR,DBF_MENU) {
+		prompt("Alarm Severity")
+		special(SPC_NOMOD)
+		menu(menuAlarmSevr)
+	}
+	field(AMSG,DBF_STRING) {
+		prompt("Alarm Message")
+		special(SPC_NOMOD)
+                size(40)
+	}
+	field(NSTA,DBF_MENU) {
+		prompt("New Alarm Status")
+		special(SPC_NOMOD)
+		interest(2)
+		menu(menuAlarmStat)
+	}
+	field(NSEV,DBF_MENU) {
+		prompt("New Alarm Severity")
+		special(SPC_NOMOD)
+		interest(2)
+		menu(menuAlarmSevr)
+	}
+	field(NAMSG,DBF_STRING) {
+		prompt("New Alarm Message")
+		special(SPC_NOMOD)
+		size(40)
+	}
+	field(ACKS,DBF_MENU) {
+		prompt("Alarm Ack Severity")
+		special(SPC_NOMOD)
+		interest(2)
+		menu(menuAlarmSevr)
+	}
+	field(ACKT,DBF_MENU) {
+		prompt("Alarm Ack Transient")
+		promptgroup("70 - Alarm")
+		special(SPC_NOMOD)
+		interest(2)
+		menu(menuYesNo)
+		initial("YES")
+	}
+	field(DISS,DBF_MENU) {
+		prompt("Disable Alarm Sevrty")
+		promptgroup("70 - Alarm")
+		interest(1)
+		menu(menuAlarmSevr)
+	}
+	field(LCNT,DBF_UCHAR) {
+		prompt("Lock Count")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(PACT,DBF_UCHAR) {
+		prompt("Record active")
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(PUTF,DBF_UCHAR) {
+		prompt("dbPutField process")
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(RPRO,DBF_UCHAR) {
+		prompt("Reprocess ")
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(ASP,DBF_NOACCESS) {
+		prompt("Access Security Pvt")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("struct asgMember    *asp")
+	}
+	field(PPN,DBF_NOACCESS) {
+		prompt("pprocessNotify")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("struct processNotify *ppn")
+	}
+	field(PPNR,DBF_NOACCESS) {
+		prompt("pprocessNotifyRecord")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("struct processNotifyRecord *ppnr")
+	}
+	field(SPVT,DBF_NOACCESS) {
+		prompt("Scan Private")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("struct scan_element *spvt")
+	}
+
+=head3 Device Fields
+
+The B<RSET> field contains the address of the Record Support Entry Table. See
+the Application Developers Guide for details on usage.
+
+The B<DSET> field contains the address of Device Support Entry Table. The
+value of this field is determined at IOC initialization time. Record support
+routines use this field to locate their device support routines.
+
+The B<DPVT> field is is for private use of the device support modules.
+
+=fields RSET, DSET, DPVT
+
+=cut
+
+	field(RSET,DBF_NOACCESS) {
+		prompt("Address of RSET")
+		special(SPC_NOMOD)
+		interest(4)
+        extra("struct typed_rset   *rset")
+	}
+    %#include "devSup.h"
+	field(DSET,DBF_NOACCESS) {
+		prompt("DSET address")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("unambiguous_dset    *dset")
+	}
+	field(DPVT,DBF_NOACCESS) {
+		prompt("Device Private")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("void                *dpvt")
+	}
+	field(RDES,DBF_NOACCESS) {
+		prompt("Address of dbRecordType")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("struct dbRecordType *rdes")
+	}
+	field(LSET,DBF_NOACCESS) {
+		prompt("Lock Set")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("struct lockRecord   *lset")
+	}
+	field(PRIO,DBF_MENU) {
+		prompt("Scheduling Priority")
+		promptgroup("20 - Scan")
+		special(SPC_SCAN)
+		interest(1)
+		menu(menuPriority)
+	}
+
+=head3 Debugging Fields
+
+The B<TPRO> field can be used to trace record processing. When this field is
+non-zero and the record is processed, a trace message will be be printed for
+this record and any other record in the same lock-set that is triggered by a
+database link from this record. The trace message includes the name of the
+thread doing the processing, and the name of the record being processed.
+
+The B<BKPT> field indicates if there is a breakpoint set at this record. This
+supports setting a debug breakpoint in the record processing. STEP through
+database processing can be supported using this.
+
+=fields TPRO, BKPT
+
+
+=head3 Miscellaneous Fields
+
+The B<ASG> string field sets the name of the access security group used for this
+record. If left empty, the record is placed in group C<DEFAULT>.
+
+The B<ASP> field is private for use by the access security system.
+
+The B<DISP> field can be set to a non-zero value to reject puts from outside of
+the IOC (i.e. via Channel Access or PV Access) to any field of the record other
+than to the DISP field itself. Field changes and record processing can still be
+instigated from inside the IOC using DB links and the IOC scan mechanisms.
+
+The B<DTYP> field specifies the device type for the record. Most record types
+have their own set of device types which are specified in the IOC's database
+definition file. If a record type does not call any device support routines,
+the DTYP and DSET fields are not used.
+
+The B<MLOK> field contains a mutex which is locked by the monitor routines in
+dbEvent.c whenever the monitor list for this record is accessed.
+
+The B<MLIS> field holds a linked list of client monitors connected to this
+record. Each record support module is responsible for triggering monitors for
+any fields that change as a result of record processing.
+
+The B<PPN> field contains the address of a putNotify callback.
+
+The B<PPNR> field contains the next record for PutNotify.
+
+The B<PUTF> field is set to TRUE if dbPutField caused the current record
+processing.
+
+The B<RDES> field contains the address of dbRecordType
+
+The B<RPRO> field specifies a reprocessing of the record when current
+processing completes.
+
+The B<TIME> field holds the time stamp when this record was last processed.
+
+The B<UTAG> field can be used to hold a site-specific 64-bit User Tag value
+that is associated with the record's time stamp.
+
+The B<TSE> field value indicates the mechanism to use to get the time stamp:
+
+=over
+
+=item *
+
+C< 0> E<mdash> Get the current time as normal
+
+=item *
+
+C<-1> E<mdash> Ask the time stamp driver for its best source of the current time, if
+available.
+
+=item *
+
+C<-2> E<mdash> Device support sets the time stamp and the optional User Tag from the
+hardware.
+
+=item *
+
+Positive values (normally between 1-255) get the time of the last occurance of
+the numbered generalTime event.
+
+=back
+
+The B<TSEL> field contains an input link for obtaining the time stamp. If this
+link points to the TIME field of a record then the time stamp and User Tag of
+that record are copied directly into this record (Channel Access links can only
+copy the time stamp, not the User Tag). If the link points to any other field,
+that field's value is read and stored in the TSE field which is then used to
+provide the time stamp as described above.
+
+=fields ASG, ASP, DISP, DTYP, MLOK, MLIS, PPN, PPNR, PUTF, RDES, RPRO, TIME, UTAG, TSE, TSEL
+
+=cut
+
+	field(TPRO,DBF_UCHAR) {
+		prompt("Trace Processing")
+	}
+	field(BKPT,DBF_NOACCESS) {
+		prompt("Break Point")
+		special(SPC_NOMOD)
+		interest(1)
+		extra("epicsUInt8          bkpt")
+	}
+	field(UDF,DBF_UCHAR) {
+		prompt("Undefined")
+		promptgroup("10 - Common")
+		pp(TRUE)
+		interest(1)
+		initial("1")
+	}
+	field(UDFS,DBF_MENU) {
+		prompt("Undefined Alarm Sevrty")
+		promptgroup("70 - Alarm")
+		interest(1)
+		menu(menuAlarmSevr)
+		initial("INVALID")
+	}
+	%#include "epicsTime.h"
+	field(TIME,DBF_NOACCESS) {
+		prompt("Time")
+		special(SPC_NOMOD)
+		interest(2)
+		extra("epicsTimeStamp      time")
+	}
+        field(UTAG,DBF_UINT64) {
+		prompt("Time Tag")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(FLNK,DBF_FWDLINK) {
+		prompt("Forward Process Link")
+		promptgroup("20 - Scan")
+		interest(1)
+	}
