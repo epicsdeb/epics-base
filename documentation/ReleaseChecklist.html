@@ -33,38 +33,32 @@
 <h1>EPICS Base Release Procedures &amp; Checklist</h1>
 
 <p>This document describes the procedures and provides a checklist of tasks
-that should be performed when creating new releases of EPICS Base.</p>
+that should be performed when creating production releases of EPICS Base.</p>
 
 <h3>The Release Process</h3>
 
-<p>The version released on the Feature Freeze date is designated the first
-pre-release, <tt>-pre1</tt>. The first Release Candidate <tt>-rc1</tt> is the
-first version that has undergone widespread testing and which has no known
-problems in it that are slated to be fixed in this release. New versions should
-be made at 2-weekly intervals during the testing and debugging period, and will
-be designated as either pre-release versions or Release Candidates by the
-Release Manager. After a Release Candidate has been available to the whole
-community for testing for at least a week without any additional problems being
-reported or significant changes being committed, the branch can be designated as
-the final release version.</p>
+<p>We used to have one written down here, but we weren't following it very
+closely so now the decision to make a new release is taken during the Core
+Developers bi-weekly meetings in an informal manner. The steps detailed below
+were written to remind Andrew (or anyone else who does the release) about
+everything that has to be done since it's so easy to miss steps.</p>
 
 <h3>Roles</h3>
 
-<p>The following roles are required. The individuals named here have have been
-responsible for these tasks in the past and are expected to continue in the
-relevent roles unless the Release Manager designates otherwise:</p>
+<p>The following roles are used below:</p>
 
 <dl>
-  <dt><strong>Release Manager</strong> (Ralph Lange)</dt>
+  <dt><strong>Release Manager</strong></dt>
     <dd>Responsible for managing and tagging the release</dd>
-  <dt><strong>Platform Developers</strong> (optional)</dt>
-    <dd>Responsible for individual operating system platforms</dd>
+  <dt><strong>Core Developers</strong></dt>
+    <dd>Responsible for maintaining the EPICS software</dd>
   <dt><strong>Application Developers</strong></dt>
     <dd>Responsible for support modules that depend on EPICS Base.</dd>
-  <dt><strong>Website Manager</strong> (Andrew Johnson)</dt>
-    <dd>Responsible for the EPICS website</dd>
+  <dt><strong>Website Editors</strong></dt>
+    <dd>Responsible for the EPICS websites</dd>
 </dl>
 
+<form>
 <table border="1" width="100%">
   <tbody>
     <tr>
@@ -78,23 +72,22 @@ relevent roles unless the Release Manager designates otherwise:</p>
     <tr>
       <td>&nbsp;</td>
       <td>Release Manager</td>
-      <td>Email all developers about the upcoming release and ask for a list
-        of remaining jobs that must be finished.</td>
+      <td>Notify core developers about the upcoming release and ask about any
+        remaining tasks that must be finished.</td>
       </tr>
     <tr>
       <td>&nbsp;</td>
       <td>All developers</td>
       <td>Check the bug tracker for any outstanding items and handle
-        appropriately. All bugs that have been fixed should have been marked
-        as Fix Committed.</td>
+        appropriately.</td>
       </tr>
     <tr>
       <td>&nbsp;</td>
       <td>Release Manager</td>
-      <td>Set the Feature Freeze date, by which time all Git commits for
-        enhancements and new functionality should have been completed. After
-        this date, commits should only be made to fix problems that show up
-        during testing.</td>
+      <td>Set a Feature Freeze date, by which time all Git branches for
+        enhancements and new functionality should have been merged. After this
+        date, commits and merges should only be made to fix problems that show
+        up during testing.</td>
       </tr>
     <tr>
       <td>&nbsp;</td>
@@ -102,9 +95,8 @@ relevent roles unless the Release Manager designates otherwise:</p>
         &amp; all developers</td>
       <td>Ensure that documentation will be updated before the release date:
         <ul>
-          <li>Application Developers Guide</li>
           <li>Release Notes</li>
-          <li>Known Problems</li>
+          <li>Doxygen annotations</li>
           <li>Other documents</li>
         </ul>
       </td>
@@ -112,91 +104,8 @@ relevent roles unless the Release Manager designates otherwise:</p>
     <tr>
       <td>&nbsp;</td>
       <td>Release Manager</td>
-      <td>Review and update this document for the upcoming release.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
-      <td>Create a release milestone on Launchpad if necessary and set the
-        expected release date. Note that pre-release and release-candidate
-        versions do not appear on Launchpad, only the final release.</td>
-      </tr>
-    <tr>
-      <th colspan="3">Creating pre-release and release-candidate versions</th>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Edit and commit changes to the EPICS version number file
-        configure/CONFIG_BASE_VERSION.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Tag the module in Git, using these tag conventions:
-        <ul>
-          <li>
-            <tt>R3.15.8-pre1</tt>
-            &mdash; pre-release tag
-            </li>
-          <li>
-            <tt>R3.15.8-rc1</tt>
-            &mdash; release candidate tag
-            </li>
-        </ul>
-        <blockquote><tt>
-          cd base-3.15<br />
-          git tag -m 'ANJ: Tagged for 3.15.8-rc1' R3.15.8-rc1
-          </tt></blockquote>
-        </td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Export the tagged version into a tarfile. The <tt>make-tar.sh</tt>
-        script generates a gzipped tarfile directly from the tag, excluding the
-        files and directories that are only used for continuous integration:
-        <blockquote><tt>
-          cd base-3.15<br />
-          git archive --prefix=base-3.15.8-rc1/ --output=base-3.15.8-rc1.tar.gz R3.15.8-rc1 configure documentation LICENSE Makefile README src startup
-          </tt></blockquote>
-        Create a GPG signature file of the tarfile as follows:
-        <blockquote><tt>
-          gpg --armor --sign --detach-sig base-3.15.8-rc1.tar.gz
-          </tt></blockquote>
-        </td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Test the tarfile by extracting its contents and building it on at
-        least one supported platform.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
-      <td>If necessary recreate the tarfile following the instructions above.
-        Copy the tar file to the Base download area of the website</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
-      <td>Create or update a website subdirectory to hold the release
-        documentation, and copy in selected files from the base/documentation
-        and base/html directories of the tarfile.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
-      <td>Create or modify the webpage for the new release with links to the
-        release documents and tar file. Pre-release and release-candidate
-        versions should use the page and URL for the final release version
-        number.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
-      <td>Add the new tar file to the website Base download index page.</td>
+      <td>Review and update this checklist for the upcoming release.
+        Update the release version number in the tags and messages below.</td>
       </tr>
     <tr>
       <th colspan="3">Testing</th>
@@ -204,7 +113,7 @@ relevent roles unless the Release Manager designates otherwise:</p>
     <tr>
       <td>&nbsp;</td>
       <td>Platform Developers</td>
-      <td>Run the built-in test programs on all available host platforms using
+      <td>Run the internal test programs on all available host platforms using
         <blockquote><tt>
           make -s runtests
         </tt></blockquote></td>
@@ -233,7 +142,7 @@ relevent roles unless the Release Manager designates otherwise:</p>
       <td>&nbsp;</td>
       <td>Application Developers</td>
       <td>Build external applications against this version of Base on all
-        available platforms and test as appropriate.  Application code changes
+        available platforms and test as appropriate. Application code changes
         may be necessary where the EPICS Base APIs have been modified.</td>
       </tr>
     <tr>
@@ -241,121 +150,275 @@ relevent roles unless the Release Manager designates otherwise:</p>
       <td>Release Manager</td>
       <td>Check that documentation has been updated:
         <ul>
-          <li><a href="https://launchpad.net/epics-appdev">Application
-            Developers Guide</a></li>
           <li>Release Notes</li>
-          <li>Known Problems (hopefully empty)</li>
-          <li>Other documents (converting...)</li>
+          <li>Doxygen annotations</li>
+          <li>Other documents</li>
           </ul>
         </td>
       </tr>
+
     <tr>
-      <th colspan="3">Release Approval</th>
+      <th colspan="3" id="ReleaseApproval">
+        Release Approval</th>
     </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Obtain a positive <q>Ok to release</q> from all platform developers
-        once a Release Candidate version has gone a whole week without any
-        issues being reported.</td>
+      <td><input type="checkbox"></td>
+      <td>Core Developers</td>
+      <td>Reach a consensus that the software is ready to release.</td>
       </tr>
     <tr>
       <th colspan="3">Creating the final release version</th>
       </tr>
     <tr>
-      <td>&nbsp;</td>
+      <td><input type="checkbox"></td>
       <td>Release Manager</td>
-      <td>Edit and commit changes to the EPICS version number file
-        configure/CONFIG_BASE_VERSION.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Tag the module in Git:
-        <blockquote><tt>
-          cd base-3.15<br />
-          git tag -m 'ANJ: Tagged for 3.15.8' R3.15.8
-          </tt></blockquote>
+      <td>
+        <p><b>For each external submodule</b> in turn (assuming it has not been
+          tagged yet):</p>
+        <ol>
+          <li><tt>git grep UNRELEASED</tt> and insert the module version to any
+            doxygen annotations that have a <tt>@since UNRELEASED</tt> comment.
+            Commit (don't push yet).</li>
+          <li>Check that the module's Release Notes have been updated to cover
+            all changes; add items as necessary, and set the module version
+            number and release date if appropriate. Convert to HTML and view in
+            a browser to check the formatting:
+            <blockquote><tt>
+              cd base-7.0/modules/&lt;module&gt;/documentation<br />
+              pandoc -f gfm -t html -o RELEASE_NOTES.html RELEASE_NOTES.md
+              </tt></blockquote>
+            Commit these changes (don't push).</li>
+
+          <li>Edit the module's release version file
+            <tt>configure/CONFIG_<i>module</i>_VERSION</tt> and the
+            <tt>Doxyfile</tt>s in the top-level and/or documentation
+            directories. In these, set <tt>DEVELOPMENT_FLAG</tt> to 0 and remove
+            <tt>-dev</tt> from the <tt>PROJECT_NUMBER</tt> string. Commit these
+            changes (don't push).</li>
+
+          <li>Tag the module:
+            <blockquote><tt>
+              git tag -m 'ANJ: Tag for EPICS 7.0.8.1' &lt;module-version&gt;
+              </tt></blockquote>
+            </li>
+
+          <li>Update the git submodule on the Base-7.0 branch to the
+            newly-tagged version, check the module's status matches the tag:
+            <blockquote><tt>
+              cd base-7.0/modules<br />
+              git add &lt;module&gt;<br />
+              git submodule status --cached
+              </tt></blockquote>
+            Don't commit the submodule updates yet.
+            </li>
+
+          <li>Edit the module's release version file
+            <tt>configure/CONFIG_<i>module</i>_VERSION</tt> and its top-level
+            <tt>Doxyfile</tt>; increment the <tt>MAINTENANCE_VERSION</tt>, set
+            the <tt>DEVELOPMENT_FLAG</tt> value to 1, and update the
+            <tt>PROJECT_NUMBER</tt> string, appending <tt>-dev</tt> to the new
+            module version number. Commit changes.</li>
+
+          <li>Push commits and the new tag to the submodule's GitHub repository
+            (assumed to be the <tt>upstream</tt> remote):
+            <blockquote><tt>
+              cd base-7.0/modules/&lt;module&gt;<br />
+              git push --follow-tags upstream master
+              </tt></blockquote>
+            </li>
+
+          </ol>
+        <p><b>After all submodules complete</b> commit the submodule updates
+          which were added for each submodule in step 4 above to the 7.0 branch
+          (don't push). After committing, make sure that the output from
+          <tt>git submodule status --cached</tt> only shows the appropriate
+          version tags in the right-most parenthesized column with no
+          <tt>-<i>n</t>-g<i>xxxxxxx</i></tt> suffix.</p>
         </td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
+      <td><input type="checkbox"></td>
       <td>Release Manager</td>
-      <td>Export the tagged version into a tarfile. Note that this command
-        generates a gzipped tarfile directly from the repository:
+
+      <td>
+        <p><tt>git grep UNRELEASED</tt> and insert the release version to any
+          doxygen annotations that have a <tt>@since UNRELEASED</tt> comment.
+          Commit (don't push).</p>
+        <p>Edit the main EPICS Base version file and the built-in module version
+        files:</p>
+        <ul>
+          <li><tt>configure/CONFIG_BASE_VERSION</tt></li>
+          <li><tt>configure/CONFIG_LIBCOM_VERSION</tt></li>
+          <li><tt>configure/CONFIG_CA_VERSION</tt></li>
+          <li><tt>configure/CONFIG_DATABASE_VERSION</tt></li>
+          </ul>
+        <p>Version numbers should be set according to the level of changes made
+          since the last release. Note that the <tt>MAINTENANCE_VERSION</tt> or
+          <tt>PATCH_LEVEL</tt> value should have been incremented after the
+          previous release tag was applied. Set all <tt>DEVELOPMENT_FLAG</tt>
+          values to 0 and <tt>EPICS_DEV_SNAPSHOT</tt> to the empty string.</p>
+        <p>Edit the headings in the Release Notes to show the appropriate
+          version number and remove the warning about this being an unreleased
+          version of EPICS.</p>
+        <p>Commit these changes (don't push).</p>
+        </td>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Release Manager</td>
+      <td>Tag the epics-base module in Git:
         <blockquote><tt>
-          cd base-3.15<br />
-          git archive --prefix=base-3.15.8/ --output=base-3.15.8.tar.gz R3.15.8 configure documentation LICENSE Makefile README src startup
+          cd base-7.0<br />
+          git tag -m 'ANJ: Tagged for release' R7.0.8.1
+          </tt></blockquote>
+        <p>Don't push to GitHub yet.</p>
+        </td>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Release Manager</td>
+      <td>Edit the main EPICS Base version file and the built-in module version
+        files:
+        <ul>
+          <li><tt>configure/CONFIG_BASE_VERSION</tt></li>
+          <li><tt>configure/CONFIG_LIBCOM_VERSION</tt></li>
+          <li><tt>configure/CONFIG_CA_VERSION</tt></li>
+          <li><tt>configure/CONFIG_DATABASE_VERSION</tt></li>
+          </ul>
+        <p>Version numbers should be set for the next expected patch/maintenance
+          release by incrementing the MAINTENANCE_VERSION or PATCH_LEVEL value
+          in each file. Set all <tt>DEVELOPMENT_FLAG</tt> values to 1 and
+          <tt>EPICS_DEV_SNAPSHOT</tt> to "-DEV".</p>
+        <p>Set up the headings in the Release Notes for the next release
+          version number and restore the warning about this being an unreleased
+          version of EPICS.</p>
+        <p>Commit these changes (don't push).</p>
+        </td>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Release Manager</td>
+      <td>Export the tagged version into a tarfile. The <tt>make-tar.sh</tt>
+        script generates a gzipped tarfile directly from the tag, excluding the
+        files and directories that are only used for continuous integration:
+        <blockquote><tt>
+          cd base-7.0<br />
+          ./.tools/make-tar.sh R7.0.8.1 ../base-7.0.8.1.tar.gz base-7.0.8.1/
           </tt></blockquote>
         Create a GPG signature file of the tarfile as follows:
         <blockquote><tt>
-          gpg --armor --sign --detach-sig base-3.15.8.tar.gz
+          cd ..<br />
+          gpg --armor --sign --detach-sig base-7.0.8.1.tar.gz
           </tt></blockquote>
         </td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
+      <td><input type="checkbox"></td>
       <td>Release Manager</td>
       <td>Test the tar file by extracting its contents and building it on at
-        least one supported platform</td>
+        least one supported platform. If this succeeds the commits and new git
+        tag can be pushed to the GitHub repository's 7.0 branch (assumed to be
+        the <tt>upstream</tt> remote):
+        <blockquote><tt>
+          git push --follow-tags upstream 7.0
+          </tt></blockquote>
+        </td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Upload the release tar file to the Launchpad download area.</td>
+      <th colspan="3">Publish to epics.anl.gov</th>
       </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Release Manager</td>
-      <td>Find all Launchpad bug reports with the status Fix Committed which
-        have been fixed in this release and mark them Fix Released.</td>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
+      <td>Copy the tarfile and its signature to the Base download area of the
+        website.</td>
       </tr>
     <tr>
-      <th colspan="3">Publish and Announce it</th>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
-      <td>Copy the tar file and its <tt>.asc</tt> signature file to the Base
-        download area of the website.</td>
-      </tr>
-    <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
       <td>Update the website subdirectory that holds the release
         documentation, and copy in the files from the base/documentation
         directory of the tarfile.</td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
       <td>Update the webpage for the new release with links to the release
         documents and tar file.</td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
       <td>Add the new release tar file to the website Base download index
         page.</td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
       <td>Link to the release webpage from other relevent areas of the
         website - update front page and sidebars.</td>
       </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>Website Manager</td>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
       <td>Add an entry to the website News page, linking to the new version
         webpage.</td>
       </tr>
+
     <tr>
-      <td>&nbsp;</td>
+      <th colspan="3">Publish to epics-controls.org</th>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
+      <td>Upload the tar file and its <tt>.asc</tt> signature file to the
+        epics-controls web-server.
+        <blockquote><tt>
+          scp base-7.0.8.1.tar.gz base-7.0.8.1.tar.gz.asc epics-controls:download/base<br />
+          </tt></blockquote>
+        </td>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Website Editor</td>
+      <td>Follow instructions on
+        <a href="https://epics-controls.org/resources-and-support/documents/epics-website-documentation/adding-a-page-for-a-new-release/">
+        Add a page for a new release</a> to create a new release webpage (not
+        required for a patch release, just edit the existing page). Update the
+        TablePress "Point Releases" table and add the new download, and adjust
+        the XYZ Html Snippet for the series download.
+        </td>
+      </tr>
+
+    <tr>
+      <th colspan="3">Publish to GitHub</th>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Release Manager</td>
+      <td>Go to the GitHub
+        <a href="https://github.com/epics-base/epics-base/releases/new?tag=R7.0.8.1">
+          Create release from tag R7.0.8.1</a> page.
+        Upload the tar file and its <tt>.asc</tt> signature file to the new
+        GitHub release page.</td>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
+      <td>Release Manager</td>
+      <td>We used to close out bug reports in Launchpad at release-time, this
+        would be the time to do that if we have an equivalent on GitHub.</td>
+      </tr>
+
+    <tr>
+      <th colspan="3">Make Announcement</th>
+      </tr>
+    <tr>
+      <td><input type="checkbox"></td>
       <td>Release Manager</td>
       <td>Announce the release on the tech-talk mailing list.</td>
       </tr>
     </tbody>
   </table>
+</form>
 </body>
 </html>

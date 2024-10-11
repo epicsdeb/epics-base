@@ -1,0 +1,6 @@
+debian/man/pvget.1
+debian/man/pvput.1
+debian/man/pvinfo.1
+debian/man/pvlist.1
+debian/man/pvmonitor.1
+debian/man/pvcall.1

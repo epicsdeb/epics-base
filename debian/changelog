@@ -1,3 +1,44 @@
+epics-base (7.0.8.1-1) UNRELEASED; urgency=medium
+
+  * Upstream 7.0.8.1
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Tue, 30 Jul 2024 09:38:52 -0400
+
+epics-base (7.0.8-1+nmu1) unstable; urgency=medium
+
+  * Upstream version 7.0.8
+
+ -- Conor Farah <farah@frib.msu.edu>  Mon, 13 May 2024 13:56:35 -0500
+
+epics-base (7.0.7-1) unstable; urgency=medium
+
+  * Upstream version 7.0.7
+  * Find softIoc.dbd with zero arguments in EPICS_BASE
+  * modify dbStaticTest for our dbd lookup workaround
+  * EPICS 7 now comes with pvdata,pvaccess,pvaclient,nt,database
+  * update libepics version
+  * Manpages for PVA cmdline tools
+  * add pvcall to command line tools
+  * rename hardcoded libepics*.install/lintian-overrides
+  * sysvinit-utils replaces lsb-base for ioclogserver
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Wed, 07 Dec 2022 10:07:35 -0500
+
+epics-base (3.15.9-1) unstable; urgency=medium
+
+  [ Priller, John ]
+  * do not install startup/EpicsHostArch
+  * replace outdated startup/EpicsHostArch
+  * update patch series
+  * New upstream version 3.15.9
+  * rebased for v3.15.9
+  * updated control version for v3.15.9
+  * change hard-coded file name to libepics3.15.9.install
+  * change hard-coded file name to libepics3.15.9.lintian-overrides
+  * updated version to 3.15.9 in libepics3.15.9.lintian-overrides
+
+ -- epics <priller@frib.msu.edu>  Fri, 13 Aug 2021 13:28:08 -0400
+
 epics-base (3.15.8-2) unstable; urgency=medium
 
   * Add patch fixing SCAN order when PHAS field is used (LP: #1899697)
@@ -454,7 +495,7 @@ epics-base (3.14.11-1) unstable; urgency=low
       ESHUTDOWN is not in FreeBSD and hence not in RTEMS.
       J field should not be PP, to match others.
       Fix UDF processing so we respect IVOA.
-      Fixed crash when ALG (algorithm) was changed 
+      Fixed crash when ALG (algorithm) was changed
         to Average at runtime. (Fixes #552803)
       Fix NULL handle issue in macParseDefns()
 
@@ -493,7 +534,7 @@ epics-base (3.14.10-13) unstable; urgency=low
     (from Ken McIvor <mcivor@iit.edu> and Carlo Segre <segre@debian.org>)
   * RTEMS: Add rtemsCom to the list of libraries to exclude from
     GeSys loadable objects.
-  * boRecord: initialize the mlst field so that monitors are posted 
+  * boRecord: initialize the mlst field so that monitors are posted
     correctly
 
  -- Michael Davidsaver <mdavidsaver@bnl.gov>  Wed, 24 Mar 2010 11:18:18 -0400

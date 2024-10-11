@@ -1,0 +1,33 @@
+record(longin, "test:li") {
+  field(VAL, "102042")
+  field(SEVR, "1")
+  field(STAT, "1")
+  field(EGU, "arb")
+  field(HOPR, "100")
+  field(LOPR, "10")
+  info(Q:form, "Hex")
+}
+record(ai, "test:ai") {
+  field(VAL, "42.2")
+  field(RVAL, "1234")
+  field(SEVR, "2")
+  field(STAT, "1")
+  field(EGU, "foo")
+  field(HOPR, "200")
+  field(LOPR, "20")
+  field(PREC, "2")
+}
+record(mbbi, "test:mbbi") {
+  field(RVAL, "10")
+  field(VAL, "1")
+  field(ZRST, "zero")
+  field(ONST, "one")
+  field(TWST, "two")
+  field(ZRVL, "1")
+  field(ONVL, "0")
+  field(TWVL, "3")
+  info(Q:time:tag, "nsec:lsb:4")
+}
+record(stringin, "test:si") {
+  field(VAL, "hello")
+}

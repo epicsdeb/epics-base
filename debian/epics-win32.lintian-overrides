@@ -1,2 +1,4 @@
 epics-win32: arch-independent-package-contains-binary-or-object
 # Contains cross-compiled binaries
+# added for bookworm build...
+epics-win32: no-code-sections

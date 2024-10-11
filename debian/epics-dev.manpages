@@ -1,2 +1,4 @@
 debian/man/softIoc.1
 debian/man/softioc.1
+debian/man/softIocPVA.1
+debian/man/softiocpva.1

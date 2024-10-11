@@ -1,0 +1,17 @@
+/cfg/
+/bin/
+/lib/
+/db/
+/dbd/
+/html/
+/include/
+/templates/
+/configure/*.local
+/documentation/html
+/documentation/*.tag
+O.*/
+/QtC-*
+envPaths
+*.orig
+*.log
+.*.swp

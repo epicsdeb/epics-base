@@ -4,6 +4,7 @@
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
+# SPDX-License-Identifier: EPICS
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
@@ -12,20 +13,22 @@
 #
 
 use strict;
+use warnings;
+
+use Cwd qw(cwd);
+use Getopt::Std;
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
 
 use FindBin qw($Bin);
 use lib ("$Bin/../../lib/perl", $Bin);
 
-use Cwd qw(cwd);
-use Getopt::Std;
 use EPICS::Path;
 use EPICS::Release;
 
 our ($arch, $top, $iocroot, $root);
 our ($opt_a, $opt_t, $opt_T);
 
-$Getopt::Std::OUTPUT_HELP_VERSION = 1;
-getopts('a:t:T:') or &HELP_MESSAGE;
+getopts('a:t:T:') or HELP_MESSAGE();
 
 my $cwd = UnixPath(cwd());
 
@@ -60,7 +63,7 @@ if ($opt_t) {
     }
 }
 
-&HELP_MESSAGE unless @ARGV == 1;
+HELP_MESSAGE() unless @ARGV == 1;
 
 my $outfile = $ARGV[0];
 
@@ -77,12 +80,13 @@ expandRelease(\%macros);
 
 # This is a perl switch statement:
 for ($outfile) {
-    m/releaseTops/       and do { &releaseTops;         last; };
-    m/dllPath\.bat/      and do { &dllPath;             last; };
-    m/relPaths\.sh/      and do { &relPaths;            last; };
-    m/cdCommands/        and do { &cdCommands;          last; };
-    m/envPaths/          and do { &envPaths;            last; };
-    m/checkRelease/      and do { &checkRelease;        last; };
+    m/releaseTops/       and do { releaseTops();         last; };
+    m/dllPath\.bat/      and do { dllPath();             last; };
+    m/relPaths\.sh/      and do { relPaths();            last; };
+    m/ModuleDirs\.pm/    and do { moduleDirs();          last; };
+    m/cdCommands/        and do { cdCommands();          last; };
+    m/envPaths/          and do { envPaths();            last; };
+    m/checkRelease/      and do { checkRelease();        last; };
     die "Output file type \'$outfile\' not supported";
 }
 
@@ -96,6 +100,7 @@ Usage: convertRelease.pl [-a arch] [-T top] [-t ioctop] outfile
         releaseTops - lists the module names defined in RELEASE*s
         dllPath.bat - path changes for cmd.exe to find Windows DLLs
         relPaths.sh - path changes for bash to add RELEASE bin dir's
+        *ModuleDirs.pm - generate a perl module adding lib/perl paths
         cdCommands - generate cd path strings for vxWorks IOCs
         envPaths - generate epicsEnvSet commands for other IOCs
         checkRelease - checks consistency with support modules
@@ -144,6 +149,19 @@ sub binDirs {
     return @path;
 }
 
+sub moduleDirs {
+    my @deps = grep !m/^ (TOP | RULES | TEMPLATE_TOP) $/x, @apps;
+    my @dirs = grep {-d $_}
+        map { AbsPath("$macros{$_}/lib/perl") } @deps;
+    unlink $outfile;
+    open(OUT, ">$outfile") or die "$! creating $outfile";
+    print OUT "# This is a generated file, do not edit!\n\n",
+        "use lib qw(\n",
+        map { "    $_\n"; } @dirs;
+    print OUT ");\n\n1;\n";
+    close OUT;
+}
+
 #
 # Generate cdCommands file with cd path strings for vxWorks IOCs and
 # RTEMS IOCs using CEXP (need parentheses around command arguments).
@@ -157,7 +175,7 @@ sub cdCommands {
 
     my $startup = $cwd;
     $startup =~ s/^$root/$iocroot/o if ($opt_t);
-    $startup =~ s/([\\"])/\\\1/g; # escape back-slashes and double-quotes
+    $startup =~ s/([\\"])/\\$1/g; # escape back-slashes and double-quotes
 
     print OUT "startup = \"$startup\"\n";
 
@@ -169,7 +187,7 @@ sub cdCommands {
     foreach my $app (@includes) {
         my $iocpath = my $path = $macros{$app};
         $iocpath =~ s/^$root/$iocroot/o if ($opt_t);
-        $iocpath =~ s/([\\"])/\\\1/g; # escape back-slashes and double-quotes
+        $iocpath =~ s/([\\"])/\\$1/g; # escape back-slashes and double-quotes
         my $app_lc = lc($app);
         print OUT "$app_lc = \"$iocpath\"\n"
             if (-d $path);
@@ -199,7 +217,7 @@ sub envPaths {
     foreach my $app (@includes) {
         my $iocpath = my $path = $macros{$app};
         $iocpath =~ s/^$root/$iocroot/o if ($opt_t);
-        $iocpath =~ s/([\\"])/\\\1/g; # escape back-slashes and double-quotes
+        $iocpath =~ s/([\\"])/\\$1/g; # escape back-slashes and double-quotes
         print OUT "epicsEnvSet(\"$app\",\"$iocpath\")\n" if (-d $path);
     }
     close OUT;
@@ -209,6 +227,12 @@ sub envPaths {
 # Check RELEASE file consistency with support modules
 #
 sub checkRelease {
+    die "\nEPICS_BASE must be set in a configure/RELEASE file.\n\n"
+        unless grep(m/^(EPICS_BASE)$/, @apps) &&
+            exists $macros{EPICS_BASE} &&
+            $macros{EPICS_BASE} ne '' &&
+            -f "$macros{EPICS_BASE}/configure/CONFIG_BASE";
+
     my $status = 0;
     delete $macros{RULES};
     delete $macros{TOP};
@@ -228,10 +252,10 @@ sub checkRelease {
                 AbsPath($macros{$parent}) ne AbsPath($ppath)) {
                 print "\n" unless ($status);
                 print "Definition of $parent conflicts with $app support.\n";
-                print "In this application a RELEASE file defines\n";
-                print "\t$parent = $macros{$parent}\n";
-                print "but $app at $path defines\n";
-                print "\t$parent = $ppath\n";
+                print "In this application or module, a RELEASE file\n";
+                print "conflicts with $app at $path\n";
+                print "  Here: $parent = $macros{$parent}\n";
+                print "  $app: $parent = $ppath\n";
                 $status = 1;
             }
         }
