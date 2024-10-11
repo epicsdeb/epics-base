@@ -1,0 +1,225 @@
+From: Dirk Zimoch <dirk.zimoch@psi.ch>
+Date: Mon, 23 Sep 2019 11:10:32 +0200
+Subject: renamed epicsSocketCountUnsentBytes to epicsSocketUnsentCount and
+ moved it to osi/os/
+
+---
+ src/libCom/log/logClient.c                     | 36 +-------------------------
+ src/libCom/osi/Makefile                        |  1 +
+ src/libCom/osi/os/Darwin/osdSockUnsentCount.c  | 17 ++++++++++++
+ src/libCom/osi/os/Linux/osdSockUnsentCount.c   | 18 +++++++++++++
+ src/libCom/osi/os/WIN32/osdSockUnsentCount.c   | 25 ++++++++++++++++++
+ src/libCom/osi/os/default/osdSockUnsentCount.c | 14 ++++++++++
+ src/libCom/osi/os/iOS/osdSockUnsentCount.c     | 17 ++++++++++++
+ src/libCom/osi/osiSock.h                       |  6 +++++
+ 8 files changed, 99 insertions(+), 35 deletions(-)
+ create mode 100644 src/libCom/osi/os/Darwin/osdSockUnsentCount.c
+ create mode 100644 src/libCom/osi/os/Linux/osdSockUnsentCount.c
+ create mode 100644 src/libCom/osi/os/WIN32/osdSockUnsentCount.c
+ create mode 100644 src/libCom/osi/os/default/osdSockUnsentCount.c
+ create mode 100644 src/libCom/osi/os/iOS/osdSockUnsentCount.c
+
+diff --git a/src/libCom/log/logClient.c b/src/libCom/log/logClient.c
+index ee92c27..73664ff 100644
+--- a/src/libCom/log/logClient.c
++++ b/src/libCom/log/logClient.c
+@@ -196,40 +196,6 @@ static void sendMessageChunk(logClient * pClient, const char * message) {
+     }
+ }
+ 
+-/*
+- * epicsSocketCountUnsentBytes ()
+- * Should go to osd socket support
+- */
+-#if defined (_WIN32) && WINVER >= _WIN32_WINNT_WIN10
+-#include <mstcpip.h>
+-#endif
+-
+-static int epicsSocketCountUnsentBytes(SOCKET sock) {
+-#if defined (_WIN32) && WINVER >= _WIN32_WINNT_WIN10
+-/* Windows 10 Version 1703 / Server 2016 */
+-/* https://docs.microsoft.com/en-us/windows/win32/api/mstcpip/ns-mstcpip-tcp_info_v0 */
+-    DWORD infoVersion = 0, bytesReturned;
+-    TCP_INFO_v0 tcpInfo;
+-    int status;
+-    if ((status = WSAIoctl(sock, SIO_TCP_INFO, &infoVersion, sizeof(infoVersion),
+-        &tcpInfo, sizeof(tcpInfo), &bytesReturned, NULL, NULL)) == 0)
+-        return tcpInfo.BytesInFlight;
+-#elif defined (SO_NWRITE)
+-/* macOS / iOS */
+-/* https://www.unix.com/man-page/osx/2/setsockopt/ */
+-    int unsent;
+-    if (getsockopt(sock, SOL_SOCKET, SO_NWRITE, &unsent) == 0)
+-        return unsent;
+-#elif defined (TIOCOUTQ)
+-/* Linux */
+-/* https://linux.die.net/man/7/tcp */
+-    int unsent;
+-    if (ioctl(sock, TIOCOUTQ, &unsent) == 0)
+-        return unsent;
+-#endif
+-    return -1;
+-}
+-
+ /* 
+  * logClientSend ()
+  */
+@@ -293,7 +259,7 @@ void epicsShareAPI logClientFlush ( logClientId id )
+         logClientClose ( pClient );
+     }
+     else if ( nSent > 0 && pClient->nextMsgIndex > 0 ) {
+-        int backlog = epicsSocketCountUnsentBytes ( pClient->sock );
++        int backlog = epicsSocketUnsentCount ( pClient->sock );
+         if (backlog >= 0) {
+             pClient->backlog = backlog;
+             nSent -= backlog;
+diff --git a/src/libCom/osi/Makefile b/src/libCom/osi/Makefile
+index e05aec3..00685d8 100644
+--- a/src/libCom/osi/Makefile
++++ b/src/libCom/osi/Makefile
+@@ -86,6 +86,7 @@ endif
+ 
+ Com_SRCS += osdSock.c
+ Com_SRCS += osdSockAddrReuse.cpp
++Com_SRCS += osdSockUnsentCount.c
+ Com_SRCS += osiSock.c
+ Com_SRCS += systemCallIntMech.cpp
+ Com_SRCS += epicsSocketConvertErrnoToString.cpp
+diff --git a/src/libCom/osi/os/Darwin/osdSockUnsentCount.c b/src/libCom/osi/os/Darwin/osdSockUnsentCount.c
+new file mode 100644
+index 0000000..00ef550
+--- /dev/null
++++ b/src/libCom/osi/os/Darwin/osdSockUnsentCount.c
+@@ -0,0 +1,17 @@
++/*************************************************************************\
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
++\*************************************************************************/
++
++#include "osiSock.h"
++
++/*
++ * epicsSocketUnsentCount ()
++ * See https://www.unix.com/man-page/osx/2/setsockopt
++ */
++int epicsSocketUnsentCount(SOCKET sock) {
++    int unsent;
++    if (getsockopt(sock, SOL_SOCKET, SO_NWRITE, &unsent) == 0)
++        return unsent;
++    return -1;
++}
+diff --git a/src/libCom/osi/os/Linux/osdSockUnsentCount.c b/src/libCom/osi/os/Linux/osdSockUnsentCount.c
+new file mode 100644
+index 0000000..6f6cbf0
+--- /dev/null
++++ b/src/libCom/osi/os/Linux/osdSockUnsentCount.c
+@@ -0,0 +1,18 @@
++/*************************************************************************\
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
++\*************************************************************************/
++
++#include <linux/sockios.h>
++#include "osiSock.h"
++
++/*
++ * epicsSocketUnsentCount ()
++ * See https://linux.die.net/man/7/tcp
++ */
++int epicsSocketUnsentCount(SOCKET sock) {
++    int unsent;
++    if (ioctl(sock, SIOCOUTQ, &unsent) == 0)
++        return unsent;
++    return -1;
++}
+diff --git a/src/libCom/osi/os/WIN32/osdSockUnsentCount.c b/src/libCom/osi/os/WIN32/osdSockUnsentCount.c
+new file mode 100644
+index 0000000..c2045bc
+--- /dev/null
++++ b/src/libCom/osi/os/WIN32/osdSockUnsentCount.c
+@@ -0,0 +1,25 @@
++/*************************************************************************\
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
++\*************************************************************************/
++
++#define epicsExportSharedSymbols
++#include "osiSock.h"
++#include <mstcpip.h>
++
++/*
++ * epicsSocketUnsentCount ()
++ * See https://docs.microsoft.com/en-us/windows/win32/api/mstcpip/ns-mstcpip-tcp_info_v0
++ */
++int epicsSocketUnsentCount(SOCKET sock) {
++#if defined (_WIN32) && WINVER >= _WIN32_WINNT_WIN10
++/* Windows 10 Version 1703 / Server 2016 */
++    DWORD infoVersion = 0, bytesReturned;
++    TCP_INFO_v0 tcpInfo;
++    int status;
++    if ((status = WSAIoctl(sock, SIO_TCP_INFO, &infoVersion, sizeof(infoVersion),
++        &tcpInfo, sizeof(tcpInfo), &bytesReturned, NULL, NULL)) == 0)
++        return tcpInfo.BytesInFlight;
++#endif
++    return -1;
++}
+diff --git a/src/libCom/osi/os/default/osdSockUnsentCount.c b/src/libCom/osi/os/default/osdSockUnsentCount.c
+new file mode 100644
+index 0000000..61094c7
+--- /dev/null
++++ b/src/libCom/osi/os/default/osdSockUnsentCount.c
+@@ -0,0 +1,14 @@
++/*************************************************************************\
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
++\*************************************************************************/
++
++#include "osiSock.h"
++
++/*
++ * epicsSocketUnsentCount ()
++ */
++int epicsSocketUnsentCount(SOCKET sock) {
++    /* not implemented */
++    return -1;
++}
+diff --git a/src/libCom/osi/os/iOS/osdSockUnsentCount.c b/src/libCom/osi/os/iOS/osdSockUnsentCount.c
+new file mode 100644
+index 0000000..00ef550
+--- /dev/null
++++ b/src/libCom/osi/os/iOS/osdSockUnsentCount.c
+@@ -0,0 +1,17 @@
++/*************************************************************************\
++* EPICS BASE is distributed subject to a Software License Agreement found
++* in file LICENSE that is included with this distribution.
++\*************************************************************************/
++
++#include "osiSock.h"
++
++/*
++ * epicsSocketUnsentCount ()
++ * See https://www.unix.com/man-page/osx/2/setsockopt
++ */
++int epicsSocketUnsentCount(SOCKET sock) {
++    int unsent;
++    if (getsockopt(sock, SOL_SOCKET, SO_NWRITE, &unsent) == 0)
++        return unsent;
++    return -1;
++}
+diff --git a/src/libCom/osi/osiSock.h b/src/libCom/osi/osiSock.h
+index 061619e..e1c2de8 100644
+--- a/src/libCom/osi/osiSock.h
++++ b/src/libCom/osi/osiSock.h
+@@ -52,6 +52,12 @@ enum epicsSocketSystemCallInterruptMechanismQueryInfo {
+ epicsShareFunc enum epicsSocketSystemCallInterruptMechanismQueryInfo 
+         epicsSocketSystemCallInterruptMechanismQuery ();
+ 
++/*
++ * Some systems (e.g Linux and Windows 10) allow to check the amount
++ * of unsent data in the output queue.
++ * Returns -1 if the information is not available.
++ */
++epicsShareFunc int epicsSocketUnsentCount(SOCKET sock);
+ 
+ /*
+  * convert socket address to ASCII in this order

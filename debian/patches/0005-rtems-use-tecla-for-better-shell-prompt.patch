@@ -8,7 +8,7 @@ Subject: rtems: use tecla for better shell prompt
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/configure/os/CONFIG.Common.RTEMS b/configure/os/CONFIG.Common.RTEMS
-index c22e37a..0711e5c 100644
+index 8f65b08..aa56cc0 100644
 --- a/configure/os/CONFIG.Common.RTEMS
 +++ b/configure/os/CONFIG.Common.RTEMS
 @@ -156,7 +156,7 @@ ARFLAGS = rc
