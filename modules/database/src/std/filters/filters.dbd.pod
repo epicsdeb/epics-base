@@ -1,0 +1,555 @@
+=title Field Modifiers and Channel Filters
+
+=head2 Contents
+
+=over
+
+=item * L<Introduction
+    |/"Introduction">
+
+=item * L<Using Field Modifiers and Channel Filters
+    |/"Using Field Modifiers and Channel Filters">
+
+=item * L<Example Filters
+    |/"Example Filters">
+
+=item * L<Field Modifier Reference
+    |/"Field Modifier Reference">
+
+=over
+
+=item * L<Long String Modifier C<$>
+    |/"Long String Field Modifier $">
+
+=item * L<Subarray Modifier C<<< [E<hellip>] >>>
+    |/"Subarray Field Modifier [start:increment:end]">
+
+=back
+
+=item * L<JSON5 Channel Filters
+    |/"JSON5 Channel Filters">
+
+=over
+
+=item * L<TimeStamp Filter C<<< {ts:{}} >>>
+    |/"TimeStamp Filter ts">
+
+=item * L<Deadband Filter C<<< {dbnd:{E<hellip>}} >>>
+    |/"Deadband Filter dbnd">
+
+=item * L<Array Filter C<<< {arr:{E<hellip>}} >>>
+    |/"Array Filter arr">
+
+=item * L<Synchronize Filter C<<< {sync:{E<hellip>}} >>>
+    |/"Synchronize Filter sync">
+
+=item * L<Decimation Filter C<<< {dec:{E<hellip>}} >>>
+    |/"Decimation Filter dec">
+
+=item * L<User Tag Filter C<<< {utag:{E<hellip>}} >>>
+    |/"User Tag Filter utag">
+
+=back
+
+=back
+
+
+=head2 Introduction
+
+A Field Modifier is a string that is appended to the field name part of a
+Channel Access or PV Access channel name of an IOC-based server.
+The IOC currently recognizes 3 different kinds of field modifier, which are
+described below.
+
+A Channel Filter is an IOC plugin that can be attached to an IOC process
+variable channel using a field modifier, and can alter the data updates that are
+served to the client that requested the filtering.
+Clients that use a channel filter have no effect on other clients connected to
+the same PV.
+Filters can only modify or drop monitor events that the IOC posts; introducing
+extra monitor events (in between the events posted by the IOC itself) is not
+currently possible.
+
+Most Channel Filters are configured by a field modifier that uses JSON5
+syntax to select the type of filter and provide any parameters it accepts.
+
+
+=head2 Using Field Modifiers and Channel Filters
+
+Modifiers can be added to any Channel Access or PV Access channel name.
+There can be more than one modifier or filter applied to a channel.
+Modifiers must appear immediately after the field name if one is included in the
+channel name.
+If no field is named because the default (VAL) field is the target, the
+modifiers must come immediately after a dot C<.> appended to the record name.
+
+The order that modifiers and filters are specified controls the order in which
+they are applied to the resulting data-stream.
+If used, the Long String and Subarray field modifiers must appear first and in
+that order, followed by any channel filters inside a pair of braces C< {} > that
+form a JSON5 (L<JavaScript Object Notation|https://spec.json5.org/>) map, which
+allows filters and their parameters to be specified as needed.
+
+Each JSON5 filter is specified as a name:value pair.
+The filter name is a map key that may be an unquoted identifier name (which all
+of the filter names given below are), or a string enclosed inside either single-
+or double-quote characters C<'> or C<"> as per the JSON5 specification.
+Parameters to the filter are provided in the value part of the key:value pair
+after the colon C<:> character, and will normally be an embedded JSON5 map
+containing zero or more key/value pairs inside a nested pair of braces C< {} >.
+
+Unless included inside a quoted string, white space characters are ignored and
+skipped over by the JSON5 parser between other token characters.
+This includes horizontal and vertical tabs, line feed/form feed/carriage return,
+space and the non-breaking space character C< \xA0 >.
+Within a quoted string, line breaks may escaped with a backslash C<\> to be
+omitted from the parsed string.
+
+An IOC Channel Access link can include filters in its channel name, but it is
+important to not include any spaces at all in the filter specification.
+If a filter name or parameter must contain a space it will be necessary to
+express that space character as an escaped character C<\x20> or C<\u0020> inside
+a quoted string, otherwise the space will mark the end of the channel name to
+the link parsing code inside the IOC.
+
+=head4 Example Filters
+
+Given a record called C<test:channel> the following would all apply a channel
+filter C<f> to the VAL field of that record, giving the filter two numeric
+parameters named C<lo> and C<hi>:
+
+ test:channel.{f:{lo:0,hi:10}}
+ test:channel.{"f":{"lo":0, "hi":10}}
+ test:channel.{'f': {'lo':0, 'hi':10} }
+
+When typing a filtered channel name as an argument to a Unix shell command, if
+quote characters are used for keys or values in JSON strings within the channel
+name string it may be necessary to enclose the name within quotes C<'> or C<">
+or to use back-slash escapes before them.
+Quotes may not be required when the Long String modifier C<$> is used at the end
+of a field name with nothing following it, but will be necessary for a square
+bracketted Subarray filter or if a dollar sign is followed by something else.
+
+ Hal$ caget test:channel.{f:{lo:0,hi:10}}
+ ...
+ Hal$ caget 'test:channel.{"f":{"lo":0, "hi":10}}'
+ ...
+ Hal$ caget -S calc:record.CALC$
+ ...
+ Hal$ caget -S 'test:channel.NAME$[0:4]'
+ test:channel.NAME$[0:4] test
+
+=head2 Field Modifier Reference
+
+The two built-in field modifiers use a simplified syntax following the record
+field name.
+
+=head3 Long String Field Modifier C<$>
+
+Appending a dollar sign C<$> to the name of a C<DBF_STRING> field causes the IOC
+to change the representation of that field into an array of characters, which
+allows strings longer than 40 character to be transported through Channel
+Access.
+Long strings are particularly useful for the CALC fields of a calculation or
+calcout record, which can hold up to 80 characters, or the VAL fields of an lsi
+(Long String Input) or lso (Long String Output) record which can be any length
+as chosen by the database designer.
+
+ Hal$ cainfo test:channel.NAME
+ test:channel.NAME
+     State:            connected
+     Host:             10.234.56.78:5064
+     Access:           read, no write
+     Native data type: DBF_STRING
+     Request type:     DBR_STRING
+     Element count:    1
+ Hal$ cainfo test:channel.NAME$
+ test:channel.NAME$
+     State:            connected
+     Host:             10.234.56.78:5064
+     Access:           read, no write
+     Native data type: DBF_CHAR
+     Request type:     DBR_CHAR
+     Element count:    61
+
+A CA client accessing a channel that uses the Long String field modifier will
+have to be specifically configured to treat the data as a string instead of the
+array of C<DBF_CHAR> that it looks like.
+CA clients should not attempt to parse the channel name themselves to recognize
+this field modifier in the name.
+All long string values returned by the IOC should include a trailing zero byte
+in their data as is standard for strings in the C language.
+For the catools programs provided with Base, the flag C<-S> indicates that a
+channel containing a character array should be treated as a long string.
+
+ Hal$ caget test:channel.NAME
+ test:channel.NAME              test:channel
+ Hal$ caget test:channel.NAME$
+ test:channel.NAME$ 61 116 101 115 116 58 99 104 97 110 110 101 108 0 0 ...
+ Hal$ caget -S test:channel.NAME$
+ test:channel.NAME$ test:channel
+
+
+=head3 Subarray Field Modifier C<[start:increment:end]>
+
+This square-bracket field modifier syntax gets translated within the IOC into
+calls to the L<Array Filter|/"Array Filter arr">, see that section below for
+details of this shorthand.
+
+The subarray field modifier syntax can immediately follow a Long String field
+modifier, which permits fetching various kinds of substrings from the field.
+This syntax cannot appear after a JSON filter specification though, the JSON
+"arr" filter syntax must be used to apply an array filter after any other JSON
+filter type.
+
+ Hal$ caget -S 'test:channel.NAME$[0:4]'
+ test:channel.NAME$[0:4] test
+ Hal$ caget -S 'test:channel.NAME$[5:-1]'
+ test:channel.NAME$[5:-1] channel
+
+
+=head2 JSON5 Channel Filters
+
+=cut
+
+registrar(tsInitialize)
+
+=head3 TimeStamp Filter C<"ts">
+
+This filter is used for two purposes:
+
+=over
+
+=item * to retrieve the timestamp of the record as a value in several different
+        formats;
+
+=item * to retrieve the record value as normal, but replace the timestamp with
+        the time the value was fetched.
+
+=back
+
+=head4 Parameters
+
+=head4 No parameters (an empty pair of braces)
+
+Retrieve the record value as normal, but replace the timestamp with the time the
+value was fetched (or an update was sent). This is useful for clients that can't
+handle timestamps that are far in the past. Normally, the record's timestamp
+indicates when the record last processed, which could have been days or even
+weeks ago for some records, or set to the EPICS epoch if the record has never
+processed.
+
+=head4 Numeric type C<"num">
+
+The following values are accepted for this parameter:
+
+=over
+
+=item * C<"dbl"> requests the timestamp as C<epicsFloat64> representing the
+        non-integral number of seconds since epoch. This format is convenient,
+        but loses precision, depending on which epoch is used.
+
+=item * C<"sec"> requests the number of seconds since epoch as C<epicsUInt32>.
+
+=item * C<"nsec"> requests the number of nanoseconds since epoch as
+        C<epicsUInt32>.
+
+=item * C<"ts"> requests the entire timestamp. It is provided as a two-element
+        array of C<epicsUInt32> representing seconds and nanoseconds.
+
+=back
+
+Note that C<epicsUInt32> cannot be transferred over Channel Access; in that
+case, the value will be converted to C<epicsFloat64>.
+
+=head4 String type C<"str">
+
+The following values are accepted for this parameter:
+
+=over
+
+=item * C<"epics"> requests the timestamp as a string in the format used by
+        tools such as C<caget>.
+
+=item * C<"iso"> requests the timestamp as a string in the ISO8601 format.
+
+=back
+
+=head4 Epoch adjustment C<"epoch">
+
+The following values are accepted for this parameter:
+
+=over
+
+=item * C<"epics"> keeps the EPICS epoch (1990-01-01) and is the default if the
+        C<"epoch"> parameter is not specified.
+
+=item * C<"unix"> converts the timestamp to the UNIX/POSIX epoch (1970-01-01).
+
+=back
+
+=head4 Examples
+
+ Hal$ caget -a 'test:invalid_ts.{"ts":{}}'
+ test:invalid_ts.{"ts":{}}      2012-08-28 22:10:31.192547 0 UDF INVALID
+ Hal$ caget -a 'test:invalid_ts'
+ test:invalid_ts                <undefined> 0 UDF INVALID
+ Hal$ caget -a test:channel
+ test:channel                   2021-03-11 18:23:48.265386 42
+ Hal$ caget 'test:channel.{"ts": {"str": "epics"}}'
+ test:channel.{"ts": {"str": "epics"}} 2021-03-11 18:23:48.265386
+ Hal$ caget 'test:channel.{"ts": {"str": "iso"}}'
+ test:channel.{"ts": {"str": "iso"}} 2021-03-11T18:23:48.265386+0100
+ Hal$ caget -f9 'test:channel.{"ts": {"num": "dbl"}}'
+ test:channel.{"ts": {"num": "dbl"}} 984331428.265386105
+ Hal$ caget -f1 'test:channel.{"ts": {"num": "ts"}}'
+ test:channel.{"ts": {"num": "ts"}} 2 984331428.0 265386163.0
+ Hal$ caget -f1 'test:channel.{"ts": {"num": "ts", "epoch": "unix"}}'
+ test:channel.{"ts": {"num": "ts", "epoch": "unix"}} 2 1615483428.0 265386163.0
+
+=cut
+
+registrar(dbndInitialize)
+
+=head3 Deadband Filter C<"dbnd">
+
+This filter implements a channel-specific monitor deadband, which is applied
+after any deadbands implemented by the record itself (it can only drop updates
+that the unfiltered channel generates, never add additional updates).
+
+The deadband can be specified as an absolute value change, or as a relative
+percentage.
+
+=head4 Parameters
+
+=over
+
+=item Mode+Deadband C<"abs">/C<"rel"> (shorthand)
+
+Mode and deadband can be specified in one definition (shorthand).
+The desired mode is given as parameter name (C<"abs"> or C<"rel">), with the
+numeric size of the deadband (absolute value or numeric percentage) as value.
+
+=item Deadband C<"d">
+
+The size of the deadband to use.
+Relative deadband values are given as a numeric percentage, but without any
+trailing percent character.
+
+=item Mode C<"m"> (optional)
+
+A string (enclosed in double-quotes C<">), which should contain either
+C<abs> or C<rel>.
+The default mode is C<abs> if no mode parameter is included.
+
+=back
+
+=head4 Example
+
+ Hal$ camonitor 'test:channel'
+ test:channel                    2012-09-01 22:10:19.600595 1 LOLO MAJOR
+ test:channel                    2012-09-01 22:10:20.600661 2 LOLO MAJOR
+ test:channel                    2012-09-01 22:10:21.600819 3 LOW MINOR
+ test:channel                    2012-09-01 22:10:22.600905 4 LOW MINOR
+ test:channel                    2012-09-01 22:10:23.601023 5  
+ test:channel                    2012-09-01 22:10:24.601136 6 HIGH MINOR
+ ^C
+ Hal$ camonitor 'test:channel.{"dbnd":{"d":1.5}}'
+ test:channel.{"dbnd":{"d":1.5}} 2012-09-01 22:11:49.613341 1 LOLO MAJOR
+ test:channel.{"dbnd":{"d":1.5}} 2012-09-01 22:11:51.613615 3 LOW MINOR
+ test:channel.{"dbnd":{"d":1.5}} 2012-09-01 22:11:53.613804 5  
+ test:channel.{"dbnd":{"d":1.5}} 2012-09-01 22:11:55.614074 7 HIGH MINOR
+ test:channel.{"dbnd":{"d":1.5}} 2012-09-01 22:11:57.614305 9 HIHI MAJOR
+ ^C
+
+=cut
+
+registrar(arrInitialize)
+
+=head3 Array Filter C<"arr">
+
+This filter is used to retrieve parts of an array (subarrays and strided
+subarrays).
+
+=head4 Parameters
+
+=over
+
+=item Square bracket notation C<[start:increment:end]> (shorthand)
+
+This much shorter square bracket notation can be used in place of JSON.
+Any parameter may be omitted (keeping the colons) to use the default value.
+If only one colon is included, it means C<[start:end]> with an increment of 1.
+If only a single parameter is given C<[index]> the filter returns one element.
+
+Index numbers for the start and end parameters must be integers, with the first
+array element being found at index C<0>.
+The value of an index may be negative, in which case the indexing is counted
+backwards from the end of the array, with C<-1> being the last element.
+If the start index selects an element that comes after the end index element,
+the subarray returned will always be empty.
+
+=item Start index C<"s">
+
+Index of the first original array element to retrieve.
+
+=item Increment C<"i">
+
+The stride or increment to apply between elements of the original array to be
+retrieved. This value must be a positive integer.
+
+=item End index C<"e">
+
+Index of the last original array element to retrieve.
+
+=back
+
+Defaults (when parameters are omitted) are:
+C<s=0> (first element), C<i=1> (fetch all elements), C<e=-1>
+(last element)
+
+=head4 Example
+
+ Hal$ caget test:channel 'test:channel.{"arr":{s:2,i:2,e:8}}' test:channel.[3:5] test:channel.[3:2:-3]
+ test:channel 10 0 1 2 3 4 5 6 7 8 9
+ test:channel.{"arr":{s:2,i:2,e:8}} 4 2 4 6 8
+ test:channel.[3:5] 3 3 4 5
+ test:channel.[3:2:-3] 3 3 5 7
+
+=cut
+
+registrar(syncInitialize)
+
+=head3 Synchronize Filter C<"sync">
+
+This filter is used to dynamically enable or disable monitors according
+to a condition and a state variable declared by the IOC.
+
+State variables have a boolean value and can be set by a binary output
+record, an iocsh command or by other software running in the IOC calling
+C<dbStateSet()>.
+
+=head4 Parameters
+
+=over
+
+=item Mode+State
+
+Mode and state can be specified in one definition (shorthand).
+The desired mode is given as the parameter name (C<"before"> / C<"first"> /
+C<"while"> / C<"last"> / C<"after"> / C<"unless"> which may be unquoted), with
+the state name (enclosed in single or double quotes C<"> or C<'>) as the value.
+
+=item Mode C<"m">
+
+A single word from the list below, enclosed in single or double quotes C<'> or
+C<">.
+This controls how the state value should affect the monitor stream. 
+
+=over
+
+=item C<"before"> E<mdash> only the last value received before the state
+changes from false to true is forwarded to the client.
+
+=item C<"first"> E<mdash> only the first value received after the state
+changes from true to false is forwarded to the client.
+
+=item C<"while"> E<mdash> values are forwarded to the client as long as
+the state is true.
+
+=item C<"last"> E<mdash> only the last value received before the state
+changes from true to false is forwarded to the client.
+
+=item C<"after"> E<mdash> only the first value received after the state
+changes from true to false is forwarded to the client.
+
+=item C<"unless"> E<mdash> values are forwarded to the client as long
+as the state is false.
+
+=back
+
+=item State C<"s">
+
+The name of a state variable, enclosed in single or double quotes C<"> or C<'>.
+
+=back
+
+=head4 Example
+
+Assuming there is a system state called "blue", that is being controlled by
+some other facility such as a timing system, updates could be restricted to
+periods only when "blue" is true by using
+
+ Hal$ camonitor 'test:channel' 'test:channel.{sync:{while:"blue"}}'
+ ...
+
+=cut
+
+registrar(decInitialize)
+
+=head3 Decimation Filter C<"dec">
+
+This filter is used to reduce the number or rate of monitor updates from a
+channel by an integer factor C<n> that is provided as a filter argument,
+discarding the other updates. A true decimation following the original meaning
+of the word would be achieved by giving C<n> as 10, to only allow every tenth
+update through.
+
+=head4 Parameters
+
+=over
+
+=item Number C<"n">
+
+The decimation factor, a positive integer. Giving n=1 is equivalent to a no-op
+that allows all updates to be passed to the client.
+
+=back
+
+This filter is intentionally very simplistic. It passes on the first monitor
+event that it sees after the channel connects, then discards the next N-1 events
+before sending the next event. If several clients connect to a channel using the
+same filter settings they may see completely different data streams since each
+client gets its own instance of the filter whose event counter starts when that
+client connects.
+
+=head4 Example
+
+To sample a 60Hz channel at 1Hz, a 10Hz channel every 6 seconds or a 1Hz channel
+once every minute:
+
+ Hal$ camonitor 'test:channel' 'test:channel.{dec:{n:60}}'
+ ...
+
+=cut
+
+registrar(utagInitialize)
+
+=head3 User Tag Filter C<"utag">
+
+This filter applies a test C< (UTAG & M) == V > to the value of the record's
+UTAG field at the time each monitor event is posted, and drops all updates for
+which this expression is false.
+
+=head4 Parameters
+
+=over
+
+=item Mask C<"M">
+
+An integer to be used as a bit mask.
+
+=item Value C<"V">
+
+The integer value to be matched after applying the mask to the UTAG value.
+
+=back
+
+=head4 Example
+
+To read a channel only when the UTAG value is even (bit 0 is 0):
+
+ Hal$ camonitor 'test:channel' 'test:channel.{utag:{m:1, v:0}}'
+ ...
+
+=cut

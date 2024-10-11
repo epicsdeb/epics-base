@@ -1,0 +1,106 @@
+record(ai, "$(P)target") {}
+
+# local input link shorthand
+record(longin, "$(P)inp1") {
+    field(INP , {pva:"$(P)target"})
+    alias("$(P)inp1:alias")
+}
+
+# local input link longhand
+record(longin, "$(P)inp2") {
+    field(INP , {pva:{pv:"$(P)target"}})
+}
+
+# remote input link
+record(longin, "$(P)inp3") {
+    field(INP , {pva:"invalid:pv:name"})
+}
+
+# null like (requires local, but not local)
+record(longin, "$(P)inp4") {
+    field(INP , {pva:{pv:"invalid:pv:name", local:true}})
+}
+
+# local input link w/ CP (process on update)
+record(calc, "$(P)cnt") {
+    field(SCAN, "1 second")
+    field(INPA, "$(P)cnt")
+    field(INPB, "9")
+    field(CALC, "A<B?A+1:0")
+    field(HIGH, "7")
+    field(HSV , "MAJOR")
+}
+record(longin, "$(P)track") {
+    field(INP , {pva:{
+                    pv:"$(P)cnt",
+                    proc:"CP",
+                    sevr:true,
+                    time:true
+                    }})
+    field(TSE, "-2")
+}
+
+# remote input link w/ CP (process on update)
+record(longin, "$(P)track2") {
+    field(INP , {pva:{
+                    pv:"$(P)cnt:rmt",
+                    proc:"CP",
+                    sevr:true,
+                    time:true
+                    }})
+    field(TSE, "-2")
+}
+
+
+# local output link
+record(longout, "$(P)out1") {
+    field(OUT , {pva:{pv:"$(P)out:tgt"}})
+    field(TPRO, "1")
+}
+record(longout, "$(P)out:tgt") {
+    field(TPRO, "1")
+}
+
+# remote output link
+record(longout, "$(P)out2") {
+    field(OUT , {pva:{pv:"$(P)out:rmt"}})
+    field(TPRO, "1")
+}
+
+# remote output link w/ retry (queue put while disconnected)
+record(longout, "$(P)out3") {
+    field(OUT , {pva:{pv:"$(P)out:rmt", retry:true}})
+    field(TPRO, "1")
+    #info(base:lsetDebug, "YES")
+}
+
+
+# output link to waveform
+record(aao, "$(P)out4:wf") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "10")
+    field(OUT , {pva:{pv:"$(P)target:wf"}})
+}
+
+# input link to waveform
+record(aao, "$(P)target:wf") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "10")
+}
+
+record(aai, "$(P)inp5:wf") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "10")
+    field(INP , {pva:{pv:"$(P)target:wf"}})
+}
+
+
+# test forward link
+record(calc, "$(P)fcnt1") {
+    field(CALC, "VAL+1")
+    field(FLNK, {pva:{pv:"$(P)fcnt2"}})
+    info(base:lsetDebug, "YES")
+}
+record(calc, "$(P)fcnt2") {
+    field(CALC, "VAL+1")
+}

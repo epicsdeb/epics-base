@@ -1,0 +1,18 @@
+# use with pvalink.db, run in a second IOC
+#  use instead of pvalink2.db to cause a type change
+
+record(calcout, "$(P)cnt:rmtx") {
+    field(SCAN, "1 second")
+    field(OUT , "$(P)cnt:rmt PP")
+    field(INPA, "$(P)cnt")
+    field(INPB, "9")
+    field(CALC, "A<B?A+1:0")
+    field(HIGH, "7")
+    field(HSV , "MAJOR")
+}
+
+record(longin, "$(P)cnt:rmt") {}
+
+record(stringout, "$(P)out:rmt") {
+    field(TPRO, "1")
+}

@@ -15,11 +15,6 @@
 #    to inform the system of the shared library location.
 
 
-# Use GNU Readline if the header file is installed
-COMMANDLINE_LIBRARY = $(strip $(if $(wildcard \
-    $(firstword $(READLINE_DIR) $(GNU_DIR))/include/readline/readline.h), \
-  READLINE, EPICS))
-
 # If libreadline needs additional libraries to be linked with it, try
 # uncommenting each of the lines below in turn, starting with the top
 # one and working downwards, until the build succeeds. Do a 'make rebuild'
@@ -33,3 +28,12 @@ COMMANDLINE_LIBRARY = $(strip $(if $(wildcard \
 
 # Readline is broken or you don't want use it:
 #COMMANDLINE_LIBRARY = EPICS
+
+
+# WARNING: Variables that are set in $(CONFIG)/CONFIG.gnuCommon cannot be
+# overridden in this file for native builds, e.g. variables such as
+#    OPT_CFLAGS_YES, WARN_CFLAGS, SHRLIB_LDFLAGS
+# They must be set in CONFIG_SITE.linux-arm.linux-arm instead.
+
+# Permit access to 64-bit file-systems
+OP_SYS_CFLAGS += -D_FILE_OFFSET_BITS=64
