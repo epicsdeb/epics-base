@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <epicsStdlib.h>
 #include <string.h>
+#include "epicsVersion.h"
 
 #include <cadef.h>
 #include <epicsGetopt.h>
@@ -44,7 +45,8 @@ void usage (void)
 {
     fprintf (stderr, "\nUsage: camonitor [options] <PV name> ...\n"
     "\n"
-    "  -h:       Help; Print this message\n"
+    "  -h:       Help: Print this message\n"
+    "  -V:       Version: Show EPICS and CA versions\n"
     "Channel Access options:\n"
     "  -w <sec>: Wait time, specifies CA timeout, default is %f second(s)\n"
     "  -m <msk>: Specify CA event mask to use.  <msk> is any combination of\n"
@@ -136,7 +138,14 @@ static void connection_handler ( struct connection_handler_args args )
     pv *ppv = ( pv * ) ca_puser ( args.chid );
     if ( args.op == CA_OP_CONN_UP ) {
         nConn++;
-        if (!ppv->onceConnected) {
+
+        if (ppv->onceConnected && ppv->dbfType != ca_field_type(ppv->chid)) {
+            /* Data type has changed. Rebuild connection with new type. */
+            ca_clear_subscription(ppv->evid);
+            ppv->evid = NULL;
+        }
+
+        if (!ppv->evid) {
             ppv->onceConnected = 1;
                                 /* Set up pv structure */
                                 /* ------------------- */
@@ -167,7 +176,7 @@ static void connection_handler ( struct connection_handler_args args )
                                                 eventMask,
                                                 event_handler,
                                                 (void*)ppv,
-                                                NULL);
+                                                &ppv->evid);
         }
     }
     else if ( args.op == CA_OP_CONN_DOWN ) {
@@ -209,10 +218,13 @@ int main (int argc, char *argv[])
 
     LINE_BUFFER(stdout);        /* Configure stdout buffering */
 
-    while ((opt = getopt(argc, argv, ":nhm:sSe:f:g:l:#:0:w:t:p:F:")) != -1) {
+    while ((opt = getopt(argc, argv, ":nhVm:sSe:f:g:l:#:0:w:t:p:F:")) != -1) {
         switch (opt) {
         case 'h':               /* Print usage */
             usage();
+            return 0;
+        case 'V':
+            printf( "\nEPICS Version %s, CA Protocol version %s\n", EPICS_VERSION_STRING, ca_version() );
             return 0;
         case 'n':               /* Print ENUM as index numbers */
             enumAsNr=1;
