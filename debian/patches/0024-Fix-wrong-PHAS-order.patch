@@ -1,0 +1,37 @@
+From: Martin Konrad <konrad@frib.msu.edu>
+Date: Tue, 13 Oct 2020 18:22:08 -0400
+Subject: Fix wrong PHAS order
+
+Records with lower PHAS value than any previously loaded records
+were inserted at the end of the list rather than at the beginning.
+This fixes lp: #1899697. Also fixes a proto-bug in that the second
+argument to the previously used ellAdd() call assumed that
+offsetof(scan_element, node)==0.
+
+Thanks to Bruno Martins for providing this patch.
+---
+ src/ioc/db/dbScan.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/ioc/db/dbScan.c b/src/ioc/db/dbScan.c
+index 05681c5..fc3d1dd 100644
+--- a/src/ioc/db/dbScan.c
++++ b/src/ioc/db/dbScan.c
+@@ -1058,7 +1058,7 @@ static void addToList(struct dbCommon *precord, scan_list *psl)
+         }
+         ptemp = (scan_element *)ellPrevious(&ptemp->node);
+     }
+-    if (ptemp == NULL) ellAdd(&psl->list, (void *)pse);
++    if (ptemp == NULL) ellInsert(&psl->list, NULL, &pse->node);
+     psl->modified = TRUE;
+     epicsMutexUnlock(psl->lock);
+ }
+@@ -1084,7 +1084,7 @@ static void deleteFromList(struct dbCommon *precord, scan_list *psl)
+         return;
+     }
+     pse->pscan_list = NULL;
+-    ellDelete(&psl->list, (void *)pse);
++    ellDelete(&psl->list, &pse->node);
+     psl->modified = TRUE;
+     epicsMutexUnlock(psl->lock);
+ }
