@@ -59,7 +59,6 @@ EPICS_TZ = "CST6CDT,M3.2.0/2,M11.1.0/2"
 # US Hawaiian Standard Time, no DST:
 #EPICS_TZ = "HST10"
 
-
 # EPICS_TS_NTP_INET
 #	NTP time server ip address for VxWorks and RTEMS.
 #	IOC will use its boot host if this is not set.
@@ -70,8 +69,11 @@ EPICS_TS_NTP_INET=
 #	Prompt string
 # IOCSH_HISTSIZE
 #	Number of lines of command history to keep.
+# IOCSH_HISTEDIT_DISABLE
+# 	Prevents use of readline or equivalent if defined.
 IOCSH_PS1="epics> "
 IOCSH_HISTSIZE=50
+IOCSH_HISTEDIT_DISABLE=
 
 # Log Server:
 # EPICS_IOC_LOG_INET 

@@ -1,0 +1,35 @@
+msc {
+  CLI2 [label="CLI #2"], CLI1 [label="CLI #1"], GWS, GWC, SRV;
+
+  CLI1 -> GWS [label="Search X"];
+  GWS box GWC [label="Begin search"];
+  GWC -> SRV [label="Search X"];
+  GWC <- SRV [label="Have X"];
+  GWC -> SRV [label="Open X"];
+  GWC <- SRV [label="Chan X"];
+  GWS box GWC [label="Add Cache"];
+  CLI1 -> GWS [label="Have X"];
+  ...;
+  CLI2 -> GWS [label="Search X"];
+  GWS box GWC [label="Cache hit"];
+  CLI2 <- GWS [label="Have X"];
+  ...;
+  CLI1 -> GWS [label="Get"];
+  GWS -> GWC [label="Get"];
+  GWC -> SRV [label="Get"];
+  GWC <- SRV [label="Got"];
+  GWS <- GWC [label="Got"];
+  CLI1 <- GWS [label="Got"];
+  ...;
+  CLI1 -> GWS [label="Sub. X"];
+  GWS box GWC [label="Add cache"];
+  GWC -> SRV [label="Sub. X"];
+  ...;
+  CLI2 -> GWS [label="Sub. X"];
+  GWS box GWC [label="Use cache"];
+  ...;
+  GWC <- SRV [label="Event"];
+  GWS <- GWC [label="Add Queue"];
+  CLI1 <- GWS [label="Event"];
+  CLI2 <- GWS [label="Event"];
+}

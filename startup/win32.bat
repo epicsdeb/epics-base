@@ -4,6 +4,7 @@ rem  Copyright (c) 2017 UChicago Argonne LLC, as Operator of Argonne
 rem      National Laboratory.
 rem  Copyright (c) 2002 The Regents of the University of California, as
 rem      Operator of Los Alamos National Laboratory.
+rem  SPDX-License-Identifier: EPICS
 rem  EPICS BASE is distributed subject to a Software License Agreement found
 rem  in file LICENSE that is included with this distribution.
 rem *************************************************************************
@@ -53,7 +54,7 @@ rem Strawberry Perl will be added to PATH.
 set _strawberry_perl_home=C:\Strawberry
 
 rem The location of Microsoft Visual Studio (pathname).
-set _visual_studio_home=C:\Program Files (x86)\Microsoft Visual Studio 14.0
+set _visual_studio_home=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community
 
 rem The EPICS host architecture specification for EPICS_HOST_ARCH
 rem (<os>-<arch>[-<toolset>] as defined in configure/CONFIG_SITE).
@@ -82,7 +83,7 @@ set "PATH=%PATH%;%_strawberry_perl_home%\perl\bin"
 :after_add_strawberry_perl
 
 rem Set the environment for Microsoft Visual Studio
-call "%_visual_studio_home%\VC\vcvarsall.bat" x86
+call "%_visual_studio_home%\VC\Auxiliary\Build\vcvarsall.bat" x86
 
 rem Set the EPICS host architecture specification
 set "EPICS_HOST_ARCH=%_epics_host_arch%"

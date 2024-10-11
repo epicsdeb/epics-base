@@ -1,4 +1,6 @@
 usr/lib/epics/bin/linux-*
+usr/lib/epics/cfg/CONFIG*
+usr/lib/epics/cfg/TOOLCHAIN.linux-x86_64.linux*
 usr/lib/epics/configure
 usr/lib/epics/db
 usr/lib/epics/dbd
@@ -6,16 +8,20 @@ usr/lib/epics/include
 usr/lib/epics/templates
 usr/lib/epics/lib/linux-*/libCom*
 usr/lib/epics/lib/linux-*/libca*
-usr/lib/epics/lib/linux-*/libgdd*
-usr/lib/epics/lib/linux-*/libcas*
 usr/lib/epics/lib/linux-*/libdbCore*
 usr/lib/epics/lib/linux-*/libdbRecStd*
+usr/lib/epics/lib/linux-*/libnt*
+usr/lib/epics/lib/linux-*/libpvAccess*
+usr/lib/epics/lib/linux-*/libpvData*
+usr/lib/epics/lib/linux-*/libpvaClient*
+usr/lib/epics/lib/linux-*/libqsrv*
 usr/lib/epics/lib/host
 usr/lib/epics/lib/pkgconfig/*.pc usr/share/pkgconfig
 usr/bin/ascheck
 usr/bin/makeBaseApp
 usr/bin/makeBaseExt
 usr/bin/softIoc
+usr/bin/softIocPVA
 usr/bin/iocLogServer
 usr/bin/msi
 usr/share/epics-dev/configure
@@ -26,4 +32,3 @@ usr/lib/epics/lib/perl/EpicsHostArch.pl
 
 configure/Sample.Makefile usr/lib/epics/configure
 
-startup/EpicsHostArch usr/lib/epics/startup
