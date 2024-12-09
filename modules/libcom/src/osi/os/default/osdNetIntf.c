@@ -1,0 +1,1 @@
+#include "../osi/osdNetIfConf.c"

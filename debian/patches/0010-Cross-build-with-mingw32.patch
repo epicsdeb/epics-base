@@ -7,42 +7,14 @@ Subject: Cross-build with mingw32
  configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw |  4 ++--
  2 files changed, 17 insertions(+), 2 deletions(-)
 
-diff --git a/configure/os/CONFIG_SITE.Common.win32-x86-mingw b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-index ba19ac6..d2f74bb 100644
---- a/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-+++ b/configure/os/CONFIG_SITE.Common.win32-x86-mingw
-@@ -5,3 +5,18 @@
+Index: epics-base/configure/os/CONFIG_SITE.Common.win32-x86-mingw
+===================================================================
+--- epics-base.orig/configure/os/CONFIG_SITE.Common.win32-x86-mingw
++++ epics-base/configure/os/CONFIG_SITE.Common.win32-x86-mingw
+@@ -5,3 +5,6 @@
  # If readline is available uncomment the following line
  # to enable command-line editing and history support
  #COMMANDLINE_LIBRARY = READLINE
 +
-+CMPLR_PREFIX=i686-w64-mingw32-
-+
 +SHARED_LIBRARIES=NO
 +STATIC_BUILD=YES
-+
-+# No -fPIC avoids "-fPIC ignored for target (all code is position independent)"
-+SHRLIB_CFLAGS =
-+SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
-+LOADABLE_SHRLIB_LDFLAGS = -shared -Wl,--out-implib,$(LIB_PREFIX)$*$(LIB_SUFFIX)
-+
-+# Override linking with gcc library from CONFIG.gnuCommon
-+GNU_LDLIBS_YES =
-+
-+OP_SYS_LDLIBS = -lws2_32
-diff --git a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-index dfc947e..cad5db1 100644
---- a/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-+++ b/configure/os/CONFIG_SITE.linux-x86.win32-x86-mingw
-@@ -15,9 +15,9 @@
- 
- # Different distribution cross-build packages use different prefixes:
- # Ubuntu:
--#CMPLR_PREFIX = i686-w64-mingw32-
-+CMPLR_PREFIX = i686-w64-mingw32-
- # RHEL:
--CMPLR_PREFIX = i686-pc-mingw32-
-+#CMPLR_PREFIX = i686-pc-mingw32-
- # Debian?
- #CMPLR_PREFIX = i586-mingw32msvc-
- 

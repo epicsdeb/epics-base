@@ -1,0 +1,102 @@
+/**
+
+@page release_notes Release Notes
+
+Release 1.4.1 (December 2023)
+==========================
+
+- Bug Fixes
+  - dbLoadGroup was fixed
+- Additions
+  - Support for "meta" member at top of array of structs
+
+Release 1.4.0 (September 2022)
+==============================
+
+- Bug Fixes
+ - apply ACF when writing to atomic group
+- Additions
+ - Add new "structure" to @ref qsrv_group_map_types
+- Changes
+ - Add Access Security hooks for single and group writes.
+ - Enable "Async Soft Channel" for output links
+ - When built against Base 7.0.6.1, set timeStamp.userTag from UTAG field.
+ - Add DTYP="QSRV Set UTag" for longin, which sets UTAG=VAL.
+
+Release 1.3.1 (June 2021)
+=========================
+
+- Bug Fixes
+ - Correct handling for server side filters.
+- Changes
+ - Syncing softMain.cpp with epics-base
+
+Release 1.3.0 (Feb 2021)
+========================
+
+- Changes
+ - Add dbLoadGroup() iocsh function to read group JSON definitions
+   from a file.  Mappings in files must refer to full record names
+   instead of fields.  eg. 'recname.VAL' instead of 'VAL'.
+
+Release 1.2.4 (July 2020)
+=========================
+
+- Bug Fixes
+  - Fix stalled monitor when server side filter drops initial DBE_PROPERTY update.
+  - Respect DISP
+- Changes
+  - Refreshed softIocPVA to match options in Base.
+
+Release 1.2.3 (May 2020)
+========================
+
+- P2P gateway deprecated in favor of https://mdavidsaver.github.io/p4p/gw.html
+
+Release 1.2.2 (Nov 2019)
+========================
+
+- Changes
+  - Enforce Access Security policy.
+  - NTEnum .value field add missing "enum_t" type ID string.
+
+Release 1.2.1 (July 2019)
+=========================
+
+- Fixes
+  - Fix unittest: testpvalink.  No functional change.
+
+Release 1.2.0 (Mar 2019)
+========================
+
+- Incompatible changes
+  - The field 'display.format' is replaced with 'display.form' and 'display.precision'.
+    https://github.com/epics-base/pva2pva/issues/19
+- Additions
+  - Use @code info(Q:form, "...") @endcode to set 'display.form'.  See @ref qsrv_form
+- Fixes
+  - Correct handling of 64-bit integer fields.
+  - Install a copy of softIocExit.db for standalone builds
+
+Release 1.1.0 (Nov 2018)
+==========================
+
+- Incompatible changes
+  - Requires pvDataCPP >= 7.1.0
+  - Requires pvAccessCPP >= 6.1.0
+- Removals
+  - Drop the broken ioccircle and ioccircle2 examples.
+- Fixes
+  - Fix QSRV monitor locking causing crash
+  - Fix Windows DLL import/export errors
+  - Correctly handle empty "scalar" case of NELM=1, NORD=0.
+- Additions
+  - QSRV implement channelList() (aka. 'pvlist') with list of record and group names.
+  - @ref qsrv_link type (requires Base >= 3.16.1)
+
+Release 1.0.0 (Dec 2017)
+========================
+
+Initial Release
+
+*/
