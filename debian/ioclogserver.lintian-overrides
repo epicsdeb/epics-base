@@ -1,4 +1,4 @@
-ioclogserver: systemd-service-file-refers-to-unusual-wantedby-target lib/systemd/system/ioclogserver@.service ioclogserver.target
+ioclogserver: systemd-service-file-refers-to-unusual-wantedby-target ioclogserver.target [usr/lib/systemd/system/ioclogserver@.service]
 # All instances of ioclogserver@.service are wanted by ioclogserver.target
 # which in turn is wanted by multi-user.target. This allows all IOC log servers
 # to be started/stopped together.

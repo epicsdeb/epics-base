@@ -47,7 +47,7 @@ export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 export SHRLIB_VERSION=$(SOV)
 
 %:
-	dh $@ --with epics -Sepicsmake --with systemd
+	dh $@ --with epics -Sepicsmake
 
 override_dh_auto_clean:
 	dh_auto_clean
@@ -132,18 +132,22 @@ override_dh_install:
 	# Don't need other copies
 	rm debian/tmp/usr/lib/epics/lib/linux-*/libCap5.so
 
+	# get rid of vcs files if they snuck into the build somehow
+	rm -f debian/tmp/usr/lib/epics/templates/makeBaseApp/top/.gitignore
+	rm -f debian/tmp/usr/lib/epics/templates/makeBaseExt/top/.gitignore
+
 	# This path is used by CA.pm
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
 	# Install systemd unit files into the right location
-	install -d debian/epics-catools/lib/systemd/system
+	install -d debian/epics-catools/usr/lib/systemd/system
 	for arch in $(EPICS_HOST_ARCH); do \
-	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-catools/lib/systemd/system/; \
+	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-catools/usr/lib/systemd/system/; \
 	  rm debian/tmp/usr/lib/epics/bin/$$arch-debug/caRepeater.service; \
 	done
 
 	# Unit files shouldn't be marked executable
-	chmod -x debian/epics-catools/lib/systemd/system/*.service
+	chmod -x debian/epics-catools/usr/lib/systemd/system/*.service
 
 	# Remove legacy init scripts
 	rm -f debian/tmp/usr/lib/epics/bin/*/S99caRepeater
@@ -153,6 +157,11 @@ override_dh_install:
 
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)-debug
+
+	# make perl scripts executable
+	for name in $(PERLBINS); do \
+	    chmod -f +x debian/epics-dev/usr/lib/epics/templates/makeBaseApp/top/caPerlApp/$$name || : ; \
+	done
 
 	for arch in $(EPICS_HOST_ARCH); do for name in $(PERLBINS); do \
 	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \

@@ -1,4 +1,10 @@
-epics-base (7.0.8.1-1) UNRELEASED; urgency=medium
+epics-base (7.0.9-1) unstable; urgency=medium
+
+  * New upstream version 7.0.9
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Thu, 22 May 2025 15:23:20 -0400
+
+epics-base (7.0.8.1-1) unstable; urgency=medium
 
   * Upstream 7.0.8.1
 

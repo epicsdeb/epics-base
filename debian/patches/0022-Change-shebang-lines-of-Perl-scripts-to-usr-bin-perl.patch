@@ -39,8 +39,8 @@ Index: epics-base/src/template/base/makeBaseApp.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
- # Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
- 
+ # SPDX-FileCopyrightText: 1997 Argonne National Laboratory
+ #
 Index: epics-base/src/template/ext/makeBaseExt.pl
 ===================================================================
 --- epics-base.orig/src/template/ext/makeBaseExt.pl
@@ -49,8 +49,8 @@ Index: epics-base/src/template/ext/makeBaseExt.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
- # Authors: Ralph Lange, Marty Kraimer, Andrew Johnson and Janet Anderson
- 
+ # SPDX-FileCopyrightText: 2000 Argonne National Laboratory
+ #
 Index: epics-base/src/tools/EpicsHostArch.pl
 ===================================================================
 --- epics-base.orig/src/tools/EpicsHostArch.pl
@@ -277,8 +277,8 @@ Index: epics-base/modules/ca/src/template/top/caPerlApp/caget.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
- use strict;
- 
+ # SPDX-FileCopyrightText: 2008 Argonne National Laboratory
+ #
 Index: epics-base/modules/ca/src/template/top/caPerlApp/cainfo.pl
 ===================================================================
 --- epics-base.orig/modules/ca/src/template/top/caPerlApp/cainfo.pl
@@ -287,8 +287,8 @@ Index: epics-base/modules/ca/src/template/top/caPerlApp/cainfo.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
- use strict;
- 
+ # SPDX-FileCopyrightText: 2008 Argonne National Laboratory
+ #
 Index: epics-base/modules/ca/src/template/top/caPerlApp/camonitor.pl
 ===================================================================
 --- epics-base.orig/modules/ca/src/template/top/caPerlApp/camonitor.pl
@@ -297,8 +297,8 @@ Index: epics-base/modules/ca/src/template/top/caPerlApp/camonitor.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
- use strict;
- 
+ # SPDX-FileCopyrightText: 2008 Argonne National Laboratory
+ #
 Index: epics-base/modules/ca/src/template/top/caPerlApp/caput.pl
 ===================================================================
 --- epics-base.orig/modules/ca/src/template/top/caPerlApp/caput.pl
@@ -307,8 +307,8 @@ Index: epics-base/modules/ca/src/template/top/caPerlApp/caput.pl
 -#!/usr/bin/env perl
 +#!/usr/bin/perl
  
- use strict;
- 
+ # SPDX-FileCopyrightText: 2008 Argonne National Laboratory
+ #
 Index: epics-base/modules/database/src/std/softIoc/makeInstallDir.pl
 ===================================================================
 --- epics-base.orig/modules/database/src/std/softIoc/makeInstallDir.pl
@@ -589,3 +589,13 @@ Index: epics-base/modules/database/src/tools/dbdReport.pl
  
  #*************************************************************************
  # Copyright (c) 2010 UChicago Argonne LLC, as Operator of Argonne
+Index: epics-base/src/tools/filterMakeflags.pl
+===================================================================
+--- epics-base.orig/src/tools/filterMakeflags.pl
++++ epics-base/src/tools/filterMakeflags.pl
+@@ -1,4 +1,4 @@
+-#!/bin/env perl
++#!/usr/bin/perl
+ #
+ # Filter all versions of GNU Make's MAKEFLAGS variable to return
+ # only the single-letter flags. The content differed slightly

@@ -1,0 +1,63 @@
+.\" Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.\" Please adjust this date whenever revising the manpage.
+.\" 
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.TH "IOCLOGSERVER" "1" "June 3, 2025" "" ""
+.SH "NAME"
+iocLogServer \- receives messages for all 
+.B iocLogClient
+s in the local area network
+.SH "SYNOPSIS"
+.B iocLogServer
+
+.SH "DESCRIPTION"
+.B iocLogServer
+is 
+.B DEPRECATED
+and will be removed in future releases. Consider using other logging solutions
+such as
+.B logstash or
+.B graylog
+instead.
+.sp 1
+.B iocLogServer 
+runs on a host. It receives messages for all enabled iocLogClients in the local
+area network. The messages are written to a file.
+.sp 1
+To start a log server on a UNIX or PC workstation you must first set the
+following environment variables and then run the executable iocLogServer
+on your PC or UNIX workstation.
+.sp 1
+.TP
+.B EPICS_IOC_LOG_FILE_NAME
+.sp 1
+The name and path to the log file.
+.sp 1
+.TP
+.B EPICS_IOC_LOG_FILE_LIMIT
+.sp 1
+The maximum size in characters for the log file. If the file grows larger than
+this limit the server will seek back to the beginning of the file and write
+new messages over the old messages starting from the beginning.
+If the value is zero then there is no limit on the size of the log file.
+.sp 1
+.TP
+.B EPICS_IOC_LOG_FILE_COMMAND
+.sp 1
+A shell command string used to obtain the log file path name during
+initialization and in response to SIGHUP. The new path name will
+replace any path name supplied in
+.B EPICS_IOC_LOG_FILE_NAME
+.
