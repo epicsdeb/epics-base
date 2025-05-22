@@ -14,6 +14,8 @@
  *  505 665 1831
  */
 
+#define USE_TYPED_DBEVENT
+
 #include <string>
 #include <stdexcept>
 
@@ -165,7 +167,7 @@ unsigned long dbChannelIO::nativeElementCount (
 {
     guard.assertIdenticalMutex ( this->mutex );
     long elements = dbChannelElements ( this->dbch );
-    if ( elements >= 0u ) {
+    if ( elements >= 0 ) {
         return static_cast < unsigned long > ( elements );
     }
     return 0u;

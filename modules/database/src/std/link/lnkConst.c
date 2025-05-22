@@ -23,8 +23,6 @@
 #include "epicsExport.h"
 
 
-typedef long (*FASTCONVERT)();
-
 typedef struct const_link {
     jlink jlink;        /* embedded object */
     int nElems;
@@ -458,7 +456,7 @@ static long lnkConst_loadArray(struct link *plink, short dbrType, void *pbuffer,
     short dbrSize;
     char *pdest = pbuffer;
     int nElems = clink->nElems;
-    FASTCONVERT conv;
+    FASTCONVERTFUNC conv;
     long status;
 
     if(INVALID_DB_REQ(dbrType))
@@ -495,9 +493,11 @@ static long lnkConst_loadArray(struct link *plink, short dbrType, void *pbuffer,
         }
         else {
             /* Long string conversion */
-            strncpy(pbuffer, clink->value.scalar_string, *pnReq);
-            ((char *)pbuffer)[*pnReq] = 0;
-            nElems = strlen(pbuffer) + 1;
+            if (*pnReq > 0) {
+                strncpy(pbuffer, clink->value.scalar_string, *pnReq);
+                ((char *)pbuffer)[*pnReq - 1] = 0;
+                nElems = strlen(pbuffer) + 1;
+            }
             status = 0;
         }
         break;

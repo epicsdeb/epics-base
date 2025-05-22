@@ -289,6 +289,7 @@ static void testMasterField(PVRecordPtr const& pvRecord)
         cout << "Master PV structure from copy" << endl << *pvMasterField << endl;
         cout << "Master PV structure from copy offset " << pvMasterField->getFieldOffset() << endl;
     }
+    testOk1(pvCopy->isMasterFieldRequested());
     testOk1(pvMasterField->getNumberFields() == pvStructureRecord->getNumberFields());
     testOk1(pvMasterField->getFieldOffset() == 0);
     PVStructurePtr pvStructureCopy = pvCopy->createPVStructure();
@@ -431,7 +432,7 @@ static void masterFieldTest()
 
 MAIN(testPVCopy)
 {
-    testPlan(70);
+    testPlan(71);
     scalarTest();
     arrayTest();
     powerSupplyTest();

@@ -590,8 +590,7 @@ void rsrv_init (void)
             errlogPrintf ( "cas " ERL_WARNING ": reachable with UDP unicast (a host's IP in EPICS_CA_ADDR_LIST)\n" );
         }
 
-        epicsSnprintf(buf, sizeof(buf)-1u, "%u", ca_server_port);
-        buf[sizeof(buf)-1u] = '\0';
+        epicsSnprintf(buf, sizeof(buf), "%u", ca_server_port);
         epicsEnvSet("RSRV_SERVER_PORT", buf);
     }
 
@@ -1537,6 +1536,13 @@ struct client *create_tcp_client (SOCKET sock , const osiSockAddr *peerAddr)
 
 void casStatsFetch ( unsigned *pChanCount, unsigned *pCircuitCount )
 {
+    if(!clientQlock) { /* not yet initialized, or disabled via dbServer */
+        if(pChanCount)
+            *pChanCount = 0;
+        if(pCircuitCount)
+            *pCircuitCount = 0;
+        return;
+    }
     LOCK_CLIENTQ;
     {
         int circuitCount = ellCount ( &clientQ );
