@@ -285,7 +285,11 @@ Inf (Infinite) value. UDF defaults to TRUE but can be set in a database file.
 Record and device support routines which write to the VAL field are generally
 responsible for setting and clearing UDF.
 
-=fields STAT, SEVR, AMSG, NSTA, NSEV, NAMSG, ACKS, ACKT, UDF
+The B<UDFS> field specifies the alarm severity that the record will be set to
+whenever its value is undefined (i.e., the UDF field is 1). This includes the
+initial severity of the record being undefined after the IOC boots.
+
+=fields STAT, SEVR, AMSG, NSTA, NSEV, NAMSG, ACKS, ACKT, UDF, UDFS
 
 =cut
 

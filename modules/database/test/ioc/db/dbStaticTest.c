@@ -13,6 +13,37 @@
 #include <dbStaticPvt.h>
 #include <dbUnitTest.h>
 #include <testMain.h>
+#include <epicsString.h>
+#include <iocsh.h>
+
+
+static void testEntryRemoved(const char *pv)
+{
+    DBENTRY entry;
+
+    testDiag("testEntryRemoved(\"%s\")", pv);
+
+    dbInitEntry(pdbbase, &entry);
+
+    testOk(dbFindRecord(&entry, pv)==S_dbLib_recNotFound,
+        "Record '%s' not present", pv);
+
+    dbFinishEntry(&entry);
+}
+
+static void testEntryPresent(const char *pv)
+{
+    DBENTRY entry;
+
+    testDiag("testEntryPresent(\"%s\")", pv);
+
+    dbInitEntry(pdbbase, &entry);
+
+    testOk(dbFindRecord(&entry, pv)==0,
+        "Record '%s' present", pv);
+
+    dbFinishEntry(&entry);
+}
 
 static void testEntry(const char *pv)
 {
@@ -291,16 +322,19 @@ static void testDbVerify(const char *record)
     dbFinishEntry(&entry);
 }
 
-static void testWrongAliasRecord(const char *filename)
+static void testReadDatabase(const char *filename, int expectToFail)
 {
     FILE *fp = NULL;
+    long status;
     dbPath(pdbbase,"." OSI_PATH_LIST_SEPARATOR "..");
     dbOpenFile(pdbbase, filename, &fp);
     if(!fp) {
-        testAbort("Unable to read %s", filename);
+        testAbort("Unable to open %s", filename);
     }
-    testOk(dbReadDatabaseFP(&pdbbase, fp, NULL, NULL) != 0,
-           "Wrong alias record in %s is expected to fail", filename);
+    status = dbReadDatabaseFP(&pdbbase, fp, NULL, NULL);
+    testOk(!status == !expectToFail,
+            "Reading %s%s", filename,
+            expectToFail ? " is expected to fail" : "");
 }
 
 void dbTestIoc_registerRecordDeviceDriver(struct dbBase *);
@@ -308,9 +342,10 @@ void dbTestIoc_registerRecordDeviceDriver(struct dbBase *);
 MAIN(dbStaticTest)
 {
     const char *ldir;
+    char *ldirDup;
     FILE *fp = NULL;
 
-    testPlan(312);
+    testPlan(350);
     testdbPrepare();
 
     testdbReadDatabase("dbTestIoc.dbd", NULL, NULL);
@@ -320,13 +355,40 @@ MAIN(dbStaticTest)
     if(!fp) {
         testAbort("Unable to read dbStaticTest.db");
     }
+    ldirDup = epicsStrDup(ldir);
     if(dbReadDatabaseFP(&pdbbase, fp, NULL, NULL)) {
         testAbort("Unable to load %s%sdbStaticTest.db",
-                  ldir, OSI_PATH_LIST_SEPARATOR);
+                  ldirDup, OSI_PATH_LIST_SEPARATOR);
     }
+    free(ldirDup);
 
-    testWrongAliasRecord("dbStaticTestAlias1.db");
-    testWrongAliasRecord("dbStaticTestAlias2.db");
+    dbPath(pdbbase,"." OSI_PATH_LIST_SEPARATOR "..");
+    ldir = dbOpenFile(pdbbase, "dbStaticTestRemove.db", &fp);
+    if(!fp) {
+        testAbort("Unable to read dbStaticTestRemove.db");
+    }
+    ldirDup = epicsStrDup(ldir);
+    if(dbReadDatabaseFP(&pdbbase, fp, NULL, NULL)) {
+        testAbort("Unable to load %s%sdbStaticTestRemove.db",
+                  ldirDup, OSI_PATH_LIST_SEPARATOR);
+    }
+    free(ldirDup);
+
+    testReadDatabase("dbStaticTestAlias1.db", 1);
+    testReadDatabase("dbStaticTestAlias2.db", 1);
+
+    /* Test re-defining aliases */
+    testReadDatabase("dbStaticTestAliasAgain1.db", 0);
+    testReadDatabase("dbStaticTestAliasAgain1.db", 0);
+    testReadDatabase("dbStaticTestAliasAgain2.db", 0);
+    testReadDatabase("dbStaticTestAliasAgain2.db", 0);
+    testReadDatabase("dbStaticTestAliasAgain3.db", 0);
+    testReadDatabase("dbStaticTestAliasAgain3.db", 0);
+    testReadDatabase("dbStaticTestAliasAgainError1.db", 1);
+    testReadDatabase("dbStaticTestAliasAgainError2.db", 1);
+    iocshCmd("var dbRecordsOnceOnly 1");
+    testReadDatabase("dbStaticTestAliasAgain2.db", 1);
+    testReadDatabase("dbStaticTestAliasAgain3.db", 1);
 
     testEntry("testrec.VAL");
     testEntry("testalias.VAL");
@@ -340,6 +402,21 @@ MAIN(dbStaticTest)
     testRec2Entry("testalias");
     testRec2Entry("testalias2");
     testRec2Entry("testalias3");
+
+    testEntryPresent("testdelrec");
+    testEntryPresent("testdelrec6");
+    testEntryPresent("testdelalias66");
+    testEntryRemoved("testdelrec1");
+    testEntryRemoved("testdelrec2");
+    testEntryRemoved("testdelrec3");
+    testEntryRemoved("testdelrec4");
+    testEntryRemoved("testdelrec5");
+    testEntryRemoved("testdelalias6");
+    testEntryRemoved("testdelrec7");
+    testEntryRemoved("testdelalias7");
+    testEntryRemoved("testdelalias77");
+    testEntryRemoved("testdelrec8");
+    testEntryRemoved("testdelrec11");
 
     eltc(0);
     testIocInitOk();
@@ -357,6 +434,21 @@ MAIN(dbStaticTest)
     testRec2Entry("testalias");
     testRec2Entry("testalias2");
     testRec2Entry("testalias3");
+
+    testEntryPresent("testdelrec");
+    testEntryPresent("testdelrec6");
+    testEntryPresent("testdelalias66");
+    testEntryRemoved("testdelrec1");
+    testEntryRemoved("testdelrec2");
+    testEntryRemoved("testdelrec3");
+    testEntryRemoved("testdelrec4");
+    testEntryRemoved("testdelrec5");
+    testEntryRemoved("testdelalias6");
+    testEntryRemoved("testdelrec7");
+    testEntryRemoved("testdelalias7");
+    testEntryRemoved("testdelalias77");
+    testEntryRemoved("testdelrec8");
+    testEntryRemoved("testdelrec11");
 
     testDbVerify("testrec");
 

@@ -1219,7 +1219,9 @@ long dbNextRecordType(DBENTRY *pdbentry)
 
 char * dbGetRecordTypeName(DBENTRY *pdbentry)
 {
-    return(pdbentry->precordType->name);
+    dbRecordType *pdbRecordType = pdbentry->precordType;
+    if(!pdbRecordType) return NULL;
+    return(pdbRecordType->name);
 }
 
 int dbGetNRecordTypes(DBENTRY *pdbentry)
@@ -1478,6 +1480,17 @@ long dbDeleteAliases(DBENTRY *pdbentry)
     return 0;
 }
 
+static void dbDeleteRecordLinks(dbRecordType *rtyp, struct dbCommon *prec)
+{
+    short i;
+
+    for (i=0; i<rtyp->no_links; i++) {
+        dbFldDes *pflddes = rtyp->papFldDes[rtyp->link_ind[i]];
+        DBLINK *plink = (DBLINK *)(((char *)prec) + pflddes->offset);
+        dbFreeLinkContents(plink);
+    }
+}
+
 long dbDeleteRecord(DBENTRY *pdbentry)
 {
     dbBase          *pdbbase = pdbentry->pdbbase;
@@ -1493,6 +1506,7 @@ long dbDeleteRecord(DBENTRY *pdbentry)
     preclist = &precordType->recList;
     ellDelete(preclist, &precnode->node);
     dbPvdDelete(pdbbase, precnode);
+    dbDeleteRecordLinks(precordType, precnode->precord);
     while (!dbFirstInfo(pdbentry)) {
         dbDeleteInfo(pdbentry);
     }
@@ -2206,12 +2220,12 @@ long dbInitRecordLinks(dbRecordType *rtyp, struct dbCommon *prec)
              */
 
         } else if(dbCanSetLink(plink, &link_info, devsup)!=0) {
-            errlogPrintf(ERL_ERROR ": %s.%s: can't initialize link type %d with \"%s\" (type %d)\n",
-                         prec->name, pflddes->name, plink->type, plink->text, link_info.ltype);
+            errlogPrintf(ERL_ERROR ": %s.%s: can't initialize link type %s with \"%s\" (type %s)\n",
+                         prec->name, pflddes->name, pamaplinkType[plink->type].strvalue, plink->text, pamaplinkType[link_info.ltype].strvalue);
 
         } else if(dbSetLink(plink, &link_info, devsup)) {
-            errlogPrintf(ERL_ERROR ": %s.%s: failed to initialize link type %d with \"%s\" (type %d)\n",
-                         prec->name, pflddes->name, plink->type, plink->text, link_info.ltype);
+            errlogPrintf(ERL_ERROR ": %s.%s: failed to initialize link type %s with \"%s\" (type %s)\n",
+                         prec->name, pflddes->name, pamaplinkType[plink->type].strvalue, plink->text, pamaplinkType[link_info.ltype].strvalue);
         }
         free(plink->text);
         plink->text = NULL;

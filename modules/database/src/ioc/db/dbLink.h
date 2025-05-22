@@ -307,7 +307,7 @@ typedef struct lset {
      *
      * @param   plink       the link
      * @param   dbrType     data type code
-     * @param   pbuffer     where to put the value
+     * @param   pbuffer     where the data is
      * @param   nRequest    number of elements to send
      * @returns status value
      */
@@ -324,7 +324,7 @@ typedef struct lset {
      *
      * @param   plink       the link
      * @param   dbrType     data type code
-     * @param   pbuffer     where to put the value
+     * @param   pbuffer     where the data is
      * @param   nRequest    number of elements to send
      * @returns status value
      */
@@ -391,6 +391,10 @@ typedef struct lset {
 #define dbGetSevr(link, sevr) \
     dbGetAlarm(link, NULL, sevr)
 
+/** @brief Lookup link field name from pointer.
+ *  Returns only field name.  aka. value of ``dbFldDes::name``
+ *  @since 3.16.2
+ */
 DBCORE_API const char * dbLinkFieldName(const struct link *plink);
 
 DBCORE_API void dbInitLink(struct link *plink, short dbfType);

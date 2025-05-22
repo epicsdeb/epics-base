@@ -2,6 +2,13 @@
 
 This document summarizes the changes to the module between releases.
 
+## Release 4.7.2 (EPICS 7.0.9, Feb 2025)
+
+* Resolved issue with changed field set in the case where the top level (master)
+field ("_") is not requested by the client, but the master field callback causes
+all fields to be marked as updated, rather than only those fields that have
+actually been modified.
+
 ## Release 4.7.1 (EPICS 7.0.8, Dec 2023)
 
 * Added data distributor plugin which can be used for distributing data between 
