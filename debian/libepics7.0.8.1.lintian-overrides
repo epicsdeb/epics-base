@@ -1,13 +1,6 @@
-<<<<<<<< HEAD:debian/libepics7.0.8.1.lintian-overrides
 libepics7.0.8.1: package-name-doesnt-match-sonames
 # Don't want to package the many Base libraries seperately
 # All have the same soname
 libepics7.0.8.1: dev-pkg-without-shlib-symlink
-========
-libepics7.0.7: package-name-doesnt-match-sonames
-# Don't want to package the many Base libraries seperately
-# All have the same soname
-libepics7.0.7: dev-pkg-without-shlib-symlink
->>>>>>>> frib-stash/uc5:debian/libepics7.0.7.lintian-overrides
 # Our policy is not to place the .so symlinks in the default search path
 # but rather in /usr/lib/epics/lib/*/
