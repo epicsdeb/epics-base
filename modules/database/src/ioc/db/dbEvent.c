@@ -19,6 +19,8 @@
  */
 
 #define EPICS_PRIVATE_API
+#define USE_TYPED_DBEVENT
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -98,8 +100,8 @@ struct event_user {
     unsigned char       extra_labor;    /* if set call extra labor func */
     unsigned char       flowCtrlMode;   /* replace existing monitor */
     unsigned char       extraLaborBusy;
-    void                (*init_func)();
-    epicsThreadId       init_func_arg;
+    void                (*init_func)(void *);
+    void                *init_func_arg;
 };
 
 typedef struct {
