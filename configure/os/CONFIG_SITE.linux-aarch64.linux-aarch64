@@ -1,0 +1,5 @@
+# CONFIG_SITE.linux-aarch64.linux-aarch64
+#
+# Site specific definitions for native linux-aarch64 builds
+#-------------------------------------------------------
+

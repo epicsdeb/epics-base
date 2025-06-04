@@ -4,6 +4,7 @@
 #     National Laboratory.
 # Copyright (c) 2002 The Regents of the University of California, as
 #     Operator of Los Alamos National Laboratory.
+# SPDX-License-Identifier: EPICS
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution. 
 #*************************************************************************
@@ -55,6 +56,9 @@ foreach my $source (@ARGV) {
     my $name   = basename($source);
     my $temp   = "$install_dir/TEMP.$name.$$";
     my $target = "$install_dir/$name";
+
+    # Don't try to install the file if it already exists
+    next if $source eq $target;
 
     if (-f $target) {
         next if -M $target < -M $source and -C $target < -C $source;
