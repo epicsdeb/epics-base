@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvaClientCPP</title>
+  <link rel="stylesheet" type="text/css"
+  href="https://mrkraimer.github.io/website/css/base.css" />
+  <link rel="stylesheet" type="text/css"
+  href="https://mrkraimer.github.io/website/css/epicsv4.css" />
+  <style type="text/css">
+/*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     body { margin-right: 10% }
+/*]]>*/</style>
+
+ <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript" src="https://mrkraimer.github.io/website/css/tocgen.js"></script>  
+
+</head>
+
+<body>
+
+<div class="head">
+<h1>EPICS pvaClientCPP</h1>
+<h2 class="nocount">Release 4.8 - March 2021</h2>
+
+<h2 class="nocount">Abstract</h2>
+
+<p>pvaClient is a software library that provides, to an EPICS client programmer, a friendly
+client side programming interface to the data of an EPICS based control system. It is intended
+for such uses as rapid development of ad hoc programs by controls engineers, or to provide
+scientists a way to directly develop analytical applications.</p>
+
+<p>Specifically, pvaClient provides a synchronous interface for pvAccess, which is the
+software support for high speed controls network communications used in EPICS version 4.
+pvAccess provides a callback based interface, which can be hard to use.
+pvaClient provides an interface that does not require callbacks even for monitors.
+</p>
+<p>
+pvaClientChannel provides many "convenience" methods to directly get and put
+scalar and scalarArray data types.
+Additional methods provide access to the full features of pvAccess.
+</p>
+<p>
+pvaClientMultiChannel provides access to data from multiple channels.
+It can be used directly by a client or via pvaClientMultiDouble or pvaClientNTMultiChannel.
+pvaClientMultiDouble allows the client to get and put data to multiple channels.
+But each channel must have a value field that is a numeric scalar.
+pvaClientNTMultiChannel allows the client to get and put data to multiple channels.
+Each channel must have a value field.
+The data for the channels is presented via normative type NTMultiChannel.
+</p>
+  <!-- last para of Abstract is boilerplate reference to EPICS -->
+      <p>For more information about EPICS generally, please refer to the home page of the <a
+       href="http://www.aps.anl.gov/epics/">Experimental Physics and Industrial
+      Control System</a>.</p>
+
+
+</div> <!-- head -->
+
+<div id="contents" class="contents">
+<hr />
+<h2>Overview</h2>
+<p>
+Documentation for pvaClientCPP is available at:
+<a
+href="https://mrkraimer.github.io/website/developerGuide/pvaClient/pvaClientCPP.html">
+pvaClient
+</a>
+</p>
+<p>
+pvaClientCPP is one of the components of
+<a href="https://epics-controls.org/resources-and-support/base/epics-7/">
+EPICS-7
+</a>
+</p>
+<p>This document is only a guide to help locate code and documentation related to pvaClientCPP
+</p>
+<p>
+It is intended for developers that want to use pvaClientCPP.
+</p>
+<h2>Developer Guide</h2>
+<p>A guide for developers is available at
+<a
+href="https://mrkraimer.github.io/website/developerGuide/developerGuide.html">
+developerGuide
+</a>
+</p>
+<p>This guide provides an overview of  the components that are part of an <b>EPICS V4</b> release.
+Some understanding of the components and how they are related is necessary in order to
+develop code that uses pvaClientCPP.
+In particular read everything related to pvaClient.
+</p>
+
+<h2>doxygen</h2>
+<p>doxygen documentation is available at
+<a
+href="./html/index.html">doxygen</a>
+</p>
+
+<h2>exampleCPP</h2>
+<p>Example code is available at
+<a
+href="https://github.com/epics-base/exampleCPP">
+exampleCPP
+</a>
+</p>
+<p>In particular look at exampleClient.
+It has many examples of using pvaClientCPP.
+</p>
+
+</div> <!-- class="contents" -->
+</body>
+</html>

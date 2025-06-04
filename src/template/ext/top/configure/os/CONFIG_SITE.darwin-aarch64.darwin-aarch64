@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2022 Argonne National Laboratory
+#
+# SPDX-License-Identifier: EPICS
+
+#
+# Site Specific Configuration Information
+
+# Where to find utilities/libraries
+#       If you do not have a certain product,
+#       leave the line empty.
+#
+
+#
+# XDarwin
+#
+#X11_LIB=/usr/X11R6/lib
+#X11_INC=/usr/X11R6/include
+#XPM_LIB=/usr/X11R6/lib
+#XPM_INC=/usr/X11R6/include
+
+#
+# HomeBrew X11 & OpenMotif
+#
+X11_LIB=/opt/homebrew/lib
+X11_INC=/opt/homebrew/include
+XPM_LIB=/opt/homebrew/lib
+XPM_INC=/opt/homebrew/include
+MOTIF_LIB=/opt/homebrew/lib
+MOTIF_INC=/opt/homebrew/include
+
+SCIPLOT = YES
