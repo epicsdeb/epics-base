@@ -43,6 +43,8 @@ sub HostArch {
         return "cygwin-x86"     if m/^i[3-6]86-cygwin/;
         return 'solaris-sparc'  if m/^sun4-solaris/;
         return 'solaris-x86'    if m/^i86pc-solaris/;
+        return 'freebsd-x86_64' if m/^x86_64-freebsd/;
+        return 'freebsd-x86_64' if m/^amd64-freebsd/;
 
         my ($kernel, $hostname, $release, $version, $cpu) = uname;
         if (m/^darwin/) {
@@ -52,7 +54,13 @@ sub HostArch {
             }
             die "$0: macOS CPU type '$cpu' not recognized\n";
         }
-
+        # mingw64 has 32bit and 64bit build shells which give same arch result
+        if (m/^(x86_64|i686)-msys/) {
+            die "$0: Architecture '$arch' is unclear,\n".
+                "try again after explicitly setting the EPICS_HOST_ARCH environment variable.\n".
+                "Use  EPICS_HOST_ARCH=windows-x64-mingw  for a 64bit MinGW build, or\n".
+                "EPICS_HOST_ARCH=win32-x86-mingw  for a 32bit MinGW build.\n"
+        }
         die "$0: Architecture '$arch' not recognized\n";
     }
 }
