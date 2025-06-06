@@ -168,6 +168,10 @@ public:
      */
     epics::pvData::PVStructurePtr getOptions(std::size_t fieldOffset);
     /**
+     * Is master field requested?
+     */
+    bool isMasterFieldRequested() const {return requestHasMasterField;}
+    /**
      * For debugging.
      */
     std::string dump();
@@ -183,6 +187,7 @@ private:
     CopyNodePtr headNode;
     epics::pvData::PVStructurePtr cacheInitStructure;
     epics::pvData::BitSetPtr ignorechangeBitSet;
+    bool requestHasMasterField;
 
     void traverseMaster(
         CopyNodePtr const &node,
