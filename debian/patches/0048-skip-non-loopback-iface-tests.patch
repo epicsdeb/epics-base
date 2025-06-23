@@ -80,7 +80,7 @@ Index: epics-base/modules/pvDatabase/test/src/Makefile
 ===================================================================
 --- epics-base.orig/modules/pvDatabase/test/src/Makefile
 +++ epics-base/modules/pvDatabase/test/src/Makefile
-@@ -29,10 +29,13 @@ testLocalProvider_SRCS += testLocalProvi
+@@ -29,12 +29,15 @@ testLocalProvider_SRCS += testLocalProvi
  testHarness_SRCS += testLocalProvider.cpp
  TESTS += testLocalProvider
  
@@ -94,7 +94,13 @@ Index: epics-base/modules/pvDatabase/test/src/Makefile
 + testPVAServer_SRCS += testPVAServer.cpp
 + testHarness_SRCS += testPVAServer.cpp
 + TESTS += testPVAServer
-+endif
  
- TESTPROD_HOST += testChannelMonitor
- testChannelMonitor_SRCS += testChannelMonitor.cpp
+-TESTPROD_HOST += testChannelMonitor
+-testChannelMonitor_SRCS += testChannelMonitor.cpp
+-testHarness_SRCS += testChannelMonitor.cpp
+-TESTS += testChannelMonitor
++ TESTPROD_HOST += testChannelMonitor
++ testChannelMonitor_SRCS += testChannelMonitor.cpp
++ testHarness_SRCS += testChannelMonitor.cpp
++ TESTS += testChannelMonitor
++endif
