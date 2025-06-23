@@ -163,6 +163,9 @@ override_dh_install:
 	    chmod -f +x debian/epics-dev/usr/lib/epics/templates/makeBaseApp/top/caPerlApp/$$name || : ; \
 	done
 
+	# remove DBD perl scripts from epics-perl, already installed by -dev
+	rm -rf debian/epics-perl/usr/lib/epics/lib/perl/DBD/
+
 	for arch in $(EPICS_HOST_ARCH); do for name in $(PERLBINS); do \
 	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \
 	;done ;done
