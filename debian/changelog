@@ -1,3 +1,9 @@
+epics-base (7.0.9-2) unstable; urgency=medium
+
+  * Skip channelMonitor test if no loopback iface available
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Mon, 23 Jun 2025 15:48:12 +0000
+
 epics-base (7.0.9-1) unstable; urgency=medium
 
   * New upstream version 7.0.9
