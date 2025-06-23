@@ -1,3 +1,9 @@
+epics-base (7.0.9-3) unstable; urgency=medium
+
+  * Remove epics-perl files already included in -dev
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Mon, 23 Jun 2025 19:44:51 +0000
+
 epics-base (7.0.9-2) unstable; urgency=medium
 
   * Skip channelMonitor test if no loopback iface available
