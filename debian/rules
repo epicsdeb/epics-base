@@ -164,6 +164,8 @@ override_dh_install:
 	done
 
 	# remove DBD perl scripts from epics-perl, already installed by -dev
+	rm -f debian/epics-perl/usr/lib/epics/lib/perl/DBD.pm
+	rm -f debian/epics-perl/usr/lib/epics/lib/perl/EpicsHostArch.pl
 	rm -rf debian/epics-perl/usr/lib/epics/lib/perl/DBD/
 
 	for arch in $(EPICS_HOST_ARCH); do for name in $(PERLBINS); do \
