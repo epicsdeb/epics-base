@@ -11,7 +11,7 @@ Index: epics-base/configure/CONFIG
 ===================================================================
 --- epics-base.orig/configure/CONFIG
 +++ epics-base/configure/CONFIG
-@@ -117,6 +117,13 @@ ifneq ($(TOP_CFG_CONFIGS),)
+@@ -122,6 +122,13 @@ ifneq ($(TOP_CFG_CONFIGS),)
    include $(TOP_CFG_CONFIGS)
  endif
  
@@ -29,7 +29,7 @@ Index: epics-base/configure/RULES_BUILD
 ===================================================================
 --- epics-base.orig/configure/RULES_BUILD
 +++ epics-base/configure/RULES_BUILD
-@@ -583,6 +583,11 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
+@@ -590,6 +590,11 @@ $(INSTALL_TEMPLATES_SUBDIR)/%: %
  
  include $(CONFIG)/RULES_EXPAND
  

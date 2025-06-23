@@ -2,3 +2,7 @@ debian/man/softIoc.1
 debian/man/softioc.1
 debian/man/softIocPVA.1
 debian/man/softiocpva.1
+debian/man/ascheck.1
+debian/man/iocLogServer.1
+debian/man/msi.1
+

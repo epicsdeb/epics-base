@@ -1,9 +1,5 @@
 epics-dev: unstripped-binary-or-object
 # dh_strip doesn't seem to want to touch usr/lib/epics/lib/*-debug/*.so
-# not sure why?
-epics-dev: hardening-no-fortify-functions usr/lib/epics/bin/linux-x86_64-debug/*
-epics-dev: hardening-no-fortify-functions usr/lib/epics/lib/linux-x86_64-debug/*
-# -debug targets are built with -O0.  Fortify is disabled in this situation
 epics-dev: breakout-link
 # EPICS config files live in /etc/epics/configure. Shared libs live in the 
 # standard /usr/lib, but accessed in most cases from $EPICS_BASE=/usr/lib/epics

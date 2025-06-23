@@ -1,0 +1,39 @@
+.\" Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.\" Please adjust this date whenever revising the manpage.
+.\" 
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.TH "ASCHECK" "1" "June 3, 2025" "" ""
+.SH "NAME"
+ascheck \- check integrity of EPICS access security files
+.SH "SYNOPSIS"
+.B ascheck
+[-S\ "mac=sub,..."] [< filename]
+
+.SH "DESCRIPTION"
+.B ascheck
+displays errors on stdout
+when a file is redirected to it.
+If no errors are detected it prints nothing.
+Only syntax errors, not logic errors, are detected.
+Thus it is still possible to get yourself in trouble.
+The flag -S means a set of macro substitutions may appear.
+This is just like the macro substitutions for dbLoadDatabase.
+
+.SH "OPTIONS"
+.TP
+.B -S
+This option allows macro substitutions to be used in the file.
+It is a single string of the form
+.B "mac1=sub1,mac2=sub2,..."

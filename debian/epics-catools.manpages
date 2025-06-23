@@ -5,3 +5,4 @@ debian/man/caput.1
 debian/man/caRepeater.8
 debian/man/makeBaseApp.1
 debian/man/makeBaseExt.1
+debian/man/casw.1

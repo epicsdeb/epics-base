@@ -292,6 +292,12 @@ void MonitorLocal::dataPut(PVRecordFieldPtr const & pvRecordField)
     {
         cout << "MonitorLocal::dataPut(pvRecordField)" << endl;
     }
+    // If this record field is the master field, and the master field was not
+    // requested, we do not proceed with copy
+    bool isMasterField = pvRecordField->getPVRecord()->getPVStructure()->getFieldOffset()==0;
+    if (isMasterField && !pvCopy->isMasterFieldRequested()) {
+        return;
+    }
     if(state!=active) return;
     {
         Lock xx(mutex);

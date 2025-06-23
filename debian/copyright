@@ -21,7 +21,7 @@ Copyright: 2002, The Regents of the University of California.
            SURA CEBAF 1993.
 License: EPICS
 
-Files: src/libCom/yajl/*
+Files: modules/libcom/src/yajl/*
 Copyright: 2010, Lloyd Hilaiel.
 License: BSDx
 

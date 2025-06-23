@@ -1,0 +1,175 @@
+.\" Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.\" Please adjust this date whenever revising the manpage.
+.\" 
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.TH "MSI" "1" "June 3, 2025" "" ""
+.SH "NAME"
+msi \- EPICS Macro Substitution and Include Tool
+.SH "SYNOPSIS"
+.B msi [\-V] [\-g] [\-o output_file] [\-I dir] [\-M subs] [\-S subfile] [template_file] 
+.SH "DESCRIPTION"
+.B msi
+is a general purpose macro substitution/include tool. It accepts as input an
+ascii template file. It looks for lines containing two reserved command names:
+.RI include
+and
+.RI substitute.
+It also looks for and performs substitutions on macros of the form
+.RI $(var)
+and
+.RI ${var}.
+It uses the macLib routines from EPICS Base to perform the substitutions,
+so it also accepts the default value and value definition syntax that
+macLib implements.
+.sp 1
+msi also allows substitutions to be specified via a separate substitution file.
+This substitution file allows the same format as the substitution files accepted
+by the EPICS IOC’s dbLoadTemplate command.
+.SH "OPTIONS"
+All parameters are optional. The 
+.B \-o, \-I, \-M,
+and
+.B \-S
+switches may be separated from their associated value string by spaces if desired.
+Output will be written to stdout unless the 
+.B \-o option is given.
+Switches have the following meanings:
+.TP
+.B \-V
+Verbose warnings; if this parameter is specified then any undefined macro
+discovered in the template file which does not have an associated default
+value is considered an error. An error message is generated, and when msi
+terminates it will do so with an exit status of 2.
+.TP
+.B \-g
+When this flag is given, all macros defined in a substitution file will
+have global scope and thus their values will persist until a new value is given
+for this macro. This flag is provided for backwards compatibility as this was
+the behavior of previous versions of msi, but it does not follow common scoping
+rules and is discouraged.
+.TP
+.B \-o output_file
+Output will be written to the specifed <file> rather than to the standard output.
+.TP
+.B \-I <dir1:dir2:...>
+This parameter, which may be repeated or contain a colon-separated (or 
+semi-colon separated on Windows) list of directory paths, specifies a search
+path for include commands. For example:
+.sp 1
+.nf
+msi \-I /home/mrk/examples:. \-I.. template
+.fi
+.sp 1
+specifies that all named files should be searched for in the following
+locations, in the order given:
+.sp 1
+.nf
+\/home/mrk/examples
+\&. (the current directory)
+\&.. (the parent of the current directory)
+.fi
+.sp 1
+Note that relative path searching is handled as
+.sp 1
+.nf
+$ cat foo.substitutions
+file rel/path/bar.template {
+  # contents
+}
+$ msi -I . -I /some/path foo.substitutions
+.fi
+.sp 1
+which will try to find 
+.RI bar.template
+at the path 
+.RI ./rel/path/
+followed by
+.RI /some/path/rel/path.
+.TP
+.B \-M <substitutions>
+This parameter specifies macro values for the template instance. Multiple macro
+values can be specified in one substitution parameter, or in multiple 
+\-M parameters. For example:
+.sp 1
+.nf
+msi \-M "a=aval,b=bval" \-Mc=cval template
+.fi
+.sp 1
+specifies that in the template file, each occurrence of:
+.sp 1
+.RS
+.br
+.ti -2
+\[bu]
+.RI $(a)
+or
+.RI ${a}
+is replaced by
+.RI aval
+.ti -2
+\[bu]
+.RI $(b)
+or
+.RI ${b}
+is replaced by
+.RI bval
+.ti -2
+\[bu]
+.RI $(c)
+or
+.RI ${c}
+is replaced by
+.RI cval
+.TP
+.B \-S <substitution_file>
+The substitution file. see
+.br
+.nf
+https://docs.epics-controls.org/projects/base/en/latest/msi.html#substitution-file-format
+.fi
+.br
+for format details.
+.TP
+.B template_file
+The input file. If no file is specified then input is taken from stdin, i.e.
+msi can be used as a filter. See below for a description of commands that
+can be embedded in the template file.
+
+It is not possible to display usage by just typing msi since executing the
+command with no arguments is a valid command. To show usage specify an illegal
+switch, e.g.
+.sp 1
+.nf
+msi \-h
+.fi
+.sp 1
+
+.SH "EXIT STATUS"
+.RS
+.br
+.ti -2
+\[bu]
+.B 0
+Success.
+.br
+.ti -2
+\[bu]
+.B 1
+Can’t open/create file, or other I/O error.
+.br
+.ti -2
+\[bu]
+.B 2
+Undefined macros encountered with the -V option specified.

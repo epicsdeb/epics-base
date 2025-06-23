@@ -13,7 +13,7 @@ Index: epics-base/src/template/base/makeBaseApp.pl
 ===================================================================
 --- epics-base.orig/src/template/base/makeBaseApp.pl
 +++ epics-base/src/template/base/makeBaseApp.pl
-@@ -65,7 +65,7 @@ sub ReplaceFilename { # (filename)
+@@ -69,7 +69,7 @@ sub ReplaceFilename { # (filename)
              } elsif (-r "$base\@Common") {	# Default version exists
                  $base = '' unless ($filearch eq "Common" && -s $file);
              } else {			# No default version
@@ -22,7 +22,7 @@ Index: epics-base/src/template/base/makeBaseApp.pl
              }
              $file = $base;	# Strip the @... part from the target name
          }
-@@ -177,8 +177,7 @@ sub get_commandline_opts { #no args
+@@ -181,8 +181,7 @@ sub get_commandline_opts { #no args
      } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
          $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
      } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
@@ -36,7 +36,7 @@ Index: epics-base/src/template/ext/makeBaseExt.pl
 ===================================================================
 --- epics-base.orig/src/template/ext/makeBaseExt.pl
 +++ epics-base/src/template/ext/makeBaseExt.pl
-@@ -126,8 +126,7 @@ sub get_commandline_opts { #no args
+@@ -130,8 +130,7 @@ sub get_commandline_opts { #no args
      } elsif ($eBASE) { # third choice is env var EPICS_MBE_BASE
          $epics_base = UnixPath($eBASE);
      } elsif ($command =~ m|/bin/|) { # assume script was called with full path to base
