@@ -1,0 +1,80 @@
+Index: epics-base/configure/CONFIG_DATABASE_VERSION
+===================================================================
+--- epics-base.orig/configure/CONFIG_DATABASE_VERSION
++++ epics-base/configure/CONFIG_DATABASE_VERSION
+@@ -1,8 +1,8 @@
+ # Version number for the database APIs and shared library
+ 
+-EPICS_DATABASE_MAJOR_VERSION = 3
+-EPICS_DATABASE_MINOR_VERSION = 24
+-EPICS_DATABASE_MAINTENANCE_VERSION = 0
++EPICS_DATABASE_MAJOR_VERSION = $(EPICS_VERSION)
++EPICS_DATABASE_MINOR_VERSION = $(EPICS_REVISION)
++EPICS_DATABASE_MAINTENANCE_VERSION = $(EPICS_MODIFICATION)
+ 
+ # Development flag, set to zero for release versions
+ 
+Index: epics-base/modules/pvAccess/configure/CONFIG_PVACCESS_VERSION
+===================================================================
+--- epics-base.orig/modules/pvAccess/configure/CONFIG_PVACCESS_VERSION
++++ epics-base/modules/pvAccess/configure/CONFIG_PVACCESS_VERSION
+@@ -1,8 +1,8 @@
+ # Version number for the PV Access API and shared library
+ 
+-EPICS_PVA_MAJOR_VERSION = 7
+-EPICS_PVA_MINOR_VERSION = 1
+-EPICS_PVA_MAINTENANCE_VERSION = 7
++EPICS_PVA_MAJOR_VERSION = $(EPICS_VERSION)
++EPICS_PVA_MINOR_VERSION = $(EPICS_REVISION)
++EPICS_PVA_MAINTENANCE_VERSION = $(EPICS_MODIFICATION)
+ 
+ # Development flag, set to zero for release versions
+ 
+Index: epics-base/configure/CONFIG_CA_VERSION
+===================================================================
+--- epics-base.orig/configure/CONFIG_CA_VERSION
++++ epics-base/configure/CONFIG_CA_VERSION
+@@ -1,8 +1,8 @@
+ # Version number for the Channel Access API and shared library
+ 
+-EPICS_CA_MAJOR_VERSION = 4
+-EPICS_CA_MINOR_VERSION = 14
+-EPICS_CA_MAINTENANCE_VERSION = 5
++EPICS_CA_MAJOR_VERSION = $(EPICS_VERSION)
++EPICS_CA_MINOR_VERSION = $(EPICS_REVISION)
++EPICS_CA_MAINTENANCE_VERSION = $(EPICS_MODIFICATION)
+ 
+ # Development flag, set to zero for release versions
+ 
+Index: epics-base/configure/CONFIG_LIBCOM_VERSION
+===================================================================
+--- epics-base.orig/configure/CONFIG_LIBCOM_VERSION
++++ epics-base/configure/CONFIG_LIBCOM_VERSION
+@@ -1,8 +1,8 @@
+ # Version number for the libcom APIs and shared library
+ 
+-EPICS_LIBCOM_MAJOR_VERSION = 3
+-EPICS_LIBCOM_MINOR_VERSION = 24
+-EPICS_LIBCOM_MAINTENANCE_VERSION = 0
++EPICS_LIBCOM_MAJOR_VERSION = $(EPICS_VERSION)
++EPICS_LIBCOM_MINOR_VERSION = $(EPICS_REVISION)
++EPICS_LIBCOM_MAINTENANCE_VERSION = $(EPICS_MODIFICATION)
+ 
+ # Development flag, set to zero for release versions
+ 
+Index: epics-base/modules/normativeTypes/configure/CONFIG_NTYPES_VERSION
+===================================================================
+--- epics-base.orig/modules/normativeTypes/configure/CONFIG_NTYPES_VERSION
++++ epics-base/modules/normativeTypes/configure/CONFIG_NTYPES_VERSION
+@@ -1,8 +1,8 @@
+ # Version number for the Normative Types API and shared library
+ 
+-EPICS_NTYPES_MAJOR_VERSION = 6
+-EPICS_NTYPES_MINOR_VERSION = 0
+-EPICS_NTYPES_MAINTENANCE_VERSION = 1
++EPICS_NTYPES_MAJOR_VERSION = $(EPICS_VERSION)
++EPICS_NTYPES_MINOR_VERSION = $(EPICS_REVISION)
++EPICS_NTYPES_MAINTENANCE_VERSION = $(EPICS_MODIFICATION)
+ 
+ # Development flag, set to zero for release versions
+ 
