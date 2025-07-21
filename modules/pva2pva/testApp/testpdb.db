@@ -1,0 +1,29 @@
+record(ai, "rec1") {
+  field(VAL, "1.0")
+  field(RVAL, "10")
+  field(HOPR, "100")
+  field(LOPR, "-100")
+}
+record(ai, "rec2") {
+  field(VAL, "2.0")
+  field(RVAL, "20")
+}
+record(ai, "rec3") {
+  field(VAL, "3.0")
+  field(RVAL, "30")
+  field(HOPR, "200")
+  field(LOPR, "-200")
+}
+record(ai, "rec4") {
+  field(VAL, "4.0")
+  field(RVAL, "40")
+}
+
+record(ai, "rec5") {
+  field(VAL, "5.0")
+  field(RVAL, "50")
+}
+record(ai, "rec6") {
+  field(VAL, "6.0")
+  field(RVAL, "60")
+}

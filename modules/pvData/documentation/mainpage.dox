@@ -1,0 +1,58 @@
+#ifndef MAINPAGE_H
+#define MAINPAGE_H
+/**
+@mainpage pvDataCPP documentation
+
+- This module is included in [EPICS Base releases](https://epics-controls.org/resources-and-support/base/) beginning with 7.0.1
+- It may also be [Downloaded](https://github.com/epics-base/pvDataCPP/releases) and built separately.
+- @htmlonly <a href="modules.html">API components</a> @endhtmlonly
+- @ref release_notes
+
+The epics::pvData namespace.
+See pv/pvData.h header.
+
+@code
+#include <pv/pvData.h>
+#include <pv/createRequest.h>
+@endcode
+
+- Type description epics::pvData::Field and sub-classes
+- Value container epics::pvData::PVField and sub-classes
+- POD array handling epics::pvData::shared_vector
+- pvRequest parsing epics::pvData::createRequest()
+
+Define a structure type and create a container with default values.
+
+@code
+namespace pvd = epics::pvData;
+pvd::StructureConstPtr stype(pvd::FieldBuilder::begin()
+                        ->add("fld1", pvd::pvInt)
+                        ->addNestedStructure("sub")
+                            ->add("fld2", pvd::pvString)
+                        ->endNested()
+                        ->createStructure());
+
+pvd::PVStructuretPtr value(stype->build());
+
+value->getSubFieldT<pvd::PVInt>("fld1")->put(4); // store integer 4.  would throw if not pvInt
+value->getSubFieldT<pvd::PVScalar>("sub.fld2")->putFrom(4.2); // convert and store string "4.2"
+@endcode
+
+is equivalent to the following pseudo-code.
+
+@code
+struct stype {
+    pvd::int32 fld1;
+    struct {
+        std::string fld2;
+    } sub;
+};
+stype value;
+value.fld1 = 4;
+value.fld2 = pvd::castUnsafe<std::string>(4.2);
+@endcode
+
+*/
+
+#endif /* MAINPAGE_H */
+

@@ -1,0 +1,18 @@
+msc {
+  CLI, GWS, GWC, SRV;
+
+  CLI -> GWS [label="Search X"];
+  GWS box GWS [label="Cache Miss"];
+  GWS -> GWC [label="Conn. Channel"];
+  GWC -> SRV [label="Open X"];
+  ...;
+  CLI -> GWS [label="Search X"];
+  GWS box GWS [label="Cache Not Conn"];
+  ...;
+  GWC <- SRV [label="Conn X"];
+  GWS <- GWC [label="Cache update"];
+  ...;
+  CLI -> GWS [label="Search X"];
+  GWS box GWS [label="Cache Hit"];
+  CLI <- GWS [label="Have X"];
+}

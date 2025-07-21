@@ -3,3 +3,10 @@
 # Site specific definitions for linux-x86 host - linux-x86 target builds
 #-------------------------------------------------------
 
+# Uncomment the followings lines to build with CLANG instead of GCC.
+#
+#GNU         = NO
+#CMPLR_CLASS = clang
+#CC          = clang
+#CCC         = clang++
+

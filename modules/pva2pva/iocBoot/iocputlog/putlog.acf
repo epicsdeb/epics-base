@@ -1,0 +1,15 @@
+HAG(MYSELF) {
+    "$(USER)"
+}
+
+ASG(DEFAULT) {
+    RULE(1,WRITE,TRAPWRITE)
+}
+ASG(SPECIAL) {
+    RULE(1,WRITE,TRAPWRITE) {
+        HAG(MYSELF)
+    }
+}
+ASG(RO) {
+    RULE(1, READ)
+}

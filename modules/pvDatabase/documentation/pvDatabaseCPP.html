@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS pvDatabaseCPP</title>
+  <link rel="stylesheet" type="text/css"
+  href="https://mrkraimer.github.io/website/css/base.css" />
+  <link rel="stylesheet" type="text/css"
+  href="https://mrkraimer.github.io/website/css/epicsv4.css" />
+  <style type="text/css">
+/*<![CDATA[*/
+     .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
+     table { margin-left: auto; margin-right: auto }
+     .diagram { text-align: center; margin: 2.5em 0 }
+     body { margin-right: 10% }
+/*]]>*/</style>
+
+ <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript" src="https://mrkraimer.github.io/website/css/tocgen.js"></script>
+
+</head>
+
+<body>
+
+<div class="head">
+<h1>EPICS pvDatabaseCPP</h1>
+<h2 class="nocount">Release 4.6.0 - March 2021</h2>
+
+<h2 class="nocount">Abstract</h2>
+
+<p><b>pvDatabase</b> is a framework for implementing a network accessible database of smart memory resident
+records. Network access is via pvAccess. The data in each record is a top level PVStructure as defined by
+pvData. The framework includes a complete implementation of ChannelProvider as defined by pvAccess.
+The framework can be extended in order to create record instances that implements services.
+The minimum that an extension must provide is a top level PVStructure and a process method.
+</p>
+
+  <!-- last para of Abstract is boilerplate reference to EPICS -->
+      <p>For more information about EPICS generally, please refer to the home page of the <a
+       href="http://www.aps.anl.gov/epics/">Experimental Physics and Industrial
+      Control System</a>.</p>
+
+
+</div> <!-- head -->
+
+<div id="contents" class="contents">
+<hr />
+<h2>Overview</h2>
+<p>
+Documentation for pvDatabaseCPP is available at:
+<a
+href="https://mrkraimer.github.io/website/developerGuide/pvDatabase/pvDatabaseCPP.html">
+pvDatabase
+</a>
+</p>
+<p>
+pvDatabaseCPP is one of the components of
+<a href="https://epics-controls.org/resources-and-support/base/epics-7/">
+EPICS-7
+</a>
+</p>
+<p>This document is only a guide to help locate code and documentation related to pvDatabaseCPP
+</p>
+<p>
+It is intended for developers that want to use pvDatabaseCPP.
+</p>
+<h2>Developer Guide</h2>
+<p>A guide for developers is available at
+<a
+href="https://mrkraimer.github.io/website/developerGuide/developerGuide.html">
+developerGuide
+</a>
+</p>
+<p>This guide provides an overview of  the components that are part of an <b>EPICS V4</b> release.
+Some understanding of the components and how they are related is necessary in order to
+develop code that uses pvDatabaseCPP.
+In particular read everything related to pvaClient.
+</p>
+
+<h2>doxygen</h2>
+<p>doxygen documentation is available at
+<a
+href="./html/index.html">doxygen</a>
+</p>
+
+<h2>exampleCPP</h2>
+<p>Example code is available at
+<a
+href="https://github.com/epics-base/exampleCPP">
+exampleCPP
+</a>
+</p>
+<p>In particular look at database, exampleLink, and helloPutGet.
+</p>
+
+</div> <!-- class="contents" -->
+</body>
+</html>

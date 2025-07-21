@@ -8,9 +8,10 @@
 CP = cp
 MV = mv
 RM = rm -f
-MKDIR = mkdir
+MKDIR = mkdir -p
 RMDIR = rm -rf
 CAT = cat
+TOUCH = touch
 
 # Allow site overrides
 -include $(CONFIG)/os/CONFIG_SITE.UnixCommon.Common

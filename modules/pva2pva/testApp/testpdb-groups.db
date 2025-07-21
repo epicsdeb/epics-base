@@ -1,0 +1,34 @@
+record("*", "rec3") {
+  info(Q:group, {
+    "grp1":{
+        "fld1":{+channel:"VAL", +putorder:0},
+        "fld2":{+channel:"RVAL"}
+    }
+  })
+}
+record("*", "rec4") {
+  info(Q:group, {
+    "grp1":{
+        "fld3":{+channel:"VAL", +putorder:0},
+        "fld4":{+channel:"RVAL"}
+    }
+  })
+}
+
+record("*", "rec5") {
+  info(Q:group, {
+    "grp2":{
+        "fld1":{+channel:"VAL"},
+        "fld3":{+channel:"RVAL"}
+    }
+  })
+}
+record("*", "rec6") {
+  info(Q:group, {
+    "grp2":{
+        "fld2":{+channel:"VAL", +trigger:"fld1,fld2"}
+    }
+  })
+  info(pdbGroup, "grp2|fld2=VAL")
+  info(pdbTrigger, "grp2|fld2>fld1,fld2")
+}

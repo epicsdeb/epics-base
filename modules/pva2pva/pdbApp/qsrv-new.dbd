@@ -1,0 +1,19 @@
+# Changes to this file may require incrementing
+# the ABI version in CONFIG_QSRV_VERSION
+
+registrar(QSRVRegistrar)
+registrar(installPVAAddLinkHook)
+link("pva", "lsetPVA")
+
+# from demo.cpp
+device(waveform, CONSTANT, devWfPDBDemo, "QSRV Demo")
+device(waveform, CONSTANT, devWfPDBDemoRepeat, "QSRV Demo Replicate")
+device(longin, CONSTANT, devLoPDBUTag, "QSRV Set UTag")
+# from imagedemo.c
+function(QSRV_image_demo)
+# from pdb.cpp
+# Extra debug info when parsing group definitions
+variable(PDBProviderDebug, int)
+# Number of worker threads for handling monitor updates.
+# Default: 1
+variable(pvaLinkNWorkers, int)

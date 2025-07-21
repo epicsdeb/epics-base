@@ -2,6 +2,7 @@
 #*************************************************************************
 # Copyright (c) 2018 UChicago Argonne LLC, as Operator of Argonne
 #     National Laboratory.
+# SPDX-License-Identifier: EPICS
 # EPICS BASE is distributed subject to a Software License Agreement found
 # in file LICENSE that is included with this distribution.
 #*************************************************************************
@@ -34,22 +35,32 @@ sub HostArch {
         return 'linux-x86_64'   if m/^x86_64-linux/;
         return 'linux-x86'      if m/^i[3-6]86-linux/;
         return 'linux-arm'      if m/^arm-linux/;
+        return 'linux-aarch64'  if m/^aarch64-linux/;
+        return 'linux-ppc64'    if m/^powerpc64-linux/;
         return 'windows-x64'    if m/^MSWin32-x64/;
         return 'win32-x86'      if m/^MSWin32-x86/;
         return "cygwin-x86_64"  if m/^x86_64-cygwin/;
         return "cygwin-x86"     if m/^i[3-6]86-cygwin/;
         return 'solaris-sparc'  if m/^sun4-solaris/;
         return 'solaris-x86'    if m/^i86pc-solaris/;
+        return 'freebsd-x86_64' if m/^x86_64-freebsd/;
+        return 'freebsd-x86_64' if m/^amd64-freebsd/;
 
         my ($kernel, $hostname, $release, $version, $cpu) = uname;
         if (m/^darwin/) {
             for ($cpu) {
-                return 'darwin-x86' if m/^(i386|x86_64)/;
-                return 'darwin-ppc' if m/Power Macintosh/;
+                return 'darwin-x86'     if m/^x86_64/;
+                return 'darwin-aarch64' if m/^arm64/;
             }
             die "$0: macOS CPU type '$cpu' not recognized\n";
         }
-
+        # mingw64 has 32bit and 64bit build shells which give same arch result
+        if (m/^(x86_64|i686)-msys/) {
+            die "$0: Architecture '$arch' is unclear,\n".
+                "try again after explicitly setting the EPICS_HOST_ARCH environment variable.\n".
+                "Use  EPICS_HOST_ARCH=windows-x64-mingw  for a 64bit MinGW build, or\n".
+                "EPICS_HOST_ARCH=win32-x86-mingw  for a 32bit MinGW build.\n"
+        }
         die "$0: Architecture '$arch' not recognized\n";
     }
 }

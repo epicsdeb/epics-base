@@ -30,6 +30,7 @@ ARCH_DEP_LDFLAGS += $(ARCH_DEP_FLAGS)
 #
 # Special flags for Darwin
 #   No common blocks (as required when using shared libraries)
+#   OS provides socket address length
 #
 OP_SYS_CFLAGS += -fno-common
 
@@ -37,12 +38,6 @@ OP_SYS_CFLAGS += -fno-common
 # Darwin os definition
 #
 OP_SYS_CPPFLAGS += -Ddarwin
-
-#
-# Always compile in debugging symbol table information
-#
-OPT_CFLAGS_YES += -g
-OPT_CXXFLAGS_YES += -g
 
 #
 # Libraries for command-line editing.
@@ -65,8 +60,8 @@ GNU = NO
 #
 # Darwin shared libraries
 #
-SHRLIB_LDFLAGS = -dynamiclib -undefined dynamic_lookup \
-    -install_name $(shell $(FULLPATHNAME) $(INSTALL_LIB))/$@ \
+SHRLIB_LDFLAGS = -dynamiclib -flat_namespace \
+    -install_name $(abspath $(INSTALL_LIB))/$@ \
     $(addprefix -compatibility_version , $(SHRLIB_VERSION)) \
     $(addprefix -current_version , $(SHRLIB_VERSION))
 SHRLIB_SUFFIX_BASE = .dylib

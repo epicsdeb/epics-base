@@ -1,0 +1,26 @@
+
+record(ao, "$(P)A") {
+    info(Q:group, {
+        "$(P)G": {
+            "A": {+channel:"VAL", +putorder:3}
+        }
+    })
+}
+
+record(ao, "$(P)B") {
+    field(ASG , "SPECIAL")
+    info(Q:group, {
+        "$(P)G": {
+            "B": {+channel:"VAL", +putorder:2}
+        }
+    })
+}
+
+record(ao, "$(P)C") {
+    field(ASG , "RO")
+    info(Q:group, {
+        "$(P)G": {
+            "C": {+channel:"VAL", +putorder:1}
+        }
+    })
+}
