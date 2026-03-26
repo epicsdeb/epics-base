@@ -83,7 +83,7 @@ typedef enum {
     initHookAfterInitDatabase,      /**< Records and locksets init  (also autosave pass 1) */
     initHookAfterFinishDevSup,      /**< Device support init pass 1 */
     initHookAfterScanInit,          /**< Scan, AS, ProcessNotify init */
-    initHookAfterInitialProcess,    /**< Records with PINI = YES processsed */
+    initHookAfterInitialProcess,    /**< Records with PINI = YES processed */
     initHookAfterCaServerInit,      /**< RSRV init */
     initHookAfterIocBuilt,          /**< End of iocBuild() */
 
@@ -154,7 +154,7 @@ typedef enum {
 
 /** \brief Type for application callback functions
  *
- * Application callback functions must match this typdef.
+ * Application callback functions must match this typedef.
  * \param state initHook enumeration value
  */
 typedef void (*initHookFunction)(initHookState state);
@@ -163,7 +163,11 @@ typedef void (*initHookFunction)(initHookState state);
  *
  * Registers \p func for initHook notifications
  * \param func Pointer to application's notification function.
- * \return 0 if Ok, -1 on error (memory allocation failure).
+ * \return Always zero.  (before 7.0.10 could return -1 on allocation failure)
+ *
+ * \since 7.0.10 initHookRegister is idempotent.
+ *        Previously, repeated registrations would result
+ *        in duplicate calls to the hook function.
  */
 LIBCOM_API int initHookRegister(initHookFunction func);
 

@@ -207,5 +207,3 @@ MAIN(testNTMatrix) {
     test_wrap();
     return testDone();
 }
-
-

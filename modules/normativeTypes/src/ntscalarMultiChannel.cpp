@@ -13,7 +13,7 @@
 using namespace std;
 using namespace epics::pvData;
 
-namespace epics { namespace nt { 
+namespace epics { namespace nt {
 
 
 static FieldCreatePtr fieldCreate = getFieldCreate();
@@ -263,7 +263,7 @@ bool NTScalarMultiChannel::isValid()
     if (getChannelName()->getLength() != valueLength) return false;
 
     PVScalarArrayPtr arrayFields[] = {
-          getSeverity(), getStatus(), getMessage(), 
+          getSeverity(), getStatus(), getMessage(),
           getSecondsPastEpoch(), getNanoseconds(), getUserTag()
     };
     size_t N = sizeof(arrayFields)/sizeof(arrayFields[0]);
@@ -275,7 +275,7 @@ bool NTScalarMultiChannel::isValid()
         if (arrayField.get() && arrayField->getLength() != valueLength)
             return false;
     }
-    return true; 
+    return true;
 }
 
 NTScalarMultiChannelBuilderPtr NTScalarMultiChannel::createBuilder()

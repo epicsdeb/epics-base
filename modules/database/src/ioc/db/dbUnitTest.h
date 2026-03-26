@@ -139,21 +139,45 @@ DBCORE_API dbCommon* testdbRecordPtr(const char* pv);
 
 typedef struct testMonitor testMonitor;
 
-/** Setup monitoring the named PV for changes */
+/** Setup monitoring the named PV for changes
+ *
+ * @param[in] pvname Requested PV name.  Must be valid for dbChannelCreate().
+ * @param[in] dbe_mask A bitwise or of DBE_VALUE and friends.
+ * @param[in] opt Currently unused.  Set to zero.
+ * @returns Newly allocated testMonitor object, which caller must testMonitorDestroy()
+ *
+ * Calls testAbort() on failure.  Will never return NULL.
+ *
+ * @since 3.16.0.1
+ */
 DBCORE_API testMonitor* testMonitorCreate(const char* pvname, unsigned dbe_mask, unsigned opt);
-/** Stop monitoring */
+/** Stop monitoring
+ *
+ * @since 3.16.0.1
+ */
 DBCORE_API void testMonitorDestroy(testMonitor*);
 /** Return immediately if it has been updated since create, last wait,
  * or reset (count w/ reset=1).
  * Otherwise, block until the value of the target PV is updated.
+ *
+ * @since 3.16.0.1
  */
 DBCORE_API void testMonitorWait(testMonitor*);
-/** Return the number of monitor events which have occured since create,
+/** Synchronize with dbEvent working for subscription.
+ *
+ * On return, any updates previously posted for this subscriptions have been delivered.
+ *
+ * @since 7.0.10
+ */
+DBCORE_API void testMonitorSync(testMonitor*);
+/** Return the number of monitor events which have occurred since create,
  * or a previous reset (called reset=1).
  * Calling w/ reset=0 only returns the count.
  * Calling w/ reset=1 resets the count to zero and ensures that the next
  * wait will block unless subsequent events occur.  Returns the previous
  * count.
+ *
+ * @since 3.16.0.1
  */
 DBCORE_API unsigned testMonitorCount(testMonitor*, unsigned reset);
 

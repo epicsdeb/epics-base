@@ -239,4 +239,3 @@ PVStructureArrayPtr PVNTField::createAlarmArray()
 }
 
 }}
-

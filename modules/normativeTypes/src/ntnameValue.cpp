@@ -140,7 +140,7 @@ bool NTNameValue::isCompatible(StructureConstPtr const & structure)
         return false;
 
     Result result(structure);
-    
+
     return result
         .is<Structure>()
         .has<ScalarArray>("name")

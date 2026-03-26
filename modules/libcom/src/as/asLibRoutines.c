@@ -66,6 +66,7 @@ static long asAsgAddRuleOptions(ASGRULE *pasgrule,int trapMask);
 static long asAsgRuleUagAdd(ASGRULE *pasgrule,const char *name);
 static long asAsgRuleHagAdd(ASGRULE *pasgrule,const char *name);
 static long asAsgRuleCalc(ASGRULE *pasgrule,const char *calc);
+static long asAsgRuleDisable(ASGRULE *pasgrule);
 
 /*
   asInitialize can be called while access security is already active.
@@ -585,8 +586,8 @@ int epicsStdCall asDumpFP(
             pasginp = (ASGINP *)ellNext(&pasginp->node);
         }
         while(pasgrule) {
-            int print_end_brace;
-
+            int print_rule_end_brace = FALSE;
+            if (pasgrule->ignore) goto next_rule;
             fprintf(fp,"\tRULE(%d,%s,%s)",
                 pasgrule->level,asAccessName[pasgrule->access],
                 asTrapOption[pasgrule->trapMask]);
@@ -594,10 +595,10 @@ int epicsStdCall asDumpFP(
             pasghag = (ASGHAG *)ellFirst(&pasgrule->hagList);
             if(pasguag || pasghag || pasgrule->calc) {
                 fprintf(fp," {\n");
-                print_end_brace = TRUE;
+                print_rule_end_brace = TRUE;
             } else {
                 fprintf(fp,"\n");
-                print_end_brace = FALSE;
+                print_rule_end_brace = FALSE;
             }
             if(pasguag) fprintf(fp,"\t\tUAG(");
             while(pasguag) {
@@ -605,7 +606,6 @@ int epicsStdCall asDumpFP(
                 pasguag = (ASGUAG *)ellNext(&pasguag->node);
                 if(pasguag) fprintf(fp,","); else fprintf(fp,")\n");
             }
-            pasghag = (ASGHAG *)ellFirst(&pasgrule->hagList);
             if(pasghag) fprintf(fp,"\t\tHAG(");
             while(pasghag) {
                 fprintf(fp,"%s",pasghag->phag->name);
@@ -618,7 +618,8 @@ int epicsStdCall asDumpFP(
                     fprintf(fp," result=%s",(pasgrule->result==1 ? "TRUE" : "FALSE"));
                 fprintf(fp,"\n");
             }
-            if(print_end_brace) fprintf(fp,"\t}\n");
+next_rule:
+            if(print_rule_end_brace) fprintf(fp,"\t}\n");
             pasgrule = (ASGRULE *)ellNext(&pasgrule->node);
         }
         pasgmember = (ASGMEMBER *)ellFirst(&pasg->memberList);
@@ -735,7 +736,7 @@ int epicsStdCall asDumpRulesFP(FILE *fp,const char *asgname)
     pasg = (ASG *)ellFirst(&pasbase->asgList);
     if(!pasg) fprintf(fp,"No ASGs\n");
     while(pasg) {
-        int print_end_brace;
+        int print_end_brace = FALSE;
 
         if(asgname && strcmp(asgname,pasg->name)!=0) {
             pasg = (ASG *)ellNext(&pasg->node);
@@ -761,8 +762,8 @@ int epicsStdCall asDumpRulesFP(FILE *fp,const char *asgname)
             pasginp = (ASGINP *)ellNext(&pasginp->node);
         }
         while(pasgrule) {
-            int print_end_brace;
-
+            int print_rule_end_brace = FALSE;
+            if ( pasgrule->ignore) goto next_rule;
             fprintf(fp,"\tRULE(%d,%s,%s)",
                 pasgrule->level,asAccessName[pasgrule->access],
                 asTrapOption[pasgrule->trapMask]);
@@ -770,10 +771,10 @@ int epicsStdCall asDumpRulesFP(FILE *fp,const char *asgname)
             pasghag = (ASGHAG *)ellFirst(&pasgrule->hagList);
             if(pasguag || pasghag || pasgrule->calc) {
                 fprintf(fp," {\n");
-                print_end_brace = TRUE;
+                print_rule_end_brace = TRUE;
             } else {
                 fprintf(fp,"\n");
-                print_end_brace = FALSE;
+                print_rule_end_brace = FALSE;
             }
             if(pasguag) fprintf(fp,"\t\tUAG(");
             while(pasguag) {
@@ -793,7 +794,8 @@ int epicsStdCall asDumpRulesFP(FILE *fp,const char *asgname)
                 fprintf(fp," result=%s",(pasgrule->result==1 ? "TRUE" : "FALSE"));
                 fprintf(fp,"\n");
             }
-            if(print_end_brace) fprintf(fp,"\t}\n");
+next_rule:
+            if(print_rule_end_brace) fprintf(fp,"\t}\n");
             pasgrule = (ASGRULE *)ellNext(&pasgrule->node);
         }
         if(print_end_brace) fprintf(fp,"}\n");
@@ -948,6 +950,7 @@ static long asComputeAsgPvt(ASG *pasg)
     if(!asActive) return(S_asLib_asNotActive);
     pasgrule = (ASGRULE *)ellFirst(&pasg->ruleList);
     while(pasgrule) {
+        if ( pasgrule->ignore) goto next_rule;
         double  result = pasgrule->result;  /* set for VAL */
         long    status;
 
@@ -960,6 +963,8 @@ static long asComputeAsgPvt(ASG *pasg)
                 pasgrule->result = ((result>.99) && (result<1.01)) ? 1 : 0;
             }
         }
+
+next_rule:
         pasgrule = (ASGRULE *)ellNext(&pasgrule->node);
     }
     pasg->inpChanged = FALSE;
@@ -995,6 +1000,7 @@ static long asComputePvt(ASCLIENTPVT asClientPvt)
     oldaccess=pasgclient->access;
     pasgrule = (ASGRULE *)ellFirst(&pasg->ruleList);
     while(pasgrule) {
+        if (pasgrule->ignore) goto next_rule;
         if(access == asWRITE) break;
         if(access>=pasgrule->access) goto next_rule;
         if(pasgclient->level > pasgrule->level) goto next_rule;
@@ -1058,6 +1064,9 @@ void asFreeAll(ASBASE *pasbase)
     ASGHAG      *pasghag;
     ASGUAG      *pasguag;
     void        *pnext;
+
+    if(!pasbase)
+        return;
 
     puag = (UAG *)ellFirst(&pasbase->uagList);
     while(puag) {
@@ -1407,4 +1416,15 @@ static long asAsgRuleCalc(ASGRULE *pasgrule,const char *calc)
                      calc);
     }
     return(status);
+}
+
+/**
+ * @brief Disable a rule if it contains unsupported elements
+ * @param pasgrule the rule to disable
+ * @return Non-zero if rule was not disabled
+ */
+static long asAsgRuleDisable(ASGRULE *pasgrule) {
+    if (!pasgrule) return 1;
+    pasgrule->ignore = 1;
+    return 0;
 }

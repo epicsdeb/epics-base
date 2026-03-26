@@ -254,5 +254,3 @@ MAIN(testNTNameValue) {
     test_extra();
     return testDone();
 }
-
-

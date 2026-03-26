@@ -183,7 +183,7 @@ static void get_enum_strs(DBADDR *paddr, char **ppbuffer,
         }
 
         if(nchoices > NELEMENTS(penum->strs))
-            nchoices = NELEMENTS(penum->strs); /* availible > capacity, truncated list */
+            nchoices = NELEMENTS(penum->strs); /* available > capacity, truncated list */
 
         penum->no_str = nchoices;
 
@@ -805,7 +805,7 @@ int dbLoadRecords(const char* file, const char* subs)
         if(dbLoadRecordsHook)
             dbLoadRecordsHook(file, subs);
     } else {
-        fprintf(stderr, ERL_ERROR " failed to load '%s'\n", file);
+        fprintf(stderr, ERL_ERROR ": Failed to load '%s'\n", file);
         if(status==-2)
             fprintf(stderr, "    Records cannot be loaded after iocInit!\n");
     }
@@ -1095,7 +1095,7 @@ static long dbPutFieldLink(DBADDR *paddr,
         return S_db_badDbrtype;
     }
 
-    status = dbParseLink(pstring, pfldDes->field_type, &link_info);
+    status = dbParseLink(pstring, pfldDes->field_type, &link_info, precord->name, pfldDes->name);
     if (status)
         return status;
 
@@ -1130,7 +1130,7 @@ static long dbPutFieldLink(DBADDR *paddr,
     }
 
     if (dbCanSetLink(plink, &link_info, new_devsup)) {
-        /* link type mis-match prevents assignment */
+        /* link type mismatch prevents assignment */
         status = S_dbLib_badField;
         goto unlock;
     }

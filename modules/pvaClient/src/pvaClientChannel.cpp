@@ -179,6 +179,7 @@ void PvaClientChannel::channelCreated(const Status& status, Channel::shared_poin
     }
     if(!status.isOK()) {
         string message("PvaClientChannel::channelCreated");
+        message += " channel " + channelName
             + " status " +  status.getMessage() + " why??";
         throw std::runtime_error(message);
     }

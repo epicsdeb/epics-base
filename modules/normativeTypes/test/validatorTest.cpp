@@ -90,7 +90,7 @@ void test_is_id()
         testOk(!result.valid(), "!Result(Union['TEST_ID']).is<Structure>('TEST_ID').valid()");
         testOk1(result.errors.at(0) == Result::Error("", Result::Error::IncorrectType));
     }
-    
+
     {
         // Type matches, ID doesn't
         Result result(FB->setId("WRONG_ID")->createStructure());
@@ -140,7 +140,7 @@ void test_has()
         result
            .has<Scalar>("A")
            .has<ScalarArray>("B");
-        testOk(!result.valid(), 
+        testOk(!result.valid(),
             "!Result(%s).has<Scalar>('A').has<ScalarArray>('B').valid()",
             strucRepr.c_str());
         testOk1(result.errors.at(0) == Result::Error("B", Result::Error::IncorrectType));
@@ -152,7 +152,7 @@ void test_has()
         result
            .has<Scalar>("A")
            .has<Scalar>("C");
-        testOk(!result.valid(), 
+        testOk(!result.valid(),
             "!Result(%s).has<Scalar>('A').has<Scalar>('C').valid()",
             strucRepr.c_str());
         testOk1(result.errors.at(0) == Result::Error("C", Result::Error::MissingField));
@@ -199,7 +199,7 @@ void test_maybe_has()
         result
            .maybeHas<Scalar>("A")
            .maybeHas<ScalarArray>("B");
-        testOk(!result.valid(), 
+        testOk(!result.valid(),
             "!Result(%s).maybeHas<Scalar>('A').maybeHas<ScalarArray>('B').valid()",
             strucRepr.c_str());
         testOk1(result.errors.at(0) == Result::Error("B", Result::Error::IncorrectType));
@@ -211,7 +211,7 @@ void test_maybe_has()
         result
            .maybeHas<Scalar>("A")
            .maybeHas<Scalar>("C");
-        testOk(result.valid(), 
+        testOk(result.valid(),
             "Result(%s).maybeHas<Scalar>('A').maybeHas<Scalar>('C').valid()",
             strucRepr.c_str());
     }

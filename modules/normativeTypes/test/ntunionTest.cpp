@@ -196,5 +196,3 @@ MAIN(testNTUnion) {
     test_regular_union();
     return testDone();
 }
-
-

@@ -21,8 +21,8 @@ void test_builder(bool extraFields)
     testOk(builder.get() != 0, "Got builder");
 
     builder->addDescriptor()->
-             addTimeStamp()->          
-             addAlarm()->  
+             addTimeStamp()->
+             addAlarm()->
              addDisplay();
 
     if (extraFields)
@@ -68,9 +68,9 @@ void test_all()
 
     PVStructurePtr pvStructure = builder->
             addDescriptor()->
-            addTimeStamp()->          
-            addAlarm()->  
-            addDisplay()->  
+            addTimeStamp()->
+            addAlarm()->
+            addDisplay()->
             add("extra1",fieldCreate->createScalar(pvString)) ->
             add("extra2",fieldCreate->createScalarArray(pvString)) ->
             createPVStructure();
@@ -120,5 +120,3 @@ MAIN(testNTNDArray) {
     test_wrap();
     return testDone();
 }
-
-

@@ -33,5 +33,3 @@ MAIN(testNTUtils) {
     test_is_a();
     return testDone();
 }
-
-

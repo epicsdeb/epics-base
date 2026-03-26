@@ -259,5 +259,3 @@ MAIN(testNTHistogram) {
     test_extra();
     return testDone();
 }
-
-
