@@ -443,6 +443,17 @@ static long processTarget(dbCommon *psrc, dbCommon *pdst)
     epicsUInt8 pact = psrc->pact;
     epicsThreadId self = epicsThreadGetIdSelf();
 
+#ifdef LOCKSET_DEBUG
+    {
+        lockSet *ls = dbLockGetRef(psrc->lset);
+        assert(ls->owner == self);
+        dbLockDecRef(ls);
+        ls = dbLockGetRef(pdst->lset);
+        assert(ls->owner == self);
+        dbLockDecRef(ls);
+    }
+#endif
+
     psrc->pact = TRUE;
 
     if (psrc->ppn)

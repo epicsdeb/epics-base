@@ -9,10 +9,10 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
-#include <stdlib.h>
-
+#include <stdint.h>
 #include "iocsh.h"
 #include "asLib.h"
+#include "epicsStdlib.h"
 #include "epicsStdioRedirect.h"
 #include "epicsString.h"
 #include "epicsTime.h"
@@ -27,6 +27,7 @@
 #include "epicsGeneralTime.h"
 #include "freeList.h"
 #include "libComRegister.h"
+#include "afterIocRunning.h"
 
 /* Register the PWD environment variable when the cd IOC shell function is
  * registered. This variable contains the current directory path.
@@ -214,7 +215,7 @@ static void registryDumpCallFunc(const iocshArgBuf *args)
 static const iocshFuncDef iocLogInitFuncDef = {"iocLogInit",0,0,
                                                "Initialize IOC logging\n"
                                                "  * EPICS environment variable 'EPICS_IOC_LOG_INET' has to be defined\n"
-                                               "  * Logging controled via 'iocLogDisable' variable\n"
+                                               "  * Logging controlled via 'iocLogDisable' variable\n"
                                                "       see 'setIocLogDisable' command\n"};
 static void iocLogInitCallFunc(const iocshArgBuf *args)
 {
@@ -337,7 +338,6 @@ static void threadCallFunc(const iocshArgBuf *args)
     int level = 0;
     const char *cp;
     epicsThreadId tid;
-    unsigned long ltmp;
     int argc = args[0].aval.ac;
     char **argv = args[0].aval.av;
     char *endp;
@@ -352,7 +352,7 @@ static void threadCallFunc(const iocshArgBuf *args)
     }
     for ( ; i < argc ; i++) {
         cp = argv[i];
-        ltmp = strtoul (cp, &endp, 0);
+        tid = (epicsThreadId) (uintptr_t) strtoull(cp, &endp, 0);
         if (*endp) {
             tid = epicsThreadGetId (cp);
             if (!tid) {
@@ -360,9 +360,6 @@ static void threadCallFunc(const iocshArgBuf *args)
                 iocshSetError(-1);
                 continue;
             }
-        }
-        else {
-            tid = (epicsThreadId)ltmp;
         }
         if (first) {
             epicsThreadShow (0, level);
@@ -420,7 +417,6 @@ static void epicsThreadResumeCallFunc(const iocshArgBuf *args)
     int i;
     const char *cp;
     epicsThreadId tid;
-    unsigned long ltmp;
     char nameBuf[64];
     int argc = args[0].aval.ac;
     char **argv = args[0].aval.av;
@@ -428,7 +424,7 @@ static void epicsThreadResumeCallFunc(const iocshArgBuf *args)
 
     for (i = 1 ; i < argc ; i++) {
         cp = argv[i];
-        ltmp = strtoul(cp, &endp, 0);
+        tid = (epicsThreadId) (uintptr_t) strtoull(cp, &endp, 0);
         if (*endp) {
             tid = epicsThreadGetId(cp);
             if (!tid) {
@@ -438,7 +434,6 @@ static void epicsThreadResumeCallFunc(const iocshArgBuf *args)
             }
         }
         else {
-            tid =(epicsThreadId)ltmp;
             epicsThreadGetName(tid, nameBuf, sizeof nameBuf);
             if (nameBuf[0] == '\0') {
                 fprintf(stderr, "'%s' is not a valid thread id\n", cp);
@@ -517,6 +512,8 @@ void epicsStdCall libComRegister(void)
 
     iocshRegister(&generalTimeReportFuncDef,generalTimeReportCallFunc);
     iocshRegister(&installLastResortEventProviderFuncDef, installLastResortEventProviderCallFunc);
+
+    afterIocRunningRegister();
 
     comDefs[0].pval = &asCheckClientIP;
     comDefs[1].pval = &freeListBypass;

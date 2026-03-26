@@ -60,6 +60,8 @@ private:
     epicsTime timeToRun;
     double period;
     bool onList;
+    bool cancelled;
+    bool processing;
     friend class Timer;
     struct IncreasingTime;
 };

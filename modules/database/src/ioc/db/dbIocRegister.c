@@ -199,7 +199,7 @@ static const iocshFuncDef dblFuncDef = {"dbl",2,dblArgs,
                                         "Database list.\n"
                                         "List record/field names.\n"
                                         "With no arguments, lists all record names.\n"
-                                        "If record type is given, then only the names of records maching the type are printed\n"
+                                        "If record type is given, then only the names of records matching the type are printed\n"
                                         "If a field list is given, then their values are also printed\n\n"
                                         "Example: dbl(\"\")\n"
                                         "         dbl(\"ai\")\n"
@@ -233,16 +233,23 @@ static const iocshFuncDef dblaFuncDef = {"dbla",1,dblaArgs,
                                          "Example: dbla(\"alia*\")\n"};
 static void dblaCallFunc(const iocshArgBuf *args) { iocshSetError(dbla(args[0].sval));}
 
-/* dbgrep */
-static const iocshArg dbgrepArg0 = { "pattern",iocshArgStringRecord};
-static const iocshArg * const dbgrepArgs[1] = {&dbgrepArg0};
-static const iocshFuncDef dbgrepFuncDef = {"dbgrep",1,dbgrepArgs,
-                                           "List record names matching pattern.\n"
+/* dbglob */
+static const iocshArg dbglobArg0 = { "pattern",iocshArgStringRecord};
+static const iocshArg dbglobArg1 = { "fields",iocshArgString};
+static const iocshArg * const dbglobArgs[2] = {&dbglobArg0,&dbglobArg1};
+static const iocshFuncDef dbglobFuncDef = {"dbglob",2,dbglobArgs,
+                                           "List record names matching pattern and optionally print field values. \n"
                                            "The pattern can contain any characters that are legal in record names as well as:\n"
                                            " - \"?\", which matches 0 or one characters.\n"
                                            " - \"*\", which matches 0 or more characters.\n\n"
-                                           "Example: dbgrep(\"*gpibAi*\")\n"};
-static void dbgrepCallFunc(const iocshArgBuf *args) { iocshSetError(dbgrep(args[0].sval));}
+                                           "Example: dbglob(\"*gpibAi*\")\n"
+                                           "         dbglob(\"*gpibAi*\",\"VAL DESC\")\n"};
+static void dbglobCallFunc(const iocshArgBuf *args) { iocshSetError(dbglob(args[0].sval,args[1].sval));}
+
+/* dbgrep; alias for dbglob, so it should have the same arguments */
+static const iocshFuncDef dbgrepFuncDef = {"dbgrep",2,dbglobArgs,
+                                           "See dbglob.\n"};
+static void dbgrepCallFunc(const iocshArgBuf *args) { iocshSetError(dbglob(args[0].sval,args[1].sval));}
 
 /* dbgf */
 static const iocshArg dbgfArg0 = { "record name",iocshArgStringRecord};
@@ -433,7 +440,7 @@ static const iocshArg scanOnceQueueShowArg0 = { "reset",iocshArgInt};
 static const iocshArg * const scanOnceQueueShowArgs[1] =
     {&scanOnceQueueShowArg0};
 static const iocshFuncDef scanOnceQueueShowFuncDef = {"scanOnceQueueShow",1,scanOnceQueueShowArgs,
-                                                      "Show details and statitics of scan once queue processing.\n"};
+                                                      "Show details and statistics of scan once queue processing.\n"};
 static void scanOnceQueueShowCallFunc(const iocshArgBuf *args)
 {
     scanOnceQueueShow(args[0].ival);
@@ -598,6 +605,7 @@ void dbIocRegister(void)
     iocshRegister(&dbnrFuncDef,dbnrCallFunc);
     iocshRegister(&dblaFuncDef,dblaCallFunc);
     iocshRegister(&dbliFuncDef,dbliCallFunc);
+    iocshRegister(&dbglobFuncDef,dbglobCallFunc);
     iocshRegister(&dbgrepFuncDef,dbgrepCallFunc);
     iocshRegister(&dbgfFuncDef,dbgfCallFunc);
     iocshRegister(&dbpfFuncDef,dbpfCallFunc);

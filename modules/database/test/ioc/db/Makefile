@@ -13,7 +13,7 @@ include $(TOP)/configure/CONFIG
 
 # Allow access to private headers in db/
 USR_CPPFLAGS += -I $(CURDIR)/../../../src/ioc/db
-USR_CPPFLAGS += -DUSE_TYPED_RSET
+USR_CPPFLAGS += -DUSE_TYPED_RSET -DUSE_TYPED_DSET
 
 TESTLIBRARY = dbTestIoc
 
@@ -208,8 +208,8 @@ TESTSPEC_RTEMS = dbTestHarness.boot; epicsRunDbTests
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 ifneq ($(filter $(T_A),$(CROSS_COMPILER_RUNTEST_ARCHS)),)
-TESTPROD_RTEMS = $(TESTPROD_HOST)
-TESTSCRIPTS_RTEMS += $(TESTS:%=%.t)
+TESTPROD += $(TESTPROD_HOST)
+TESTSCRIPTS += $(TESTS:%=%.t)
 endif
 
 include $(TOP)/configure/RULES

@@ -188,7 +188,7 @@ bool NTTable::isCompatible(PVStructurePtr const & pvStructure)
 bool NTTable::isValid()
 {
     PVFieldPtrArray const & columns = pvValue->getPVFields();
-        
+
     if (getLabels()->getLength() != columns.size()) return false;
     bool first = true;
     int length = 0;

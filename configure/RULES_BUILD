@@ -562,11 +562,11 @@ $(INSTALL_DOC)/%: $(COMMON_DIR)/%
 
 $(INSTALL_DOC)/%: %
 	$(ECHO) "Installing doc $@"
-	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(INSTALL_DOC)
+	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_DOC)/%: ../%
 	$(ECHO) "Installing doc $@"
-	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(INSTALL_DOC)
+	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
 
 $(INSTALL_HTML)/$(HTMLS_DIR)/%: $(COMMON_DIR)/%
 	$(ECHO) "Installing generated html $@"

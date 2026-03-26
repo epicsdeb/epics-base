@@ -173,5 +173,3 @@ MAIN(testNTAttribute) {
     test_wrap();
     return testDone();
 }
-
-

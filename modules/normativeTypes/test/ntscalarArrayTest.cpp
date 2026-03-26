@@ -242,5 +242,3 @@ MAIN(testNTScalarArray) {
     test_wrap();
     return testDone();
 }
-
-

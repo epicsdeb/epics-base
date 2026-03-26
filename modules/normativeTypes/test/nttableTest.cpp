@@ -245,5 +245,3 @@ MAIN(testNTTable) {
     test_wrap();
     return testDone();
 }
-
-

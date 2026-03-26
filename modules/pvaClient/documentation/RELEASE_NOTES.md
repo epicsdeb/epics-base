@@ -2,6 +2,10 @@
 
 This document summarizes the changes to the module between releases.
 
+## Release 4.8.1 (EPICS 7.0.10, Dec 2025)
+
+* Fix error message generation code.
+
 ## Release 4.8.0 (EPICS 7.0.6 Jul 2021)
 
 * PvaClientNTMultiData::getChannelChangeFlags is a new method. It fixes issue #66.

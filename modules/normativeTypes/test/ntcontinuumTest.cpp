@@ -274,5 +274,3 @@ MAIN(testNTContinuum) {
     test_extra();
     return testDone();
 }
-
-
