@@ -1,3 +1,9 @@
+epics-base (7.0.10-1) unstable; urgency=medium
+
+  * New upstream version 7.0.10
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Thu, 26 Mar 2026 11:14:03 -0400
+
 epics-base (7.0.9-3) unstable; urgency=medium
 
   * Remove epics-perl files already included in -dev
