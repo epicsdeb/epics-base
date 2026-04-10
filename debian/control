@@ -3,7 +3,7 @@ Section: devel
 Priority: optional
 Maintainer: Evan Daykin <daykin@frib.msu.edu>
 Uploaders: Anton Derbenev <aderbenev@bnl.gov>
-Build-Depends: debhelper (>= 13), epics-debhelper (>= 12.0),
+Build-Depends: debhelper (>= 13), epics-debhelper (>= 12.0), iproute2,
                libreadline6-dev | libreadline-dev, libncurses-dev, perl,
                mingw32 | g++-mingw-w64, python3, debhelper-compat (= 13),
 Standards-Version: 4.6.2
