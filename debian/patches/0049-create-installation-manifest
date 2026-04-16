@@ -1,0 +1,179 @@
+Index: epics-base/configure/RULES_BUILD
+===================================================================
+--- epics-base.orig/configure/RULES_BUILD
++++ epics-base/configure/RULES_BUILD
+@@ -453,6 +453,15 @@ $(COMMON_DIR)/$(GENVERSION): FORCE
+ 	$(GENVERSIONHEADER) -t $(TOP) -N $(GENVERSIONMACRO) -V "$(GENVERSIONDEFAULT)" $@
+ endif
+ 
++define append_manifest
++while ! mkdir $(TOP)/.$(2)-manifest.lock 2>/dev/null; do :; done; \
++printf '%s %s\n' \
++  '$(abspath $(CURDIR)/$(notdir $(1)))' \
++  '$(abspath $(1))' \
++  >> '$(TOP)/.$(2)-manifest'; \
++rmdir $(TOP)/.$(2)-manifest.lock
++endef
++
+ #---------------------------------------------------------------
+ # Install rules for BIN_INSTALLS and LIB_INSTALLS
+ 
+@@ -460,6 +469,7 @@ define  BIN_INSTALLS_template
+ $$(INSTALL_BIN)/$$(notdir $(1)): $(1)
+ 	$(ECHO) "Installing $$(<F)"
+ 	@$$(INSTALL) -d -m $$(BIN_PERMISSIONS) $$^ $$(INSTALL_BIN)
++	@$(call append_manifest,$$<,bin)
+ endef
+ $(foreach file, $(BIN_INSTALLS), $(eval $(call BIN_INSTALLS_template, $(file))))
+ 
+@@ -467,6 +477,7 @@ define  LIB_INSTALLS_template
+ $$(INSTALL_LIB)/$$(notdir $(1)): $(1)
+ 	$(ECHO) "Installing $$(<F)"
+ 	@$$(INSTALL) -d -m $$(LIB_PERMISSIONS) $$^ $$(INSTALL_LIB)
++	@$(call append_manifest,$$<,lib)
+ endef
+ $(foreach file, $(LIB_INSTALLS), $(eval $(call LIB_INSTALLS_template, $(file))))
+ 
+@@ -475,28 +486,34 @@ $(foreach file, $(LIB_INSTALLS), $(eval
+ $(INSTALL_BIN)/%: ../os/$(OS_CLASS)/%
+ 	$(ECHO) "Installing os-specific script $@"
+ 	@$(INSTALL_PRODUCT) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_BIN)
++	@$(call append_manifest,$@,bin)
+ 
+ $(INSTALL_BIN)/%: %
+ 	$(ECHO) "Installing created executable $@"
+ 	@$(INSTALL_PRODUCT) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_BIN)
++	@$(call append_manifest,$@,bin)
+ 
+ $(INSTALL_BIN)/%: ../%
+ 	$(ECHO) "Installing script $@"
+ 	@$(INSTALL_PRODUCT) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_BIN)
++	$(call append_manifest,$@,bin)
+ 
+ $(INSTALL_LIB)/%$(LIB_SUFFIX): %$(LIB_SUFFIX)
+ 	$(ECHO) "Installing library $@"
+ 	@$(INSTALL_LIBRARY) -d -m $(LIB_PERMISSIONS) $< $(INSTALL_LIB)
++	@$(call append_manifest,$@,lib)
+ 
+ ifneq ($(LIB_SUFFIX),$(DLLSTUB_SUFFIX))
+ $(INSTALL_LIB)/%$(DLLSTUB_SUFFIX): %$(DLLSTUB_SUFFIX)
+ 	$(ECHO) "Installing DLL stub library $@"
+ 	@$(INSTALL_LIBRARY) -d -m $(LIB_PERMISSIONS) $< $(INSTALL_LIB)
++	@$(call append_manifest,$@,lib)
+ endif # SUFFIX
+ 
+ $(INSTALL_SHRLIBS): $(INSTALL_SHRLIB)/%: %
+ 	$(ECHO) "Installing shared library $@"
+ 	@$(INSTALL_LIBRARY) -d -m $(SHRLIB_PERMISSIONS) $< $(INSTALL_SHRLIB)
++	@$(call append_manifest,$@,lib)
+ ifneq ($(SHRLIB_SUFFIX),$(SHRLIB_SUFFIX_BASE))
+ ifneq (,$(strip $(SHRLIB_VERSION)))
+ 	@$(RM) $(subst $(SHRLIB_SUFFIX),$(SHRLIB_SUFFIX_BASE),$@)
+@@ -508,10 +525,12 @@ ifneq ($(INSTALL_TCLLIB),$(INSTALL_BIN))
+ $(INSTALL_TCLLIB)/%: %
+ 	$(ECHO) "Installing Tcl library $@"
+ 	@$(INSTALL) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_TCLLIB)
++	@$(call append_manifest,$@,lib)
+ 
+ $(INSTALL_TCLLIB)/%: ../%
+ 	$(ECHO) "Installing Tcl library $@"
+ 	@$(INSTALL) -d -m $(BIN_PERMISSIONS) $< $(INSTALL_TCLLIB)
++	@$(call append_manifest,$@,lib)
+ endif
+ 
+ ifneq ($(TCLINDEX),)
+@@ -523,6 +542,7 @@ endif
+ $(INSTALL_LOADABLE_SHRLIBS): $(INSTALL_SHRLIB)/%: %
+ 	$(ECHO) "Installing loadable shared library $@"
+ 	@$(INSTALL_LIBRARY) -d -m $(SHRLIB_PERMISSIONS) $< $(INSTALL_SHRLIB)
++	@$(call append_manifest,$@,lib)
+ ifneq ($(LOADABLE_SHRLIB_SUFFIX),$(SHRLIB_SUFFIX_BASE))
+ ifneq (,$(strip $(LOADABLE_SHRLIB_VERSION)))
+ 	@$(RM) $(subst $(LOADABLE_SHRLIB_SUFFIX),$(SHRLIB_SUFFIX_BASE),$@)
+@@ -534,59 +554,73 @@ ifneq ($(INSTALL_CONFIGS),)
+ $(INSTALL_CONFIG)/%: %
+ 	$(ECHO) "Installing config file $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $(abspath $< $(@D))
++	@$(call append_manifest,$@,config)
+ 
+ $(INSTALL_CONFIG)/%: ../%
+ 	$(ECHO) "Installing config file $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $(abspath $< $(@D))
++	@$(call append_manifest,$@,config)
+ endif
+ 
+ $(INSTALL_INCLUDE)/%: $(COMMON_DIR)/%
+ 	$(ECHO) "Installing generated generic include file $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,inc)
+ 
+ $(INSTALL_INCLUDE)/%: %
+ 	$(ECHO) "Installing generic include file $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,inc)
+ 
+ $(INSTALL_INCLUDE)/os/$(OS_CLASS)/%: %
+ 	$(ECHO) "Installing OS dependent include file $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,inc)
+ 
+ $(INSTALL_INCLUDE)/compiler/$(CMPLR_CLASS)/%: %
+ 	$(ECHO) "Installing compiler dependent include file $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,inc)
+ 
+ $(INSTALL_DOC)/%: $(COMMON_DIR)/%
+ 	$(ECHO) "Installing generated doc $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,doc)
+ 
+ $(INSTALL_DOC)/%: %
+ 	$(ECHO) "Installing doc $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,doc)
+ 
+ $(INSTALL_DOC)/%: ../%
+ 	$(ECHO) "Installing doc $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,doc)
+ 
+ $(INSTALL_HTML)/$(HTMLS_DIR)/%: $(COMMON_DIR)/%
+ 	$(ECHO) "Installing generated html $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,doc)
+ 
+ $(INSTALL_HTML)/$(HTMLS_DIR)/%: %
+ 	$(ECHO) "Installing html $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,doc)
+ 
+ $(INSTALL_HTML)/$(HTMLS_DIR)/%: ../%
+ 	$(ECHO) "Installing html $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,doc)
+ 
+ $(INSTALL_TEMPLATES_SUBDIR)/%: ../%
+ 	$(ECHO) "Installing $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,templates)
+ 
+ $(INSTALL_TEMPLATES_SUBDIR)/%: %
+ 	$(ECHO) "Installing $@"
+ 	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
++	@$(call append_manifest,$@,templates)
+ 
+ include $(CONFIG)/RULES_EXPAND
+ 
+Index: epics-base/configure/RULES_TOP
+===================================================================
+--- epics-base.orig/configure/RULES_TOP
++++ epics-base/configure/RULES_TOP
+@@ -29,6 +29,8 @@ ifndef DISABLE_TOP_RULES
+ 
+   realuninstall: uninstallDirs
+ 	$(RMDIR) $(INSTALL_LOCATION_BIN) $(INSTALL_LOCATION_LIB)
++	find . -type f -name '.*-manifest*' -delete
++	find . -type f -name '.*-manifest.lock' -delete
+   ifeq (modules,$(filter modules,$(DIRS)))
+     ifeq (distclean,$(filter distclean,$(MAKECMDGOALS)))
+ 	$(RM) $(wildcard modules/RELEASE.*.local)
