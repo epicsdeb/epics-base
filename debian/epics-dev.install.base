@@ -1,0 +1,7 @@
+usr/lib/epics/cfg
+usr/lib/epics/lib/pkgconfig/*.pc usr/share/pkgconfig
+usr/share/epics-dev/configure
+usr/lib/epics/lib/perl/DBD.pm
+usr/lib/epics/lib/perl/DBD
+usr/lib/epics/lib/perl/EpicsHostArch.pl
+configure/Sample.Makefile usr/lib/epics/configure

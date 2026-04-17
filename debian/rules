@@ -55,15 +55,14 @@ override_dh_auto_clean:
 	dh_auto_clean
 	rm -rf configure/conf.d
 	rm -f modules/RELEASE.*
+	$(MAKE) -f debian/gen-debfiles clean
 
 override_dh_auto_build:
 	install -d configure/conf.d
 	./debian/gen-harden.sh > configure/conf.d/05hardening.make
 	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV) CREATE_INSTALL_MANIFESTS=YES
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
-
-execute_before_dh_gencontrol:
-	include ./debian/gen-substvars
+	$(MAKE) -f debian/gen-debfiles substvars installfiles
 
 override_dh_auto_install:
 	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
@@ -155,8 +154,8 @@ override_dh_install:
 	chmod -x debian/epics-catools/usr/lib/systemd/system/*.service
 
 	# Remove legacy init scripts
-	rm -f debian/tmp/usr/lib/epics/bin/*/S99caRepeater
-	rm -f debian/tmp/usr/lib/epics/bin/*/S99logServer
+	rm -f debian/tmp/usr/bin/*/S99caRepeater
+	rm -f debian/tmp/usr/bin/*/S99logServer
 
 	dh_install
 
