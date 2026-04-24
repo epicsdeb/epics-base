@@ -1,14 +1,20 @@
 import glob
 import os
+import re
 import argparse
 from pathlib import Path
 
 
 intree_modules = ['ca', 'src', 'libcom', 'database']
 dev_manifests= ['bin', 'cfg', 'lib', 'include', 'db', 'dbd', 'templates']
+user_bins = ['makeBaseApp.pl', 'makeBaseExt.pl', 'softIoc', 'caget', 'caput',\
+ 'camonitor', 'cainfo', 'caRepeater', 'casw', 'msi',\
+'softIocPVA', 'ascheck', 'pvget', 'pvput', 'pvmonitor', 'pvlist', 'pvinfo', 'pvcall']
+exclude_names = ['caRepeater.service', "makeBaseApp.pl", "makeBaseExt.pl", "iocLogServer" ".gitignore", "S99logServer"]
 tools_manifests = ['bin']
 doc_manifests=['doc']
 
+initd_regex = re.compile("^(S[0-9][0-9])")
 
 linux_archs = ["linux-x86_64", "linux-x86_64-debug"]
 
@@ -16,17 +22,20 @@ base_dir = os.path.realpath(".")
 
 epics_base="usr/lib/epics/"
 
+lib_base="usr/lib/x86_64-linux-gnu/"
+lib_base_host="usr/lib/epics/lib/host/"
+
 manifests_dir="./"
 
 def read_manifest(fname):
     try:
-        return [[Path(os.path.relpath(path, base_dir)) for path in line.strip().split()] for line in open(fname, "r").readlines()]
+        return [[Path(os.path.relpath(path, base_dir)) for path in line.strip().split()] for line in set(open(fname, "r").readlines())]
     except FileNotFoundError:
         print(f"{fname} not found")
         return []
 
 def file_is_for_win32(path):
-    return "in32" in str(path)
+    return "in32" in str(path) or "mingw" in str(path) or ".exe" in path.name or path.name.endswith(".lib")
 
 def file_is_for_perl(path):
     return "perl" in str(path)
@@ -38,7 +47,7 @@ def is_static_library(path):
     return path.suffix==".a"
 
 def is_debug_library(path):
-    return not any(["-debug" in part for part in path.parts])
+    return any(["-debug" in part for part in path.parts])
 
 def unversioned_shlib(path):
     return os.path.join(str(path.parent),path.name.split(".",1)[0]+".so")
@@ -46,10 +55,21 @@ def unversioned_shlib(path):
 def file_is_in_this_module(path, moduleName, modulePath):
     split_name = path.parts
     return ((split_name[0]=='src' and modulePath=='src') or (split_name[1] == modulePath))\
-     and not (file_is_for_win32(path) or file_is_for_perl(path))
+     and not (file_is_for_win32(path) or file_is_for_perl(path) or file_is_for_initd(path) or is_excluded(path))
+
+def file_is_for_initd(path):
+    return bool(initd_regex.search(path.name))
 
 def is_application(path):
-    return path.suffix==""
+    return path.suffix=="" and "bin" in path.parts
+
+def is_excluded(path):
+    return path.name in exclude_names
+
+def get_baselines(moduleName):
+    if os.path.exists(f"debian/{moduleName}.install.base"):
+        return open(f"debian/{moduleName}.install.base", "r").readlines()
+    return []
 
 #versioned shared libraries
 def generate_lib_install_file(moduleName, modulePath):
@@ -57,7 +77,7 @@ def generate_lib_install_file(moduleName, modulePath):
     libs = []
     for entry in manifest:
         if file_is_in_this_module(entry[0], moduleName, modulePath) and is_shared_library(entry[1]) and not is_debug_library(entry[1]):
-            libs.append(os.path.join(epics_base, str(entry[1])+"\n")) 
+            libs.append(os.path.join(lib_base, str(entry[1].name)+"\n"))
     if len(libs) > 0:
         with open(f"debian/{moduleName}.install", "w") as f:
             f.writelines(libs)
@@ -71,13 +91,17 @@ def generate_dev_install_file(moduleName, modulePath):
             if file_is_in_this_module(entry[0],moduleName,modulePath):
                 name = entry[1]
                 strname = str(name)
-                if is_shared_library(name) and not is_debug_library(name):
+                if is_shared_library(name):
+                    if is_debug_library(name):
+                        #install unversioned and versioned .so for debug in -dev
+                        files[category].append(os.path.join(epics_base, strname+"\n"))
                     strname = unversioned_shlib(name)
+                    #add static lib and unversioned .so to usr/lib/epics/lib/host
+                    files[category].append(os.path.join(lib_base_host, entry[1].name.split(".",1)[0]+".so"+"\n"))
+                    files[category].append(os.path.join(lib_base_host, entry[1].name.split(".",1)[0]+".a"+"\n"))
                 if not is_application(name):
                     files[category].append(os.path.join(epics_base, strname+"\n"))
-    baselines = []
-    if os.path.exists("debian/{moduleName}.install.base"):
-        baselines = open("debian/{moduleName}.install.base", "r")
+    baselines = get_baselines(moduleName)
     if any([len(files[category]) > 0 for category in dev_manifests]):
         with open(f"debian/{moduleName}.install","w") as f:
             f.writelines(baselines)
@@ -92,10 +116,12 @@ def generate_bin_install_file(moduleName, modulePath):
         if file_is_in_this_module(entry[0], moduleName, modulePath):
             name=entry[1]
             if is_application(name):
-                apps.append("/usr/bin/"+entry[1].name+"\n")
-    baselines = []
-    if os.path.exists("debian/{moduleName}.install.base"):
-        baselines = open("debian/{moduleName}.install.base", "r")
+                if entry[1].name in user_bins and not is_debug_library(entry[1]):
+                    apps.append("usr/bin/"+entry[1].name+"\n")
+                apps.append(epics_base+str(entry[1])+"\n")
+    baselines = get_baselines(moduleName)
+    if os.path.exists(f"debian/{moduleName}.install.base"):
+        baselines = open(f"debian/{moduleName}.install.base", "r").readlines()
     if len(baselines) + len(apps) > 0:
         with open(f"debian/{moduleName}.install", "w") as f:
             f.writelines(baselines)
@@ -122,5 +148,5 @@ if __name__ == "__main__":
     elif (args.moduleName.endswith("tools")):
         generate_bin_install_file(args.moduleName, args.modulePath)
     else:
-        generate_lib_install_file(args.moduleName, args.modulePath)\
+        generate_lib_install_file(args.moduleName, args.modulePath)
     

@@ -78,12 +78,12 @@ Index: epics-base/configure/RULES_BUILD
  $(INSTALL_CONFIG)/%: %
  	$(ECHO) "Installing config file $@"
  	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $(abspath $< $(@D))
-+	@$(call append_manifest,$@,config)
++	@$(call append_manifest,$@,cfg)
  
  $(INSTALL_CONFIG)/%: ../%
  	$(ECHO) "Installing config file $@"
  	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $(abspath $< $(@D))
-+	@$(call append_manifest,$@,config)
++	@$(call append_manifest,$@,cfg)
  endif
  
  $(INSTALL_INCLUDE)/%: $(COMMON_DIR)/%

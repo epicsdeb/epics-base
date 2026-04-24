@@ -38,7 +38,7 @@ ALLBINS := $(shell dh_listpackages)
 
 MODULES = epics ca com dbcore nt qsrv pva pvaclient pvdata pvdatabase
 
-TARGETS = $(EPICS_HOST_ARCH)-debug
+TARGETS = $(EPICS_HOST_ARCH) $(EPICS_HOST_ARCH)-debug
 
 ifneq (,$(findstring epics-win32,$(ALLBINS)))
 TARGETS += win32-x86-mingw
@@ -46,7 +46,6 @@ endif
 
 export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 
-export SHRLIB_VERSION=$(SOV)
 
 %:
 	dh $@ --with epics -Sepicsmake
@@ -60,12 +59,12 @@ override_dh_auto_clean:
 override_dh_auto_build:
 	install -d configure/conf.d
 	./debian/gen-harden.sh > configure/conf.d/05hardening.make
-	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV) CREATE_INSTALL_MANIFESTS=YES
+	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics CREATE_INSTALL_MANIFESTS=YES
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
-	$(MAKE) -f debian/gen-debfiles substvars installfiles
+	$(MAKE) -f debian/gen-debfiles installfiles
 
 override_dh_auto_install:
-	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics
 
 # skip this since we should install configure/RELEASE
 override_dh_epics_postinstall:
@@ -85,7 +84,8 @@ PERLLIB=$(shell perl -MConfig -e 'print $$Config{vendorlib}')
 PERLARCH=$(shell perl -MConfig -e 'print $$Config{vendorarch}')
 
 override_dh_install:
-	sed -i -e "s|^.*EPICS_SITE_VERSION.*$$|EPICS_SITE_VERSION = $(DEBV)|" debian/tmp/usr/lib/epics/configure/CONFIG_SITE
+	echo "DH INSTALL OVERRIDE - EPICS HOST ARCH = $(EPICS_HOST_ARCH), ALL TARGETS = $(TARGETS)"
+	# sed -i -e "s|^.*EPICS_SITE_VERSION.*$$|EPICS_SITE_VERSION = $(DEBV)|" debian/tmp/usr/lib/epics/configure/CONFIG_SITE
 
 	# some object code is getting installed somehow
 	rm -f debian/tmp/usr/lib/epics/bin/linux-*/*.o
@@ -136,10 +136,6 @@ override_dh_install:
 	# Don't need other copies
 	rm debian/tmp/usr/lib/epics/lib/linux-*/libCap5.so
 
-	# get rid of vcs files if they snuck into the build somehow
-	rm -f debian/tmp/usr/lib/epics/templates/makeBaseApp/top/.gitignore
-	rm -f debian/tmp/usr/lib/epics/templates/makeBaseExt/top/.gitignore
-
 	# This path is used by CA.pm
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
@@ -156,6 +152,8 @@ override_dh_install:
 	# Remove legacy init scripts
 	rm -f debian/tmp/usr/bin/*/S99caRepeater
 	rm -f debian/tmp/usr/bin/*/S99logServer
+	rm -f debian/tmp/usr/lib/epics/bin/*/S99caRepeater
+	rm -f debian/tmp/usr/lib/epics/bin/*/S99logServer
 
 	dh_install
 
@@ -172,15 +170,6 @@ override_dh_install:
 	rm -f debian/epics-perl/usr/lib/epics/lib/perl/EpicsHostArch.pl
 	rm -rf debian/epics-perl/usr/lib/epics/lib/perl/DBD/
 
-	for arch in $(EPICS_HOST_ARCH); do for name in $(PERLBINS); do \
-	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \
-	;done ;done
-
-ifneq (,$(findstring epics-win32,$(ALLBINS)))
-	install -d debian/epics-win32/usr/lib/epics/include/os
-	mv debian/epics-dev/usr/lib/epics/include/os/WIN32 debian/epics-win32/usr/lib/epics/include/os/
-endif
-
 	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
 
 override_dh_installdocs:
@@ -189,16 +178,14 @@ override_dh_installdocs:
 override_dh_missing:
 	dh_missing --fail-missing
 
-override_dh_makeshlibs:
-	dh_makeshlibs -Nepics-dev -a
-	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
-	dh_makeshlibs -pepics-dev -Xusr/lib/epics
-
-override_dh_shlibdeps:
-	dh_shlibdeps -Nlibepics$(SOV) -a
-	# Prevent self dependency
-	#  This would happen because the package provides several dependent libraries
-	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
+#override_dh_makeshlibs:
+#	dh_makeshlibs -Nepics-dev -a
+#	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
+#	dh_makeshlibs -pepics-dev -Xusr/lib/epics
 
 # We provide our own deps
 override_dh_epicsdep:
+
+#libs need to go to their respective packages
+override_dh_epics_install:
+
