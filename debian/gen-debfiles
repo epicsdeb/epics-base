@@ -67,6 +67,11 @@ $(1).install:
 	python3 debian/generate_install_file.py $(1) $(2)
 endef
 
+define GEN_LINKS_RULE
+$(1).links: $(1).install
+	python3 debian/generate_links_file.py $(1) $(2)
+endef
+
 VERSIONED_MODULES := $(foreach m,$(MODULES),lib$(m)$($(m)_LIBVERSION))
 SUBSTVARS_FILES := $(foreach m,$(VERSIONED_MODULES),$(m).substvars)
 SHLIB_INSTALL_FILES := $(foreach m,$(VERSIONED_MODULES),$(m).install)
@@ -79,12 +84,15 @@ DEV_INSTALL_FILES := $(foreach m,$(DEV_PACKAGES),$(m).install)
 
 BIN_INSTALL_FILES := $(foreach m,$(BINMODULES),$(m).install)
 
+SHLIB_LINKS_FILES := $(foreach m,$(VERSIONED_MODULES),$(m).links)
+
 ALL_INSTALL_FILES_WITH_PREFIX := $(foreach f, $(SHLIB_INSTALL_FILES) $(DEV_INSTALL_FILES) $(BIN_INSTALL_FILES), debian/$(f))
 
 $(foreach i, $(shell seq 1 $(words $(VERSIONED_MODULES))), \
 		$(eval $(call GEN_INSTALL_FILE_RULE, $(word $(i),$(VERSIONED_MODULES)), $(word $(i), $(MODULES_DIRS))));\
 		$(eval $(call GEN_INSTALL_FILE_RULE, $(word $(i),$(BINMODULES)), $(word $(i), $(MODULES_DIRS))));\
-		$(eval $(call GEN_INSTALL_FILE_RULE, $(word $(i),$(DEV_PACKAGES)), $(word $(i), $(MODULES_DIRS))));)
+		$(eval $(call GEN_INSTALL_FILE_RULE, $(word $(i),$(DEV_PACKAGES)), $(word $(i), $(MODULES_DIRS))));\
+		$(eval $(call GEN_LINKS_RULE, $(word $(i),$(VERSIONED_MODULES)), $(word $(i),$(DEV_PACKAGES))));)
 
 .PHONY: substvars
 substvars: $(SUBSTVARS_FILES)
@@ -97,9 +105,12 @@ bininstallfiles: $(BIN_INSTALL_FILES)
 
 installfiles: libinstallfiles devinstallfiles bininstallfiles
 
+links: $(SHLIB_LINKS_FILES)
+
 .PHONY: test
 test:
 	@echo $(VERSIONED_MODULES)
 
 clean:
 	$(RM) $(ALL_INSTALL_FILES_WITH_PREFIX)
+	$(RM) $(foreach f, $(DEV_PACKAGES) $(VERSIONED_MODULES), debian/$(f).links)

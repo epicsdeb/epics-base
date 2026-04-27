@@ -62,6 +62,7 @@ override_dh_auto_build:
 	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics CREATE_INSTALL_MANIFESTS=YES
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
 	$(MAKE) -f debian/gen-debfiles installfiles
+	$(MAKE) -f debian/gen-debfiles links
 
 override_dh_auto_install:
 	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics
