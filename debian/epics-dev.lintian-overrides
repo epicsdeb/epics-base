@@ -3,7 +3,8 @@ epics-dev: unstripped-binary-or-object
 epics-dev: breakout-link
 # EPICS config files live in /etc/epics/configure. Shared libs live in the 
 # standard /usr/lib, but accessed in most cases from $EPICS_BASE=/usr/lib/epics
-executable-not-elf-or-script [usr/lib/epics/bin/*/*.pl
+executable-not-elf-or-script [usr/lib/epics/bin/linux-x86_64-debug/EpicsHostArch.pl]
+executable-not-elf-or-script [usr/lib/epics/bin/linux-x86_64/EpicsHostArch.pl]
 #perl helpers are executable, just interpreted by perl
 package-contains-vcs-control-file [usr/lib/epics/templates/makeBase*/top/.gitignore]
 #These are part of the template for generating app skeletons

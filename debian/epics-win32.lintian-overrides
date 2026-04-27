@@ -2,5 +2,5 @@ epics-win32: arch-independent-package-contains-binary-or-object
 # Contains cross-compiled binaries
 # added for bookworm build...
 epics-win32: no-code-sections
-executable-not-elf-or-script [usr/lib/epics/bin/*/*.pl
+executable-not-elf-or-script [usr/lib/epics/bin/win32-x86-mingw/EpicsHostArch.pl]
 #perl helpers are executable, just interpreted by perl

@@ -1,0 +1,2 @@
+#debug libraries are supposed to be unstripped
+unstripped-binary-or-object [usr/lib/epics/lib/linux-x86_64-debug/*
