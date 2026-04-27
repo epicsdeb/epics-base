@@ -13,8 +13,7 @@ Homepage: http://www.aps.anl.gov/epics/
 
 Package: libepics7
 Section: libs
-Architecture: any
-Multi-Arch: same
+Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, libca4 (= ${binary:Version}),
  libcom3 (= ${binary:Version}),
@@ -26,7 +25,7 @@ Depends: python3, libca4 (= ${binary:Version}),
  libpvdatabase4 (= ${binary:Version}),
  libqsrv1 (= ${binary:Version}),
  ${shlibs:Depends}, ${misc:Depends}
-Recommends: epics-catools, epics-pvatools
+Recommends: epics-catools, epics-pvatools, epics-commontools, epics-dbtools, epics-qsrvtools
 Conflicts: epics-perl (<= 3.14.10-7)
 Description: EPICS Base libraries for clients and servers
  The Experimental Physics and Industrial Control System is a collection of
@@ -35,25 +34,10 @@ Description: EPICS Base libraries for clients and servers
  .
  This metapackage contains all EPICS modules from the epics-base repository.
 
-Package: ioclogserver
-Section: admin
-Architecture: any
-Depends: epics-commontools (= ${binary:Version}), sysvinit-utils (>= 3),
-         ${misc:Depends}, ${shlibs:Depends}, adduser, systemd
-Description: Log recording daemon for EPICS IOCS
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- The IOC log server listens for network log messages sent from
- IOC.  This is used by the caputlog support module to collect
- messages relating to PV value changes. This is a virtual package 
-
 Package: epics-dev
 Architecture: any
 Depends: python3, libepics7 (= ${binary:Version}),
-         epics-catools (= ${binary:Version}),
-         epics-pvatools (= ${binary:Version}),
+         epics-tools(= ${binary:Version}),
          libca-dev (= ${binary:Version}),
          libcom-dev (= ${binary:Version}),
          libdbcore-dev (= ${binary:Version}),
@@ -80,15 +64,6 @@ Description: Files needed to develop new EPICS applications
  Libraries, headers, and utilities needed to develop applications
  targeted to the host system.
 
-Package: epics-msi
-Architecture: all
-Depends: ${misc:Depends}
-Description: EPICS Macro Substitution and Include tool
- MSI is a general purpose macro substitution/include tool.
- It accepts as input an ascii template file.
- .
- This is a dummy package which can be removed.
-
 Package: libca-dev
 Section: libdevel
 Architecture: any
@@ -103,8 +78,7 @@ Description: EPICS Channel Access library
 
 Package: libca4
 Section: libs
-Architecture: any
-Multi-Arch: same
+Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, libcom3 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
@@ -120,6 +94,7 @@ Description: EPICS Channel Access library
 Package: libcom-dev
 Section: libdevel
 Architecture: any
+Multi-Arch: same
 Depends: libcom3 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS base common library
@@ -131,8 +106,7 @@ Description: EPICS base common library
 
 Package: libcom3
 Section: libs
-Architecture: any
-Multi-Arch: same
+Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS base common library
@@ -156,8 +130,7 @@ Description: EPICS database core library
 
 Package: libdbcore3
 Section: libs
-Architecture: any
-Multi-Arch: same
+Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3,
          libca4 (= ${binary:Version}),
@@ -168,18 +141,6 @@ Description: EPICS database core library
  control systems.
  .
  Shared libraries for the EPICS database core libraries.
-
-Package: epics-dbtools
-Section: utils
-Architecture: any
-Multi-Arch: same
-Depends: libdbcore3
-Description: EPICS database command-line tools
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Applications for building database files (ascheck, makeBpt, msi)
 
 Package: libnt-dev
 Section: libdevel
@@ -195,7 +156,7 @@ Description: EPICS normatives types library
 
 Package: libnt6
 Section: libs
-Architecture: any
+Architecture: amd64
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3,
@@ -222,7 +183,7 @@ Description: EPICS PVAccess library
 
 Package: libpva7
 Section: libs
-Architecture: any
+Architecture: amd64
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends},
@@ -251,7 +212,7 @@ Description: EPICS PVAclient library
 
 Package: libpvaclient4
 Section: libs
-Architecture: any
+Architecture: amd64
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
@@ -276,7 +237,7 @@ Description: EPICS PVData library
 
 Package: libpvdata8
 Section: libs
-Architecture: any
+Architecture: amd64
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3,
@@ -303,8 +264,7 @@ Description: EPICS PVData library
 
 Package: libpvdatabase4
 Section: libs
-Architecture: any
-Multi-Arch: same
+Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS PVDatabase library
@@ -328,8 +288,7 @@ Description: EPICS PVA server (QSRV) library
 
 Package: libqsrv1
 Section: libs
-Architecture: any
-Multi-Arch: same
+Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS PVA server (QSRV) library
@@ -339,9 +298,62 @@ Description: EPICS PVA server (QSRV) library
  .
  Shared libraries for the EPICS pva2pva module.
 
+Package: epics-tools
+Architecture: amd64
+Depends: libepics7 (= ${binary:Version}),
+         epics-catools (= ${binary:Version}),
+         epics-pvatools (= ${binary:Version}),
+         epics-commontools(= ${binary:Version}),
+         epics-dbtools(= ${binary:Version}),
+         epics-qsrvtools(= ${binary:Version}),
+         ioclogserver(= ${binary:Version}),
+         ${misc:Depends}
+Description: EPICS Command-line tools
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Metapackage of all command-line applications for EPICS base.
+
+Package: epics-catools
+Section: utils
+Architecture: amd64
+Depends: libca4 (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Description: Command line utilities for EPICS
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ EPICS utilities such as caget and caput as well as the caRepeater daemon.
+
+Package: epics-commontools
+Section: utils
+Architecture: amd64
+Depends: libcom3 (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Description: EPICS base command-line tools
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Codegen applications for building libcom (antelope, e_flex)
+
+Package: epics-dbtools
+Section: utils
+Architecture: amd64
+Depends: libdbcore3 (= ${binary:Version}),
+         ${shlibs:Depends}, ${misc:Depends}
+Description: EPICS database command-line tools
+ The Experimental Physics and Industrial Control System is a collection of
+ tools, libraries and applications for creating a distributed soft real-time
+ control systems.
+ .
+ Applications for building database files (ascheck, makeBpt, msi)
+
 Package: epics-pvatools
 Section: admin
-Architecture: any
+Architecture: amd64
 Depends: libpva7 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Recommends: epics-qsrvtools
@@ -354,7 +366,7 @@ Description: Command line utilities for EPICS
 
 Package: epics-qsrvtools
 Section: admin
-Architecture: any
+Architecture: amd64
 Depends: libqsrv1 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
 Description: Command line utilities for EPICS
@@ -364,29 +376,20 @@ Description: Command line utilities for EPICS
  .
  EPICS PVAccess IOC binaries: qsrv and (deprecated) p2p daemon.
 
-Package: epics-catools
-Section: utils
-Architecture: any
-Depends: libepics7 (= ${binary:Version}),
+Package: ioclogserver
+Section: admin
+Architecture: amd64
+Depends: epics-commontools (= ${binary:Version}), sysvinit-utils (>= 3),
+         adduser, systemd,
          ${shlibs:Depends}, ${misc:Depends}
-Description: Command line utilities for EPICS
+Description: Log recording daemon for EPICS IOCS
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
  control systems.
  .
- EPICS utilities such as caget and caput as well as the caRepeater daemon.
-
-Package: epics-commontools
-Section: utils
-Architecture: any
-Multi-Arch: same
-Depends: libcom-dev, libepics7
-Description: EPICS base command-line tools
- The Experimental Physics and Industrial Control System is a collection of
- tools, libraries and applications for creating a distributed soft real-time
- control systems.
- .
- Codegen applications for building libcom (antelope, e_flex)
+ The IOC log server listens for network log messages sent from
+ IOC.  This is used by the caputlog support module to collect
+ messages relating to PV value changes.
 
 Package: epics-perl
 Architecture: any

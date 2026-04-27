@@ -162,7 +162,7 @@ override_dh_install:
 
 	# make perl scripts executable
 	for name in $(PERLBINS); do \
-	    chmod -f +x debian/epics-dev/usr/lib/epics/templates/makeBaseApp/top/caPerlApp/$$name || : ; \
+	    chmod -f +x debian/libca-dev/usr/lib/epics/templates/makeBaseApp/top/caPerlApp/$$name || : ; \
 	done
 
 	# remove DBD perl scripts from epics-perl, already installed by -dev
@@ -189,3 +189,5 @@ override_dh_epicsdep:
 #libs need to go to their respective packages
 override_dh_epics_install:
 
+# handle lintian overrides in-house now that this package (mostly) plays by the rules
+override_dh_epics_lintian:

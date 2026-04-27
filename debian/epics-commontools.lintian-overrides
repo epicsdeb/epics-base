@@ -1,0 +1,4 @@
+#This is EPICS arch notation, but debian doesn't pick it up as a valid arch
+arch-dependent-file-not-in-arch-specific-directory [usr/lib/epics/bin/linux-x86_64*
+#debug libraries are unstripped
+unstripped-binary-or-object [usr/lib/epics/bin/*-debug*
