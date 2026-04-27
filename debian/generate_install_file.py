@@ -10,7 +10,7 @@ dev_manifests= ['bin', 'cfg', 'lib', 'include', 'db', 'dbd', 'templates']
 user_bins = ['makeBaseApp.pl', 'makeBaseExt.pl', 'softIoc', 'caget', 'caput',\
  'camonitor', 'cainfo', 'caRepeater', 'casw', 'msi',\
 'softIocPVA', 'ascheck', 'pvget', 'pvput', 'pvmonitor', 'pvlist', 'pvinfo', 'pvcall']
-exclude_names = ['caRepeater.service', "makeBaseApp.pl", "makeBaseExt.pl", "iocLogServer" ".gitignore", "S99logServer"]
+exclude_names = ['caRepeater.service', "makeBaseApp.pl", "makeBaseExt.pl", "S99logServer", "TOOLCHAIN.linux-x86_64.win32-x86-mingw"]
 tools_manifests = ['bin']
 doc_manifests=['doc']
 
