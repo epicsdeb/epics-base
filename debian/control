@@ -79,6 +79,7 @@ Description: EPICS Channel Access library
 Package: libca4
 Section: libs
 Architecture: amd64
+Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, libcom3 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
@@ -107,6 +108,7 @@ Description: EPICS base common library
 Package: libcom3
 Section: libs
 Architecture: amd64
+Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
 Description: EPICS base common library

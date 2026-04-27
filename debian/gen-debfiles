@@ -114,3 +114,4 @@ test:
 clean:
 	$(RM) $(ALL_INSTALL_FILES_WITH_PREFIX)
 	$(RM) $(foreach f, $(DEV_PACKAGES) $(VERSIONED_MODULES), debian/$(f).links)
+	$(RM) $(foreach f, $(VERSIONED_MODULES), debian/$(f).lintian-overrides)

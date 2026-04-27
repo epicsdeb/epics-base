@@ -72,7 +72,7 @@ override_dh_epics_postinstall:
 	# no op
 
 override_dh_auto_test:
-	# LD_LIBRARY_PATH=$(shell pwd)/lib/$(EPICS_HOST_ARCH) make runtests
+	LD_LIBRARY_PATH=$(shell pwd)/lib/$(EPICS_HOST_ARCH) make runtests
 
 USRBINS=makeBaseApp.pl makeBaseExt.pl softIoc caget caput camonitor cainfo caRepeater casw msi iocLogServer softIocPVA ascheck pvget pvput pvmonitor pvlist pvinfo pvcall
 
@@ -165,6 +165,9 @@ override_dh_install:
 	for name in $(PERLBINS); do \
 	    chmod -f +x debian/libca-dev/usr/lib/epics/templates/makeBaseApp/top/caPerlApp/$$name || : ; \
 	done
+
+	#remove config file that's installed by epics-win32
+	rm -f debian/epics-dev/usr/lib/epics/cfg/TOOLCHAIN.linux-x86_64.win32-x86-mingw
 
 	# remove DBD perl scripts from epics-perl, already installed by -dev
 	rm -f debian/epics-perl/usr/lib/epics/lib/perl/DBD.pm

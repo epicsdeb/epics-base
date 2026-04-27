@@ -21,8 +21,10 @@ def read_install_file(name):
 
 def generate_links_files(libname, devname):
     libs = read_install_file(libname)
+    with open(f"debian/{libname}.lintian-overrides", "w") as overrides:
+        overrides.write(f"#lib names are not debian-compliant (SONAME is full versioned, and use caps sometimes)\npackage-name-doesnt-match-sonames lib*\n")
     with open(f"debian/{libname}.links", "w") as liblinks:
-        liblinks.writelines([lib_root+lib+" "+major_versioned_library(lib)+"\n" for lib in libs])
+        liblinks.writelines([os.path.join(lib_root,lib)+" "+major_versioned_library(lib)+"\n" for lib in libs])
     with open(f"debian/{devname}.links", "w") as devlinks:
         devlinks.writelines([major_versioned_library(lib)+" "+unversioned_library(lib)+"\n" for lib in libs])
 
