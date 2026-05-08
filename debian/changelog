@@ -1,3 +1,9 @@
+epics-base (7.0.10-2) unstable; urgency=medium
+
+  * Modules are now installed in their own packages.
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Fri, 08 May 2026 11:03:07 -0400
+
 epics-base (7.0.10-1) unstable; urgency=medium
 
   * New upstream version 7.0.10
