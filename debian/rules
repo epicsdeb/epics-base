@@ -26,6 +26,8 @@ export DEB_CXXFLAGS_STRIP = -O2
 export DEB_CFLAGS_MAINT_APPEND = -g
 export DEB_CXXFLAGS_MAINT_APPEND = -g
 
+export MANUAL_SOVER=YES
+
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
