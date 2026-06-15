@@ -89,8 +89,8 @@ Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, libcom3 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Recommends: epics-catools
 Description: EPICS Channel Access library
  The Experimental Physics and Industrial Control System is a collection of
@@ -121,8 +121,8 @@ Architecture: amd64
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS base common library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -151,8 +151,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: python3,
          libca4 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS database core library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -182,8 +182,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: python3,
          libpvdata8 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS normative types library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -213,8 +213,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends},
  libpvdata8 (= ${binary:Version}),
  ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS PVAccess library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -244,8 +244,8 @@ Architecture: amd64
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS PVAClient library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -273,8 +273,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: python3,
          libcom3 (= ${binary:Version}),
          ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS PVAClient library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -301,8 +301,8 @@ Section: libs
 Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS PVDatabase library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
@@ -329,8 +329,8 @@ Section: libs
 Architecture: amd64
 Pre-Depends: ${misc:Pre-Depends}
 Depends: python3, ${shlibs:Depends}, ${misc:Depends}
-Breaks: libepics7.0.10
-Replaces: libepics7.0.10
+Breaks: libepics7.0.10, libepics7.0.9, libepics7.0.8
+Replaces: libepics7.0.10, libepics7.0.9, libepics7.0.8
 Description: EPICS PVA server (QSRV) library
  The Experimental Physics and Industrial Control System is a collection of
  tools, libraries and applications for creating a distributed soft real-time
