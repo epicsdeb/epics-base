@@ -1,6 +1,7 @@
 epics-base (7.0.10-3) unstable; urgency=medium
 
   * Added 'breaks' for more old libepics7.* series
+  * Fix softIoc.dbd resolution for debian structure
 
  -- Evan Daykin <daykin@frib.msu.edu>  Fri, 15 Jun 2026 14:28:30 -0400
 
