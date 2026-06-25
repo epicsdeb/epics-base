@@ -12,3 +12,4 @@
 0046-numbered-python-for-makeRPath
 0048-skip-non-loopback-iface-tests.patch
 0049-create-installation-manifest
+0050-fix-softioc-dbd-resolution

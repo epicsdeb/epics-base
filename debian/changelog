@@ -1,3 +1,9 @@
+epics-base (7.0.10-4) unstable; urgency=medium
+
+  * Add missing softIoc patch to series file
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Thu, 25 Jun 2026 11:03:47 -0400
+
 epics-base (7.0.10-3) unstable; urgency=medium
 
   * Added 'breaks' for more old libepics7.* series
