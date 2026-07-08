@@ -14,3 +14,22 @@ Index: epics-base/modules/database/src/std/softIoc/softMain.cpp
  #define DBD_FILE EPICS_BASE OSI_PATH_SEPARATOR DBD_BASE
  #define EXIT_FILE EPICS_BASE OSI_PATH_SEPARATOR EXIT_BASE
  
+Index: epics-base/modules/pva2pva/pdbApp/softMain.cpp
+===================================================================
+--- epics-base.orig/modules/pva2pva/pdbApp/softMain.cpp
++++ epics-base/modules/pva2pva/pdbApp/softMain.cpp
+@@ -45,11 +45,11 @@ extern "C" int softIocPVA_registerRecord
+ 
+ #define DBD_BASE "dbd" OSI_PATH_SEPARATOR "softIocPVA.dbd"
+ #define EXIT_BASE "db" OSI_PATH_SEPARATOR "softIocExit.db"
+-#define DBD_FILE_REL ".." OSI_PATH_SEPARATOR ".." OSI_PATH_SEPARATOR DBD_BASE
+-#define EXIT_FILE_REL ".." OSI_PATH_SEPARATOR ".." OSI_PATH_SEPARATOR EXIT_BASE
++#define DEB_BASE  "usr" OSI_PATH_SEPARATOR "lib" OSI_PATH_SEPARATOR "epics"
++#define DBD_FILE_REL ".." OSI_PATH_SEPARATOR ".." OSI_PATH_SEPARATOR DEB_BASE OSI_PATH_SEPARATOR  DBD_BASE
++#define EXIT_FILE_REL ".." OSI_PATH_SEPARATOR ".." OSI_PATH_SEPARATOR DEB_BASE OSI_PATH_SEPARATOR EXIT_BASE
+ #define DBD_FILE EPICS_BASE OSI_PATH_SEPARATOR DBD_BASE
+ #define EXIT_FILE EPICS_BASE OSI_PATH_SEPARATOR EXIT_BASE
+-
+ namespace {
+ 
+ bool verbose = false;

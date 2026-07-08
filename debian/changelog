@@ -1,3 +1,9 @@
+epics-base (7.0.10-5) unstable; urgency=medium
+
+  * apply softIoc DBD resolution patch to softIocPVA
+
+ -- Evan Daykin <daykin@frib.msu.edu>  Wed, 08 Jul 2026 13:27:15 -0400
+
 epics-base (7.0.10-4) unstable; urgency=medium
 
   * Add missing softIoc patch to series file
