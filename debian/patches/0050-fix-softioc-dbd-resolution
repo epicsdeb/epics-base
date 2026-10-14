@@ -33,3 +33,27 @@ Index: epics-base/modules/pva2pva/pdbApp/softMain.cpp
  namespace {
  
  bool verbose = false;
+Index: epics-base/modules/database/test/std/rec/netget.plt
+===================================================================
+--- epics-base.orig/modules/database/test/std/rec/netget.plt
++++ epics-base/modules/database/test/std/rec/netget.plt
+@@ -74,13 +74,16 @@ sub watchdog (&$$) {
+ # Start the IOC
+ 
+ my $softIoc = "$bin/softIocPVA$exe";
+-$softIoc = "$bin/softIoc$exe"
+-    unless -x $softIoc;
++my $softIocDbd = '@TOP@/dbd/softIocPVA.dbd';
++unless (-x $softIoc){
++    $softIoc = "$bin/softIoc$exe";
++    $softIocDbd = '@TOP@/dbd/softIoc.dbd';
++}
+ BAIL_OUT("Can't find a softIoc executable")
+     unless -x $softIoc;
+ 
+ watchdog {
+-    $ioc->start($softIoc, '-x', $prefix);
++    $ioc->start($softIoc, '-D', $softIocDbd, '-m', "IOC=$prefix", '-d', '@TOP@/db/softIocExit.db' );
+     $ioc->cmd;  # Wait for command prompt
+ } 10, kill_bail('starting softIoc');
+ 
