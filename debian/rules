@@ -40,7 +40,7 @@ ALLBINS := $(shell dh_listpackages)
 
 MODULES = epics ca com dbcore nt qsrv pva pvaclient pvdata pvdatabase
 
-TARGETS = $(EPICS_HOST_ARCH) $(EPICS_HOST_ARCH)-debug
+TARGETS = $(EPICS_HOST_ARCH)-debug
 
 ifneq (,$(findstring epics-win32,$(ALLBINS)))
 TARGETS += win32-x86-mingw
@@ -53,6 +53,7 @@ export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 	dh $@ --with epics -Sepicsmake
 
 override_dh_auto_clean:
+	echo "ehr $(EPICS_HOST_ARCH) cchr $(CROSS_COMPILER_HOST_ARCHS) cctr $(CROSS_COMPILER_TARGET_ARCHS) ba $(BUILD_ARCHS)"
 	dh_auto_clean
 	rm -rf configure/conf.d
 	rm -f modules/RELEASE.*
