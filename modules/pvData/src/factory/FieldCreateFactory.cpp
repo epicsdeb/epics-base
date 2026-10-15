@@ -15,6 +15,7 @@
 #include <sstream>
 
 #include <epicsString.h>
+#include <epicsStdio.h>
 #include <epicsMutex.h>
 #include <epicsThread.h>
 
@@ -378,7 +379,8 @@ BoundedScalarArray::BoundedScalarArray(ScalarType elementType, size_t size)
 string BoundedScalarArray::getID() const
 {
     char buffer[32];
-    sprintf(buffer, "%s<%zu>", ScalarTypeFunc::name(getElementType()), size);
+    epicsSnprintf(buffer, sizeof(buffer), "%s<%lu>",
+        ScalarTypeFunc::name(getElementType()), (unsigned long) size);
     return string(buffer);
 }
 
@@ -403,7 +405,8 @@ FixedScalarArray::FixedScalarArray(ScalarType elementType, size_t size)
 string FixedScalarArray::getID() const
 {
     char buffer[32];
-    sprintf(buffer, "%s[%zu]", ScalarTypeFunc::name(getElementType()), size);
+    epicsSnprintf(buffer, sizeof(buffer), "%s[%lu]",
+        ScalarTypeFunc::name(getElementType()), (unsigned long) size);
     return string(buffer);
 }
 

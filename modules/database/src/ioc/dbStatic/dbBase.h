@@ -21,6 +21,7 @@
 #include "dbDefs.h"
 #include "recSup.h"
 #include "devSup.h"
+#include "drvSup.h"
 
 typedef struct dbMenu {
     ELLNODE         node;
@@ -33,7 +34,7 @@ typedef struct dbMenu {
 typedef struct drvSup {
     ELLNODE         node;
     char            *name;
-    struct drvet    *pdrvet;
+    drvet           *pdrvet;
 }drvSup;
 
 typedef struct devSup {
@@ -125,7 +126,7 @@ typedef struct dbRecordNode {
     struct dbRecordNode *aliasedRecnode; /* NULL unless flags|DBRN_FLAGS_ISALIAS */
 }dbRecordNode;
 
-/*dbRecordAttribute is for "psuedo" fields */
+/*dbRecordAttribute is for "pseudo" fields */
 /*pdbFldDes is so that other access routines work correctly*/
 /*Until base supports char * value MUST be fixed length string*/
 typedef struct dbRecordAttribute {

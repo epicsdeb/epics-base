@@ -23,7 +23,9 @@ namespace epics { namespace pvData {
 
 TimerCallback::TimerCallback()
 : period(0.0),
-  onList(false)
+  onList(false),
+  cancelled(false),
+  processing(false)
 {
 }
 
@@ -50,6 +52,7 @@ void Timer::addElement(TimerCallbackPtr const & timerCallback)
     temp.push_back(timerCallback);
 
     timerCallback->onList = true;
+    timerCallback->cancelled = false;
 
     // merge sorted lists.
     // for us effectively insertion sort.
@@ -60,6 +63,11 @@ void Timer::addElement(TimerCallbackPtr const & timerCallback)
 bool Timer::cancel(TimerCallbackPtr const &timerCallback)
 {
     Lock xx(mutex);
+    /* If we're processing, just set the cancel flag */
+    if (timerCallback->processing) {
+        timerCallback->cancelled = true;
+        return true;
+    }
     if(!timerCallback->onList) return false;
     if(!alive) {
         timerCallback->onList = false;
@@ -107,6 +115,7 @@ void Timer::run()
             TimerCallbackPtr work;
             work.swap(queue.front());
             work->onList = false;
+            work->processing = true;
             queue.pop_front();
 
             {
@@ -115,7 +124,15 @@ void Timer::run()
                 work->callback();
             }
 
-            if(work->period > 0.0 && alive) {
+            work->processing = false;
+
+            if(work->period > 0.0 && alive && !work->cancelled) {
+                if(waitfor <= -work->period) {
+                    // Periodic timer phase has fallen behind by at least one full period.
+                    // Could be due to previous slow jobs, or a system time jump forward.
+                    // Reset the phase.
+                    work->timeToRun = now = epicsTime::getCurrent();
+                }
                 work->timeToRun += work->period;
                 addElement(work);
             }

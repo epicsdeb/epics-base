@@ -14,6 +14,11 @@
 #include <cstring>
 #include <memory>
 
+// allow to test deprecated functions without causing compiler warnings
+#include <compilerDependencies.h>
+#undef EPICS_DEPRECATED
+#define EPICS_DEPRECATED
+
 #include <testMain.h>
 
 #include <pv/pvUnitTest.h>

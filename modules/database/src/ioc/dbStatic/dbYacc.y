@@ -8,7 +8,7 @@
 * in file LICENSE that is included with this distribution.
 \*************************************************************************/
 %{
-static int yyerror();
+static int yyerror(char *str);
 static int yy_start;
 static long pvt_yy_parse(void);
 static int yyFailed = 0;
@@ -370,14 +370,15 @@ json_value: jsonNULL    { $$ = dbmfStrdup("null"); }
 static int yyerror(char *str)
 {
     if (str)
-        epicsPrintf(ERL_ERROR ": %s\n", str);
+        fprintf(stderr, ERL_ERROR ": %s\n", str);
     else
-        epicsPrintf(ERL_ERROR "");
+        fprintf(stderr, ERL_ERROR ": ");
     if (!yyFailed) {    /* Only print this stuff once */
-        epicsPrintf(" at or before '%s'", yytext);
+        fprintf(stderr, " at or before '%s'", yytext);
         dbIncludePrint();
         yyFailed = TRUE;
     }
+    fprintf(stderr, "\n %d | %s\n", pinputFileNow->line_num, my_buffer);
     return(0);
 }
 static long pvt_yy_parse(void)

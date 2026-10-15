@@ -36,8 +36,6 @@
 #include "epicsExport.h"
 
 
-typedef long (*FASTCONVERT)();
-
 typedef struct calc_link {
     jlink jlink;        /* embedded object */
     int nArgs;
@@ -179,7 +177,7 @@ static jlif_result lnkCalc_string(jlink *pjlink, const char *val, size_t len)
     if (clink->pstate == ps_time) {
         char tinp;
 
-        if (len != 1 || (tinp = toupper((int) val[0])) < 'A' || tinp > 'L') {
+        if (len != 1 || (tinp = toupper((int) val[0])) < 'A' || tinp >= 'A' + CALCPERFORM_NARGS) {
             errlogPrintf("lnkCalc: Bad 'time' parameter \"%.*s\"\n", (int) len, val);
             return jlif_stop;
         }
@@ -558,7 +556,7 @@ static long lnkCalc_getValue(struct link *plink, short dbrType, void *pbuffer,
     dbCommon *prec = plink->precord;
     int i;
     long status;
-    FASTCONVERT conv;
+    FASTCONVERTFUNC conv;
 
     if(INVALID_DB_REQ(dbrType))
         return S_db_badDbrtype;
@@ -638,7 +636,7 @@ static long lnkCalc_putValue(struct link *plink, short dbrType,
     dbCommon *prec = plink->precord;
     int i;
     long status;
-    FASTCONVERT conv;
+    FASTCONVERTFUNC conv;
 
     if(INVALID_DB_REQ(dbrType))
         return S_db_badDbrtype;

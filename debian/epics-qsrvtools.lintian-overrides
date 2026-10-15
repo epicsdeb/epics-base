@@ -1,0 +1,2 @@
+#debug binaries are unstripped
+unstripped-binary-or-object [usr/lib/epics/bin/*-debug*

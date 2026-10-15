@@ -7,11 +7,11 @@
 #include <pv/ntid.h>
 #include <pv/typeCast.h>
 
-namespace epics { 
+namespace epics {
 
 namespace nt {
 
-    const static std::string BAD_NAME = "?"; 
+    const static std::string BAD_NAME = "?";
 
     NTID::NTID(const std::string & id)
     : fullName(id),
@@ -81,7 +81,7 @@ namespace nt {
             else
             {
                 name = fullName;
-            } 
+            }
         }
         return name;
     }
@@ -105,7 +105,7 @@ namespace nt {
             {
                 endMajorIndex = fullName.find('.', versionSepIndex+1);
                 majorVersionStr = (endMajorIndex != std::string::npos)
-                    ? fullName.substr(versionSepIndex+1, endMajorIndex-(versionSepIndex+1)) : 
+                    ? fullName.substr(versionSepIndex+1, endMajorIndex-(versionSepIndex+1)) :
                       fullName.substr(versionSepIndex+1);
             }
             else
@@ -150,7 +150,7 @@ namespace nt {
             {
                 endMinorIndex = fullName.find('.', endMajorIndex+1);
                 minorVersionStr = (endMinorIndex != std::string::npos)
-                    ? fullName.substr(endMajorIndex+1, endMinorIndex-(endMajorIndex+1)) : 
+                    ? fullName.substr(endMajorIndex+1, endMinorIndex-(endMajorIndex+1)) :
                       fullName.substr(endMajorIndex+1);
             }
             else
@@ -186,5 +186,3 @@ namespace nt {
 
 
 }}
-
-

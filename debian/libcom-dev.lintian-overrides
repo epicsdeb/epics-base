@@ -1,0 +1,4 @@
+# EPICS architectures are used here
+arch-dependent-file-not-in-arch-specific-directory [usr/lib/epics/lib/*/libCom.*
+#debug libraries are supposed to be unstripped
+unstripped-binary-or-object [usr/lib/epics/lib/linux-x86_64-debug/*

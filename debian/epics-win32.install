@@ -1,3 +1,8 @@
 usr/lib/epics/bin/win32-*
 usr/lib/epics/lib/win32-*/*.lib
 usr/lib/epics/cfg/TOOLCHAIN.linux-x86_64.win32*
+usr/lib/epics/include/os/WIN32/*
+usr/lib/epics/templates/makeBaseApp/top/exampleBoot/ioc/Makefile@win32
+usr/lib/epics/templates/makeBaseApp/top/iocBoot/ioc/Makefile@win32
+usr/lib/epics/templates/makeBaseExt/top/configure/os/CONFIG_SITE.win32-x86-debug.win32-x86-debug
+usr/lib/epics/templates/makeBaseExt/top/configure/os/CONFIG_SITE.win32-x86.win32-x86

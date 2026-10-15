@@ -481,27 +481,30 @@ void PVRecordStructure::init()
     for(size_t i=0; i<numFields; i++) {
         PVFieldPtr pvField = pvFields[i];
         if(pvField->getField()->getType()==structure) {
-             PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
-             PVRecordStructurePtr pvRecordStructure(
+            PVStructurePtr xxx = static_pointer_cast<PVStructure>(pvField);
+            PVRecordStructurePtr pvRecordStructure(
                  new PVRecordStructure(xxx,self,pvRecord));
-             pvRecordFields->push_back(pvRecordStructure);
-             pvRecordStructure->init();
+            pvRecordFields->push_back(pvRecordStructure);
+            pvRecordStructure->init();
         } else {
-             PVRecordFieldPtr pvRecordField(
+            PVRecordFieldPtr pvRecordField(
                 new PVRecordField(pvField,self,pvRecord));
-             pvRecordFields->push_back(pvRecordField);
-             pvRecordField->init();
-             // Master field listeners will be called before
-             // calling listeners for the first subfield
-             if (!masterFieldCallbackSet) {
-                 masterFieldCallbackSet = true;
-                 // Find master field
-                 PVRecordStructurePtr p = pvRecordField->parent.lock();
-                 while (p) {
-                     pvRecordField->master = p;
-                     p = p->parent.lock();
-                 }
-             }
+            pvRecordFields->push_back(pvRecordField);
+            pvRecordField->init();
+            // Master field listeners will be called before
+            // calling listeners for the first subfield
+            if (!masterFieldCallbackSet) {
+                masterFieldCallbackSet = true;
+                // Find master field
+                PVRecordStructurePtr p = pvRecordField->parent.lock();
+                while (p) {
+                    PVRecordStructurePtr p2 = p->parent.lock();
+                    if (!p2) {
+                        pvRecordField->master = p;
+                    }
+                    p = p2;
+                }
+            }
         }
     }
 }

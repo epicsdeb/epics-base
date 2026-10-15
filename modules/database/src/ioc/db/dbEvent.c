@@ -19,6 +19,8 @@
  */
 
 #define EPICS_PRIVATE_API
+#define USE_TYPED_DBEVENT
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -98,8 +100,8 @@ struct event_user {
     unsigned char       extra_labor;    /* if set call extra labor func */
     unsigned char       flowCtrlMode;   /* replace existing monitor */
     unsigned char       extraLaborBusy;
-    void                (*init_func)();
-    epicsThreadId       init_func_arg;
+    void                (*init_func)(void *);
+    void                *init_func_arg;
 };
 
 typedef struct {
@@ -555,6 +557,40 @@ static void event_remove ( struct event_que *ev_que,
     pevent->npend--;
 }
 
+/* synchronize with worker thread.
+ *
+ * On return, any previously pending events or extra labor have been handled.
+ *
+ * caller must lock evUser->lock
+ */
+static
+void db_sync_event (struct event_user * const evUser)
+{
+    /* grab current cycle counter, then wait for it to change */
+    epicsUInt32 curSeq = evUser->pflush_seq;
+    event_waiter wait;
+    wait.wake = epicsEventCreate(epicsEventEmpty); /* failure allowed */
+
+    ellAdd(&evUser->waiters, &wait.node);
+    do {
+        epicsMutexUnlock( evUser->lock );
+        /* ensure worker will cycle at least once */
+        epicsEventMustTrigger(evUser->ppendsem);
+
+        if(wait.wake) {
+            epicsEventMustWait(wait.wake);
+        } else {
+            epicsThreadSleep(0.01); /* ick. but better than cantProceed() */
+        }
+
+        epicsMutexMustLock ( evUser->lock );
+    } while(curSeq == evUser->pflush_seq);
+    ellDelete(&evUser->waiters, &wait.node);
+    /* destroy under lock to ensure epicsEventMustTrigger() has returned */
+    if(wait.wake)
+        epicsEventDestroy(wait.wake);
+}
+
 /*
  * DB_CANCEL_EVENT()
  *
@@ -592,34 +628,9 @@ void db_cancel_event (dbEventSubscription event)
     UNLOCKEVQUE (que);
 
     if(sync) {
-        /* cycle through worker */
-        struct event_user *evUser = que->evUser;
-        epicsUInt32 curSeq;
-        event_waiter wait;
-        wait.wake = epicsEventCreate(epicsEventEmpty); /* may fail */
-
-        epicsMutexMustLock ( evUser->lock );
-        ellAdd(&evUser->waiters, &wait.node);
-        /* grab current cycle counter, then wait for it to change */
-        curSeq = evUser->pflush_seq;
-        do {
-            epicsMutexUnlock( evUser->lock );
-            /* ensure worker will cycle at least once */
-            epicsEventMustTrigger(evUser->ppendsem);
-
-            if(wait.wake) {
-                epicsEventMustWait(wait.wake);
-            } else {
-                epicsThreadSleep(0.01); /* ick. but better than cantProceed() */
-            }
-
-            epicsMutexMustLock ( evUser->lock );
-        } while(curSeq == evUser->pflush_seq);
-        ellDelete(&evUser->waiters, &wait.node);
-        /* destroy under lock to ensure epicsEventMustTrigger() has returned */
-        if(wait.wake)
-            epicsEventDestroy(wait.wake);
-        epicsMutexUnlock( evUser->lock );
+        epicsMutexMustLock ( que->evUser->lock );
+        db_sync_event(que->evUser);
+        epicsMutexUnlock( que->evUser->lock );
     }
 }
 
@@ -633,10 +644,10 @@ void db_flush_extra_labor_event (dbEventCtx ctx)
     struct event_user * const evUser = (struct event_user *) ctx;
 
     epicsMutexMustLock ( evUser->lock );
-    while ( evUser->extraLaborBusy ) {
-        epicsMutexUnlock ( evUser->lock );
-        epicsThreadSleep(0.1);
-        epicsMutexMustLock ( evUser->lock );
+    if ( evUser->extraLaborBusy || (evUser->extra_labor && evUser->extralabor_sub) ) {
+        db_sync_event(evUser);
+        // At this point, original labor completed.
+        // Do not wait for any additional labor queued afterwards.
     }
     epicsMutexUnlock ( evUser->lock );
 }
@@ -1025,9 +1036,7 @@ static void event_task (void *pParm)
          * labor to this task
          */
         epicsMutexMustLock ( evUser->lock );
-        evUser->extraLaborBusy = TRUE;
         if ( evUser->extra_labor && evUser->extralabor_sub ) {
-            evUser->extra_labor = FALSE;
             pExtraLaborSub = evUser->extralabor_sub;
             pExtraLaborArg = evUser->extralabor_arg;
         }
@@ -1035,12 +1044,14 @@ static void event_task (void *pParm)
             pExtraLaborSub = NULL;
             pExtraLaborArg = NULL;
         }
+        evUser->extra_labor = FALSE;
         if ( pExtraLaborSub ) {
+            evUser->extraLaborBusy = TRUE;
             epicsMutexUnlock ( evUser->lock );
             (*pExtraLaborSub)(pExtraLaborArg);
             epicsMutexMustLock ( evUser->lock );
+            evUser->extraLaborBusy = FALSE;
         }
-        evUser->extraLaborBusy = FALSE;
 
         for ( ev_que = &evUser->firstque; ev_que; ev_que = ev_que->nextque ) {
             /* unlock during iteration is safe as event_que will not be free'd */

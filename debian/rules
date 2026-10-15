@@ -26,6 +26,8 @@ export DEB_CXXFLAGS_STRIP = -O2
 export DEB_CFLAGS_MAINT_APPEND = -g
 export DEB_CXXFLAGS_MAINT_APPEND = -g
 
+export MANUAL_SOVER=YES
+
 # chop out the source version from Changelog (ie 3.14.12)
 # Taken from CDBS
 DEB_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' ')
@@ -36,6 +38,8 @@ DEBV=$(shell echo "$(DEB_NOEPOCH_VERSION)"| cut -f '2-' -d '-')
 # fetch the list of all binary packages being built
 ALLBINS := $(shell dh_listpackages)
 
+MODULES = epics ca com dbcore nt qsrv pva pvaclient pvdata pvdatabase
+
 TARGETS = $(EPICS_HOST_ARCH)-debug
 
 ifneq (,$(findstring epics-win32,$(ALLBINS)))
@@ -44,24 +48,27 @@ endif
 
 export CROSS_COMPILER_TARGET_ARCHS=$(TARGETS)
 
-export SHRLIB_VERSION=$(SOV)
 
 %:
-	dh $@ --with epics -Sepicsmake --with systemd
+	dh $@ --with epics -Sepicsmake
 
 override_dh_auto_clean:
+	echo "ehr $(EPICS_HOST_ARCH) cchr $(CROSS_COMPILER_HOST_ARCHS) cctr $(CROSS_COMPILER_TARGET_ARCHS) ba $(BUILD_ARCHS)"
 	dh_auto_clean
 	rm -rf configure/conf.d
 	rm -f modules/RELEASE.*
+	$(MAKE) -f debian/gen-debfiles clean
 
 override_dh_auto_build:
 	install -d configure/conf.d
 	./debian/gen-harden.sh > configure/conf.d/05hardening.make
-	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_build -- FINAL_LOCATION=/usr/lib/epics CREATE_INSTALL_MANIFESTS=YES
 	sed -i -e "s|\$$ENV{EPICS_HOST_ARCH}|$(EPICS_HOST_ARCH)|g" bin/*/makeBaseApp.pl
+	$(MAKE) -f debian/gen-debfiles installfiles
+	$(MAKE) -f debian/gen-debfiles links
 
 override_dh_auto_install:
-	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics EPICS_SITE_VERSION=$(DEBV)
+	dh_auto_install -- FINAL_LOCATION=/usr/lib/epics
 
 # skip this since we should install configure/RELEASE
 override_dh_epics_postinstall:
@@ -81,7 +88,8 @@ PERLLIB=$(shell perl -MConfig -e 'print $$Config{vendorlib}')
 PERLARCH=$(shell perl -MConfig -e 'print $$Config{vendorarch}')
 
 override_dh_install:
-	sed -i -e "s|^.*EPICS_SITE_VERSION.*$$|EPICS_SITE_VERSION = $(DEBV)|" debian/tmp/usr/lib/epics/configure/CONFIG_SITE
+	echo "DH INSTALL OVERRIDE - EPICS HOST ARCH = $(EPICS_HOST_ARCH), ALL TARGETS = $(TARGETS)"
+	# sed -i -e "s|^.*EPICS_SITE_VERSION.*$$|EPICS_SITE_VERSION = $(DEBV)|" debian/tmp/usr/lib/epics/configure/CONFIG_SITE
 
 	# some object code is getting installed somehow
 	rm -f debian/tmp/usr/lib/epics/bin/linux-*/*.o
@@ -136,16 +144,18 @@ override_dh_install:
 	ln -s ${EPICS_HOST_ARCH} debian/tmp/usr/lib/epics/lib/host
 
 	# Install systemd unit files into the right location
-	install -d debian/epics-catools/lib/systemd/system
+	install -d debian/epics-catools/usr/lib/systemd/system
 	for arch in $(EPICS_HOST_ARCH); do \
-	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-catools/lib/systemd/system/; \
+	  mv debian/tmp/usr/lib/epics/bin/$$arch/caRepeater.service debian/epics-catools/usr/lib/systemd/system/; \
 	  rm debian/tmp/usr/lib/epics/bin/$$arch-debug/caRepeater.service; \
 	done
 
 	# Unit files shouldn't be marked executable
-	chmod -x debian/epics-catools/lib/systemd/system/*.service
+	chmod -x debian/epics-catools/usr/lib/systemd/system/*.service
 
 	# Remove legacy init scripts
+	rm -f debian/tmp/usr/bin/*/S99caRepeater
+	rm -f debian/tmp/usr/bin/*/S99logServer
 	rm -f debian/tmp/usr/lib/epics/bin/*/S99caRepeater
 	rm -f debian/tmp/usr/lib/epics/bin/*/S99logServer
 
@@ -154,14 +164,18 @@ override_dh_install:
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)
 	install -d debian/epics-perl/usr/lib/epics/bin/$(EPICS_HOST_ARCH)-debug
 
-	for arch in $(EPICS_HOST_ARCH); do for name in $(PERLBINS); do \
-	  mv debian/epics-dev/usr/lib/epics/bin/$$arch/$$name debian/epics-perl/usr/lib/epics/bin/$$arch/ \
-	;done ;done
+	# make perl scripts executable
+	for name in $(PERLBINS); do \
+	    chmod -f +x debian/libca-dev/usr/lib/epics/templates/makeBaseApp/top/caPerlApp/$$name || : ; \
+	done
 
-ifneq (,$(findstring epics-win32,$(ALLBINS)))
-	install -d debian/epics-win32/usr/lib/epics/include/os
-	mv debian/epics-dev/usr/lib/epics/include/os/WIN32 debian/epics-win32/usr/lib/epics/include/os/
-endif
+	#remove config file that's installed by epics-win32
+	rm -f debian/epics-dev/usr/lib/epics/cfg/TOOLCHAIN.linux-x86_64.win32-x86-mingw
+
+	# remove DBD perl scripts from epics-perl, already installed by -dev
+	rm -f debian/epics-perl/usr/lib/epics/lib/perl/DBD.pm
+	rm -f debian/epics-perl/usr/lib/epics/lib/perl/EpicsHostArch.pl
+	rm -rf debian/epics-perl/usr/lib/epics/lib/perl/DBD/
 
 	chmod -x debian/epics-dev/usr/lib/epics/configure/Sample.Makefile
 
@@ -171,16 +185,16 @@ override_dh_installdocs:
 override_dh_missing:
 	dh_missing --fail-missing
 
-override_dh_makeshlibs:
-	dh_makeshlibs -Nepics-dev -a
-	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
-	dh_makeshlibs -pepics-dev -Xusr/lib/epics
-
-override_dh_shlibdeps:
-	dh_shlibdeps -Nlibepics$(SOV) -a
-	# Prevent self dependency
-	#  This would happen because the package provides several dependent libraries
-	dh_shlibdeps -plibepics$(SOV) -- -xlibepics$(SOV)
+#override_dh_makeshlibs:
+#	dh_makeshlibs -Nepics-dev -a
+#	# prevent the .so symlinks under usr/lib/epics/lib from being detected.
+#	dh_makeshlibs -pepics-dev -Xusr/lib/epics
 
 # We provide our own deps
 override_dh_epicsdep:
+
+#libs need to go to their respective packages
+override_dh_epics_install:
+
+# handle lintian overrides in-house now that this package (mostly) plays by the rules
+override_dh_epics_lintian:

@@ -6,6 +6,7 @@
 
 #include <testMain.h>
 #include <epicsUnitTest.h>
+#include <epicsStdio.h>
 
 #include <pv/current_function.h>
 #include <pv/pvData.h>
@@ -54,7 +55,7 @@ void buildMiss()
     for(size_t i=0; i<1000; i++) {
         // unique name each time to (partially) defeat caching
         char buf[10];
-        sprintf(buf, "field%zu", i);
+        epicsSnprintf(buf, sizeof(buf), "field%lu", (unsigned long) i);
 
         record.start();
 

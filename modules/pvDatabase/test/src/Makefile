@@ -33,3 +33,8 @@ TESTPROD_HOST += testPVAServer
 testPVAServer_SRCS += testPVAServer.cpp
 testHarness_SRCS += testPVAServer.cpp
 TESTS += testPVAServer
+
+TESTPROD_HOST += testChannelMonitor
+testChannelMonitor_SRCS += testChannelMonitor.cpp
+testHarness_SRCS += testChannelMonitor.cpp
+TESTS += testChannelMonitor

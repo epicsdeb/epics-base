@@ -41,7 +41,7 @@
  * prototypes only appear in the windows SDK 8 and above.
  * VS2010 supplies sdk 7, but can be upgraded to later SDK 
 
- * To accomodate this we suuply prototypes on, for XP
+ * To accommodate this we supply prototypes on, for XP
  * fall back to Tls*() which will build and run
  * correctly for epicsThreads, but means that TLS allocations from
  * epicsThreadImplicitCreate() will continue to leak (for non-EPICS threads).
@@ -49,13 +49,13 @@
  * Also, WINE circa 5.0.3 provides the FLS storage functions, but doesn't
  * actually run the dtor function.
  *
- * we check for existance of _WIN32_WINNT_WIN8 which will only be defined
+ * we check for existence of _WIN32_WINNT_WIN8 which will only be defined
  * in SDK 8 and above. If Visa is detected and SDK < 8 we will supply
  * the missing prototypes
  */
 
 #if _WIN32_WINNT >= 0x0600 /* VISTA */
-#   ifdef _WIN32_WINNT_WIN8 /* Existance means using SDK 8 or higher */
+#   ifdef _WIN32_WINNT_WIN8 /* Existence means using SDK 8 or higher */
 #       include <fibersapi.h>
 #   else
 #       include <winnt.h> /* for PFLS_CALLBACK_FUNCTION */
@@ -103,6 +103,7 @@ typedef struct epicsThreadOSD {
     char isSuspended;
     int joinable;
     int isRunning;
+    int isOkToBlock;
     HANDLE timer; /* waitable timer */
 } win32ThreadParam;
 
@@ -586,6 +587,7 @@ static win32ThreadParam * epicsThreadImplicitCreate ( void )
 
         pParm->handle = handle;
         pParm->id = id;
+        pParm->isOkToBlock = 1;
         win32ThreadPriority = GetThreadPriority ( pParm->handle );
         assert ( win32ThreadPriority != THREAD_PRIORITY_ERROR_RETURN );
         pParm->epicsPriority = epicsThreadGetOsiPriorityValue ( win32ThreadPriority );
@@ -1224,3 +1226,17 @@ void testPriorityMapping ()
     return 0;
 }
 #endif
+
+int epicsStdCall epicsThreadIsOkToBlock(void)
+{
+    struct epicsThreadOSD *pthreadInfo = epicsThreadGetIdSelf();
+
+    return(pthreadInfo->isOkToBlock);
+}
+
+void epicsStdCall epicsThreadSetOkToBlock(int isOkToBlock)
+{
+    struct epicsThreadOSD *pthreadInfo = epicsThreadGetIdSelf();
+
+    pthreadInfo->isOkToBlock = !!isOkToBlock;
+}

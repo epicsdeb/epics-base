@@ -175,5 +175,3 @@ MAIN(testNTNDArrayAttribute) {
     test_wrap();
     return testDone();
 }
-
-

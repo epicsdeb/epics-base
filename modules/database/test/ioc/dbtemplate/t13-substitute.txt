@@ -1,0 +1,3 @@
+file dbtemplate/t13-template.txt {
+    { a=foo }
+}

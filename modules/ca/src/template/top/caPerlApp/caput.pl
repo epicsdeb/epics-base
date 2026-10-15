@@ -1,5 +1,9 @@
 #!/usr/bin/env perl
 
+# SPDX-FileCopyrightText: 2008 Argonne National Laboratory
+#
+# SPDX-License-Identifier: EPICS
+
 use strict;
 
 # This construct sets @INC to search lib/perl of all RELEASE entries
@@ -163,7 +167,7 @@ sub HELP_MESSAGE {
         "  -w <sec>:  Wait time, specifies CA timeout, default is $opt_w second\n",
         "  -c: Use put_callback to wait for completion\n",
         "Format options:\n",
-        "  -t: Terse mode - print only sucessfully written value, without name\n",
+        "  -t: Terse mode - print only successfully written value, without name\n",
         "  -l: Long mode \"name timestamp value stat sevr\" (read PVs as DBR_TIME_xxx)\n",
         "  -S: Put string as an array of char (long string)\n",
         "Enum format:\n",

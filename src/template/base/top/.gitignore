@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2022 Argonne National Laboratory
+#
+# SPDX-License-Identifier: EPICS
+
+# Before adding patterns here, please read the gitignore
+# documentation at https://git-scm.com/docs/gitignore
+
 # Install directories
 /bin/
 /cfg/
@@ -24,9 +31,4 @@
 O.*/
 
 # Common files created by other tools
-/QtC-*
-/.vscode/
-*.orig
-*.log
-.*.swp
 .DS_Store

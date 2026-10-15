@@ -50,7 +50,7 @@ static const iocshArg dbDumpMenuArg1 = { "menuName",iocshArgString};
 static const iocshArg * const dbDumpMenuArgs[] = {
     &argPdbbase, &dbDumpMenuArg1};
 static const iocshFuncDef dbDumpMenuFuncDef = {"dbDumpMenu",2,dbDumpMenuArgs,
-                          "Dump information about the available menuNames and choices defined withing each menuName.\n"
+                          "Dump information about the available menuNames and choices defined within each menuName.\n"
                           "Example: dbDumpMenu pdbbase menuAlarmStat \n"
                           "If last argument(s) are missing, dump all menuNames information in the database.\n"};
 static void dbDumpMenuCallFunc(const iocshArgBuf *args)
@@ -207,7 +207,7 @@ static const iocshFuncDef dbPvdTableSizeFuncDef = {
 };
 static void dbPvdTableSizeCallFunc(const iocshArgBuf *args)
 {
-    dbPvdTableSize(args[0].ival);
+    iocshSetError(dbPvdTableSize(args[0].ival));
 }
 
 /* dbReportDeviceConfig */

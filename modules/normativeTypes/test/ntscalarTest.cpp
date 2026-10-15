@@ -233,5 +233,3 @@ MAIN(testNTScalar) {
     test_wrap();
     return testDone();
 }
-
-

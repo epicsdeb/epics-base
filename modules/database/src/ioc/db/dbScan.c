@@ -155,7 +155,7 @@ void scanStop(void)
 {
     int i;
 
-    if (scanCtl == ctlExit) return;
+    if (scanCtl == ctlInit || scanCtl == ctlExit) return;
     scanCtl = ctlExit;
 
     interruptAccept = FALSE;
@@ -264,7 +264,7 @@ void scanAdd(struct dbCommon *precord)
     } else if (scan == menuScanI_O_Intr) {
         ioscan_head *piosh = NULL;
         int prio;
-        DEVSUPFUN get_ioint_info;
+        long (*get_ioint_info)(int, struct dbCommon *, IOSCANPVT*);
 
         if (precord->dset == NULL){
             recGblRecordError(-1, (void *)precord,
@@ -332,7 +332,7 @@ void scanDelete(struct dbCommon *precord)
     } else if (scan == menuScanI_O_Intr) {
         ioscan_head *piosh = NULL;
         int prio;
-        DEVSUPFUN get_ioint_info;
+        long (*get_ioint_info)(int, struct dbCommon *, IOSCANPVT*);
 
         if (precord->dset==NULL) {
             recGblRecordError(-1, (void *)precord,
@@ -680,7 +680,9 @@ int scanOnceCallback(struct dbCommon *precord, once_complete cb, void *usr)
     pushOK = epicsRingBytesPut(onceQ, (void*)&ent, sizeof(ent));
 
     if (!pushOK) {
-        if (newOverflow) errlogPrintf("scanOnce: Ring buffer overflow\n");
+        if (newOverflow)
+            errlogPrintf("%s : " ERL_WARNING " scanOnce: Ring buffer overflow\n",
+                         precord->name);
         newOverflow = FALSE;
         epicsAtomicIncrIntT(&onceQOverruns);
     } else {
