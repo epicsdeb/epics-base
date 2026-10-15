@@ -2,6 +2,7 @@ epics-base (7.0.10-6) unstable; urgency=medium
 
   * netget.plt: use correct in-tree path for softIoc(PVA)
   * d/rules: remove EPICS_HOST_ARCH from TARGETS to fix warning spam
+  * bump epics-debhelper build dependency
 
  -- Evan Daykin <daykin@frib.msu.edu>  Wed, 14 Oct 2026 15:17:15 -0400
 
